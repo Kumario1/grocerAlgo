@@ -62,8 +62,13 @@ def bfs(free, start):
                 q.append(v)
     return dist, parent
 
+# departments whose staff operate behind counters; a label printed inside a
+# sealed pocket identifies that pocket as a staff service area
+SERVICE_DEPTS = ("DELI", "BAKERY", "SEAFOOD", "SUSHI", "KITCHEN",
+                 "PHARMACY", "MEAL SIMPLE", "COOKING")
+
 def seal_staff_gaps(free, seed_pt, cell=4.0, gap_kernel=2, max_pocket_cells=800,
-                    protect_pts=()):
+                    protect_pts=(), service_pts=()):
     """Cull staff-only service interiors (deli/bakery islands, seafood
     counters...) that connect to the sales floor only through narrow
     staff pass-throughs.
@@ -71,18 +76,26 @@ def seal_staff_gaps(free, seed_pt, cell=4.0, gap_kernel=2, max_pocket_cells=800,
     H-E-B maps draw service counters with small gaps (~1-2 cells = 0.5-1 m)
     that shoppers never use; customer openings are >=3 cells (~1.5 m+).
     Recipe: morphologically bridge gaps <= gap_kernel cells, BFS from the
-    seed on the sealed grid, and cull the regions that became unreachable —
-    but only pockets <= max_pocket_cells, so an over-aggressive kernel can
-    disconnect a huge region without silently deleting it.
+    seed on the sealed grid, and classify the regions that became
+    unreachable:
+      - pocket holds a service_pts label (DELI, BAKERY...) -> STAFF AREA,
+        culled with no size cap (the printed label is authoritative);
+      - pocket near a protect_pts badge and aisle-sized -> shopping
+        corridor, kept;
+      - otherwise -> dead crevice between fixtures (leads nowhere), culled
+        if <= max_pocket_cells so an over-aggressive kernel can never
+        silently delete a real region.
     Side effect (accepted, conservative): 2-cell checkout lanes seal too.
 
     protect_pts: PDF-point coordinates that mark known-customer space
-    (aisle badges). A pocket within PROTECT_R cells of one is a narrow
-    shopping aisle, not a staff area — never culled. Real aisles and
-    staff gaps can both be ~2 cells wide at this resolution; the badge
-    is the tiebreaker. Badges print at the corridor MOUTH (which stays
-    in the main region), so a small window is needed, but it must stay
-    tight: the wine-back staff strip sits ~4.5 cells from badge 14.
+    (aisle badges). Real aisles and staff gaps can both be ~2 cells wide
+    at this resolution; the badge is the tiebreaker. Badges print at the
+    corridor MOUTH (which stays in the main region), so a small window is
+    needed, but it must stay tight: the wine-back staff strip sits ~4.5
+    cells from badge 14.
+
+    Returns (walkable, culled_pockets, staff_mask) — staff_mask flags the
+    cells culled because a service label sat inside them.
     """
     PROTECT_R = 4
     st = np.ones((gap_kernel + 1, gap_kernel + 1), bool)
@@ -98,11 +111,24 @@ def seal_staff_gaps(free, seed_pt, cell=4.0, gap_kernel=2, max_pocket_cells=800,
         win = labels[max(0, cy - PROTECT_R):cy + PROTECT_R + 1,
                      max(0, cx - PROTECT_R):cx + PROTECT_R + 1]
         protected |= set(np.unique(win[win > 0]).tolist())
+    service = set()
+    for px, py in service_pts:
+        cx, cy = int(px // cell), int(py // cell)
+        if 0 <= cy < h and 0 <= cx < w and labels[cy, cx] > 0:
+            service.add(int(labels[cy, cx]))
     out = free.copy()
+    staff = np.zeros_like(free)
     culled = []
     for i in range(1, n + 1):
         m = labels == i
         size = int(m.sum())
+        if i in service:                    # staff area, label-identified
+            out[m] = False
+            staff |= m
+            ys, xs = np.where(m)
+            culled.append((size, float(xs.mean() * cell),
+                           float(ys.mean() * cell)))
+            continue
         if i in protected and size >= 25:
             continue        # badge-adjacent AND aisle-sized -> real corridor
         if size <= max_pocket_cells:
@@ -111,7 +137,7 @@ def seal_staff_gaps(free, seed_pt, cell=4.0, gap_kernel=2, max_pocket_cells=800,
                 ys, xs = np.where(m)
                 culled.append((size, float(xs.mean() * cell),
                                float(ys.mean() * cell)))
-    return out, culled
+    return out, culled, staff
 
 def shape_mask(entries, shape, cell=4.0):
     """Bool grid mask from exclusion/inclusion entries.
