@@ -13,6 +13,26 @@ import os
 
 from router import engine
 
+# --- auto-derivation constants (universal — never tuned per store; a store
+# that needs different values authors its own seal_zones.json override) ---
+#
+# Departments that get an auto seal disk. FLORAL is deliberately NOT added
+# to engine.SERVICE_DEPTS: that tuple drives SUBSTRING pocket-culling and
+# the QA VERIFY pass, and 659's floral FRONT is real customer space (adding
+# it fires a spurious VERIFY there — checked 2026-07-21, golden pixels
+# unaffected but VERIFY != []). Strict-matched seal derivation is the only
+# place the floral family needs.
+SEAL_DEPTS = engine.SERVICE_DEPTS + ("FLORAL",)
+DISK_R = 130        # pt — seal radius around a service-dept label (~15 m);
+                    # 659's authored disks range 90-170
+DISK_BRIDGE = 12    # pt — staff pass-through gap width (~1.4 m), same as
+                    # the legacy global bridge
+CHECK_WIN_X = 200   # pt — half-window around the CHECKSTANDS label in which
+CHECK_WIN_Y = 45    # fixture centers count as checkstand-bank members
+CHECK_PAD = 8       # pt — padding around the checkstand-cluster bbox
+CHECK_BRIDGE = 20   # pt — checkout lanes are wider than counter gaps, so
+                    # their zone bridges looser (matches 659's authored rect)
+
 
 def _load_json(path):
     try:
@@ -21,14 +41,121 @@ def _load_json(path):
         return None
 
 
+def derive_zones(anchors, store_dir="data/<store>"):
+    """ENTRANCE/CHECKOUT zones straight from extracted labels.
+
+    ENTRANCE <- the "ENTRANCE" anchor (else any anchor starting with
+    ENTRANCE); CHECKOUT <- the "CHECKSTANDS" label position (else
+    "CHECK STANDS", else any anchor starting with CHECK). A missing label
+    is a hard, actionable error: the map cannot be onboarded without a
+    human (or agent) authoring zones.json.
+    """
+    def find(exact, prefix):
+        for name in exact:
+            if name in anchors:
+                return anchors[name]
+        for name in sorted(anchors):
+            if name.startswith(prefix):
+                return anchors[name]
+        return None
+
+    ent = find(("ENTRANCE",), "ENTRANCE")
+    chk = find(("CHECKSTANDS", "CHECK STANDS"), "CHECK")
+    missing = [what for what, v in (("ENTRANCE", ent), ("CHECKSTANDS", chk))
+               if v is None]
+    if missing:
+        raise SystemExit(
+            f"cannot derive zones for {store_dir}: no {'/'.join(missing)} "
+            f"label found among extracted anchors. Author "
+            f"{store_dir}/zones.json with at least ENTRANCE and CHECKOUT "
+            f"points (PDF pt), e.g. "
+            '{"ENTRANCE": [x, y], "CHECKOUT": [x, y]}')
+    return {"ENTRANCE": list(ent), "CHECKOUT": list(chk)}
+
+
+def derive_seal_zones(anchors, fixtures):
+    """Default seal zones from labels + fixtures (stores without a
+    seal_zones.json override).
+
+    Service disks: an anchor whose name STRICTLY equals a SEAL_DEPTS entry
+    — or whose FIRST word aliases to one (engine.ALIASES, e.g. "BLOOMS
+    RESTROOMS" -> FLORAL) — gets a disk {pt, r: DISK_R, bridge:
+    DISK_BRIDGE}. Strictness is the point: noise anchors ("CANNED MEAT",
+    "POT PIE FROZEN DESSERTS") must never spawn zones, and MEAT/DAIRY/
+    PRODUCE are shelf departments, not service counters.
+
+    Checkstand rect: fixtures (bboxes [x0,y0,x1,y1]) whose centers fall
+    within +/-CHECK_WIN_X x +/-CHECK_WIN_Y of the CHECKSTANDS label form
+    the checkstand bank; the zone is their bbox padded CHECK_PAD with the
+    looser CHECK_BRIDGE.
+    """
+    zones = []
+    for name in sorted(anchors):
+        first = name.split()[0] if name.split() else ""
+        family = engine.ALIASES.get(first)
+        if name in SEAL_DEPTS or family in SEAL_DEPTS:
+            zones.append({"name": f"auto:{name}", "pt": list(anchors[name]),
+                          "r": DISK_R, "bridge": DISK_BRIDGE})
+    label = anchors.get("CHECKSTANDS") or anchors.get("CHECK STANDS")
+    if label is not None:
+        lx, ly = label
+        cluster = [f for f in fixtures
+                   if abs((f[0] + f[2]) / 2 - lx) <= CHECK_WIN_X
+                   and abs((f[1] + f[3]) / 2 - ly) <= CHECK_WIN_Y]
+        if cluster:
+            zones.append({"name": "auto:CHECKSTANDS",
+                          "rect": [min(f[0] for f in cluster) - CHECK_PAD,
+                                   min(f[1] for f in cluster) - CHECK_PAD,
+                                   max(f[2] for f in cluster) + CHECK_PAD,
+                                   max(f[3] for f in cluster) + CHECK_PAD],
+                          "bridge": CHECK_BRIDGE})
+    return zones
+
+
+def _fixture_bboxes(geom):
+    """Rect fixtures + poly-fixture bboxes, one [x0,y0,x1,y1] list."""
+    boxes = [list(f) for f in geom["fixtures"]]
+    for p in geom.get("fixture_polys") or []:
+        xs, ys = [q[0] for q in p], [q[1] for q in p]
+        boxes.append([min(xs), min(ys), max(xs), max(ys)])
+    return boxes
+
+
+def _zones_drift(file_zones, derived):
+    """Compact informational diff between authored zones.json and what the
+    deriver would produce (only ENTRANCE/CHECKOUT are derivable)."""
+    fz = {k.upper(): v for k, v in file_zones.items()}
+    diff = {}
+    for k in ("ENTRANCE", "CHECKOUT"):
+        a, b = fz.get(k), derived.get(k)
+        if a != b:
+            diff[k] = {"file": a, "derived": b}
+    return diff or None
+
+
+def _seal_drift(file_zones, derived):
+    """Compact informational summary for an authored seal_zones.json vs the
+    auto path (counts + names — geometry differences are expected; the
+    file is hand-tuned, so this is a coverage comparison, not equality)."""
+    return {"file_n": len(file_zones), "derived_n": len(derived),
+            "file_names": [z.get("name", "?") for z in file_zones],
+            "derived_names": [z.get("name", "?") for z in derived]}
+
+
 def load_store(store_dir):
-    """Read data/<store>/ into one config dict.
+    """Read data/<store>/ into one config dict, deriving what is absent.
 
     Returns {geom, anchors, zones, exclusions, inclusions, seal_zones,
-    provenance}. `anchors` is geometry anchors merged with zones.json keys
+    provenance}. `anchors` is geometry anchors merged with zones keys
     uppercased — zone entries win, exactly as build_profile always did.
-    Missing optional files load as empty ([], {}) and are marked "absent"
-    in provenance ("file" when present).
+
+    Precedence: a per-store JSON, when present, wins VERBATIM and is
+    marked "file" in provenance. Absent zones/seal_zones are auto-derived
+    from the extracted labels ("derived"); absent exclusions/inclusions
+    are simply empty ("absent" — there is no derivable default for human
+    truth). When a store HAS override files, the derived config is still
+    computed and the delta recorded in provenance["drift"] (informational
+    drift detector — 659 never silently diverges from the auto path).
     """
     geom = json.load(open(os.path.join(store_dir, "geometry.json")))
     zones = _load_json(os.path.join(store_dir, "zones.json"))
@@ -40,8 +167,31 @@ def load_store(store_dir):
                                     ("seal_zones", seal_zones),
                                     ("exclusions", exclusions),
                                     ("inclusions", inclusions))}
-    zones = zones or {}
+    drift = {}
+
+    if zones is None:
+        zones = derive_zones(geom["anchors"], store_dir)   # may SystemExit
+        provenance["zones"] = "derived"
+    else:
+        try:
+            drift["zones"] = _zones_drift(zones,
+                                          derive_zones(geom["anchors"]))
+        except SystemExit as e:
+            drift["zones"] = {"underivable": str(e)}
     anchors = {**geom["anchors"], **{k.upper(): v for k, v in zones.items()}}
+
+    if seal_zones is None:
+        seal_zones = derive_seal_zones(anchors, _fixture_bboxes(geom))
+        provenance["seal_zones"] = "derived"
+    else:
+        drift["seal_zones"] = _seal_drift(
+            seal_zones, derive_seal_zones(anchors, _fixture_bboxes(geom)))
+    provenance["drift"] = {k: v for k, v in drift.items() if v} or None
+
+    if "ENTRANCE" not in anchors or "CHECKOUT" not in anchors:
+        raise SystemExit(
+            f"{store_dir}/zones.json must define ENTRANCE and CHECKOUT "
+            f"(has: {sorted(zones)})")
     return {"geom": geom, "anchors": anchors, "zones": zones,
             "exclusions": exclusions or [], "inclusions": inclusions or [],
             "seal_zones": seal_zones or [], "provenance": provenance}
