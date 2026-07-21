@@ -20,8 +20,10 @@ Outputs (data/<store>/qa/):
                           snapped cells (red tie-line = snap moved far)
     corridor_width.png    distance-transform heat: dark red = sliver corridors
                           (exclusion candidates), green = comfortably wide
+    report.json           every printed diagnostic, machine-readable — the
+                          headless onboarding agent's interface
 """
-import os, sys
+import json, os, sys
 import numpy as np
 import fitz
 from PIL import Image, ImageDraw
@@ -168,3 +170,34 @@ narrow.sort()                              # the shelf the anchor snapped onto
 print("tightest corridors at anchors (half-width capacity):")
 for hw_cells, name in narrow[:8]:
     print(f"  {name}: {hw_cells * m_per_cell:.2f} m")
+
+# --- machine-readable report (the headless-agent loop reads this; same
+# numbers as the prints above, deterministically ordered) ---
+report = {
+    "store": STORE,
+    "walkable_pct": round(float(free.mean()) * 100, 1),
+    "reachable_pct": round(float(reachable.mean()) * 100, 1),
+    "m_per_cell": round(m_per_cell, 4),
+    "components": {"n": int(ncomp), "sizes": [int(s) for s in sizes]},
+    "culled_pockets": [
+        {"cells": int(size), "x": round(px, 1), "y": round(py, 1),
+         "near": min(anchors, key=lambda a: (anchors[a][0] - px) ** 2
+                     + (anchors[a][1] - py) ** 2)}
+        for size, px, py in sorted(culled_pockets,
+                                   key=lambda t: (-t[0], t[1], t[2]))],
+    "verify": [
+        {"name": name, "x": round(ax, 1), "y": round(ay, 1),
+         "frac": round(frac, 3)}
+        for name, ax, ay, frac in verify],           # already sorted by name
+    "far_snaps": [
+        {"name": name, "cells": round(moved, 1),
+         "meters": round(moved * m_per_cell, 2)}
+        for name, moved in sorted(far_snaps, key=lambda t: (-t[1], t[0]))],
+    "narrow": [
+        {"name": name, "half_width_m": round(hw_cells * m_per_cell, 2)}
+        for hw_cells, name in narrow[:8]],
+    "provenance": cfg["provenance"],
+}
+with open(f"{OUTDIR}/report.json", "w") as f:
+    json.dump(report, f, indent=1, sort_keys=True)
+    f.write("\n")
