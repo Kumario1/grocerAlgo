@@ -8,10 +8,25 @@ path and compares it pixel-by-pixel against the frozen golden.
 Precedence rule: a per-store JSON file, when present, wins VERBATIM (full
 replacement, never merged with derived defaults).
 """
+import glob
 import json
 import os
 
 from router import engine
+
+
+def pdf_path(store):
+    """The store's guide PDF in the repo root: guide-<city>-<store>.pdf,
+    any city (discover.py downloads it). Exact-suffix check so store 24
+    never matches a store-124 file."""
+    hits = sorted(p for p in glob.glob(f"guide-*-{store}.pdf")
+                  if p.endswith(f"-{store}.pdf"))
+    if not hits:
+        raise SystemExit(f"no guide-*-{store}.pdf in the repo root — run: "
+                         f"python3 discover.py {store}")
+    if len(hits) > 1:
+        raise SystemExit(f"ambiguous guide PDFs for store {store}: {hits}")
+    return hits[0]
 
 # --- auto-derivation constants (universal — never tuned per store; a store
 # that needs different values authors its own seal_zones.json override) ---

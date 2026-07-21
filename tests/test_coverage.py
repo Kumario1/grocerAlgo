@@ -28,7 +28,7 @@ STORES = sorted(
 def test_no_missed_sections(store):
     cfg = derive.load_store(f"data/{store}")
     built = derive.build_free(cfg)
-    page = fitz.open(f"guide-austin-{store}.pdf")[1]
+    page = fitz.open(derive.pdf_path(store))[1]
     pix = page.get_pixmap(dpi=144)
     base = Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
     m = float(np.load(f"data/{store}/profile.npz",

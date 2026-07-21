@@ -33,7 +33,7 @@ from router import engine, derive, qa_checks
 CELL = engine.CELL
 STORE = sys.argv[1] if len(sys.argv) > 1 else "659"
 DIR = f"data/{STORE}"
-PDF = f"guide-austin-{STORE}.pdf"
+PDF = derive.pdf_path(STORE)
 OUTDIR = f"{DIR}/qa"
 
 # service departments where staff operate behind counters; if the area

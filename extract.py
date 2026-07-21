@@ -2,12 +2,14 @@
 """One-shot: H-E-B directory PDF (page 1 = map) -> geometry JSON.
 
 Usage: python3 extract.py [store]   (default 659)
-Reads guide-austin-<store>.pdf, writes data/<store>/geometry.json.
+Reads guide-<city>-<store>.pdf (resolved via router.derive.pdf_path),
+writes data/<store>/geometry.json.
 """
 import json, os, sys, fitz
+from router.derive import pdf_path
 
 STORE = "659"
-PDF = f"guide-austin-{STORE}.pdf"
+PDF = None            # resolved in __main__ (script-only entry point)
 OUT = f"data/{STORE}/geometry.json"
 WHITE = (1.0, 1.0, 1.0)
 
@@ -217,7 +219,7 @@ def overlay(geom):
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         STORE = sys.argv[1]
-        PDF = f"guide-austin-{STORE}.pdf"
         OUT = f"data/{STORE}/geometry.json"
+    PDF = pdf_path(STORE)
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     overlay(extract())
