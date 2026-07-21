@@ -62,7 +62,7 @@ def bfs(free, start):
                 q.append(v)
     return dist, parent
 
-def seal_staff_gaps(free, seed_pt, cell=4.0, gap_kernel=2, max_pocket_cells=600,
+def seal_staff_gaps(free, seed_pt, cell=4.0, gap_kernel=2, max_pocket_cells=800,
                     protect_pts=()):
     """Cull staff-only service interiors (deli/bakery islands, seafood
     counters...) that connect to the sales floor only through narrow

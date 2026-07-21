@@ -120,13 +120,26 @@ def extract():
             fixture_polys.append([[round(x, 2), round(y, 2)] for x, y in ch[:-1]])
         return True
 
+    badge_pts = [v for k, v in anchors.items() if k.startswith("AISLE ")]
     for dr in page.get_drawings():
         if dr["type"] == "f" and dr.get("fill") in (None, WHITE):
             continue                            # body/background: stroke twin has it
+        sw = dr.get("width") or 0
         for ch in chains(dr):
             xs, ys = [p[0] for p in ch], [p[1] for p in ch]
-            if max(xs) - min(xs) < 2 and max(ys) - min(ys) < 2:
+            x0, y0, x1, y1 = min(xs), min(ys), max(xs), max(ys)
+            if x1 - x0 < 2 and y1 - y0 < 2:
                 continue                        # icon confetti, smaller than a cell
+            if x1 - x0 < 6 and y1 - y0 < 6 and sw <= 0.61:
+                continue    # thin-stroke trinket: dashes, stars, legend marks —
+                            # printed decoration, not furniture (real furniture
+                            # linework is >=0.69pt or larger than 6pt)
+            if (x1 - x0 <= 14 and y1 - y0 <= 14
+                    and any(x0 - 1 <= px <= x1 + 1 and y0 - 1 <= py <= y1 + 1
+                            for px, py in badge_pts)):
+                continue    # the aisle-number badge glyph (hexagon around the
+                            # digit): map annotation at the corridor mouth, not
+                            # an object — never let it block walkability
             closed = (len(ch) >= 4 and abs(ch[0][0] - ch[-1][0]) < .5
                       and abs(ch[0][1] - ch[-1][1]) < .5)
             if dr["type"] == "s":
