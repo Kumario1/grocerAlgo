@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""geometry.json + zones.json -> profile.npz (grid, anchors, all-pairs D).
+"""geometry.json + per-store config (file or derived) -> profile.npz
+(grid, anchors, all-pairs D).
 
 Usage: python3 build_profile.py [store]   (default 659; reads/writes data/<store>/)
 """
@@ -9,9 +10,8 @@ from router import engine, derive
 STORE = sys.argv[1] if len(sys.argv) > 1 else "659"
 DIR = f"data/{STORE}"
 
-cfg = derive.load_store(DIR)
-anchors = cfg["anchors"]
-assert "ENTRANCE" in anchors and "CHECKOUT" in anchors, anchors.keys()
+cfg = derive.load_store(DIR)   # zones/seal_zones auto-derive when no file;
+anchors = cfg["anchors"]       # hard-errors (actionable) if underivable
 
 # the one shared build path (router/derive.py): exclusions -> staff-gap
 # sealing (badge-protected, service-label condemned) -> inclusions ->
