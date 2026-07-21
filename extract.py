@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """One-shot: H-E-B directory PDF (page 1 = map) -> geometry JSON.
 
-Usage: python3 extract_659.py [store]   (default 659)
+Usage: python3 extract.py [store]   (default 659)
 Reads guide-austin-<store>.pdf, writes data/<store>/geometry.json.
 """
 import json, os, sys, fitz
@@ -39,8 +39,8 @@ def extract():
         cx = sum(p[2] for p in parts) / len(parts)
         cy = sum(p[3] for p in parts) / len(parts)
         for label in ("ENTRANCE", "EXIT", "CHECK", "PRODUCE", "BAKERY", "DELI",
-                      "SEAFOOD", "MEAT", "DAIRY", "FLORAL", "PHARMACY",
-                      "FROZEN", "KITCHEN", "RESTROOM"):
+                      "SEAFOOD", "MEAT", "DAIRY", "FLORAL", "BLOOMS",
+                      "PHARMACY", "FROZEN", "KITCHEN", "RESTROOM"):
             if label in phrase:
                 anchors.setdefault(phrase if len(phrase) < 30 else label,
                                    [cx, cy])

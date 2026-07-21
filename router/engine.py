@@ -73,6 +73,12 @@ def bfs(free, start):
 SERVICE_DEPTS = ("DELI", "BAKERY", "SEAFOOD", "SUSHI", "KITCHEN",
                  "PHARMACY", "MEAL SIMPLE", "COOKING")
 
+# chain-branding label aliases -> canonical department family. BLOOMS is
+# H-E-B's floral-shop brand (store 24 prints "Blooms" where 659 prints
+# "Floral"). Used by the seal-zone DERIVATION (router/derive.py) only —
+# never by the substring pocket-culling above.
+ALIASES = {"BLOOMS": "FLORAL"}
+
 def seal_staff_gaps(free, seed_pt, cell=CELL, seal_zones=(), max_pocket_cells=None,
                     protect_pts=(), service_pts=()):
     """Cull staff-only service interiors (deli/bakery islands, seafood

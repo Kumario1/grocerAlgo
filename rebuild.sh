@@ -3,7 +3,7 @@
 # Usage: ./rebuild.sh [store]   (default 659)
 set -e
 S=${1:-659}
-python3 extract_659.py "$S"
+python3 extract.py "$S"
 if [ -f "data/$S/zones.json" ]; then
     python3 build_profile.py "$S"
 else
