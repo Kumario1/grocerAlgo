@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
-"""One-shot: guide-austin-659.pdf (page 1 = map) -> data/heb659_geometry.json."""
-import json, fitz
+"""One-shot: H-E-B directory PDF (page 1 = map) -> geometry JSON.
+
+Usage: python3 extract_659.py [pdf] [out_json]   (defaults: store #659)
+"""
+import json, sys, fitz
 
 PDF = "guide-austin-659.pdf"
 OUT = "data/heb659_geometry.json"
@@ -10,11 +13,17 @@ def extract():
     page = fitz.open(PDF)[1]
     words = page.get_text("words")  # (x0, y0, x1, y1, text, ...)
 
-    anchors = {}
+    anchors, seen = {}, []
     for x0, y0, x1, y1, t, *_ in words:
-        if t.isdigit() and 1 <= int(t) <= 45:
+        if t.isdigit() and 1 <= int(t) <= 60:
+            seen.append(int(t))
             anchors[f"AISLE {int(t)}"] = [(x0 + x1) / 2, (y0 + y1) / 2]
-    assert len([k for k in anchors if k.startswith("AISLE")]) == 45, anchors.keys()
+    # aisle badges must be a clean 1..N run, each number exactly once
+    # (store #659: 45, store #24: 43); duplicates or holes mean the map
+    # page carries stray digits and needs a smarter filter.
+    aisles = sorted(seen)
+    assert len(aisles) >= 20 and aisles == list(range(1, len(aisles) + 1)), \
+        f"aisle badges not a clean 1..N run: {aisles}"
 
     # Multi-word labels (Entrance, Check Stands, department names): join words
     # that share a line, then keep known label phrases.
@@ -111,8 +120,11 @@ def overlay(geom):
     dr.line([(x * s, y * s) for x, y in geom["boundary"]], fill="green", width=4)
     for k, (x, y) in geom["anchors"].items():
         dr.ellipse([x * s - 4, y * s - 4, x * s + 4, y * s + 4], fill="blue")
-    im.save("data/heb659_extract_overlay.png")
-    print("overlay -> data/heb659_extract_overlay.png")
+    path = OUT.replace("_geometry.json", "_extract_overlay.png")
+    im.save(path)
+    print(f"overlay -> {path}")
 
 if __name__ == "__main__":
+    if len(sys.argv) == 3:
+        PDF, OUT = sys.argv[1], sys.argv[2]
     overlay(extract())

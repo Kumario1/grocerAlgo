@@ -15,7 +15,7 @@ Outputs (data/qa/):
     corridor_width.png    distance-transform heat: dark red = sliver corridors
                           (exclusion candidates), green = comfortably wide
 """
-import json, os
+import json, os, sys
 import numpy as np
 import fitz
 from PIL import Image, ImageDraw
@@ -23,24 +23,41 @@ from scipy import ndimage
 from router import engine
 
 CELL = 4.0
-PDF = "guide-austin-659.pdf"
+GEOM_PATH = sys.argv[1] if len(sys.argv) > 1 else "data/heb659_geometry.json"
+PDF = sys.argv[2] if len(sys.argv) > 2 else "guide-austin-659.pdf"
+OUTDIR = sys.argv[3] if len(sys.argv) > 3 else "data/qa"
+PREFIX = GEOM_PATH.replace("_geometry.json", "")
 
-os.makedirs("data/qa", exist_ok=True)
-geom = json.load(open("data/heb659_geometry.json"))
-zones = json.load(open("data/heb659_zones.json"))
-excl = json.load(open("data/heb659_exclusions.json"))
+
+def _load(path, default):
+    try:
+        return json.load(open(path))
+    except FileNotFoundError:
+        return default
+
+
+os.makedirs(OUTDIR, exist_ok=True)
+geom = json.load(open(GEOM_PATH))
+zones = _load(PREFIX + "_zones.json", {})
+excl = _load(PREFIX + "_exclusions.json", [])
 anchors = {**geom["anchors"], **{k.upper(): v for k, v in zones.items()}}
 
 free = engine.build_grid(geom, exclusions=[e["rect"] for e in excl])
 free_old = engine.build_grid({**geom, "boundary": None})
 h, w = free.shape
 
-seed = engine.nearest_free(free, anchors["ENTRANCE"])
+if "ENTRANCE" in anchors:
+    seed_pt = anchors["ENTRANCE"]
+else:  # no zones authored yet: seed from the aisle-badge centroid (in-store)
+    ax = [v for k, v in anchors.items() if k.startswith("AISLE")]
+    seed_pt = (sum(x for x, _ in ax) / len(ax), sum(y for _, y in ax) / len(ax))
+    print("note: no ENTRANCE anchor — seeding reachability from aisle centroid")
+seed = engine.nearest_free(free, seed_pt)
 reach, _ = engine.bfs(free, seed)
 reachable = (reach >= 0).reshape(h, w)
 
 try:
-    m_per_cell = float(np.load("data/heb659_profile.npz",
+    m_per_cell = float(np.load(PREFIX + "_profile.npz",
                                allow_pickle=True)["m_per_cell"])
 except Exception:
     m_per_cell = 0.473
@@ -62,7 +79,7 @@ def tint(img, mask, color, alpha=0.45):
 im = tint(base, free_old & ~free, (220, 30, 30))          # reclaimed
 im = tint(im, free & ~reachable, (255, 140, 0))           # isolated pockets
 im = tint(im, reachable, (30, 160, 60))                   # true walkable
-im.save("data/qa/walkable_overlay.png")
+im.save(f"{OUTDIR}/walkable_overlay.png")
 
 # --- 2. reachable.png ---
 im = tint(base, reachable, (30, 160, 60), 0.35)
@@ -80,7 +97,7 @@ for name in sorted(anchors):
     dr.line([px, py, qx, qy], fill=color, width=2)
     dr.ellipse([px - 4, py - 4, px + 4, py + 4], fill=color)
     dr.ellipse([qx - 3, qy - 3, qx + 3, qy + 3], outline="black")
-im.save("data/qa/reachable.png")
+im.save(f"{OUTDIR}/reachable.png")
 
 # --- 3. corridor_width.png ---
 d = ndimage.distance_transform_edt(reachable)
@@ -92,7 +109,7 @@ heat = Image.fromarray(rgb).resize(base.size, Image.NEAREST)
 mm = Image.fromarray(reachable.astype(np.uint8) * 255).resize(base.size,
                                                               Image.NEAREST)
 Image.composite(Image.blend(base, heat, 0.6), base, mm) \
-     .save("data/qa/corridor_width.png")
+     .save(f"{OUTDIR}/corridor_width.png")
 
 # --- stats ---
 labels, ncomp = ndimage.label(free)
