@@ -68,12 +68,34 @@ def extract():
     big = sum((x1 - x0) * (y1 - y0) > 200 for x0, y0, x1, y1 in fixtures)
     assert big >= 100, f"only {big} store-sized fixtures — wrong fill/stroke filter?"
 
+    # Sales-floor boundary: the map draws the interior outline as one CLOSED
+    # thick-stroke polyline (store #659: 18 segments, stroke width ~1.85).
+    # Everything outside it (parking, drive-thru, curbside) is not walkable.
+    boundary = []
+    for dr in page.get_drawings():
+        if dr["type"] != "s" or not dr.get("width") or dr["width"] < 1.5:
+            continue
+        pts = []
+        for item in dr["items"]:
+            if item[0] == "l":
+                if not pts:
+                    pts.append([item[1].x, item[1].y])
+                pts.append([item[2].x, item[2].y])
+        if len(pts) > 4 and pts[0] == pts[-1]:            # closed chain
+            r = dr["rect"]
+            if ((r.x1 - r.x0) > 0.6 * page.rect.width
+                    and (r.y1 - r.y0) > 0.6 * page.rect.height
+                    and len(pts) > len(boundary)):
+                boundary = pts
+    assert boundary, "no closed thick-stroke boundary polygon found"
+
     geom = {"page": {"w": page.rect.width, "h": page.rect.height},
             "anchors": anchors, "fixtures": fixtures,
-            "obstacle_paths": obstacle_paths}
+            "obstacle_paths": obstacle_paths, "boundary": boundary}
     json.dump(geom, open(OUT, "w"))
     print(f"{len(anchors)} anchors, {len(fixtures)} fixtures, "
-          f"{len(obstacle_paths)} wall segments -> {OUT}")
+          f"{len(obstacle_paths)} wall segments, "
+          f"boundary {len(boundary)} vertices -> {OUT}")
     return geom
 
 def overlay(geom):
@@ -86,6 +108,7 @@ def overlay(geom):
     dr = ImageDraw.Draw(im)
     for x0, y0, x1, y1 in geom["fixtures"]:
         dr.rectangle([x0 * s, y0 * s, x1 * s, y1 * s], outline="red")
+    dr.line([(x * s, y * s) for x, y in geom["boundary"]], fill="green", width=4)
     for k, (x, y) in geom["anchors"].items():
         dr.ellipse([x * s - 4, y * s - 4, x * s + 4, y * s + 4], fill="blue")
     im.save("data/heb659_extract_overlay.png")

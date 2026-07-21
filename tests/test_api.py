@@ -37,3 +37,15 @@ def test_unmatched_flagged_not_dropped():
 
 def test_empty_list_400():
     assert client.post("/api/route", json={"items": []}).status_code == 400
+
+def test_route_stays_inside_boundary():
+    import json
+    from router import engine
+    geom = json.load(open("data/heb659_geometry.json"))
+    bmask = engine.build_grid({"page": geom["page"],
+                               "boundary": geom["boundary"],
+                               "fixtures": [], "obstacle_paths": []})
+    body = client.post("/api/route", json={"items": LIST_25}).json()
+    outside = [(x, y) for x, y in body["path"]
+               if not bmask[int(y // 4), int(x // 4)]]
+    assert not outside, f"route leaves the store at {outside[:5]}"
