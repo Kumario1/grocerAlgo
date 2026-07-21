@@ -5,19 +5,22 @@ from router import engine
 
 geom = json.load(open("data/heb659_geometry.json"))
 zones = json.load(open("data/heb659_zones.json"))
+exclusions = [e["rect"] for e in json.load(open("data/heb659_exclusions.json"))]
 anchors = {**geom["anchors"], **{k.upper(): v for k, v in zones.items()}}
 assert "ENTRANCE" in anchors and "CHECKOUT" in anchors, anchors.keys()
 
-free = engine.build_grid(geom)
+free = engine.build_grid(geom, exclusions=exclusions)
 h, w = free.shape
 
-# reachability field from the entrance defines legal space for snapping
-ent_cell = (int(anchors["ENTRANCE"][0] // 4), int(anchors["ENTRANCE"][1] // 4))
-if not free[ent_cell[1], ent_cell[0]]:
-    d0, _ = engine.bfs(free, (ent_cell[0], min(h - 1, ent_cell[1] + 2)))
-else:
-    d0, _ = engine.bfs(free, ent_cell)
-reach = d0
+# reachability field from the entrance defines legal space for snapping;
+# the ENTRANCE label sits on the boundary line itself, so seed from the
+# nearest walkable interior cell
+seed = engine.nearest_free(free, anchors["ENTRANCE"])
+reach, _ = engine.bfs(free, seed)
+
+# the true walkable region is the entrance-connected component only —
+# enclosed rooms (lease, restrooms, back areas) get culled here
+free &= (reach >= 0).reshape(h, w)
 
 names = sorted(anchors)
 cells = np.array([engine.snap(free, reach, anchors[n]) for n in names])

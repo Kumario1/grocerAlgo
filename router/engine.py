@@ -1,13 +1,28 @@
 """Routing engine: occupancy grid, BFS distances, fixed-endpoint TSP."""
 import numpy as np
 from collections import deque
+from PIL import Image, ImageDraw
 
-def build_grid(geom, cell=4.0):
-    """True = walkable. Fixtures block their interior; walls block their line."""
+def build_grid(geom, cell=4.0, exclusions=()):
+    """True = walkable.
+
+    Walkable space starts as the interior of the sales-floor boundary
+    polygon (geom["boundary"]; everything outside — parking, drive-thru,
+    curbside — is blocked). Fixtures block their interior, walls their
+    line, and exclusion rects (hand-QA zones the drawing shows open but
+    shoppers can't use, e.g. behind-Dairy) block like fixtures.
+    Geometries without a boundary (toy tests) start fully walkable.
+    """
     w = int(np.ceil(geom["page"]["w"] / cell))
     h = int(np.ceil(geom["page"]["h"] / cell))
-    free = np.ones((h, w), bool)
-    for x0, y0, x1, y1 in geom["fixtures"]:
+    if geom.get("boundary"):
+        mask = Image.new("1", (w, h), 0)
+        ImageDraw.Draw(mask).polygon(
+            [(x / cell, y / cell) for x, y in geom["boundary"]], fill=1)
+        free = np.array(mask, bool)
+    else:
+        free = np.ones((h, w), bool)
+    for x0, y0, x1, y1 in list(geom["fixtures"]) + [list(r) for r in exclusions]:
         free[int(y0 // cell):int(np.ceil(y1 / cell)),
              int(x0 // cell):int(np.ceil(x1 / cell))] = False
     for (x0, y0), (x1, y1) in geom["obstacle_paths"]:
@@ -37,6 +52,22 @@ def bfs(free, start):
                 parent[v] = u
                 q.append(v)
     return dist, parent
+
+def nearest_free(free, xy_pt, cell=4.0):
+    """Nearest walkable cell to a PDF-point coordinate (ignores reachability).
+    Use to seed the first BFS when the reference point (e.g. ENTRANCE, drawn
+    on the boundary line itself) may not be walkable."""
+    cx, cy = int(xy_pt[0] // cell), int(xy_pt[1] // cell)
+    h, w = free.shape
+    for r in range(120):
+        for dy in range(-r, r + 1):
+            for dx in range(-r, r + 1):
+                if max(abs(dx), abs(dy)) != r:
+                    continue
+                x, y = cx + dx, cy + dy
+                if 0 <= x < w and 0 <= y < h and free[y, x]:
+                    return (x, y)
+    raise ValueError(f"no walkable cell near {xy_pt}")
 
 def snap(free, reachable_dist, xy_pt, cell=4.0):
     """Nearest walkable-and-reachable cell to a PDF-point coordinate."""
