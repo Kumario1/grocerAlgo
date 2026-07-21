@@ -34,20 +34,39 @@ def extract():
                 anchors.setdefault(phrase if len(phrase) < 30 else label,
                                    [cx, cy])
 
+    # InDesign splits each shelf into TWO drawings: a white fill-only body
+    # ("f", fill=white) and a stroke-only outline ("s" with "re" items).
+    # Fill color is therefore useless as a furniture signal — the stroked
+    # rectangle is the shelf. Fixtures = stroked rects + all "fs" combos +
+    # colored fills; white fill-only rects (bodies/background) are skipped
+    # since their outlines already carry them. Page-scale rects (store
+    # perimeter, background frames) are walls, not furniture.
+    max_fixture_area = 0.10 * page.rect.width * page.rect.height
     fixtures, obstacle_paths = [], []
-    for dr in page.get_drawings():
-        if dr["type"] in ("f", "fs") and dr.get("fill") not in (None, WHITE):
-            r = dr["rect"]
+
+    def add_fixture(r):
+        if 0 < (r.x1 - r.x0) * (r.y1 - r.y0) < max_fixture_area:
             fixtures.append([r.x0, r.y0, r.x1, r.y1])
+
+    for dr in page.get_drawings():
+        if dr["type"] == "fs" or (dr["type"] == "f"
+                                  and dr.get("fill") not in (None, WHITE)):
+            add_fixture(dr["rect"])
         elif dr["type"] == "s":
             for item in dr["items"]:
                 if item[0] == "l":                       # line segment
                     a, b = item[1], item[2]
                     obstacle_paths.append([[a.x, a.y], [b.x, b.y]])
-                elif item[0] == "re":                    # stroked rect -> 4 edges
+                elif item[0] == "re":                    # stroked rect: fixture
+                    add_fixture(item[1])                 # ...and 4 wall edges
                     r = item[1]
                     c = [[r.x0, r.y0], [r.x1, r.y0], [r.x1, r.y1], [r.x0, r.y1]]
                     obstacle_paths += [[c[i], c[(i + 1) % 4]] for i in range(4)]
+
+    # self-check: a real supermarket has >100 store-sized fixtures; catching
+    # the "kept only decorative confetti" failure mode (2026-07-21 bug).
+    big = sum((x1 - x0) * (y1 - y0) > 200 for x0, y0, x1, y1 in fixtures)
+    assert big >= 100, f"only {big} store-sized fixtures — wrong fill/stroke filter?"
 
     geom = {"page": {"w": page.rect.width, "h": page.rect.height},
             "anchors": anchors, "fixtures": fixtures,
