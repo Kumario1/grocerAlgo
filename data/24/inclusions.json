@@ -1,0 +1,8 @@
+[
+  {"name": "grocery aisles 1-8 corridors around the 'Kitchen Gadgets' shelf label — on this store KITCHEN is aisle shelving (the service kitchen is Cooking Connection), so the auto KITCHEN seal disk wrongly guillotined four aisle corridors at its rim; customer space",
+   "rect": [540, 225, 805, 392]},
+  {"name": "aisles 20-22 corridors (Seasonal/Toys/School Supplies) west of the Deli island — deli disk rim cut them at the badge mouths; customer space",
+   "rect": [514, 408, 582, 552]},
+  {"name": "aisle 39-41 west ends east of Pharmacy (Diet Aids/Vitamins, Cough & Cold, Laxatives corridors) — pharmacy disk rim cut them; badge 39 marks the corridor; customer space",
+   "rect": [256, 565, 400, 630]}
+]
