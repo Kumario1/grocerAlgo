@@ -1,0 +1,69 @@
+<!-- served at / by app.py -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>grocerAlgo — H-E-B #659</title>
+<style>
+  body { font: 16px system-ui; margin: 0; display: flex; flex-wrap: wrap; }
+  #panel { padding: 16px; width: 300px; box-sizing: border-box; }
+  textarea { width: 100%; height: 180px; font: inherit; }
+  button { margin-top: 8px; padding: 8px 20px; font: inherit; cursor: pointer; }
+  #map { flex: 1; min-width: 320px; }
+  svg { width: 100%; height: auto; display: block; }
+  .fixture { fill: #d9d2c5; }
+  .route { fill: none; stroke: #1a73e8; stroke-width: 4; stroke-linejoin: round; }
+  .stop circle { fill: #d93025; } .stop text { fill: #fff; font: bold 11px system-ui;
+    text-anchor: middle; dominant-baseline: central; }
+  .term circle { fill: #188038; }
+  #summary { margin-top: 12px; } .unmatched { color: #b00; }
+  ol { padding-left: 20px; } li { margin: 2px 0; }
+</style>
+<div id="panel">
+  <h2>H-E-B #659 route</h2>
+  <textarea id="list" placeholder="one item per line&#10;milk&#10;tortilla chips&#10;dog food"></textarea>
+  <button onclick="go()">Route it</button>
+  <div id="summary"></div>
+</div>
+<div id="map"><svg id="svg"></svg></div>
+<script>
+let geom;
+const S = document.getElementById('svg');
+const el = (t, a) => { const e = document.createElementNS('http://www.w3.org/2000/svg', t);
+  for (const k in a) e.setAttribute(k, a[k]); S.appendChild(e); return e; };
+
+async function init() {
+  geom = await (await fetch('/api/geometry')).json();
+  S.setAttribute('viewBox', `0 0 ${geom.page.w} ${geom.page.h}`);
+  for (const [x0, y0, x1, y1] of geom.fixtures)
+    el('rect', {x: x0, y: y0, width: x1 - x0, height: y1 - y0, class: 'fixture'});
+}
+init();
+
+async function go() {
+  const items = document.getElementById('list').value.split('\n')
+    .map(s => s.trim()).filter(Boolean);
+  if (!items.length) return;
+  const r = await fetch('/api/route', {method: 'POST',
+    headers: {'Content-Type': 'application/json'}, body: JSON.stringify({items})});
+  const sum = document.getElementById('summary');
+  if (!r.ok) { sum.textContent = 'Could not route that list.'; return; }
+  const b = await r.json();
+  S.querySelectorAll('.route, .stop, .term').forEach(e => e.remove());
+  el('polyline', {points: b.path.map(p => p.join(',')).join(' '), class: 'route'});
+  const badge = (x, y, label, cls, r) => {
+    const g = el('g', {class: cls});
+    const c = document.createElementNS(S.namespaceURI, 'circle');
+    c.setAttribute('cx', x); c.setAttribute('cy', y); c.setAttribute('r', r);
+    const t = document.createElementNS(S.namespaceURI, 'text');
+    t.setAttribute('x', x); t.setAttribute('y', y); t.textContent = label;
+    g.append(c, t);
+  };
+  badge(b.path[0][0], b.path[0][1], 'S', 'term', 12);
+  badge(b.path.at(-1)[0], b.path.at(-1)[1], '$', 'term', 12);
+  for (const s of b.stops) badge(s.x, s.y, s.n, 'stop', 10);
+  sum.innerHTML = `<b>${b.distance_m} m</b> · ${b.stops.length} stops` +
+    `<ol>` + b.stops.map(s =>
+      `<li>${s.anchor.toLowerCase()} — ${s.items.join(', ')}</li>`).join('') + `</ol>` +
+    (b.unmatched.length ? `<div class="unmatched">Couldn't place: ` +
+      b.unmatched.map(u => `${u.query} (try: ${u.suggestions.join(', ')})`).join('; ') +
+      `</div>` : '');
+}
+</script>
