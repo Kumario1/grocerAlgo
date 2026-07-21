@@ -9,7 +9,7 @@
 > - Every substantive edit → one line in the **§16 Changelog**.
 > - Confidence tags on findings: `confirmed` (observed in live data / official docs), `strong` (multiple independent implementations agree), `inferred` (reasoned, not yet verified), `unconfirmed` (needs a test).
 
-**Version:** 1.3 · **Last updated:** 2026-07-21 · **Owner:** RAM
+**Version:** 1.4 · **Last updated:** 2026-07-21 · **Owner:** RAM
 **Prototype status:** Routing engine proven end-to-end on a real floor plan (see §15).
 
 ---
@@ -403,6 +403,11 @@ Source: Run-D matcher joining the directory's item→aisle table against the map
 What: The two halves describe the same store, so they check each other. Nearest-glyph matching of aisle numbers ↔ category labels hit only **10/20** — because **aisle numbers print at aisle *ends* while category labels run down aisle *middles***. That's not a data problem; it's the §8.1 corridor-segment model empirically confirmed with real coordinates: labels must be assigned to corridor *edges*, never to the nearest point.
 Implication: Reinforces the medial-axis corridor graph as the join substrate between map geometry and directory text. Operationally moot for item location (the directory hands us item→aisle directly), but it hardens the §6 self-verify loop: any future auto-matcher must match against segments, and a low match rate flags geometry problems.
 
+#### HEB-F10 — Service areas are drawn open but staff-only; boundary + gap-width + labels identify them (2026-07-21, confirmed)
+Source: store-owner markup of the #659 walkable-overlay QA; verified against the directory-PDF vector geometry and re-confirmed on store #24.
+What: Three map facts with routing consequences. (a) The map's **closed thick-stroke polyline (~1.85 pt) is the sales-floor boundary** — everything outside (parking, drive-thru, curbside, Admin/Receiving/Loading Dock) is non-walkable; found automatically on both #659 (19 vertices) and #24 (11 vertices). (b) **Service areas (deli/bakery islands, seafood counters, pharmacy, kitchen, Meal Simple prep) are drawn as open floor** but are staff-only; their counters leave drawn gaps of ~0.5–1 m (staff pass-throughs), while genuine customer openings are ≥~1.5 m. (c) Department labels print **inside** their service areas, so naive snapping puts stops in staff space.
+Implication: Walkable = inside boundary − fixtures − walls − exclusions, then (1) **staff-gap sealing**: morphologically bridge gaps ≤2 cells and cull the disconnected pockets (size-capped so an aggressive kernel can't delete a real region) — catches enclosed service interiors automatically; (2) **service-label attention**: any of DELI/BAKERY/SEAFOOD/SUSHI/KITCHEN/PHARMACY/MEAL SIMPLE/COOKING whose label area is still walkable is flagged `VERIFY:` in map_qa for a human exclusion rect (wide-mouth areas like Pharmacy are geometrically undetectable); (3) snapping then lands department anchors on the customer frontage for free. Side effect (accepted): 2-cell checkout lanes seal. Implemented in `router/engine.py::seal_staff_gaps` + `map_qa.py`; per-store ground truth in `data/<store>/exclusions.json` and `tests/test_walkability.py`.
+
 *(Next HEB findings append here.)*
 
 ### 14.2 Kroger  (official)
@@ -441,6 +446,7 @@ Implication: Reinforces cache-first + nightly top-N warm even for the official p
 
 ## 16. Changelog
 
+- **2026-07-21 — v1.4.** Walkable-area correctness pass from store-owner QA markup: HEB-F10 (boundary polygon is the sales floor; service areas drawn open but staff-only; staff gaps ≤~1 m vs customer openings ≥~1.5 m). Engine gains boundary rasterization + `seal_staff_gaps`; map_qa gains service-label VERIFY pass + per-store folders (`data/<store>/`); walkability ground-truth tests added; validated on stores #659 and #24.
 - **2026-07-21** — Phase 1 exit reached: #659 routable end-to-end via web app (see README).
 - **2026-07-21 — v1.3.** Roadmap reordered to **H-E-B first** (§13): Kroger-first's de-risking rationale obsolete after F7/F8; Phase 1 = #659 end-to-end (store profile from vector assets, directory-seeded Location DB, directory-entry fuzzy resolution, stranger-usable web app, zero scraping); Kroger + shopping mode + A&M store → Phase 2. Pilot-store conflict resolved: Austin #659. P0 #6 and P1 #12 swapped accordingly; ingestion QA tool + digit OCR dropped from Phase 1. Detailed Phase 1 execution plan: `docs/superpowers/plans/2026-07-21-phase1-heb659.md`.
 - **2026-07-21 — v1.2.** Official H-E-B per-store directory PDF discovered and ingested (`guide-austin-659.pdf`, store #659 Austin): HEB-F7 (published item→aisle directory, 165 entries — now the primary HEB data source; scraping demoted to fallback), HEB-F8 (map half fully vector — 45/45 aisles + 563 fixtures extracted exactly; leak bug structurally impossible; §8.1 vector-first validated), HEB-F9 (directory↔map cross-check; 10/20 nearest-glyph result empirically confirms segment-not-point). §7 HEBAdapter gains Tier 0 directory seed; §6 diagram + onboarding-agent note updated; §8.3 exact-anchor note; §8.8 prior gains free directory training data; §12 HEB risk impacts reduced + directory-staleness row; Q7 resolved, Q8 (directory coverage) added; Phase 2 seeding rewritten + pilot-store reconcile note (A&M vs Austin #659); §15 deliverables recorded.

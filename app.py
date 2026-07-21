@@ -11,8 +11,8 @@ from router.resolve import resolve
 
 app = FastAPI(title="grocerAlgo — HEB #659")
 
-GEOM = json.load(open("data/heb659_geometry.json"))
-_p = np.load("data/heb659_profile.npz", allow_pickle=True)
+GEOM = json.load(open("data/659/geometry.json"))
+_p = np.load("data/659/profile.npz", allow_pickle=True)
 NAMES = [str(n) for n in _p["names"]]
 IDX = {n: i for i, n in enumerate(NAMES)}
 CELLS = _p["cells"]
@@ -22,8 +22,8 @@ FREE = _p["free"]
 M_PER_CELL = float(_p["m_per_cell"])
 CELL = float(_p["cell"])
 W = FREE.shape[1]
-DIRECTORY = {**load_directory("heb659_directory.csv", set(NAMES)),
-             **load_directory("data/heb659_departments.csv", set(NAMES))}
+DIRECTORY = {**load_directory("data/659/directory.csv", set(NAMES)),
+             **load_directory("data/659/departments.csv", set(NAMES))}
 
 class RouteReq(BaseModel):
     items: list[str]

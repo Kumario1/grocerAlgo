@@ -1,16 +1,28 @@
 #!/usr/bin/env python3
-"""geometry.json + zones.json -> heb659_profile.npz (grid, anchors, all-pairs D)."""
-import json, numpy as np
+"""geometry.json + zones.json -> profile.npz (grid, anchors, all-pairs D).
+
+Usage: python3 build_profile.py [store]   (default 659; reads/writes data/<store>/)
+"""
+import json, sys, numpy as np
 from router import engine
 
-geom = json.load(open("data/heb659_geometry.json"))
-zones = json.load(open("data/heb659_zones.json"))
-exclusions = [e["rect"] for e in json.load(open("data/heb659_exclusions.json"))]
+STORE = sys.argv[1] if len(sys.argv) > 1 else "659"
+DIR = f"data/{STORE}"
+
+geom = json.load(open(f"{DIR}/geometry.json"))
+zones = json.load(open(f"{DIR}/zones.json"))
+exclusions = [e["rect"] for e in json.load(open(f"{DIR}/exclusions.json"))]
 anchors = {**geom["anchors"], **{k.upper(): v for k, v in zones.items()}}
 assert "ENTRANCE" in anchors and "CHECKOUT" in anchors, anchors.keys()
 
 free = engine.build_grid(geom, exclusions=exclusions)
 h, w = free.shape
+
+# cull staff-only service interiors (deli island, seafood counter, ...)
+free, culled = engine.seal_staff_gaps(free, anchors["ENTRANCE"])
+if culled:
+    print(f"service pockets culled: {len(culled)} "
+          f"(largest {max(s for s, _, _ in culled)} cells)")
 
 # reachability field from the entrance defines legal space for snapping;
 # the ENTRANCE label sits on the boundary line itself, so seed from the
@@ -54,7 +66,7 @@ for _xs in _rows.values():
 pitch_pts = float(np.median(_pitches))
 m_per_cell = 3.0 / (pitch_pts / 4.0)   # ponytail: coarse scale; label-only accuracy
 
-np.savez_compressed("data/heb659_profile.npz", free=free, cell=4.0,
+np.savez_compressed(f"{DIR}/profile.npz", free=free, cell=4.0,
                     names=names, cells=cells, D=D, parents=parents,
                     m_per_cell=m_per_cell)
-print(f"{n} anchors, grid {w}x{h}, m/cell={m_per_cell:.3f} -> data/heb659_profile.npz")
+print(f"{n} anchors, grid {w}x{h}, m/cell={m_per_cell:.3f} -> {DIR}/profile.npz")

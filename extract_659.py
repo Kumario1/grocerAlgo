@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """One-shot: H-E-B directory PDF (page 1 = map) -> geometry JSON.
 
-Usage: python3 extract_659.py [pdf] [out_json]   (defaults: store #659)
+Usage: python3 extract_659.py [store]   (default 659)
+Reads guide-austin-<store>.pdf, writes data/<store>/geometry.json.
 """
-import json, sys, fitz
+import json, os, sys, fitz
 
-PDF = "guide-austin-659.pdf"
-OUT = "data/heb659_geometry.json"
+STORE = "659"
+PDF = f"guide-austin-{STORE}.pdf"
+OUT = f"data/{STORE}/geometry.json"
 WHITE = (1.0, 1.0, 1.0)
 
 def extract():
@@ -120,11 +122,14 @@ def overlay(geom):
     dr.line([(x * s, y * s) for x, y in geom["boundary"]], fill="green", width=4)
     for k, (x, y) in geom["anchors"].items():
         dr.ellipse([x * s - 4, y * s - 4, x * s + 4, y * s + 4], fill="blue")
-    path = OUT.replace("_geometry.json", "_extract_overlay.png")
+    path = OUT.replace("geometry.json", "extract_overlay.png")
     im.save(path)
     print(f"overlay -> {path}")
 
 if __name__ == "__main__":
-    if len(sys.argv) == 3:
-        PDF, OUT = sys.argv[1], sys.argv[2]
+    if len(sys.argv) > 1:
+        STORE = sys.argv[1]
+        PDF = f"guide-austin-{STORE}.pdf"
+        OUT = f"data/{STORE}/geometry.json"
+    os.makedirs(os.path.dirname(OUT), exist_ok=True)
     overlay(extract())

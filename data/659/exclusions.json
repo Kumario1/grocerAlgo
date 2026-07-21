@@ -1,0 +1,14 @@
+[
+  {"name": "top-left wall service gap (between left-wall shelving and aisle 27's north shelf; no badge -> not a shopping aisle)",
+   "rect": [260, 58, 608, 96]},
+  {"name": "behind Dairy cases / top wall service band (cooler access, staff only)",
+   "rect": [608, 58, 1030, 112]},
+  {"name": "Deli/Bakery island interior (staff prep + counters; customers walk the sawtooth frontage west of 846)",
+   "rect": [846, 200, 938, 524]},
+  {"name": "Pharmacy counter + work area (staff only; pickup happens at the east-facing counter)",
+   "rect": [260, 455, 340, 656]},
+  {"name": "Seafood counter + Kitchen-east back area (staff only per store owner markup)",
+   "rect": [1010, 305, 1139, 485]},
+  {"name": "Meal Simple seating/prep block by right restrooms (per store owner markup)",
+   "rect": [1050, 628, 1139, 702]}
+]
