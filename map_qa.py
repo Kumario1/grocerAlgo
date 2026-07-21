@@ -28,7 +28,7 @@ from PIL import Image, ImageDraw
 from scipy import ndimage
 from router import engine
 
-CELL = 4.0
+CELL = engine.CELL
 STORE = sys.argv[1] if len(sys.argv) > 1 else "659"
 DIR = f"data/{STORE}"
 PDF = f"guide-austin-{STORE}.pdf"
@@ -51,6 +51,7 @@ geom = json.load(open(f"{DIR}/geometry.json"))
 zones = _load(f"{DIR}/zones.json", {})
 excl = _load(f"{DIR}/exclusions.json", [])
 incl = _load(f"{DIR}/inclusions.json", [])
+seal_zones = _load(f"{DIR}/seal_zones.json", [])
 anchors = {**geom["anchors"], **{k.upper(): v for k, v in zones.items()}}
 
 free_raw = engine.build_grid(geom, exclusions=excl)
@@ -68,7 +69,8 @@ badges = [v for k, v in anchors.items() if k.startswith("AISLE ")]
 service_pts = [v for k, v in anchors.items()
                if any(s in k for s in SERVICE_DEPTS)]
 free, culled_pockets, staff_mask = engine.seal_staff_gaps(
-    free_raw, seed_pt, protect_pts=badges, service_pts=service_pts)
+    free_raw, seed_pt, seal_zones=seal_zones,
+    protect_pts=badges, service_pts=service_pts)
 incl_mask = engine.shape_mask(incl, free.shape)
 free |= free_raw & incl_mask          # human-verified customer zones win
 seed = engine.nearest_free(free, seed_pt)
@@ -79,7 +81,7 @@ try:
     m_per_cell = float(np.load(f"{DIR}/profile.npz",
                                allow_pickle=True)["m_per_cell"])
 except Exception:
-    m_per_cell = 0.473
+    m_per_cell = 0.1183 * CELL          # ~0.473 at 4-pt, scales with resolution
 
 page = fitz.open(PDF)[1]
 pix = page.get_pixmap(dpi=144)
@@ -106,7 +108,8 @@ for name in sorted(anchors):
         continue  # the label itself is sealed/excluded -> area was handled
     if incl_mask[cy, cx]:
         continue  # inside a human-verified inclusion rect -> already judged
-    disc = reachable[max(0, cy - 3):cy + 4, max(0, cx - 3):cx + 4]
+    rad = max(1, round(12 / CELL))                       # ~1.4 m service-label window
+    disc = reachable[max(0, cy - rad):cy + rad + 1, max(0, cx - rad):cx + rad + 1]
     frac = float(disc.mean()) if disc.size else 0.0
     if frac > 0.4:
         verify.append((name, ax, ay, frac))
@@ -135,8 +138,9 @@ for name in sorted(anchors):
     px, py = ax * S, ay * S
     qx, qy = (sx * CELL + CELL / 2) * S, (sy * CELL + CELL / 2) * S
     moved = max(abs(qx - px), abs(qy - py)) / (CELL * S)
-    color = "red" if moved > 6 else "blue"
-    if moved > 6:
+    far_thresh = round(24 / CELL)                        # ~2.8 m far-snap flag
+    color = "red" if moved > far_thresh else "blue"
+    if moved > far_thresh:
         far_snaps.append((name, moved))
     dr.line([px, py, qx, qy], fill=color, width=2)
     dr.ellipse([px - 4, py - 4, px + 4, py + 4], fill=color)
@@ -149,8 +153,8 @@ im.save(f"{OUTDIR}/reachable.png")
 # whole normal aisles paint red. Green saturates at a realistic store aisle
 # (~2.4 m full width); red = genuinely tight (<~1.2 m), worth a human look.
 d = ndimage.distance_transform_edt(reachable)
-cap = ndimage.maximum_filter(d, size=5)
-v = np.clip(cap / 2.5, 0, 1)               # 2.5 cells half-width ~ 2.4 m wide
+cap = ndimage.maximum_filter(d, size=2 * max(1, round(8 / CELL)) + 1)  # ~1 m radius
+v = np.clip(cap / (1.2 / m_per_cell), 0, 1)   # green saturates at ~2.4 m full width
 rgb = np.zeros((h, w, 3), np.uint8)
 rgb[..., 0] = (255 * (1 - v)).astype(np.uint8)
 rgb[..., 1] = (255 * v).astype(np.uint8)
@@ -168,7 +172,7 @@ print(f"walkable: {free.mean() * 100:.1f}% of page "
 print(f"components: {ncomp}  sizes: {sizes[:5]}{'...' if ncomp > 5 else ''}")
 print(f"anchors: {len(anchors)}  |  exclusions: {len(excl)}")
 if culled_pockets:
-    print(f"service pockets sealed (>=25 cells): {len(culled_pockets)}")
+    print(f"service pockets sealed (service + dead crevices): {len(culled_pockets)}")
     for size, px, py in sorted(culled_pockets, reverse=True)[:10]:
         near = min(anchors, key=lambda a: (anchors[a][0] - px) ** 2
                    + (anchors[a][1] - py) ** 2)
@@ -177,7 +181,7 @@ for name, ax, ay, frac in verify:
     print(f"VERIFY: {name} area still {frac * 100:.0f}% walkable at "
           f"({ax:.0f},{ay:.0f}) — staff area? add an exclusion rect if so")
 if far_snaps:
-    print("snaps moved >6 cells (check reachable.png):")
+    print(f"snaps moved >{round(24 / CELL)} cells (check reachable.png):")
     for name, moved in sorted(far_snaps, key=lambda t: -t[1]):
         print(f"  {name}: {moved:.0f} cells (~{moved * m_per_cell:.1f} m)")
 narrow = []

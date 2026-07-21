@@ -11,8 +11,8 @@ import pytest
 from scipy import ndimage
 from router import engine
 
-CELL = 4.0
 _p = np.load("data/659/profile.npz", allow_pickle=True)
+CELL = float(_p["cell"])
 FREE = _p["free"]
 GEOM = json.load(open("data/659/geometry.json"))
 
