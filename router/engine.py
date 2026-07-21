@@ -87,6 +87,14 @@ def seal_staff_gaps(free, seed_pt, cell=4.0, gap_kernel=2, max_pocket_cells=600)
                                float(ys.mean() * cell)))
     return out, culled
 
+def rect_mask(rects, shape, cell=4.0):
+    """Bool grid mask covering the given PDF-point rects."""
+    m = np.zeros(shape, bool)
+    for x0, y0, x1, y1 in rects:
+        m[int(y0 // cell):int(np.ceil(y1 / cell)),
+          int(x0 // cell):int(np.ceil(x1 / cell))] = True
+    return m
+
 def nearest_free(free, xy_pt, cell=4.0):
     """Nearest walkable cell to a PDF-point coordinate (ignores reachability).
     Use to seed the first BFS when the reference point (e.g. ENTRANCE, drawn

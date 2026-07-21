@@ -50,6 +50,7 @@ os.makedirs(OUTDIR, exist_ok=True)
 geom = json.load(open(f"{DIR}/geometry.json"))
 zones = _load(f"{DIR}/zones.json", {})
 excl = _load(f"{DIR}/exclusions.json", [])
+incl = _load(f"{DIR}/inclusions.json", [])
 anchors = {**geom["anchors"], **{k.upper(): v for k, v in zones.items()}}
 
 free_raw = engine.build_grid(geom, exclusions=[e["rect"] for e in excl])
@@ -64,6 +65,8 @@ else:  # no zones authored yet: seed from the aisle-badge centroid (in-store)
     print("note: no ENTRANCE anchor — seeding reachability from aisle centroid")
 
 free, culled_pockets = engine.seal_staff_gaps(free_raw, seed_pt)
+incl_mask = engine.rect_mask([e["rect"] for e in incl], free.shape)
+free |= free_raw & incl_mask          # human-verified customer zones win
 seed = engine.nearest_free(free, seed_pt)
 reach, _ = engine.bfs(free, seed)
 reachable = (reach >= 0).reshape(h, w)
@@ -97,6 +100,8 @@ for name in sorted(anchors):
     cx, cy = int(ax // CELL), int(ay // CELL)
     if not (0 <= cy < h and 0 <= cx < w) or not reachable[cy, cx]:
         continue  # the label itself is sealed/excluded -> area was handled
+    if incl_mask[cy, cx]:
+        continue  # inside a human-verified inclusion rect -> already judged
     disc = reachable[max(0, cy - 3):cy + 4, max(0, cx - 3):cx + 4]
     frac = float(disc.mean()) if disc.size else 0.0
     if frac > 0.4:

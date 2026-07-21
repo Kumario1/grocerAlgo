@@ -33,11 +33,11 @@ MUST_NOT = [
     (400, 80, "top-left wall service gap (exclusion)"),
     (519, 660, "Lease room interior (enclosed)"),
     (760, 700, "Texas Backyard interior (enclosed)"),
-    # staff-only service areas per store-owner markup (2026-07-21 picture)
+    # staff-only service areas per store-owner markup (2026-07-21 pictures)
     (890, 300, "Deli island interior (staff)"),
-    (880, 480, "Bakery interior (staff)"),
+    (880, 400, "Bakery interior (staff)"),
     (833, 330, "wine-back service strip (staff gap)"),
-    (300, 550, "Pharmacy counter area (staff)"),
+    (314, 624, "Pharmacy back area, below shelf row (staff)"),
     (1060, 400, "Seafood counter (staff)"),
     (1090, 660, "Meal Simple prep block (staff)"),
     # sealed by the staff-gap rule; conservative — shoppers do exit through
@@ -50,6 +50,12 @@ MUST = [
     (946, 485, "Produce area"),
     (350, 122, "aisle 27 corridor, left wing"),
     (808, 300, "aisle 15 corridor west of wine shelf"),
+    # customer zones from owner green markup (inclusions.json)
+    (300, 532, "Pharmacy waiting corridor"),
+    (370, 510, "aisle 42 west end by pharmacy"),
+    (990, 430, "island east walkway / cafe tables"),
+    (884, 500, "Floral front"),
+    (1100, 475, "Seafood south frontage"),
 ]
 
 
