@@ -104,6 +104,16 @@
    300,
    530,
    "pharmacy-wing corridor, dental/oral row (coverage-net restore)"
+  ],
+  [
+   311,
+   397,
+   "aisle 31 corridor at Dog Food label (audit: pet/laundry section had no must point)"
+  ],
+  [
+   302,
+   348,
+   "aisle 29 corridor at Laundry Detergent label (audit: pet/laundry section)"
   ]
  ],
  "must_not": [
@@ -196,6 +206,26 @@
    534,
    640,
    "express/self-checkout lane"
+  ],
+  [
+   1020,
+   230,
+   "NE enclosed room off the Market top corridor (audit: enclosed, was uncovered)"
+  ],
+  [
+   287,
+   165,
+   "enclosed room on the top wall west of Dairy (audit: enclosed, was uncovered)"
+  ],
+  [
+   1057,
+   400,
+   "east service corridor behind Seafood/Market (audit: staff, was uncovered)"
+  ],
+  [
+   820,
+   515,
+   "Admin room east of Restrooms (audit: enclosed, was uncovered)"
   ]
  ]
 }
