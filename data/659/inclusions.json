@@ -4,5 +4,7 @@
   {"name": "Pharmacy waiting corridor + aisle 41-45 west ends (customer)",
    "rect": [262, 455, 426, 592]},
   {"name": "Seafood/Sushi south frontage toward Produce (customer)",
-   "rect": [1012, 440, 1139, 500]}
+   "rect": [1012, 440, 1139, 500]},
+  {"name": "Produce south walkway + approach to right entrance (customer, per owner green markup)",
+   "rect": [986, 578, 1139, 654]}
 ]
