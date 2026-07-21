@@ -34,6 +34,8 @@ async function init() {
   S.setAttribute('viewBox', `0 0 ${geom.page.w} ${geom.page.h}`);
   for (const [x0, y0, x1, y1] of geom.fixtures)
     el('rect', {x: x0, y: y0, width: x1 - x0, height: y1 - y0, class: 'fixture'});
+  for (const poly of geom.fixture_polys || [])
+    el('polygon', {points: poly.map(p => p.join(',')).join(' '), class: 'fixture'});
 }
 init();
 

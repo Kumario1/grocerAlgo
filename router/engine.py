@@ -28,6 +28,10 @@ def build_grid(geom, cell=4.0, exclusions=()):
     for x0, y0, x1, y1 in geom["fixtures"]:
         free[int(y0 // cell):int(np.ceil(y1 / cell)),
              int(x0 // cell):int(np.ceil(x1 / cell))] = False
+    if geom.get("fixture_polys"):
+        # exact non-rect furniture (diagonal counters, curved kiosks)
+        free &= ~shape_mask([{"poly": p} for p in geom["fixture_polys"]],
+                            (h, w), cell)
     if exclusions:
         free &= ~shape_mask(exclusions, (h, w), cell)
     for (x0, y0), (x1, y1) in geom["obstacle_paths"]:
