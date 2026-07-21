@@ -140,8 +140,13 @@ for name in sorted(anchors):
 im.save(f"{OUTDIR}/reachable.png")
 
 # --- 3. corridor_width.png ---
+# Color = the corridor's CAPACITY (max wall-distance within 2 cells), not the
+# cell's own wall-distance — otherwise every shelf-front cell reads d=1 and
+# whole normal aisles paint red. Green saturates at a realistic store aisle
+# (~2.4 m full width); red = genuinely tight (<~1.2 m), worth a human look.
 d = ndimage.distance_transform_edt(reachable)
-v = np.clip(d / 6.0, 0, 1)                 # 6 cells half-width ~ 2.8 m wide
+cap = ndimage.maximum_filter(d, size=5)
+v = np.clip(cap / 2.5, 0, 1)               # 2.5 cells half-width ~ 2.4 m wide
 rgb = np.zeros((h, w, 3), np.uint8)
 rgb[..., 0] = (255 * (1 - v)).astype(np.uint8)
 rgb[..., 1] = (255 * v).astype(np.uint8)
@@ -174,8 +179,8 @@ if far_snaps:
 narrow = []
 for name in sorted(anchors):
     sx, sy = engine.snap(free, reach, anchors[name])
-    narrow.append((d[sy, sx], name))
-narrow.sort()
-print("narrowest corridors at anchors (half-width):")
+    narrow.append((cap[sy, sx], name))     # corridor capacity, not distance to
+narrow.sort()                              # the shelf the anchor snapped onto
+print("tightest corridors at anchors (half-width capacity):")
 for hw_cells, name in narrow[:8]:
     print(f"  {name}: {hw_cells * m_per_cell:.2f} m")
