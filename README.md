@@ -10,13 +10,31 @@ PDF — no scraping. See `plan.md` for the full product plan.
     python3 -m uvicorn app:app --port 8000
     # open http://localhost:8000
 
-## Rebuild store data (only when the source PDF changes)
+## Universal map pipeline
 
-    python3 extract.py [store]        # guide-austin-<store>.pdf -> data/<store>/geometry.json
-    python3 build_profile.py [store]  # geometry -> data/<store>/profile.npz
-    python3 map_qa.py [store]         # walkability diagnostics -> data/<store>/qa/
+    ./rebuild.sh <store>              # everything below + tests, one command
 
-Per-store data lives in data/<store>/ (659 = pilot, 24 = map-generality test).
+    guide-austin-<store>.pdf
+      -> extract.py            geometry.json (fixtures, walls, boundary, labels)
+      -> router/derive.py      per-store config: zones + seal_zones AUTO-DERIVE
+                               from the extracted labels; a data/<store>/*.json
+                               override, when present, wins verbatim
+      -> build_profile.py      profile.npz (walkable grid, anchors, all-pairs D)
+      -> map_qa.py             data/<store>/qa/ PNGs + report.json (machine-readable)
+
+The algorithm is frozen and store-agnostic; ALL per-store variation lives
+in small JSONs under data/<store>/ (zones, seal_zones, exclusions,
+inclusions, walk_truth). To onboard a new store, follow
+docs/onboarding.md — written to be executed by a headless agent; done =
+`./rebuild.sh <store>` exits 0 and report.json has zero VERIFY flags.
+
+Golden gate: store 659's walkable grid is frozen pixel-by-pixel in
+data/659/golden_free.npy (tests/test_golden.py). Any universal-rule
+change that moves a blessed pixel fails the suite; re-blessing is a
+deliberate documented act, never drift.
+
+Per-store data lives in data/<store>/ (659 = pilot, 24 = first store
+onboarded through the universal pipeline).
 
 ## Tests
 
