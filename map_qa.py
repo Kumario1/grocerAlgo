@@ -28,7 +28,7 @@ import numpy as np
 import fitz
 from PIL import Image, ImageDraw
 from scipy import ndimage
-from router import engine, derive
+from router import engine, derive, qa_checks
 
 CELL = engine.CELL
 STORE = sys.argv[1] if len(sys.argv) > 1 else "659"
@@ -142,6 +142,27 @@ mm = Image.fromarray(reachable.astype(np.uint8) * 255).resize(base.size,
 Image.composite(Image.blend(base, heat, 0.6), base, mm) \
      .save(f"{OUTDIR}/corridor_width.png")
 
+# --- coverage nets (router/qa_checks.py): missed-section detectors that are
+# independent of any authored truth — the onboarding agent cannot pass its
+# own blind spots through these ---
+cov = qa_checks.coverage(page.get_text("words"), base, cfg, built, m_per_cell)
+label_clusters = cov["unreachable_shelf_labels"]
+floor_patches = cov["sealed_floor_patches"]
+
+# draw coverage findings on the overlay so the agent SEES them: red X per
+# label cluster, red box per sealed floor patch
+im = Image.open(f"{OUTDIR}/walkable_overlay.png")
+dr = ImageDraw.Draw(im)
+for c in label_clusters:
+    x, y, r = c["x"] * S, c["y"] * S, 18 * S
+    dr.line([x - r, y - r, x + r, y + r], fill="red", width=6)
+    dr.line([x - r, y + r, x + r, y - r], fill="red", width=6)
+for p in floor_patches:
+    x, y, r = p["x"] * S, p["y"] * S, 14 * S
+    dr.rectangle([x - r, y - r, x + r, y + r], outline="red", width=5)
+if label_clusters or floor_patches:
+    im.save(f"{OUTDIR}/walkable_overlay.png")
+
 # --- stats ---
 labels, ncomp = ndimage.label(free)
 sizes = sorted(np.bincount(labels.ravel())[1:], reverse=True)
@@ -170,6 +191,14 @@ narrow.sort()                              # the shelf the anchor snapped onto
 print("tightest corridors at anchors (half-width capacity):")
 for hw_cells, name in narrow[:8]:
     print(f"  {name}: {hw_cells * m_per_cell:.2f} m")
+for c in label_clusters:
+    print(f"COVERAGE: {c['n']} shelf labels with no reachable frontage near "
+          f"({c['x']:.0f},{c['y']:.0f}) — {', '.join(c['labels'])} — missed "
+          f"section? open it (inclusion) or bless it (exclusion)")
+for p in floor_patches:
+    print(f"COVERAGE: {p['m2']:.0f} m^2 of painted floor sealed at "
+          f"({p['x']:.0f},{p['y']:.0f}) — missed section? open it (inclusion) "
+          f"or bless it (exclusion)")
 
 # --- machine-readable report (the headless-agent loop reads this; same
 # numbers as the prints above, deterministically ordered) ---
@@ -196,6 +225,7 @@ report = {
     "narrow": [
         {"name": name, "half_width_m": round(hw_cells * m_per_cell, 2)}
         for hw_cells, name in narrow[:8]],
+    "coverage": cov,
     "provenance": cfg["provenance"],
 }
 with open(f"{OUTDIR}/report.json", "w") as f:

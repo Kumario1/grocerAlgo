@@ -8,8 +8,10 @@ This document is your complete instruction set. Follow it exactly.
 Input: `guide-austin-<N>.pdf` in the repo root (page 2 of the file is the
 store map). Output: a converged walkable map for `data/<N>/` — meaning
 `./rebuild.sh <N>` exits 0 AND `data/<N>/qa/report.json` has
-`"verify": []` — plus an authored `data/<N>/walk_truth.json` locking the
-result in as regression tests.
+`"verify": []` AND `"coverage"` empty (both lists) — plus an authored
+`data/<N>/walk_truth.json` locking the result in as regression tests.
+Onboarding is NOT done until the separate audit role (`docs/audit.md`)
+passes CLEAN — you grade your own work here, the audit does not trust you.
 
 The pipeline is universal and frozen. ALL store-specific truth lives in
 five JSON files under `data/<N>/`. You resolve every ambiguity by editing
@@ -39,6 +41,14 @@ Repeat until converged:
 2. Read `data/<N>/qa/report.json`. Look at, in order:
    - `verify`: service-dept labels whose surroundings are still walkable.
      EACH one demands a judgment call (step 3).
+   - `coverage`: the missed-section nets (they exist because store 24 once
+     shipped with its whole pharmacy wing sealed and every other signal
+     green). `unreachable_shelf_labels` = clusters of product labels no
+     shopper can reach — almost always a swallowed corridor block; open it
+     with an inclusion (carve out any staff room sharing the pocket).
+     `sealed_floor_patches` = large painted-floor areas our rules sealed.
+     They render on walkable_overlay.png as red X marks (label clusters)
+     and red boxes (paint patches).
    - `components` / `culled_pockets`: one giant component is right;
      a large culled pocket near an aisle badge is a swallowed corridor.
    - `far_snaps`: an anchor snapping meters away from its label usually
@@ -63,7 +73,9 @@ Repeat until converged:
    wrong in shape (e.g. the checkstand rect eats a corridor, or a service
    disk misses the counter entirely) — your file replaces ALL derived
    zones, so carry over the ones that were right.
-5. Rerun. Converged = exit 0 AND `"verify": []` in report.json.
+5. Rerun. Converged = exit 0 AND `"verify": []` AND
+   `"coverage": {"sealed_floor_patches": [], "unreachable_shelf_labels": []}`
+   in report.json.
 
 Then author `data/<N>/walk_truth.json` (~12–18 points, PDF pt, read off
 the overlay PNG and `geometry.json` anchors):
@@ -147,3 +159,9 @@ counter, rect = checkstand bank; `bridge` = max gap width sealed, pt):
   and the PDF genuinely lacks the labels: STOP and report the blocker
   with the evidence (report.json excerpt + what you saw on the PNG). Do
   not work around it in code.
+
+## After convergence: hand off to the audit
+
+Run the `docs/audit.md` role (a separate agent/context — NOT you continuing
+in this conversation; the audit exists because your blind spots pass your
+own tests). Onboarding finishes only when the audit reports CLEAN.

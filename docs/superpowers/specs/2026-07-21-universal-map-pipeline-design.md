@@ -101,6 +101,32 @@ walk tests green for both stores, golden gate green.
 - No color-segmentation QA layer (deferred).
 - No interactive review UI (the headless agent is the review tool).
 
+## Addendum (2026-07-21, post store-24 miss): coverage nets + audit role
+
+Store 24 first shipped "converged" (zero VERIFY, suite green) with its
+pharmacy wing sealed: the onboarding agent authors walk_truth.json itself,
+so its blind spots pass its own tests. Two additions close the class:
+
+1. **Mechanical coverage nets** (`router/qa_checks.py`, universal,
+   calibrated to zero flags on blessed 659): (a) every shelf-printed
+   product label must have entrance-reachable frontage within ~1.9 m —
+   failing labels cluster (≥3 = missed section); (b) large painted-floor
+   patches sealed BY OUR RULES (raw-reachable, outside checkstand rect
+   zones) flag when corroborated by failing labels or an aisle badge.
+   Exemptions are principled, not thresholds: enclosed rooms are
+   raw-unreachable (the drawing sealed them, not us); lanes sit in
+   declared rect seal-zones. Findings go to report.json `coverage`, print
+   as COVERAGE lines, and draw red X/box markers on the overlay.
+   Gated per-store in `tests/test_coverage.py`; convergence now requires
+   empty coverage in addition to empty verify.
+2. **Adversarial audit role** (`docs/audit.md`): a separate agent that did
+   not build the store re-runs the pipeline, sweeps the overlay crop by
+   crop (the miss was invisible at page zoom), spot-probes ≥10 product
+   labels against the shipped grid, and reviews walk_truth adequacy.
+   Onboarding is complete only on `AUDIT CLEAN`. Drawn-sealed shelf
+   sections (walled in the source PDF) are exempt from the nets by design
+   — the audit sweep owns them.
+
 ## Trade-offs accepted
 
 - Per-store manual truth is bounded (~10–25 lines + walk points), not
