@@ -15,11 +15,19 @@ exclusions = [e["rect"] for e in json.load(open(f"{DIR}/exclusions.json"))]
 anchors = {**geom["anchors"], **{k.upper(): v for k, v in zones.items()}}
 assert "ENTRANCE" in anchors and "CHECKOUT" in anchors, anchors.keys()
 
-free = engine.build_grid(geom, exclusions=exclusions)
-h, w = free.shape
+try:
+    inclusions = [e["rect"] for e in json.load(open(f"{DIR}/inclusions.json"))]
+except FileNotFoundError:
+    inclusions = []
 
-# cull staff-only service interiors (deli island, seafood counter, ...)
-free, culled = engine.seal_staff_gaps(free, anchors["ENTRANCE"])
+free_raw = engine.build_grid(geom, exclusions=exclusions)
+h, w = free_raw.shape
+
+# cull staff-only service interiors (deli island, seafood counter, ...),
+# then restore human-verified customer zones the sealing rule over-culled
+free, culled = engine.seal_staff_gaps(free_raw, anchors["ENTRANCE"])
+if inclusions:
+    free |= free_raw & engine.rect_mask(inclusions, free.shape)
 if culled:
     print(f"service pockets culled: {len(culled)} "
           f"(largest {max(s for s, _, _ in culled)} cells)")
