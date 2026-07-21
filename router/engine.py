@@ -10,9 +10,11 @@ def build_grid(geom, cell=4.0, exclusions=()):
     Walkable space starts as the interior of the sales-floor boundary
     polygon (geom["boundary"]; everything outside — parking, drive-thru,
     curbside — is blocked). Fixtures block their interior, walls their
-    line, and exclusion rects (hand-QA zones the drawing shows open but
+    line, and exclusion shapes (hand-QA zones the drawing shows open but
     shoppers can't use, e.g. behind-Dairy) block like fixtures.
-    Geometries without a boundary (toy tests) start fully walkable.
+    `exclusions` is a list of {"rect": ...} / {"poly": ...} entries
+    (see shape_mask). Geometries without a boundary (toy tests) start
+    fully walkable.
     """
     w = int(np.ceil(geom["page"]["w"] / cell))
     h = int(np.ceil(geom["page"]["h"] / cell))
@@ -23,9 +25,11 @@ def build_grid(geom, cell=4.0, exclusions=()):
         free = np.array(mask, bool)
     else:
         free = np.ones((h, w), bool)
-    for x0, y0, x1, y1 in list(geom["fixtures"]) + [list(r) for r in exclusions]:
+    for x0, y0, x1, y1 in geom["fixtures"]:
         free[int(y0 // cell):int(np.ceil(y1 / cell)),
              int(x0 // cell):int(np.ceil(x1 / cell))] = False
+    if exclusions:
+        free &= ~shape_mask(exclusions, (h, w), cell)
     for (x0, y0), (x1, y1) in geom["obstacle_paths"]:
         n = max(2, int(max(abs(x1 - x0), abs(y1 - y0)) / cell) * 2)
         for t in np.linspace(0, 1, n):
@@ -105,12 +109,28 @@ def seal_staff_gaps(free, seed_pt, cell=4.0, gap_kernel=2, max_pocket_cells=600,
                                float(ys.mean() * cell)))
     return out, culled
 
-def rect_mask(rects, shape, cell=4.0):
-    """Bool grid mask covering the given PDF-point rects."""
+def shape_mask(entries, shape, cell=4.0):
+    """Bool grid mask from exclusion/inclusion entries.
+
+    Each entry carries either "rect": [x0, y0, x1, y1] (fine for aisle-side
+    bands) or "poly": [[x, y], ...] (vertex list, for slanted/stepped areas
+    like the deli island that a rectangle can't follow). PDF points.
+    """
     m = np.zeros(shape, bool)
-    for x0, y0, x1, y1 in rects:
-        m[int(y0 // cell):int(np.ceil(y1 / cell)),
-          int(x0 // cell):int(np.ceil(x1 / cell))] = True
+    poly_img, poly_draw = None, None
+    for e in entries:
+        if "rect" in e:
+            x0, y0, x1, y1 = e["rect"]
+            m[int(y0 // cell):int(np.ceil(y1 / cell)),
+              int(x0 // cell):int(np.ceil(x1 / cell))] = True
+        elif "poly" in e:
+            if poly_img is None:
+                poly_img = Image.new("1", (shape[1], shape[0]), 0)
+                poly_draw = ImageDraw.Draw(poly_img)
+            poly_draw.polygon([(x / cell, y / cell) for x, y in e["poly"]],
+                              fill=1)
+    if poly_img is not None:
+        m |= np.array(poly_img, bool)
     return m
 
 def nearest_free(free, xy_pt, cell=4.0):

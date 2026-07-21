@@ -53,7 +53,7 @@ excl = _load(f"{DIR}/exclusions.json", [])
 incl = _load(f"{DIR}/inclusions.json", [])
 anchors = {**geom["anchors"], **{k.upper(): v for k, v in zones.items()}}
 
-free_raw = engine.build_grid(geom, exclusions=[e["rect"] for e in excl])
+free_raw = engine.build_grid(geom, exclusions=excl)
 free_old = engine.build_grid({**geom, "boundary": None})
 h, w = free_raw.shape
 
@@ -67,7 +67,7 @@ else:  # no zones authored yet: seed from the aisle-badge centroid (in-store)
 badges = [v for k, v in anchors.items() if k.startswith("AISLE ")]
 free, culled_pockets = engine.seal_staff_gaps(free_raw, seed_pt,
                                               protect_pts=badges)
-incl_mask = engine.rect_mask([e["rect"] for e in incl], free.shape)
+incl_mask = engine.shape_mask(incl, free.shape)
 free |= free_raw & incl_mask          # human-verified customer zones win
 seed = engine.nearest_free(free, seed_pt)
 reach, _ = engine.bfs(free, seed)
