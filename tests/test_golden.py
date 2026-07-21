@@ -29,3 +29,17 @@ def test_shipped_profile_matches_golden():
         "data/659/profile.npz free grid deviates from golden_free.npy — "
         "a pipeline change moved blessed pixels (see re-bless procedure "
         "in this file's docstring)")
+
+
+def test_rebuilt_grid_matches_golden():
+    """Catches rule drift: 659's committed inputs pushed through the exact
+    shared build path (router/derive.py) must reproduce the blessed grid,
+    pixel by pixel."""
+    from router import derive
+    cfg = derive.load_store("data/659")
+    free = derive.build_free(cfg)["free"]
+    assert free.shape == GOLDEN.shape, (free.shape, GOLDEN.shape)
+    assert np.array_equal(free, GOLDEN), (
+        f"rebuilt 659 grid deviates from golden on "
+        f"{int((free != GOLDEN).sum())} cells — a universal rule or the "
+        "shared loader changed behavior")

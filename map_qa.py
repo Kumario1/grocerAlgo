@@ -21,12 +21,12 @@ Outputs (data/<store>/qa/):
     corridor_width.png    distance-transform heat: dark red = sliver corridors
                           (exclusion candidates), green = comfortably wide
 """
-import json, os, sys
+import os, sys
 import numpy as np
 import fitz
 from PIL import Image, ImageDraw
 from scipy import ndimage
-from router import engine
+from router import engine, derive
 
 CELL = engine.CELL
 STORE = sys.argv[1] if len(sys.argv) > 1 else "659"
@@ -38,43 +38,19 @@ OUTDIR = f"{DIR}/qa"
 # around one of these labels is still walkable, a human must check it
 SERVICE_DEPTS = engine.SERVICE_DEPTS
 
-
-def _load(path, default):
-    try:
-        return json.load(open(path))
-    except FileNotFoundError:
-        return default
-
-
 os.makedirs(OUTDIR, exist_ok=True)
-geom = json.load(open(f"{DIR}/geometry.json"))
-zones = _load(f"{DIR}/zones.json", {})
-excl = _load(f"{DIR}/exclusions.json", [])
-incl = _load(f"{DIR}/inclusions.json", [])
-seal_zones = _load(f"{DIR}/seal_zones.json", [])
-anchors = {**geom["anchors"], **{k.upper(): v for k, v in zones.items()}}
+cfg = derive.load_store(DIR)
+geom, anchors, excl = cfg["geom"], cfg["anchors"], cfg["exclusions"]
 
-free_raw = engine.build_grid(geom, exclusions=excl)
+# the one shared build path (router/derive.py) — identical to build_profile;
+# QA renders from the UNCUT grid so isolated pockets show orange
+built = derive.build_free(cfg)
+free = built["free_uncut"]
+free_raw, reach = built["free_raw"], built["reach"]
+culled_pockets, staff_mask = built["culled"], built["staff_mask"]
+incl_mask = built["incl_mask"]
+h, w = free.shape
 free_old = engine.build_grid({**geom, "boundary": None})
-h, w = free_raw.shape
-
-if "ENTRANCE" in anchors:
-    seed_pt = anchors["ENTRANCE"]
-else:  # no zones authored yet: seed from the aisle-badge centroid (in-store)
-    ax = [v for k, v in anchors.items() if k.startswith("AISLE")]
-    seed_pt = (sum(x for x, _ in ax) / len(ax), sum(y for _, y in ax) / len(ax))
-    print("note: no ENTRANCE anchor — seeding reachability from aisle centroid")
-
-badges = [v for k, v in anchors.items() if k.startswith("AISLE ")]
-service_pts = [v for k, v in anchors.items()
-               if any(s in k for s in SERVICE_DEPTS)]
-free, culled_pockets, staff_mask = engine.seal_staff_gaps(
-    free_raw, seed_pt, seal_zones=seal_zones,
-    protect_pts=badges, service_pts=service_pts)
-incl_mask = engine.shape_mask(incl, free.shape)
-free |= free_raw & incl_mask          # human-verified customer zones win
-seed = engine.nearest_free(free, seed_pt)
-reach, _ = engine.bfs(free, seed)
 reachable = (reach >= 0).reshape(h, w)
 
 try:
