@@ -3,7 +3,7 @@
 Coordinates are PDF points on page 1 of guide-austin-659.pdf, picked off
 data/659/qa/walkable_overlay.png (regenerate with map_qa.py). If geometry or
 exclusions change, rebuild first:
-    python3 extract_659.py && python3 build_profile.py && python3 map_qa.py
+    python3 extract.py && python3 build_profile.py && python3 map_qa.py
 """
 import json
 import numpy as np
