@@ -20,6 +20,11 @@ try:
 except FileNotFoundError:
     inclusions = []
 
+try:
+    seal_zones = json.load(open(f"{DIR}/seal_zones.json"))
+except FileNotFoundError:
+    seal_zones = []
+
 free_raw = engine.build_grid(geom, exclusions=exclusions)
 h, w = free_raw.shape
 
@@ -31,6 +36,7 @@ badges = [v for k, v in anchors.items() if k.startswith("AISLE ")]
 service = [v for k, v in anchors.items()
            if any(s in k for s in engine.SERVICE_DEPTS)]
 free, culled, _ = engine.seal_staff_gaps(free_raw, anchors["ENTRANCE"],
+                                         seal_zones=seal_zones,
                                          protect_pts=badges,
                                          service_pts=service)
 if inclusions:
@@ -79,9 +85,9 @@ _pitches = []
 for _xs in _rows.values():
     _pitches += [d for d in np.diff(sorted(_xs)) if 10 < d < 35]  # skip stacks/block gaps
 pitch_pts = float(np.median(_pitches))
-m_per_cell = 3.0 / (pitch_pts / 4.0)   # ponytail: coarse scale; label-only accuracy
+m_per_cell = 3.0 / (pitch_pts / engine.CELL)   # ponytail: coarse scale; label-only accuracy
 
-np.savez_compressed(f"{DIR}/profile.npz", free=free, cell=4.0,
+np.savez_compressed(f"{DIR}/profile.npz", free=free, cell=engine.CELL,
                     names=names, cells=cells, D=D, parents=parents,
                     m_per_cell=m_per_cell)
 print(f"{n} anchors, grid {w}x{h}, m/cell={m_per_cell:.3f} -> {DIR}/profile.npz")
