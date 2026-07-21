@@ -48,35 +48,104 @@ def extract():
     # InDesign splits each shelf into TWO drawings: a white fill-only body
     # ("f", fill=white) and a stroke-only outline ("s" with "re" items).
     # Fill color is therefore useless as a furniture signal — the stroked
-    # rectangle is the shelf. Fixtures = stroked rects + all "fs" combos +
-    # colored fills; white fill-only rects (bodies/background) are skipped
-    # since their outlines already carry them. Page-scale rects (store
-    # perimeter, background frames) are walls, not furniture.
-    max_fixture_area = 0.10 * page.rect.width * page.rect.height
-    fixtures, obstacle_paths = [], []
+    # shape is the shelf. Geometry is captured EXACTLY, never as bounding
+    # boxes: axis-aligned rects stay rects, everything else (diagonal
+    # counters, stepped/curved kiosks) keeps its vertex chain. Thin or
+    # open chains are drawn wall lines, not furniture. White fill-only
+    # drawings (bodies/background) are skipped since their stroke twins
+    # carry the geometry. Page-scale shapes are frames, not furniture.
+    W, H = page.rect.width, page.rect.height
+    max_fixture_area = 0.10 * W * H
+    fixtures, fixture_polys, obstacle_paths = [], [], []
 
-    def add_fixture(r):
-        if 0 < (r.x1 - r.x0) * (r.y1 - r.y0) < max_fixture_area:
-            fixtures.append([r.x0, r.y0, r.x1, r.y1])
+    def chains(dr, bez_n=8):
+        """Drawing items -> point chains. 're'/'qu' close themselves;
+        beziers are sampled; a new chain starts when an item doesn't
+        continue from the previous endpoint."""
+        out, cur = [], []
+
+        def flush():
+            nonlocal cur
+            if len(cur) >= 2:
+                out.append(cur)
+            cur = []
+
+        def moveto(p):
+            if not cur or abs(cur[-1][0] - p.x) > .05 or abs(cur[-1][1] - p.y) > .05:
+                flush()
+                cur.append([p.x, p.y])
+
+        for it in dr["items"]:
+            if it[0] == "re":
+                flush()
+                r = it[1]
+                out.append([[r.x0, r.y0], [r.x1, r.y0], [r.x1, r.y1],
+                            [r.x0, r.y1], [r.x0, r.y0]])
+            elif it[0] == "qu":
+                flush()
+                q = it[1]
+                out.append([[q.ul.x, q.ul.y], [q.ur.x, q.ur.y], [q.lr.x, q.lr.y],
+                            [q.ll.x, q.ll.y], [q.ul.x, q.ul.y]])
+            elif it[0] == "l":
+                moveto(it[1])
+                cur.append([it[2].x, it[2].y])
+            elif it[0] == "c":
+                p1, p2, p3, p4 = it[1:5]
+                moveto(p1)
+                for k in range(1, bez_n + 1):
+                    t, m = k / bez_n, 1 - k / bez_n
+                    cur.append([m*m*m*p1.x + 3*m*m*t*p2.x + 3*m*t*t*p3.x + t*t*t*p4.x,
+                                m*m*m*p1.y + 3*m*m*t*p2.y + 3*m*t*t*p3.y + t*t*t*p4.y])
+        flush()
+        return out
+
+    def walls(ch):
+        obstacle_paths.extend([[round(a, 2) for a in ch[i]],
+                               [round(a, 2) for a in ch[i + 1]]]
+                              for i in range(len(ch) - 1))
+
+    def fixture(ch):
+        """Closed, furniture-sized chain -> exact fixture shape."""
+        xs, ys = [p[0] for p in ch], [p[1] for p in ch]
+        bw, bh = max(xs) - min(xs), max(ys) - min(ys)
+        if bw < 1.5 or bh < 1.5 or bw * bh >= max_fixture_area:
+            return False                        # sliver / page frame
+        corners = {(round(min(xs), 1), round(min(ys), 1)),
+                   (round(max(xs), 1), round(min(ys), 1)),
+                   (round(max(xs), 1), round(max(ys), 1)),
+                   (round(min(xs), 1), round(max(ys), 1))}
+        if {(round(x, 1), round(y, 1)) for x, y in ch} == corners:
+            fixtures.append([min(xs), min(ys), max(xs), max(ys)])
+        else:
+            fixture_polys.append([[round(x, 2), round(y, 2)] for x, y in ch[:-1]])
+        return True
 
     for dr in page.get_drawings():
-        if dr["type"] == "fs" or (dr["type"] == "f"
-                                  and dr.get("fill") not in (None, WHITE)):
-            add_fixture(dr["rect"])
-        elif dr["type"] == "s":
-            for item in dr["items"]:
-                if item[0] == "l":                       # line segment
-                    a, b = item[1], item[2]
-                    obstacle_paths.append([[a.x, a.y], [b.x, b.y]])
-                elif item[0] == "re":                    # stroked rect: fixture
-                    add_fixture(item[1])                 # ...and 4 wall edges
-                    r = item[1]
-                    c = [[r.x0, r.y0], [r.x1, r.y0], [r.x1, r.y1], [r.x0, r.y1]]
-                    obstacle_paths += [[c[i], c[(i + 1) % 4]] for i in range(4)]
+        if dr["type"] == "f" and dr.get("fill") in (None, WHITE):
+            continue                            # body/background: stroke twin has it
+        for ch in chains(dr):
+            xs, ys = [p[0] for p in ch], [p[1] for p in ch]
+            if max(xs) - min(xs) < 2 and max(ys) - min(ys) < 2:
+                continue                        # icon confetti, smaller than a cell
+            closed = (len(ch) >= 4 and abs(ch[0][0] - ch[-1][0]) < .5
+                      and abs(ch[0][1] - ch[-1][1]) < .5)
+            if dr["type"] == "s":
+                walls(ch)                       # all drawn strokes block their line
+                if closed:
+                    fixture(ch)                 # ...and closed ones their interior
+            elif closed and fixture(ch):
+                pass
+            else:
+                # degenerate fill: zero-width wall line (e.g. the seafood /
+                # kitchen counter walls drawn as 2-line white-ish fills)
+                walls(ch)
 
     # self-check: a real supermarket has >100 store-sized fixtures; catching
     # the "kept only decorative confetti" failure mode (2026-07-21 bug).
     big = sum((x1 - x0) * (y1 - y0) > 200 for x0, y0, x1, y1 in fixtures)
+    big += sum(1 for ch in fixture_polys
+               if (max(p[0] for p in ch) - min(p[0] for p in ch))
+               * (max(p[1] for p in ch) - min(p[1] for p in ch)) > 200)
     assert big >= 100, f"only {big} store-sized fixtures — wrong fill/stroke filter?"
 
     # Sales-floor boundary: the map draws the interior outline as one CLOSED
@@ -102,9 +171,11 @@ def extract():
 
     geom = {"page": {"w": page.rect.width, "h": page.rect.height},
             "anchors": anchors, "fixtures": fixtures,
+            "fixture_polys": fixture_polys,
             "obstacle_paths": obstacle_paths, "boundary": boundary}
     json.dump(geom, open(OUT, "w"))
-    print(f"{len(anchors)} anchors, {len(fixtures)} fixtures, "
+    print(f"{len(anchors)} anchors, {len(fixtures)} rect fixtures + "
+          f"{len(fixture_polys)} poly fixtures, "
           f"{len(obstacle_paths)} wall segments, "
           f"boundary {len(boundary)} vertices -> {OUT}")
     return geom
@@ -117,8 +188,12 @@ def overlay(geom):
     im = Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
     s = pix.width / geom["page"]["w"]
     dr = ImageDraw.Draw(im)
+    for a, b in geom["obstacle_paths"]:
+        dr.line([a[0] * s, a[1] * s, b[0] * s, b[1] * s], fill="orange")
     for x0, y0, x1, y1 in geom["fixtures"]:
         dr.rectangle([x0 * s, y0 * s, x1 * s, y1 * s], outline="red")
+    for poly in geom["fixture_polys"]:
+        dr.polygon([(x * s, y * s) for x, y in poly], outline="magenta")
     dr.line([(x * s, y * s) for x, y in geom["boundary"]], fill="green", width=4)
     for k, (x, y) in geom["anchors"].items():
         dr.ellipse([x * s - 4, y * s - 4, x * s + 4, y * s + 4], fill="blue")

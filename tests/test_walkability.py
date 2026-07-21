@@ -44,6 +44,9 @@ MUST_NOT = [
     # sealed by the staff-gap rule; conservative — shoppers do exit through
     # lanes, but no stop/anchor ever needs to stand inside one
     (688, 545, "checkout lane between checkstands"),
+    # rotated-quad cafe table by the island east walkway: exact-geometry
+    # capture (2026-07-21); you can't walk through a table
+    (990, 430, "cafe table (rotated quad fixture)"),
 ]
 MUST = [
     (652, 568, "front action alley south of checkstands"),
@@ -54,7 +57,9 @@ MUST = [
     # customer zones from owner green markup (inclusions.json)
     (332, 532, "Pharmacy pickup corridor, east of counter wall"),
     (370, 510, "aisle 42 west end by pharmacy"),
-    (990, 430, "island east walkway / cafe tables"),
+    # (990,430) turned out to BE a cafe table — a rotated quad the old
+    # extractor dropped; the walkway beside the tables is the customer space
+    (955, 430, "island east walkway beside cafe tables"),
     (884, 500, "Floral front"),
     (1100, 475, "Seafood south frontage"),
     # narrow aisles rescued by badge protection (owner markup round 3)
