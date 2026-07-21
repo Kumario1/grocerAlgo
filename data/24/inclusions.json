@@ -4,5 +4,9 @@
   {"name": "aisles 20-22 corridors (Seasonal/Toys/School Supplies) west of the Deli island — deli disk rim cut them at the badge mouths; customer space",
    "rect": [514, 408, 582, 552]},
   {"name": "aisle 39-41 west ends east of Pharmacy (Diet Aids/Vitamins, Cough & Cold, Laxatives corridors) — pharmacy disk rim cut them; badge 39 marks the corridor; customer space",
-   "rect": [256, 565, 400, 630]}
+   "rect": [256, 565, 400, 630]},
+  {"name": "pharmacy-wing aisles 33-36 corridors (Lotion/Skin Care, Shaving, Foot/Eye Care, Baby rows) — the pharmacy seal disk merged them with the counter room into one pocket and culled it whole (2026-07-21 coverage-net finding: 38 shelf labels with no reachable frontage); customer space north of the counter room",
+   "rect": [222, 412, 380, 488]},
+  {"name": "pharmacy-wing aisles 36-38 corridors east of the counter room (Baby Wipes/Diapers, Dental/Oral, Hosiery rows) — same pocket, room carved out at x<258 so it stays sealed staff space",
+   "rect": [258, 488, 380, 558]}
 ]
