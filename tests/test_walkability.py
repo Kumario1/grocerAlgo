@@ -1,7 +1,7 @@
 """Ground-truth walkability tests for the #659 map layer.
 
 Coordinates are PDF points on page 1 of guide-austin-659.pdf, picked off
-data/qa/walkable_overlay.png (regenerate with map_qa.py). If geometry or
+data/659/qa/walkable_overlay.png (regenerate with map_qa.py). If geometry or
 exclusions change, rebuild first:
     python3 extract_659.py && python3 build_profile.py && python3 map_qa.py
 """
@@ -12,9 +12,9 @@ from scipy import ndimage
 from router import engine
 
 CELL = 4.0
-_p = np.load("data/heb659_profile.npz", allow_pickle=True)
+_p = np.load("data/659/profile.npz", allow_pickle=True)
 FREE = _p["free"]
-GEOM = json.load(open("data/heb659_geometry.json"))
+GEOM = json.load(open("data/659/geometry.json"))
 
 
 def walkable(x, y):
@@ -33,13 +33,23 @@ MUST_NOT = [
     (400, 80, "top-left wall service gap (exclusion)"),
     (519, 660, "Lease room interior (enclosed)"),
     (760, 700, "Texas Backyard interior (enclosed)"),
+    # staff-only service areas per store-owner markup (2026-07-21 picture)
+    (890, 300, "Deli island interior (staff)"),
+    (880, 480, "Bakery interior (staff)"),
+    (833, 330, "wine-back service strip (staff gap)"),
+    (300, 550, "Pharmacy counter area (staff)"),
+    (1060, 400, "Seafood counter (staff)"),
+    (1090, 660, "Meal Simple prep block (staff)"),
+    # sealed by the staff-gap rule; conservative — shoppers do exit through
+    # lanes, but no stop/anchor ever needs to stand inside one
+    (688, 545, "checkout lane between checkstands"),
 ]
 MUST = [
     (652, 568, "front action alley south of checkstands"),
-    (688, 545, "checkout lane between checkstands"),
     (800, 130, "corridor in front of Dairy"),
     (946, 485, "Produce area"),
     (350, 122, "aisle 27 corridor, left wing"),
+    (808, 300, "aisle 15 corridor west of wine shelf"),
 ]
 
 

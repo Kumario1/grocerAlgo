@@ -1,15 +1,20 @@
 #!/usr/bin/env python3
 """Map-layer QA harness: visual + numeric diagnostics for the walkable grid.
 
-The iterate-to-perfect loop:
-    python3 map_qa.py            -> inspect data/qa/*.png + stdout stats
-    edit data/heb659_exclusions.json (rects the drawing shows open but
-    shoppers can't use), rerun, then: python3 build_profile.py && pytest
+Usage: python3 map_qa.py [store]   (default 659; reads data/<store>/,
+writes data/<store>/qa/)
 
-Outputs (data/qa/):
-    walkable_overlay.png  green = walkable+reachable, orange = walkable but
-                          cut off from the entrance, red = the OLD no-boundary
-                          rule called it walkable (reclaimed outside space)
+The iterate-to-perfect loop:
+    python3 map_qa.py <store>    -> inspect data/<store>/qa/*.png + stats
+    edit data/<store>/exclusions.json (rects the drawing shows open but
+    shoppers can't use), rerun, then: python3 build_profile.py <store> && pytest
+
+Outputs (data/<store>/qa/):
+    walkable_overlay.png  green = walkable+reachable, purple = staff-gap-
+                          sealed service interiors, orange = walkable but
+                          cut off from the entrance, red = the OLD
+                          no-boundary rule called it walkable. Dashed
+                          circles = VERIFY service labels (see stats).
     reachable.png         entrance-connected region + anchors and their
                           snapped cells (red tie-line = snap moved far)
     corridor_width.png    distance-transform heat: dark red = sliver corridors
@@ -23,10 +28,15 @@ from scipy import ndimage
 from router import engine
 
 CELL = 4.0
-GEOM_PATH = sys.argv[1] if len(sys.argv) > 1 else "data/heb659_geometry.json"
-PDF = sys.argv[2] if len(sys.argv) > 2 else "guide-austin-659.pdf"
-OUTDIR = sys.argv[3] if len(sys.argv) > 3 else "data/qa"
-PREFIX = GEOM_PATH.replace("_geometry.json", "")
+STORE = sys.argv[1] if len(sys.argv) > 1 else "659"
+DIR = f"data/{STORE}"
+PDF = f"guide-austin-{STORE}.pdf"
+OUTDIR = f"{DIR}/qa"
+
+# service departments where staff operate behind counters; if the area
+# around one of these labels is still walkable, a human must check it
+SERVICE_DEPTS = ("DELI", "BAKERY", "SEAFOOD", "SUSHI", "KITCHEN",
+                 "PHARMACY", "MEAL SIMPLE", "COOKING")
 
 
 def _load(path, default):
@@ -37,14 +47,14 @@ def _load(path, default):
 
 
 os.makedirs(OUTDIR, exist_ok=True)
-geom = json.load(open(GEOM_PATH))
-zones = _load(PREFIX + "_zones.json", {})
-excl = _load(PREFIX + "_exclusions.json", [])
+geom = json.load(open(f"{DIR}/geometry.json"))
+zones = _load(f"{DIR}/zones.json", {})
+excl = _load(f"{DIR}/exclusions.json", [])
 anchors = {**geom["anchors"], **{k.upper(): v for k, v in zones.items()}}
 
-free = engine.build_grid(geom, exclusions=[e["rect"] for e in excl])
+free_raw = engine.build_grid(geom, exclusions=[e["rect"] for e in excl])
 free_old = engine.build_grid({**geom, "boundary": None})
-h, w = free.shape
+h, w = free_raw.shape
 
 if "ENTRANCE" in anchors:
     seed_pt = anchors["ENTRANCE"]
@@ -52,12 +62,14 @@ else:  # no zones authored yet: seed from the aisle-badge centroid (in-store)
     ax = [v for k, v in anchors.items() if k.startswith("AISLE")]
     seed_pt = (sum(x for x, _ in ax) / len(ax), sum(y for _, y in ax) / len(ax))
     print("note: no ENTRANCE anchor — seeding reachability from aisle centroid")
+
+free, culled_pockets = engine.seal_staff_gaps(free_raw, seed_pt)
 seed = engine.nearest_free(free, seed_pt)
 reach, _ = engine.bfs(free, seed)
 reachable = (reach >= 0).reshape(h, w)
 
 try:
-    m_per_cell = float(np.load(PREFIX + "_profile.npz",
+    m_per_cell = float(np.load(f"{DIR}/profile.npz",
                                allow_pickle=True)["m_per_cell"])
 except Exception:
     m_per_cell = 0.473
@@ -75,10 +87,31 @@ def tint(img, mask, color, alpha=0.45):
                                        alpha), img, mm)
 
 
+# --- service-label attention pass (Rule 2): after all rules, is the area
+# around a service-department label still walkable? Then a human must judge.
+verify = []
+for name in sorted(anchors):
+    if not any(s in name for s in SERVICE_DEPTS):
+        continue
+    ax, ay = anchors[name]
+    cx, cy = int(ax // CELL), int(ay // CELL)
+    if not (0 <= cy < h and 0 <= cx < w) or not reachable[cy, cx]:
+        continue  # the label itself is sealed/excluded -> area was handled
+    disc = reachable[max(0, cy - 3):cy + 4, max(0, cx - 3):cx + 4]
+    frac = float(disc.mean()) if disc.size else 0.0
+    if frac > 0.4:
+        verify.append((name, ax, ay, frac))
+
 # --- 1. walkable_overlay.png ---
-im = tint(base, free_old & ~free, (220, 30, 30))          # reclaimed
+im = tint(base, free_old & ~free_raw, (220, 30, 30))      # reclaimed outside
+im = tint(im, free_raw & ~free, (150, 60, 200))           # staff-gap sealed
 im = tint(im, free & ~reachable, (255, 140, 0))           # isolated pockets
 im = tint(im, reachable, (30, 160, 60))                   # true walkable
+dr = ImageDraw.Draw(im)
+for name, ax, ay, _ in verify:                            # dashed = manual
+    x, y, r = ax * S, ay * S, 14 * S
+    for a0 in range(0, 360, 30):
+        dr.arc([x - r, y - r, x + r, y + r], a0, a0 + 15, fill="red", width=5)
 im.save(f"{OUTDIR}/walkable_overlay.png")
 
 # --- 2. reachable.png ---
@@ -118,6 +151,15 @@ print(f"walkable: {free.mean() * 100:.1f}% of page "
       f"({reachable.mean() * 100:.1f}% entrance-reachable)")
 print(f"components: {ncomp}  sizes: {sizes[:5]}{'...' if ncomp > 5 else ''}")
 print(f"anchors: {len(anchors)}  |  exclusions: {len(excl)}")
+if culled_pockets:
+    print(f"service pockets sealed (>=25 cells): {len(culled_pockets)}")
+    for size, px, py in sorted(culled_pockets, reverse=True)[:10]:
+        near = min(anchors, key=lambda a: (anchors[a][0] - px) ** 2
+                   + (anchors[a][1] - py) ** 2)
+        print(f"  {size:5d} cells at ({px:.0f},{py:.0f}) near {near}")
+for name, ax, ay, frac in verify:
+    print(f"VERIFY: {name} area still {frac * 100:.0f}% walkable at "
+          f"({ax:.0f},{ay:.0f}) — staff area? add an exclusion rect if so")
 if far_snaps:
     print("snaps moved >6 cells (check reachable.png):")
     for name, moved in sorted(far_snaps, key=lambda t: -t[1]):

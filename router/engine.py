@@ -2,6 +2,7 @@
 import numpy as np
 from collections import deque
 from PIL import Image, ImageDraw
+from scipy import ndimage
 
 def build_grid(geom, cell=4.0, exclusions=()):
     """True = walkable.
@@ -52,6 +53,39 @@ def bfs(free, start):
                 parent[v] = u
                 q.append(v)
     return dist, parent
+
+def seal_staff_gaps(free, seed_pt, cell=4.0, gap_kernel=2, max_pocket_cells=600):
+    """Cull staff-only service interiors (deli/bakery islands, seafood
+    counters...) that connect to the sales floor only through narrow
+    staff pass-throughs.
+
+    H-E-B maps draw service counters with small gaps (~1-2 cells = 0.5-1 m)
+    that shoppers never use; customer openings are >=3 cells (~1.5 m+).
+    Recipe: morphologically bridge gaps <= gap_kernel cells, BFS from the
+    seed on the sealed grid, and cull the regions that became unreachable —
+    but only pockets <= max_pocket_cells, so an over-aggressive kernel can
+    disconnect a huge region without silently deleting it.
+    Side effect (accepted, conservative): 2-cell checkout lanes seal too.
+    """
+    st = np.ones((gap_kernel + 1, gap_kernel + 1), bool)
+    sealed = free & ~ndimage.binary_closing(~free, structure=st)
+    seed = nearest_free(sealed, seed_pt, cell)          # doorway-pinch safe
+    dist, _ = bfs(sealed, seed)
+    h, w = free.shape
+    pockets = free & ~(dist >= 0).reshape(h, w)
+    labels, n = ndimage.label(pockets)
+    out = free.copy()
+    culled = []
+    for i in range(1, n + 1):
+        m = labels == i
+        size = int(m.sum())
+        if size <= max_pocket_cells:
+            out[m] = False
+            if size >= 25:                              # ignore corner nibbles
+                ys, xs = np.where(m)
+                culled.append((size, float(xs.mean() * cell),
+                               float(ys.mean() * cell)))
+    return out, culled
 
 def nearest_free(free, xy_pt, cell=4.0):
     """Nearest walkable cell to a PDF-point coordinate (ignores reachability).

@@ -41,7 +41,7 @@ def test_empty_list_400():
 def test_route_stays_inside_boundary():
     import json
     from router import engine
-    geom = json.load(open("data/heb659_geometry.json"))
+    geom = json.load(open("data/659/geometry.json"))
     bmask = engine.build_grid({"page": geom["page"],
                                "boundary": geom["boundary"],
                                "fixtures": [], "obstacle_paths": []})

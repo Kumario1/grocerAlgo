@@ -12,8 +12,11 @@ PDF — no scraping. See `plan.md` for the full product plan.
 
 ## Rebuild store data (only when the source PDF changes)
 
-    python3 extract_659.py      # PDF -> data/heb659_geometry.json (+ QA overlay)
-    python3 build_profile.py    # geometry -> data/heb659_profile.npz
+    python3 extract_659.py [store]    # guide-austin-<store>.pdf -> data/<store>/geometry.json
+    python3 build_profile.py [store]  # geometry -> data/<store>/profile.npz
+    python3 map_qa.py [store]         # walkability diagnostics -> data/<store>/qa/
+
+Per-store data lives in data/<store>/ (659 = pilot, 24 = map-generality test).
 
 ## Tests
 
