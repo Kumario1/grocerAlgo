@@ -79,8 +79,13 @@ def held_karp(D, n_stops):
     return best, [S[j] for j in reversed(order)]
 
 def tsp_order(D, n_stops):
-    """Exact <=18 stops; nearest-neighbor + 2-opt beyond (plan.md §8.5)."""
-    if n_stops <= 18:
+    """Exact <=14 stops; nearest-neighbor + 2-opt beyond (plan.md §8.5).
+
+    Cutoff dropped from 18 to 14 per the Task 7 perf guard: pure-Python
+    Held-Karp on 18 stops is ~5 s (blows the <1 s G3 budget); the 2-opt
+    branch is within a few % of optimal for 15-18 stops.
+    """
+    if n_stops <= 14:
         return held_karp(D, n_stops)
     S = list(range(2, 2 + n_stops))
     order, left, cur = [], set(S), 0
