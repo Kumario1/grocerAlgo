@@ -11,12 +11,12 @@ DIR = f"data/{STORE}"
 
 geom = json.load(open(f"{DIR}/geometry.json"))
 zones = json.load(open(f"{DIR}/zones.json"))
-exclusions = [e["rect"] for e in json.load(open(f"{DIR}/exclusions.json"))]
+exclusions = json.load(open(f"{DIR}/exclusions.json"))
 anchors = {**geom["anchors"], **{k.upper(): v for k, v in zones.items()}}
 assert "ENTRANCE" in anchors and "CHECKOUT" in anchors, anchors.keys()
 
 try:
-    inclusions = [e["rect"] for e in json.load(open(f"{DIR}/inclusions.json"))]
+    inclusions = json.load(open(f"{DIR}/inclusions.json"))
 except FileNotFoundError:
     inclusions = []
 
@@ -30,7 +30,7 @@ badges = [v for k, v in anchors.items() if k.startswith("AISLE ")]
 free, culled = engine.seal_staff_gaps(free_raw, anchors["ENTRANCE"],
                                       protect_pts=badges)
 if inclusions:
-    free |= free_raw & engine.rect_mask(inclusions, free.shape)
+    free |= free_raw & engine.shape_mask(inclusions, free.shape)
 if culled:
     print(f"service pockets culled: {len(culled)} "
           f"(largest {max(s for s, _, _ in culled)} cells)")
