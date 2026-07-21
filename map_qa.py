@@ -64,7 +64,9 @@ else:  # no zones authored yet: seed from the aisle-badge centroid (in-store)
     seed_pt = (sum(x for x, _ in ax) / len(ax), sum(y for _, y in ax) / len(ax))
     print("note: no ENTRANCE anchor — seeding reachability from aisle centroid")
 
-free, culled_pockets = engine.seal_staff_gaps(free_raw, seed_pt)
+badges = [v for k, v in anchors.items() if k.startswith("AISLE ")]
+free, culled_pockets = engine.seal_staff_gaps(free_raw, seed_pt,
+                                              protect_pts=badges)
 incl_mask = engine.rect_mask([e["rect"] for e in incl], free.shape)
 free |= free_raw & incl_mask          # human-verified customer zones win
 seed = engine.nearest_free(free, seed_pt)

@@ -24,8 +24,11 @@ free_raw = engine.build_grid(geom, exclusions=exclusions)
 h, w = free_raw.shape
 
 # cull staff-only service interiors (deli island, seafood counter, ...),
-# then restore human-verified customer zones the sealing rule over-culled
-free, culled = engine.seal_staff_gaps(free_raw, anchors["ENTRANCE"])
+# then restore human-verified customer zones the sealing rule over-culled.
+# Aisle badges protect their pockets: a badge marks a shopping corridor.
+badges = [v for k, v in anchors.items() if k.startswith("AISLE ")]
+free, culled = engine.seal_staff_gaps(free_raw, anchors["ENTRANCE"],
+                                      protect_pts=badges)
 if inclusions:
     free |= free_raw & engine.rect_mask(inclusions, free.shape)
 if culled:

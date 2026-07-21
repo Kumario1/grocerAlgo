@@ -56,6 +56,11 @@ MUST = [
     (990, 430, "island east walkway / cafe tables"),
     (884, 500, "Floral front"),
     (1100, 475, "Seafood south frontage"),
+    # narrow aisles rescued by badge protection (owner markup round 3)
+    (390, 397, "left-wing aisle 37 corridor"),
+    (544, 450, "Toys aisle, south bank (badge 22)"),
+    (781, 300, "north-bank corridor by Tortillas shelf"),
+    (1110, 592, "Produce south walkway"),
 ]
 
 

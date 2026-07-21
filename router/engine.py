@@ -54,7 +54,8 @@ def bfs(free, start):
                 q.append(v)
     return dist, parent
 
-def seal_staff_gaps(free, seed_pt, cell=4.0, gap_kernel=2, max_pocket_cells=600):
+def seal_staff_gaps(free, seed_pt, cell=4.0, gap_kernel=2, max_pocket_cells=600,
+                    protect_pts=()):
     """Cull staff-only service interiors (deli/bakery islands, seafood
     counters...) that connect to the sales floor only through narrow
     staff pass-throughs.
@@ -66,7 +67,16 @@ def seal_staff_gaps(free, seed_pt, cell=4.0, gap_kernel=2, max_pocket_cells=600)
     but only pockets <= max_pocket_cells, so an over-aggressive kernel can
     disconnect a huge region without silently deleting it.
     Side effect (accepted, conservative): 2-cell checkout lanes seal too.
+
+    protect_pts: PDF-point coordinates that mark known-customer space
+    (aisle badges). A pocket within PROTECT_R cells of one is a narrow
+    shopping aisle, not a staff area — never culled. Real aisles and
+    staff gaps can both be ~2 cells wide at this resolution; the badge
+    is the tiebreaker. Badges print at the corridor MOUTH (which stays
+    in the main region), so a small window is needed, but it must stay
+    tight: the wine-back staff strip sits ~4.5 cells from badge 14.
     """
+    PROTECT_R = 4
     st = np.ones((gap_kernel + 1, gap_kernel + 1), bool)
     sealed = free & ~ndimage.binary_closing(~free, structure=st)
     seed = nearest_free(sealed, seed_pt, cell)          # doorway-pinch safe
@@ -74,11 +84,19 @@ def seal_staff_gaps(free, seed_pt, cell=4.0, gap_kernel=2, max_pocket_cells=600)
     h, w = free.shape
     pockets = free & ~(dist >= 0).reshape(h, w)
     labels, n = ndimage.label(pockets)
+    protected = set()
+    for px, py in protect_pts:
+        cx, cy = int(px // cell), int(py // cell)
+        win = labels[max(0, cy - PROTECT_R):cy + PROTECT_R + 1,
+                     max(0, cx - PROTECT_R):cx + PROTECT_R + 1]
+        protected |= set(np.unique(win[win > 0]).tolist())
     out = free.copy()
     culled = []
     for i in range(1, n + 1):
         m = labels == i
         size = int(m.sum())
+        if i in protected and size >= 25:
+            continue        # badge-adjacent AND aisle-sized -> real corridor
         if size <= max_pocket_cells:
             out[m] = False
             if size >= 25:                              # ignore corner nibbles
