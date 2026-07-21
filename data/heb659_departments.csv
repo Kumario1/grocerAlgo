@@ -1,0 +1,35 @@
+item,aisle_raw
+Bananas,Produce
+Apples,Produce
+Berries,Produce
+Lettuce,Produce
+Tomatoes,Produce
+Onions,Produce
+Potatoes,Produce
+Avocados,Produce
+Milk,Dairy
+Eggs,Dairy
+Butter,Dairy
+Yogurt,Dairy
+Cheese,Dairy
+Cream Cheese,Dairy
+Sour Cream,Dairy
+Chicken,Meat
+Ground Beef,Meat
+Steak,Meat
+Bacon,Meat
+Sausage,Meat
+Shrimp,Seafood
+Salmon,Seafood
+Fish,Seafood
+Sliced Turkey,Deli
+Sliced Ham,Deli
+Rotisserie Chicken,Deli
+Sourdough Bread,Bakery
+Tortillas,Bakery
+Cake,Bakery
+Croissants,Bakery
+Ice Cream,Frozen
+Frozen Pizza,Frozen
+Frozen Vegetables,Frozen
+Frozen Waffles,Frozen
