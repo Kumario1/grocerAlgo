@@ -25,10 +25,14 @@ h, w = free_raw.shape
 
 # cull staff-only service interiors (deli island, seafood counter, ...),
 # then restore human-verified customer zones the sealing rule over-culled.
-# Aisle badges protect their pockets: a badge marks a shopping corridor.
+# Aisle badges protect their pockets (a badge marks a shopping corridor);
+# service-department labels condemn theirs (staff areas, no size cap).
 badges = [v for k, v in anchors.items() if k.startswith("AISLE ")]
-free, culled = engine.seal_staff_gaps(free_raw, anchors["ENTRANCE"],
-                                      protect_pts=badges)
+service = [v for k, v in anchors.items()
+           if any(s in k for s in engine.SERVICE_DEPTS)]
+free, culled, _ = engine.seal_staff_gaps(free_raw, anchors["ENTRANCE"],
+                                         protect_pts=badges,
+                                         service_pts=service)
 if inclusions:
     free |= free_raw & engine.shape_mask(inclusions, free.shape)
 if culled:

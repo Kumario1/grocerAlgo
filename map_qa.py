@@ -10,11 +10,12 @@ The iterate-to-perfect loop:
     shoppers can't use), rerun, then: python3 build_profile.py <store> && pytest
 
 Outputs (data/<store>/qa/):
-    walkable_overlay.png  green = walkable+reachable, purple = staff-gap-
-                          sealed service interiors, orange = walkable but
-                          cut off from the entrance, red = the OLD
-                          no-boundary rule called it walkable. Dashed
-                          circles = VERIFY service labels (see stats).
+    walkable_overlay.png  green = walkable+reachable, purple = staff service
+                          areas (sealed pockets holding a DELI/BAKERY/...
+                          label), orange = walkable but cut off from the
+                          entrance, red = the OLD no-boundary rule called it
+                          walkable; sealed no-label crevices between fixtures
+                          stay untinted. Dashed circles = VERIFY labels.
     reachable.png         entrance-connected region + anchors and their
                           snapped cells (red tie-line = snap moved far)
     corridor_width.png    distance-transform heat: dark red = sliver corridors
@@ -35,8 +36,7 @@ OUTDIR = f"{DIR}/qa"
 
 # service departments where staff operate behind counters; if the area
 # around one of these labels is still walkable, a human must check it
-SERVICE_DEPTS = ("DELI", "BAKERY", "SEAFOOD", "SUSHI", "KITCHEN",
-                 "PHARMACY", "MEAL SIMPLE", "COOKING")
+SERVICE_DEPTS = engine.SERVICE_DEPTS
 
 
 def _load(path, default):
@@ -65,8 +65,10 @@ else:  # no zones authored yet: seed from the aisle-badge centroid (in-store)
     print("note: no ENTRANCE anchor — seeding reachability from aisle centroid")
 
 badges = [v for k, v in anchors.items() if k.startswith("AISLE ")]
-free, culled_pockets = engine.seal_staff_gaps(free_raw, seed_pt,
-                                              protect_pts=badges)
+service_pts = [v for k, v in anchors.items()
+               if any(s in k for s in SERVICE_DEPTS)]
+free, culled_pockets, staff_mask = engine.seal_staff_gaps(
+    free_raw, seed_pt, protect_pts=badges, service_pts=service_pts)
 incl_mask = engine.shape_mask(incl, free.shape)
 free |= free_raw & incl_mask          # human-verified customer zones win
 seed = engine.nearest_free(free, seed_pt)
@@ -110,8 +112,10 @@ for name in sorted(anchors):
         verify.append((name, ax, ay, frac))
 
 # --- 1. walkable_overlay.png ---
+# purple is ONLY label-identified staff areas; sealed crevices between
+# fixtures (lead nowhere, not staff sections) stay untinted like furniture
 im = tint(base, free_old & ~free_raw, (220, 30, 30))      # reclaimed outside
-im = tint(im, free_raw & ~free, (150, 60, 200))           # staff-gap sealed
+im = tint(im, staff_mask, (150, 60, 200))                 # staff service areas
 im = tint(im, free & ~reachable, (255, 140, 0))           # isolated pockets
 im = tint(im, reachable, (30, 160, 60))                   # true walkable
 dr = ImageDraw.Draw(im)
