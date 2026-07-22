@@ -7,11 +7,17 @@ writes data/<store>/geometry.json.
 """
 import json, os, sys, fitz
 from router.derive import pdf_path
+from router import raster
 
 STORE = "659"
 PDF = None            # resolved in __main__ (script-only entry point)
 OUT = f"data/{STORE}/geometry.json"
 WHITE = (1.0, 1.0, 1.0)
+
+
+def raster_experiment_enabled():
+    """The fallback stays opt-in until every differential gate passes."""
+    return os.environ.get("GROCER_RASTER_EXPERIMENTAL") == "1"
 
 
 def stitch_open_boundary(chains, width, height, join_tol=3.0):
@@ -72,7 +78,30 @@ def stitch_open_boundary(chains, width, height, join_tol=3.0):
 
 
 def extract():
-    page = fitz.open(PDF)[1]
+    doc = fitz.open(PDF)
+    page = doc[1]
+    if raster.is_raster_page(page):
+        if not raster_experiment_enabled():
+            raise SystemExit(
+                "raster fallback remains experimental because the universal "
+                "differential benchmark has not passed; inspect "
+                "docs/superpowers/specs/2026-07-22-raster-fallback-"
+                "benchmark-results.md or set GROCER_RASTER_EXPERIMENTAL=1 "
+                "for benchmark/holdout QA only")
+        config_path = f"data/{STORE}/raster.json"
+        try:
+            config = json.load(open(config_path))
+        except FileNotFoundError:
+            config = {}
+        artifact_dir = f"data/{STORE}/qa/raster"
+        geom = raster.extract_page(page, config, artifact_dir=artifact_dir)
+        json.dump(geom, open(OUT, "w"))
+        print(f"raster/{geom['ocr_backend']}: {len(geom['anchors'])} anchors, "
+              f"{len(geom['fixtures'])} rect fixtures + "
+              f"{len(geom['fixture_polys'])} poly fixtures, "
+              f"{len(geom['obstacle_paths'])} wall segments, boundary "
+              f"{len(geom['boundary'])} vertices -> {OUT}; QA {artifact_dir}")
+        return geom
     words = page.get_text("words")  # (x0, y0, x1, y1, text, ...)
 
     anchors, seen = {}, []
@@ -263,9 +292,8 @@ def overlay(geom):
     """QA: render extracted geometry over the real map page -> PNG."""
     from PIL import Image, ImageDraw
     page = fitz.open(PDF)[1]
-    pix = page.get_pixmap(dpi=144)
-    im = Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
-    s = pix.width / geom["page"]["w"]
+    im = raster.render_source(page, geom, dpi=144)
+    s = im.width / geom["page"]["w"]
     dr = ImageDraw.Draw(im)
     for a, b in geom["obstacle_paths"]:
         dr.line([a[0] * s, a[1] * s, b[0] * s, b[1] * s], fill="orange")
