@@ -1305,8 +1305,14 @@ def _write_failure_artifacts(directory, original, image, error, backend,
                    "segments": segment_count}, output, indent=2)
 
 
-def extract_page(page, config=None, backend="auto", artifact_dir=None):
-    """Extract normal routing geometry from one full-page image map."""
+def extract_page(page, config=None, backend="tesseract", artifact_dir=None):
+    """Extract normal routing geometry from one full-page image map.
+
+    Tesseract is the production backend: on the differential corpus it reads
+    roughly 700 words per page against Apple Vision's 400, which is the
+    difference between passing and failing the positioned-label gate.
+    "auto" and "vision" stay callable for benchmark comparison.
+    """
     if not is_raster_page(page):
         raise RasterExtractionError("raster fallback called for a vector page")
     config = config or {}

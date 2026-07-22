@@ -42,8 +42,9 @@ currently an experiment: it passes the structural precision/recall, exact-aisle,
 aisle-position, anchor and runtime gates on both OCR backends, but not the
 boundary IoU gate, so normal pipeline runs reject raster guides. Benchmark and
 holdout QA can opt in with `GROCER_RASTER_EXPERIMENTAL=1`. The experimental path
-uses Apple Vision on macOS, retries with Tesseract, records positioned OCR in
-`geometry.json`, and writes diagnostics under `data/<store>/qa/raster/`.
+OCRs with Tesseract (it reads ~700 words per page to Apple Vision's ~400),
+records positioned OCR in `geometry.json`, and writes diagnostics under
+`data/<store>/qa/raster/`.
 
     python3 raster_benchmark.py --backend tesseract   # scores every plan gate,
     python3 raster_benchmark.py --backend vision      # exits nonzero on a miss
