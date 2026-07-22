@@ -110,6 +110,22 @@ def test_boundary_discovery_closes_gap_without_emitting_door_icon(tmp_path):
     assert max(y for _, y in boundary) <= 152
 
 
+def test_structural_mask_never_walls_off_an_aisle_badge():
+    # A solid badge is wide enough to survive the long-line openings, so
+    # erasing it only from the pre-restoration planes let it come back as
+    # structure and seal the corridor mouth it labels (store 388).
+    image = np.full((200, 300, 3), 255, np.uint8)
+    cv2.line(image, (20, 40), (280, 40), (40, 40, 40), 3)
+    cv2.line(image, (20, 160), (280, 160), (40, 40, 40), 3)
+    cv2.ellipse(image, (150, 100), (28, 15), 0, 0, 360, (20, 20, 20), -1)
+    badge = {"bbox": [122, 85, 178, 115], "text": "7", "confidence": .9}
+
+    mask = raster._structural_mask(Image.fromarray(image), [], 245, [badge])
+
+    assert not mask[90:110, 130:170].any()
+    assert mask[38:43, 100:200].any()
+
+
 def test_structural_mask_keeps_diagonal_walls():
     image = np.full((120, 120, 3), 255, np.uint8)
     cv2.line(image, (15, 100), (105, 15), (70, 70, 70), 2)
@@ -171,15 +187,25 @@ def test_raster_coverage_words_use_stored_positioned_ocr():
     ]
 
 
-def test_clean_vector_rasterization_retains_structural_parity():
-    image = render("388")
-    expected = truth_mask("388", image.size)
+@pytest.mark.parametrize("store", ["24", "659", "388", "790"])
+def test_clean_vector_rasterization_retains_structural_parity(store):
+    """OCR-free canary: rasterizing a vector guide must not LOSE structure.
+
+    Called without word or badge boxes, nothing erases printed text, so the
+    mask keeps glyphs as structure and its precision is meaningfully lower
+    than the production path's - only a floor worth asserting here.  Recall
+    is the property this canary can hold to account, and the full OCR-fed
+    precision/recall gates (>=.93/.93 clean) are enforced by
+    raster_benchmark.py against the image-only PDF corpus.
+    """
+    image = render(store)
+    expected = truth_mask(store, image.size)
 
     found = raster._structural_mask(image, [], 245) > 0
     precision, recall = pixel_metrics(expected, found)
 
-    assert precision >= .93
-    assert recall >= .93
+    assert recall >= .95
+    assert precision >= .85
 
 
 @pytest.mark.parametrize("backend", ["vision", "tesseract"])

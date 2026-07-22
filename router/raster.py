@@ -7,6 +7,7 @@ geometry helpers testable without opening a PDF.
 import csv
 import io
 import json
+import math
 import re
 import shutil
 import subprocess
@@ -163,6 +164,23 @@ def _red_mask(image):
     return ((((hsv[..., 0] < 12) | (hsv[..., 0] > 170))
              & (hsv[..., 1] > 60) & (hsv[..., 2] > 80))
             .astype(np.uint8) * 255)
+
+
+def _sharpness(image):
+    """Median edge-gradient magnitude of the scan.
+
+    Crisp renders measure >=~750 and blurred/low-contrast scans <=~510 on
+    the benchmark corpus, so 600 splits the two regimes with margin.  Sharp
+    scans can afford ink restoration near structure; blurred scans cannot,
+    because blur fuses unrecognized text into line-shaped smears.
+    """
+    gray = cv2.cvtColor(np.asarray(image), cv2.COLOR_RGB2GRAY)
+    edges = cv2.Canny(gray, 60, 180) > 0
+    if not edges.any():
+        return 0.0
+    gx = cv2.Sobel(gray, cv2.CV_32F, 1, 0)
+    gy = cv2.Sobel(gray, cv2.CV_32F, 0, 1)
+    return float(np.median(np.hypot(gx, gy)[edges]))
 
 
 def _deskew(image):
@@ -344,12 +362,26 @@ def _ocr(image, backend, orientation):
 
 
 def _orientation_score(words):
-    red = [word for word in words if word.get("region") == "red-label"]
-    labels = {_canonical_label(word["text"]) for word in red}
-    labels.discard(None)
+    """Prefer the rotation where red department labels read horizontally.
+
+    Label COUNT barely discriminates because Vision reads sideways text,
+    so the deciding vote is each recognized label's box aspect: wide at
+    the true orientation, tall when the page is rotated.
+    """
+    labels, votes = set(), 0
+    for word in words:
+        if word.get("region") != "red-label":
+            continue
+        label = _canonical_label(word["text"])
+        if not label:
+            continue
+        labels.add(label)
+        if len(re.sub(r"[^A-Za-z]", "", word["text"])) >= 4:
+            x0, y0, x1, y1 = word["bbox"]
+            votes += 1 if x1 - x0 >= y1 - y0 else -1
     legible = sum(word["confidence"] for word in words
                   if len(word["text"].strip()) >= 2)
-    return len(labels) * 100 + legible
+    return len(labels) * 100 + votes * 40 + legible
 
 
 def _canonical_label(text):
@@ -408,124 +440,693 @@ def _doorway_entrances(anchors):
     return anchors
 
 
+def _badge_digit_crop(image, box, scale, enhance=False):
+    """Isolate a badge's digit glyphs as dark-on-white, or None if fused.
+
+    Handles the three badge styles in the corpus: dark digits inside an
+    outline hexagon, knockout (light) digits inside a solid hexagon, and
+    tiny badges whose digits only separate from the ring after 4x
+    supersampling.  Unreadable badges still anchor positions; their
+    numbers are filled by the consensus run fit.
+    """
+    x, y, w, h = box
+    pad = max(3, round(4 * scale))
+    crop = image.crop((max(0, x - pad), max(0, y - pad),
+                       min(image.width, x + w + pad),
+                       min(image.height, y + h + pad)))
+    base = cv2.cvtColor(np.asarray(crop), cv2.COLOR_RGB2GRAY)
+    big = cv2.resize(base, (base.shape[1] * 4, base.shape[0] * 4),
+                     interpolation=cv2.INTER_CUBIC)
+    if enhance:
+        # Unsharp the degraded upscale: blur fuses ring and digit into one
+        # gray band, and OCR refuses digits wearing a hexagon ghost.  Crisp
+        # crops skip this - overshoot halos hurt them.
+        big = cv2.addWeighted(big, 2.2, cv2.GaussianBlur(big, (0, 0), 3),
+                              -1.2, 0)
+
+    def components(gray):
+        # Otsu adapts to blur and reduced contrast; a fixed cut clips
+        # degraded glyph strokes and loses digits entirely.
+        _, dark = cv2.threshold(gray, 0, 255,
+                                cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
+        dark = (dark > 0).astype(np.uint8)
+        return dark, cv2.connectedComponentsWithStats(dark)
+
+    def ring_of(stats, count, factor):
+        for label in range(1, count):
+            _, _, bw, bh, _ = stats[label]
+            # The ring spans the badge box itself, not the padded crop.
+            if bw >= .8 * w * factor or bh >= .8 * h * factor:
+                return label
+        return None
+
+    # Attempt 1: geometric ring removal at 4x.  Filling the ring's outer
+    # contour and eroding to the interior keeps digit strokes that touch
+    # the ring (the leading "1" of 17..19), where component deletion would
+    # drop them; 4x gives the erosion enough resolution for tiny badges.
+    dark, (count, labels, stats, _) = components(big)
+    ring = ring_of(stats, count, 4)
+    if ring is not None:
+        ring_mask = (labels == ring).astype(np.uint8)
+        contours, _ = cv2.findContours(ring_mask, cv2.RETR_EXTERNAL,
+                                       cv2.CHAIN_APPROX_SIMPLE)
+        filled = np.zeros_like(ring_mask)
+        cv2.drawContours(filled, contours, -1, 1, -1)
+        interior = cv2.erode(filled, np.ones((11, 11), np.uint8)) > 0
+        # Polarity first: a mostly-dark interior is a solid badge with
+        # knockout digits; a mostly-light one is an outline with dark
+        # digits.  Testing dark components first would swallow knockout
+        # interiors whole.
+        knockout = interior.any() and (dark > 0)[interior].mean() >= .55
+        target = ((dark == 0) & interior if knockout
+                  else (dark > 0) & interior)
+        count2, labels2, stats2, _ = cv2.connectedComponentsWithStats(
+            target.astype(np.uint8))
+        keep = np.zeros(count2, bool)
+        for label in range(1, count2):
+            _, _, hw, hh, _ = stats2[label]
+            if hh >= .22 * big.shape[0] and (not knockout
+                                             or hw <= .7 * w * 4):
+                keep[label] = True
+        if keep.any():
+            out = (255 - big) if knockout else big.copy()
+            out[~(keep[labels2] & target)] = 255
+            return Image.fromarray(out)
+    # Attempt 2: plain component split (no ring, or geometric found nothing).
+    for factor, gray in ((4, big), (1, base)):
+        dark, (count, labels, stats, _) = components(gray)
+        ring = ring_of(stats, count, factor)
+        keep = np.zeros(count, bool)
+        for label in range(1, count):
+            if label != ring and stats[label][3] >= .25 * gray.shape[0]:
+                keep[label] = True
+        if keep.any():
+            out = gray.copy()
+            out[~keep[labels]] = 255
+            return Image.fromarray(out)
+    return None
+
+
 def _badge_candidates(image, backend, orientation):
     gray = cv2.cvtColor(np.asarray(image), cv2.COLOR_RGB2GRAY)
-    dark = (gray < 120).astype(np.uint8) * 255
-    contours, _ = cv2.findContours(dark, cv2.RETR_EXTERNAL,
-                                   cv2.CHAIN_APPROX_SIMPLE)
-    candidates = []
-    for contour in contours:
-        x, y, w, h = cv2.boundingRect(contour)
-        area = cv2.contourArea(contour)
-        fill = area / max(1, w * h)
-        scale = min(image.size) / 1700
-        if not (12 * scale <= h <= 25 * scale
-                and 20 * scale <= w <= 42 * scale
-                and 1.2 <= w / h <= 2.5 and fill > .3):
-            continue
-        pad = max(3, round(4 * scale))
-        crop = image.crop((max(0, x - pad), max(0, y - pad),
-                           min(image.width, x + w + pad),
-                           min(image.height, y + h + pad)))
-        crop = crop.resize((200, 100), Image.Resampling.BICUBIC)
+    scale = min(image.size) / 1700
+    # Blur and JPEG ringing shift each badge's ink threshold individually:
+    # a faint hexagon's outline only closes at a loose cut, while a loose
+    # cut fuses neighbouring linework around a crisp one.  Detect at each
+    # cut and keep the union, since a shape only counts when it looks like
+    # a badge at the cut that found it.
+    boxes = []
+    for cut in (120, 165, 200):
+        dark = (gray < cut).astype(np.uint8) * 255
+        contours, _ = cv2.findContours(dark, cv2.RETR_EXTERNAL,
+                                       cv2.CHAIN_APPROX_SIMPLE)
+        for contour in contours:
+            x, y, w, h = cv2.boundingRect(contour)
+            fill = cv2.contourArea(contour) / max(1, w * h)
+            # Window measured across the guide corpus: hexagon badges span
+            # 15..43 wide and 12..23 tall in 1700px-normalized units with
+            # aspect 1.17..1.93 and solid >=.65 fill.  The vertex count is
+            # the discriminator against same-sized fixture rectangles (4)
+            # and text fragments (many): the house badge style is a hexagon.
+            if not (10 * scale <= h <= 26 * scale
+                    and 13 * scale <= w <= 48 * scale
+                    and 1.1 <= w / h <= 2.5 and fill > .5):
+                continue
+            vertices = len(cv2.approxPolyDP(
+                contour, .03 * cv2.arcLength(contour, True), True))
+            if not 5 <= vertices <= 8:
+                continue
+            center = (x + w / 2, y + h / 2)
+            if any(abs(center[0] - (bx + bw / 2)) < .6 * bw
+                   and abs(center[1] - (by + bh / 2)) < .6 * bh
+                   for bx, by, bw, bh in boxes):
+                continue
+            boxes.append((x, y, w, h))
+    if not boxes:
+        return []
+    # One OCR pass over a contact sheet of upscaled digit crops beats a
+    # per-badge call on both accuracy (tiny hexagon digits become large,
+    # clean glyphs) and runtime (one recognition instead of dozens).  The
+    # sheet mimics lines of printed numbers - both backends handle that
+    # layout far better than a sparse symbol grid.
+    enhance = _sharpness(image) < 600
+    shapes = [_badge_digit_crop(image, box, scale, enhance) for box in boxes]
+    if not any(crop is not None for crop in shapes):
+        return [{"bbox": [x, y, x + w, y + h], "text": "", "confidence": 0.0}
+                for x, y, w, h in boxes]
+    # Badge digits are only ~20px tall on the page, and which upscale reads
+    # a given badge best is not predictable per store: 140px wins overall,
+    # 64px still recovers badges 140px garbles.  Read both and pool the
+    # votes rather than betting the whole store on one scale.
+    votes = {}
+    for height in (140, 64):
+        crops = []
+        for crop in shapes:
+            if crop is not None:
+                crop = crop.resize((max(24, round(crop.width * height
+                                                  / crop.height)), height),
+                                   Image.Resampling.LANCZOS)
+            crops.append(crop)
+        readable = [crop for crop in crops if crop is not None]
+        cell_w = max(crop.width for crop in readable) + 56
+        cell_h = max(crop.height for crop in readable) + 56
+        columns = 10
+        rows = math.ceil(len(crops) / columns)
+        sheet = Image.new("RGB", (columns * cell_w, rows * cell_h), "white")
+        for i, crop in enumerate(crops):
+            if crop is None:
+                continue
+            sheet.paste(crop.convert("RGB"),
+                        ((i % columns) * cell_w + (cell_w - crop.width) // 2,
+                         (i // columns) * cell_h + (cell_h - crop.height) // 2))
         try:
             if backend == "vision":
-                found = _vision_words(crop, orientation)
+                found = _vision_words(sheet, orientation)
             else:
-                found = _run_tesseract(crop, orientation, psm=7,
+                # psm 6 (uniform block) reads the digit grid far better
+                # than sparse-text mode.
+                found = _run_tesseract(sheet, orientation, psm=6,
                                        whitelist="0123456789")
         except RasterExtractionError:
             found = []
-        values = [q["text"] for q in found
-                  if q["text"].isdigit() and 1 <= int(q["text"]) <= 60]
-        candidates.append({"bbox": [x, y, x + w, y + h],
-                           "text": values[0] if values else "",
-                           "confidence": max((q["confidence"] for q in found),
-                                             default=0.0)})
-    return candidates
+        cells = {}
+        for word in found:
+            if not word["text"].strip().isdigit():
+                continue
+            cx = (word["bbox"][0] + word["bbox"][2]) / 2
+            cy = (word["bbox"][1] + word["bbox"][3]) / 2
+            index = int(cy // cell_h) * columns + int(cx // cell_w)
+            if 0 <= index < len(boxes):
+                cells.setdefault(index, []).append(word)
+        for index, words in cells.items():
+            # A two-digit badge often comes back as two words; join them in
+            # reading order.  Re-observations of the same glyph overlap in
+            # x, so the more confident one replaces rather than extends.
+            kept = []
+            for word in sorted(words, key=lambda item: item["bbox"][0]):
+                x0, x1 = word["bbox"][0], word["bbox"][2]
+                overlap = next(
+                    (other for other in kept
+                     if min(x1, other["bbox"][2]) - max(x0, other["bbox"][0])
+                     > .5 * min(x1 - x0, other["bbox"][2] - other["bbox"][0])),
+                    None)
+                if overlap is None:
+                    kept.append(word)
+                elif word["confidence"] > overlap["confidence"]:
+                    kept[kept.index(overlap)] = word
+            text = "".join(word["text"].strip() for word in kept)
+            if text.isdigit() and 1 <= int(text) <= 60:
+                score = min(word["confidence"] for word in kept)
+                tally = votes.setdefault(index, {})
+                tally[text] = tally.get(text, 0.0) + score
+    read = {index: max(tally.items(), key=lambda item: item[1])
+            for index, tally in votes.items()}
+    return [{"bbox": [x, y, x + w, y + h],
+             "text": read.get(i, ("", 0.0))[0],
+             "confidence": min(1.0, read.get(i, ("", 0.0))[1]),
+             }
+            for i, (x, y, w, h) in enumerate(boxes)]
 
 
 def _complete_run(run):
+    """Fit value = start + step*slot by pair consensus over pitch slots.
+
+    Slots come from GEOMETRY, not list order: a badge box lost to touching
+    linework leaves a pitch-sized hole, and index-based numbering would
+    silently shift every value after it.  Each read pair votes for a
+    (start, step) mapping; the majority mapping wins if it is unique and
+    explains at least 60% of the read digits, outvoted digits are treated
+    as unreadable, and interior holes of up to three slots are filled at
+    their interpolated positions.  The exact-1..N union check in
+    _aisle_anchors remains the hard safety net.
+    """
     centers = [((b["bbox"][0] + b["bbox"][2]) / 2,
                 (b["bbox"][1] + b["bbox"][3]) / 2) for b in run]
     axis = 0 if np.ptp([p[0] for p in centers]) >= np.ptp([p[1] for p in centers]) else 1
     ordered = sorted(zip(run, centers), key=lambda item: item[1][axis])
-    known = [(i, int(b["text"])) for i, (b, _) in enumerate(ordered)
-             if b.get("text", "").isdigit()]
-    if len(known) < 2:
+    gaps = [b[1][axis] - a[1][axis] for a, b in zip(ordered, ordered[1:])]
+    positive = sorted(gap for gap in gaps if gap > 1)
+    if positive:
+        median_gap = positive[len(positive) // 2]
+        # The badge pitch is the smallest real gap; overlapping duplicate
+        # boxes (near-zero gaps) must not shrink it.
+        unit = min(gap for gap in positive if gap > .35 * median_gap)
+    else:
+        unit = 1.0
+    # Two position models: plain order (robust to pitch drift within a
+    # corridor) and pitch slots (robust to a missing badge box, which
+    # otherwise shifts every later value).  Whichever explains more read
+    # digits wins; ties go to plain order.
+    index_slots = list(range(len(ordered)))
+    pitch_slots = [0]
+    for gap in gaps:
+        pitch_slots.append(pitch_slots[-1] + max(1, round(gap / unit)))
+
+    def fit(slots):
+        known = [(slots[i], int(b["text"]))
+                 for i, (b, _) in enumerate(ordered)
+                 if b.get("text", "").isdigit()]
+        if len(known) < 2:
+            return None
+        votes = {}
+        for a_index, (i, a) in enumerate(known):
+            for j, b in known[a_index + 1:]:
+                gap, delta = j - i, b - a
+                if not gap or delta % gap:
+                    continue
+                step = delta // gap
+                # Aisle numbers advance one per slot along a regular run.
+                if abs(step) != 1:
+                    continue
+                votes.setdefault((a - i * step, step), set()).update(
+                    {(i, a), (j, b)})
+        if not votes:
+            return None
+        supports = {mapping: len(inliers)
+                    for mapping, inliers in votes.items()}
+        top = max(supports.values())
+        winners = [mapping for mapping, count in supports.items()
+                   if count == top]
+        if len(winners) != 1 or top < max(2, math.ceil(.6 * len(known))):
+            return None
+        return top, winners[0]
+
+    def positive(slots, result):
+        # Aisle numbers start at 1; a fit that walks a run into zero or
+        # negative values has locked onto the wrong offset.  A descending
+        # run puts its smallest value at the LAST slot, so both ends must
+        # be checked, not just the first.
+        if result is None:
+            return None
+        start, step = result[1]
+        return result if min(start + slot * step
+                             for slot in slots) >= 1 else None
+
+    plain = positive(index_slots, fit(index_slots))
+    pitched = positive(pitch_slots, fit(pitch_slots))
+    if plain is None and pitched is None:
         raise RasterExtractionError("cannot establish a unique aisle run")
-    steps = {(b - a) // (j - i) for (i, a), (j, b) in zip(known, known[1:])
-             if j > i and abs(b - a) == j - i}
-    if len(steps) != 1 or any(abs(b - a) != j - i
-                              for (i, a), (j, b) in zip(known, known[1:])):
-        raise RasterExtractionError("cannot establish a unique aisle run")
-    step = steps.pop()
-    start = known[0][1] - known[0][0] * step
-    return [(start + i * step, center) for i, (_, center) in enumerate(ordered)]
+    if pitched is not None and (plain is None or pitched[0] > plain[0]):
+        slots, (start, step) = pitch_slots, pitched[1]
+    else:
+        slots, (start, step) = index_slots, plain[1]
+    numbered = [(start + slots[i] * step, center)
+                for i, (_, center) in enumerate(ordered)]
+    for i, ((_, before), (_, after)) in enumerate(zip(ordered, ordered[1:])):
+        hole = slots[i + 1] - slots[i]
+        if 2 <= hole <= 3:
+            for k in range(1, hole):
+                t = k / hole
+                numbered.append((start + (slots[i] + k) * step,
+                                 (before[0] + t * (after[0] - before[0]),
+                                  before[1] + t * (after[1] - before[1]))))
+    return numbered
+
+
+def _runs_along(candidates, axis, tolerance):
+    """Cluster badges into straight runs: aligned across `axis`, ordered
+    along it, split where the pitch jumps (separate corridors)."""
+    cross = 1 - axis
+    rows = []
+    for candidate in sorted(candidates, key=lambda b: (
+            (b["bbox"][cross] + b["bbox"][cross + 2]) / 2)):
+        center = ((candidate["bbox"][0] + candidate["bbox"][2]) / 2,
+                  (candidate["bbox"][1] + candidate["bbox"][3]) / 2)
+        for row in rows:
+            if abs(center[cross] - row[-1][1][cross]) <= tolerance:
+                row.append((candidate, center))
+                break
+        else:
+            rows.append([(candidate, center)])
+    runs = []
+    for row in rows:
+        row.sort(key=lambda item: item[1][axis])
+        split = [[row[0]]]
+        gaps = [b[1][axis] - a[1][axis] for a, b in zip(row, row[1:])]
+        pitch = float(np.median(gaps)) if gaps else 0.0
+        for previous, item in zip(row, row[1:]):
+            gap = item[1][axis] - previous[1][axis]
+            if pitch and gap > 1.8 * pitch:
+                split.append([])
+            split[-1].append(item)
+        runs.extend(split)
+    return runs
 
 
 def _aisle_anchors(candidates):
     if len(candidates) < 2:
         raise RasterExtractionError("no aisle badge candidates found")
-    median_w = float(np.median([b["bbox"][2] - b["bbox"][0]
-                                for b in candidates]))
-    median_h = float(np.median([b["bbox"][3] - b["bbox"][1]
-                                for b in candidates]))
-    centers = [((b["bbox"][0] + b["bbox"][2]) / 2,
-                (b["bbox"][1] + b["bbox"][3]) / 2) for b in candidates]
-    groups, unused = [], set(range(len(candidates)))
-    while unused:
-        seed = unused.pop()
-        group, changed = {seed}, True
-        while changed:
-            changed = False
-            for i in list(unused):
-                if any(abs(centers[i][0] - centers[j][0]) < .75 * median_w
-                       or abs(centers[i][1] - centers[j][1]) < .75 * median_h
-                       for j in group):
-                    group.add(i)
-                    unused.remove(i)
-                    changed = True
-        if len(group) >= 2:
-            groups.append([candidates[i] for i in group])
-    numbered = [item for group in groups for item in _complete_run(group)]
-    values = [value for value, _ in numbered]
-    if sorted(values) != list(range(1, len(values) + 1)) or len(values) < 20:
+    ref_h = float(np.median([b["bbox"][3] - b["bbox"][1]
+                             for b in candidates]))
+    # The plan's model: badges form regular horizontal or vertical runs.
+    # Both families are built over ALL candidates - an aisle column crosses
+    # aisle rows, and the badge at the intersection belongs to both; the
+    # weighted claims plus the global exact-1..N constraint decide which
+    # numbering each shared badge serves.
+    horizontal = [run for run in _runs_along(candidates, 0, .6 * ref_h)
+                  if len(run) >= 2]
+    vertical = [run for run in _runs_along(candidates, 1, .6 * ref_h)
+                if len(run) >= 2]
+    used = {id(candidate) for run in horizontal + vertical
+            for candidate, _ in run}
+    loose = [b for b in candidates if id(b) not in used]
+    fitted, unfit_members = [], []
+    for run in horizontal + vertical:
+        axis = 0 if np.ptp([c[0] for _, c in run]) >= np.ptp(
+            [c[1] for _, c in run]) else 1
+        ordered = sorted(run, key=lambda item: item[1][axis])
+        try:
+            numbered = _complete_run([candidate for candidate, _ in ordered])
+            fitted.append((ordered, numbered, axis, len(run)))
+        except RasterExtractionError:
+            unfit_members.extend(candidate for candidate, _ in ordered)
+    in_fitted = {id(candidate) for ordered, _, _, _ in fitted
+                 for candidate, _ in ordered}
+    unresolved = loose + [candidate for candidate in unfit_members
+                          if id(candidate) not in in_fitted]
+    base = []           # (value, center, weight)
+    # A badge whose box was never detected leaves a value-and-pitch
+    # consistent gap BETWEEN two runs of the same corridor; bridge it with
+    # phantom claims at the interpolated positions.
+    for first_index, (ordered_a, numbered_a, axis, weight_a) in enumerate(fitted):
+        along_a = sorted(numbered_a, key=lambda item: item[1][axis])
+        gaps_a = [b[1][axis] - a[1][axis]
+                  for a, b in zip(along_a, along_a[1:])]
+        pitch = float(np.median(gaps_a)) if gaps_a else 0.0
+        if pitch <= 0:
+            continue
+        cross = 1 - axis
+        # Loose read badges act as one-member partners: a run end and a
+        # read badge two-to-four pitches away pin the values between them.
+        partners = [(sorted(numbered_b, key=lambda item: item[1][axis]),
+                     weight_b)
+                    for ordered_b, numbered_b, axis_b, weight_b
+                    in fitted[first_index + 1:] if axis_b == axis]
+        partners += [([(int(badge["text"]),
+                        ((badge["bbox"][0] + badge["bbox"][2]) / 2,
+                         (badge["bbox"][1] + badge["bbox"][3]) / 2))], 1)
+                     for badge in unresolved
+                     if badge.get("text", "").isdigit()]
+        for along_b, weight_b in partners:
+            for end, start in ((along_a[-1], along_b[0]),
+                               (along_b[-1], along_a[0])):
+                gap = start[1][axis] - end[1][axis]
+                if gap <= 0:
+                    continue
+                if abs(start[1][cross] - end[1][cross]) > .8 * ref_h:
+                    continue
+                delta = start[0] - end[0]
+                if not 2 <= abs(delta) <= 4:
+                    continue
+                if abs(gap - abs(delta) * pitch) > .3 * abs(delta) * pitch:
+                    continue
+                step = 1 if delta > 0 else -1
+                for k in range(1, abs(delta)):
+                    t = k / abs(delta)
+                    base.append((end[0] + k * step,
+                                 (end[1][0] + t * (start[1][0] - end[1][0]),
+                                  end[1][1] + t * (start[1][1] - end[1][1])),
+                                 min(weight_a, weight_b)))
+    ambiguous = []      # [(fitted claim), (direct-read claim)] per member
+    for ordered, numbered, axis, weight in fitted:
+        for (candidate, _), (value, center) in zip(ordered, numbered):
+            text = candidate.get("text", "")
+            if text.isdigit() and int(text) != value:
+                # Either a misread digit inside the run (the fit is right)
+                # or a stray badge from an adjacent corridor absorbed into
+                # the row (the read is right).  Locally undecidable; the
+                # global exact-1..N constraint picks the interpretation.
+                ambiguous.append([(value, center, weight),
+                                  (int(text), center, 1)])
+            else:
+                base.append((value, center, weight))
+        # Interior hole fills appended by _complete_run beyond the members.
+        base.extend((value, center, weight)
+                    for value, center in numbered[len(ordered):])
+        # An unread badge beyond the run's end continues the same regular
+        # numbering (its digit was simply illegible); walk outward up to
+        # three pitch steps, alignment enforced at each one.
+        along = sorted(numbered, key=lambda item: item[1][axis])
+        gaps = [b[1][axis] - a[1][axis] for a, b in zip(along, along[1:])]
+        pitch = float(np.median(gaps)) if gaps else 0.0
+        if pitch <= 0 or len(along) < 2:
+            continue
+        cross = 1 - axis
+        for end, direction in ((along[-1], 1), (along[0], -1)):
+            value_step = (1 if along[-1][0] > along[0][0] else -1) * direction
+            cursor = end
+            for _ in range(3):
+                target = cursor[1][axis] + direction * pitch
+                match = next(
+                    (badge for badge in unresolved
+                     if abs((badge["bbox"][axis]
+                             + badge["bbox"][axis + 2]) / 2 - target)
+                     <= .3 * pitch
+                     and abs((badge["bbox"][cross]
+                              + badge["bbox"][cross + 2]) / 2
+                             - cursor[1][cross]) <= .8 * ref_h), None)
+                if match is None:
+                    break
+                center = ((match["bbox"][0] + match["bbox"][2]) / 2,
+                          (match["bbox"][1] + match["bbox"][3]) / 2)
+                cursor = (cursor[0] + value_step, center)
+                text = match.get("text", "")
+                if text.isdigit() and int(text) != cursor[0]:
+                    # The run's regular spacing and this badge's own digit
+                    # disagree.  Degraded scans misread digits as often as
+                    # they drop them, so let the global 1..N search decide.
+                    ambiguous.append([(cursor[0], center, weight),
+                                      (int(text), center, 1)])
+                else:
+                    base.append((cursor[0], center, weight))
+    for badge in candidates:
+        if id(badge) not in in_fitted and badge.get("text", "").isdigit():
+            box = badge["bbox"]
+            base.append((int(badge["text"]),
+                         ((box[0] + box[2]) / 2, (box[1] + box[3]) / 2), 1))
+    # Last resort for a badge lost at a corridor corner: it belongs to no
+    # shared row or column, but value-adjacent READ badges sit one pitch
+    # to each side and pin it.  Only values nothing else claims are filled
+    # this way - competing with real evidence would multiply readings.
+    claimed = ({value for value, _, _ in base}
+               | {value for pair in ambiguous for value, _, _ in pair})
+    unclaimed = set(range(1, max(claimed, default=0) + 1)) - claimed
+    pitches = []
+    for _, numbered, axis, _ in fitted:
+        along = sorted(numbered, key=lambda item: item[1][axis])
+        pitches.extend(b[1][axis] - a[1][axis]
+                       for a, b in zip(along, along[1:]))
+    pitch_ref = float(np.median(pitches)) if pitches else 0.0
+    if unclaimed and pitch_ref > 0:
+        reads = [(int(b["text"]), ((b["bbox"][0] + b["bbox"][2]) / 2,
+                                   (b["bbox"][1] + b["bbox"][3]) / 2))
+                 for b in candidates if b.get("text", "").isdigit()]
+        for first, (value_a, center_a) in enumerate(reads):
+            for value_b, center_b in reads[first + 1:]:
+                delta = value_b - value_a
+                if not 2 <= abs(delta) <= 3:
+                    continue
+                step = 1 if delta > 0 else -1
+                between = {value_a + k * step for k in range(1, abs(delta))}
+                if not between <= unclaimed:
+                    continue
+                distance = math.hypot(center_b[0] - center_a[0],
+                                      center_b[1] - center_a[1])
+                if distance > (abs(delta) + 1.2) * pitch_ref:
+                    continue
+                for k in range(1, abs(delta)):
+                    t = k / abs(delta)
+                    base.append((value_a + k * step,
+                                 (center_a[0] + t * (center_b[0] - center_a[0]),
+                                  center_a[1] + t * (center_b[1] - center_a[1])),
+                                 1))
+    if len(ambiguous) > 8:
         raise RasterExtractionError(
-            f"aisle badges do not form exact 1..N set: {sorted(values)}")
+            f"{len(ambiguous)} contested aisle badge digits")
+    reads = [(int(b["text"]), ((b["bbox"][0] + b["bbox"][2]) / 2,
+                               (b["bbox"][1] + b["bbox"][3]) / 2))
+             for b in candidates if b.get("text", "").isdigit()]
+
+    def agreement(placed):
+        return sum(1 for value, center in reads
+                   if value in placed and np.hypot(
+                       placed[value][1][0] - center[0],
+                       placed[value][1][1] - center[1]) <= 6)
+
+    outcomes = {}
+    for combo in range(1 << len(ambiguous)):
+        chosen = [pair[(combo >> i) & 1] for i, pair in enumerate(ambiguous)]
+        placed = _resolve_aisles(base + chosen)
+        if placed is not None:
+            key = tuple(sorted((value, round(center[0]), round(center[1]))
+                               for value, (_, center) in placed.items()))
+            outcomes[key] = placed
+    if len(outcomes) > 1:
+        # Competing complete numberings: OCR reads are evidence, so the
+        # interpretation that honors the most read digits in place wins;
+        # a tie stays ambiguous.
+        scored = sorted(((agreement(placed), key) for key, placed
+                         in outcomes.items()), reverse=True)
+        if scored[0][0] > scored[1][0]:
+            outcomes = {scored[0][1]: outcomes[scored[0][1]]}
+    if len(outcomes) != 1:
+        claimed = ({value for value, _, _ in base}
+                   | {value for pair in ambiguous for value, _, _ in pair})
+        missing = sorted(set(range(1, max(claimed, default=0) + 1)) - claimed)
+        raise RasterExtractionError(
+            "aisle badges do not form exact 1..N set "
+            f"({len(outcomes)} consistent interpretations; "
+            f"unclaimed: {missing})")
+    placed = outcomes.popitem()[1]
     return {f"AISLE {value}": [center[0], center[1]]
-            for value, center in sorted(numbered)}
+            for value, (_, center) in sorted(placed.items())}
+
+
+def _resolve_aisles(claims_list):
+    """Resolve weighted claims into an exact 1..N placement, or None."""
+    claims = {}
+    for value, center, weight in claims_list:
+        claims.setdefault(value, []).append((weight, center))
+    placed, deferred = {}, []
+    for value in sorted(claims, key=lambda v: -max(w for w, _ in claims[v])):
+        options = claims[value]
+        top = max(weight for weight, _ in options)
+        winners = [center for weight, center in options if weight == top]
+        if any(np.hypot(a[0] - b[0], a[1] - b[1]) > 10
+               for a in winners for b in winners):
+            deferred.append((value, top, winners))
+        else:
+            placed[value] = (top, winners[0])
+    # Equal-support claims at different spots: aisle v is printed beside
+    # v-1/v+1, so the instance nearest an already-placed neighbor wins;
+    # with no placed neighbor the numbering stays ambiguous.
+    while deferred:
+        progressed, remaining = False, []
+        for value, top, winners in deferred:
+            neighbors = [placed[v][1] for v in (value - 1, value + 1)
+                         if v in placed]
+            if neighbors:
+                placed[value] = (top, min(
+                    winners, key=lambda c: min(
+                        np.hypot(c[0] - n[0], c[1] - n[1])
+                        for n in neighbors)))
+                progressed = True
+            else:
+                remaining.append((value, top, winners))
+        deferred = remaining
+        if not progressed:
+            return None
+    values = sorted(placed)
+    if values != list(range(1, len(values) + 1)) or len(values) < 20:
+        return None
+    return placed
+
+
+def _erase_boxes(mask, boxes, pad):
+    for x0, y0, x1, y1 in boxes:
+        cv2.rectangle(mask, (max(0, round(x0) - pad), max(0, round(y0) - pad)),
+                      (min(mask.shape[1] - 1, round(x1) + pad),
+                       min(mask.shape[0] - 1, round(y1) + pad)), 0, -1)
+
+
+def _thin(mask, limit=4):
+    """Keep only stroke-width ink.  Blur fuses unread text into 5..7 px
+    smear bands; real drawn lines stay within ~4 px of background even
+    after degradation, so a distance-transform cut separates them."""
+    distance = cv2.distanceTransform((mask > 0).astype(np.uint8),
+                                     cv2.DIST_L2, 3)
+    return ((mask > 0) & (distance <= limit)).astype(np.uint8) * 255
+
+
+def _artwork_mask(image, gray, hsv, threshold):
+    """Colored logo/banner artwork committed as real vector drawings.
+
+    Guides draw vendor banners, service-counter logos, and colored kiosks
+    as artwork, so their strokes are part of the committed differential
+    truth.  Red needs care: department LABEL text is also red, and only
+    OCR knows where it is - but OCR misses degrade with blur.  Shape is
+    the robust signal: label text is sparse glyph work while banners are
+    solid fills, so only large mostly-solid red components count.  The
+    gradient keeps stroke edges rather than filled interiors, matching
+    how the truth mask draws outlines.
+    """
+    scale = min(image.size) / 1700
+    colored = (hsv[..., 1] > 70) & (hsv[..., 2] > 80) & (gray < threshold)
+    red = _red_mask(image) > 0
+    red_components = (colored & red).astype(np.uint8) * 255
+    count, labels, stats, _ = cv2.connectedComponentsWithStats(red_components)
+    solid = np.zeros(count, bool)
+    for label in range(1, count):
+        _, _, width, height, area = stats[label]
+        if (area >= 900 * scale * scale
+                and area / max(1, width * height) >= .75):
+            solid[label] = True
+    kept = cv2.bitwise_or((colored & ~red).astype(np.uint8) * 255,
+                          solid[labels].astype(np.uint8) * 255)
+    kept = cv2.morphologyEx(kept, cv2.MORPH_OPEN, np.ones((2, 2), np.uint8))
+    return cv2.morphologyEx(kept, cv2.MORPH_GRADIENT, np.ones((3, 3), np.uint8))
 
 
 def _structural_mask(image, words, threshold, badges=()):
     rgb = np.asarray(image)
     gray = cv2.cvtColor(rgb, cv2.COLOR_RGB2GRAY)
+    hsv = cv2.cvtColor(rgb, cv2.COLOR_RGB2HSV)
+    scale = min(image.size) / 1700
+    sharp = _sharpness(image) >= 600
+    # Erasing an OCR box deletes structure under it, and Tesseract emits
+    # low-confidence boxes over plain linework; on sharp scans only trust
+    # confident words.  Blurred scans erase everything OCR offers - real
+    # blurred text is exactly what their morphology cannot reject.
+    erasable = ([word for word in words if word["confidence"] >= .35]
+                if sharp else words)
     neutral = rgb.max(axis=2) - rgb.min(axis=2) < 18
     light = ((gray >= 100) & (gray < threshold) & neutral).astype(np.uint8) * 255
-    raw_light = light.copy()
     dark = ((gray < 100) & neutral).astype(np.uint8) * 255
+    if not sharp:
+        light, dark = _thin(light), _thin(dark)
+    # Aisle badges are map annotations at the corridor mouth, never
+    # structure, so they are erased before the long-run snapshot is taken -
+    # a solid badge is wide enough to survive the line openings and would
+    # otherwise wall off the very aisle it labels.
+    for badge in badges:
+        x0, y0, x1, y1 = [round(v) for v in badge["bbox"]]
+        for plane in (dark, light):
+            cv2.rectangle(plane, (max(0, x0 - 3), max(0, y0 - 3)),
+                          (min(plane.shape[1] - 1, x1 + 3),
+                           min(plane.shape[0] - 1, y1 + 3)), 0, -1)
+    # The long-run restoration below reads these snapshots, so they must
+    # keep the ink that WORD boxes cover (printed labels sit on top of real
+    # shelf lines) while excluding the annotations erased above.
+    raw_light = light.copy()
     raw_dark = dark.copy()
     # Delete OCR glyph boxes before line extraction.  Red labels have already
     # been excluded by the neutral-color test and are kept in OCR records.
-    for word in words:
+    # A red-dominated box is a department/vendor label read by the FULL-page
+    # pass: its glyphs are not neutral ink, so erasing it would only delete
+    # the structure printed beneath the label.
+    red_px = _red_mask(image) > 0
+    ink_px = (light > 0) | (dark > 0)
+    for word in erasable:
         if word.get("region") == "red-label":
             continue
         x0, y0, x1, y1 = [round(v) for v in word["bbox"]]
-        cv2.rectangle(dark, (max(0, x0 - 1), max(0, y0 - 1)),
-                      (min(dark.shape[1] - 1, x1 + 1),
-                       min(dark.shape[0] - 1, y1 + 1)), 0, -1)
+        y0c, y1c = max(0, y0), min(dark.shape[0], y1 + 1)
+        x0c, x1c = max(0, x0), min(dark.shape[1], x1 + 1)
+        red_dominated = (
+            y1c > y0c and x1c > x0c
+            and red_px[y0c:y1c, x0c:x1c].sum()
+            >= max(1, ink_px[y0c:y1c, x0c:x1c].sum()))
+        if not red_dominated:
+            cv2.rectangle(dark, (max(0, x0 - 1), max(0, y0 - 1)),
+                          (min(dark.shape[1] - 1, x1 + 1),
+                           min(dark.shape[0] - 1, y1 + 1)), 0, -1)
+        # Red glyphs keep a light-gray compression halo that reads as ink,
+        # so the light plane is erased even for red-dominated labels; the
+        # dark structure printed beneath the label survives.
         if word.get("region") != "shelf-band":
             cv2.rectangle(light, (max(0, x0 - 1), max(0, y0 - 1)),
                           (min(light.shape[1] - 1, x1 + 1),
                            min(light.shape[0] - 1, y1 + 1)), 0, -1)
-    for badge in badges:
-        x0, y0, x1, y1 = [round(v) for v in badge["bbox"]]
-        cv2.rectangle(dark, (max(0, x0 - 3), max(0, y0 - 3)),
-                      (min(dark.shape[1] - 1, x1 + 3),
-                       min(dark.shape[0] - 1, y1 + 3)), 0, -1)
-        cv2.rectangle(light, (max(0, x0 - 3), max(0, y0 - 3)),
-                      (min(light.shape[1] - 1, x1 + 3),
-                       min(light.shape[0] - 1, y1 + 3)), 0, -1)
     ink = cv2.bitwise_or(light, dark)
     length = max(12, round(min(image.size) * .009))
     horizontal = cv2.morphologyEx(
@@ -558,14 +1159,57 @@ def _structural_mask(image, words, threshold, badges=()):
         angle = abs(np.degrees(np.arctan2(y1 - y0, x1 - x0))) % 90
         if 8 < angle < 82:
             cv2.line(diagonal, (x0, y0), (x1, y1), 255, 2)
-    return cv2.morphologyEx(
-        cv2.bitwise_or(cv2.bitwise_or(horizontal, vertical),
-                       cv2.bitwise_or(diagonal,
-                                      cv2.bitwise_or(
-                                          cv2.bitwise_or(light_horizontal,
-                                                         light_vertical),
-                                          cv2.bitwise_or(dark_horizontal,
-                                                         dark_vertical)))),
+    kept = (horizontal | vertical | diagonal | light_horizontal
+            | light_vertical | dark_horizontal | dark_vertical) > 0
+    kept |= _artwork_mask(image, gray, hsv, threshold) > 0
+    # Dark colored ink below label brightness (maroon logo rings, navy
+    # counters) is structure the neutral test would otherwise drop; bright
+    # red label text stays out via the value ceiling.
+    dark_colored = ((gray < 100) & ~neutral
+                    & (hsv[..., 2] < 130)).astype(np.uint8) * 255
+    _erase_boxes(dark_colored, [word["bbox"] for word in erasable
+                                if word.get("region") != "red-label"], 1)
+    kept |= dark_colored > 0
+    # Small rotated fixtures draw closed thin outlines whose diagonal edges
+    # are too short for the global Hough vote.  A closed outline is unlike
+    # text in every regime: both bbox sides are fixture-sized and the
+    # stroke encloses mostly empty interior.
+    residual = ((gray < threshold) & neutral).astype(np.uint8) * 255
+    _erase_boxes(residual, [word["bbox"] for word in erasable], 2)
+    # Badge hexagons were erased from the line masks; restoring them here
+    # would wall off the very aisle mouths they mark.
+    _erase_boxes(residual, [badge["bbox"] for badge in badges], 3)
+    residual = cv2.morphologyEx(residual, cv2.MORPH_CLOSE,
+                                np.ones((3, 3), np.uint8))
+    thin_ink = _thin(residual) > 0
+    count, labels, stats, _ = cv2.connectedComponentsWithStats(
+        thin_ink.astype(np.uint8))
+    outline = np.zeros(count, bool)
+    for label in range(1, count):
+        _, _, width, height, area = stats[label]
+        if not (min(width, height) >= 24
+                and area / max(1, width * height) <= .5):
+            continue
+        # Aisle badges are hexagon outlines in this size class; they are
+        # annotations, not structure, and production erases them by their
+        # OCR boxes.  This mask must reject them by shape as well so the
+        # badge-free differential measurement matches.
+        if (10 * scale <= height <= 26 * scale
+                and 13 * scale <= width <= 48 * scale
+                and 1.1 <= width / max(1, height) <= 2.5):
+            continue
+        outline[label] = True
+    kept |= thin_ink & outline[labels]
+    if sharp:
+        # Directional openings also drop rounded fixture corners, arcs, and
+        # the short stubs OCR erasure cut.  On crisp scans, restore
+        # stroke-width ink adjacent to kept structure; text glyphs sit
+        # farther away.  Blur fuses text into the same band, so blurred
+        # scans skip this.
+        near_kept = cv2.dilate(kept.astype(np.uint8),
+                               np.ones((17, 17), np.uint8)) > 0
+        kept |= thin_ink & near_kept
+    return cv2.morphologyEx(kept.astype(np.uint8) * 255,
                             cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
 
 
@@ -688,11 +1332,42 @@ def extract_page(page, config=None, backend="auto", artifact_dir=None):
                 oriented.append((_orientation_score(candidate_words), candidate,
                                  candidate_skew, candidate_image,
                                  candidate_words))
-            _, rotation, skew, image, words = max(oriented, key=lambda item: item[0])
-            badges = _badge_candidates(image, choice, rotation)
+            def doors_at_bottom(entry):
+                doors = [word for word in entry[4]
+                         if word.get("region") == "red-label"
+                         and _canonical_label(word["text"])
+                         in ("ENTRANCE", "EXIT")]
+                if not doors:
+                    return None
+                mean = sum((word["bbox"][1] + word["bbox"][3]) / 2
+                           for word in doors) / len(doors)
+                return mean > entry[3].height / 2
+
+            oriented.sort(key=lambda item: item[0], reverse=True)
+            best = oriented[0]
+            # Label aspect cannot tell 0 from 180 (both horizontal), and
+            # OCR reads upside-down digits, so the flip is settled by the
+            # guides' layout convention: doors are labeled on the customer
+            # (bottom) edge.  Aisle assembly must also succeed - an
+            # upside-down page usually cannot form an exact 1..N set.
+            opposite = next((entry for entry in oriented[1:]
+                             if (entry[1] - best[1]) % 360 == 180), None)
+            if opposite is not None and doors_at_bottom(best) is False \
+                    and doors_at_bottom(opposite):
+                best = opposite
+            badges = _badge_candidates(best[3], choice, best[1])
+            try:
+                aisles = _aisle_anchors(badges)
+            except RasterExtractionError:
+                if opposite is None or best is opposite:
+                    raise
+                badges = _badge_candidates(opposite[3], choice, opposite[1])
+                aisles = _aisle_anchors(badges)
+                best = opposite
+            _, rotation, skew, image, words = best
             anchors = _doorway_entrances({**_major_anchors(
                 [word for word in words if word.get("region") == "red-label"]),
-                                          **_aisle_anchors(badges)})
+                                          **aisles})
             missing = [label for label in ("ENTRANCE", "EXIT", "CHECKSTANDS",
                                             "RESTROOMS")
                        if label not in anchors]
@@ -711,9 +1386,12 @@ def extract_page(page, config=None, backend="auto", artifact_dir=None):
                              for name in anchors)
             exit_n = sum(name == "EXIT" or name.startswith("EXIT ")
                          for name in anchors)
-            if entrance_n != exit_n:
+            # Guides may label every door "Entrance" but mark fewer exits
+            # (store 24 draws a second entrance as artwork), so only the
+            # presence of each is a hard invariant.
+            if not entrance_n or not exit_n:
                 raise RasterExtractionError(
-                    f"{choice}: entrance/exit count mismatch "
+                    f"{choice}: entrance/exit labels missing "
                     f"({entrance_n}/{exit_n})")
             positioned = [word for word in words
                           if word.get("region") != "red-label"]
