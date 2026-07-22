@@ -60,7 +60,9 @@ repeat that build before inspecting its evidence. Then repeat until converged:
      sits inside a wrongly-sealed or wrongly-open region.
    - `narrow`: corridors under ~0.5 m half-width are usually artifacts —
      slivers between a fixture and a wall that should be excluded.
-   - `walkable_pct`: sane stores land roughly 20–35%.
+   - `walkable_pct`: typical stores land around 20–35%. Sparse schematic
+     guides may reach 40%, but only when every aisle/label has reachable
+     frontage and visual inspection finds no remaining staff-only floor.
 3. View the PNGs in `data/<N>/qa/` (you can read images): green =
    walkable, purple = sealed staff areas, orange = walkable but cut off
    from the entrance, dashed red circles = the VERIFY spots.

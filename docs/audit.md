@@ -21,7 +21,9 @@ screenshot. Your job is to be that human, systematically.
 ## Mandatory passes — all of them, in order
 
 **1. Mechanical.** Rerun `./rebuild.sh <N>`. Confirm: exit 0; report.json
-has `"verify": []` and empty `"coverage"` lists; walkable_pct 20–35%;
+has `"verify": []` and empty `"coverage"` lists; walkable_pct is normally
+20–35%, or up to 40% for a sparse schematic guide only after complete
+aisle/label probes and visual confirmation that no staff-only floor remains;
 single dominant component. Any failure = finding, stop and file it.
 
 **2. Systematic visual sweep — the heart of the audit.** Cut

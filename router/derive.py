@@ -11,6 +11,7 @@ replacement, never merged with derived defaults).
 import glob
 import json
 import os
+from statistics import median
 
 from router import engine
 
@@ -27,6 +28,21 @@ def pdf_path(store):
     if len(hits) > 1:
         raise SystemExit(f"ambiguous guide PDFs for store {store}: {hits}")
     return hits[0]
+
+
+def derive_aisle_pitch(anchors):
+    """Median adjacent aisle-label spacing, tolerating larger-scale guides."""
+    rows = {}
+    for name, (x, y) in anchors.items():
+        if name.startswith("AISLE"):
+            rows.setdefault(round(y / 25), []).append(x)
+    gaps = [b - a for xs in rows.values()
+            for a, b in zip(sorted(xs), sorted(xs)[1:])]
+    pitches = [d for d in gaps if 10 < d < 35]
+    if not pitches:
+        pitches = [d for d in gaps if 35 <= d < 50]
+    assert pitches, "cannot derive aisle pitch from aisle-label rows"
+    return float(median(pitches))
 
 # --- auto-derivation constants (universal — never tuned per store; a store
 # that needs different values authors its own seal_zones.json override) ---

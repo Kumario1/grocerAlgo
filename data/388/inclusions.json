@@ -1,0 +1,10 @@
+[
+  {"name": "Aisle 9 corridor at the 'Kitchen Gadgets' category label (customer): the extracted KITCHEN anchor (394.7,137.6) is a product-category label printed in the ordinary badged aisle between gondolas x=387.4 and x=425.4, not a service kitchen",
+   "rect": [388, 97, 425, 322]},
+
+  {"name": "Deli east frontage / Floral approach corridor (customer): open shopping floor between the deli counter (east face x=884.3) and the floral display blocks (x=941.6), where the merged 'DELI FLORAL' label centroid (924,484) lands",
+   "rect": [886, 415, 941, 535]},
+
+  {"name": "Pharmacy-front OTC shelf aisles (Nutrition / Diet Aids / Vitamins / OTC Cough-Cold, shelf rows x=228.8-307.1): the auto PHARMACY seal disk (r=130 pt about the label at 138.9,623.8) reaches to x=269 and bridged these ~14-pt customer aisles shut at their west ends",
+   "rect": [206, 580, 310, 668]}
+]

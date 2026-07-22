@@ -82,5 +82,11 @@ def test_walkable_fraction_sane(store):
 
 
 @pytest.mark.parametrize("store", STORES)
+def test_profile_scale_sane(store):
+    m_per_cell = float(_store(store)["m_per_cell"])
+    assert np.isfinite(m_per_cell) and 0.1 < m_per_cell < 1.0, m_per_cell
+
+
+@pytest.mark.parametrize("store", STORES)
 def test_all_anchor_pairs_connected(store):
     assert (_store(store)["D"] >= 0).all()

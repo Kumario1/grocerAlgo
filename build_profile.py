@@ -40,19 +40,9 @@ for i, (cx, cy) in enumerate(cells):
         D[i, j] = dist[by * w + bx]
 assert (D >= 0).all(), "disconnected anchor pair"
 
-# calibration: aisle pitch ~ 3.0 m. Adjacent PARALLEL aisles live in the same
-# number-row; a flat median over all aisle x is fooled by the ~14 left-wall
-# aisle numbers stacked at one x (deviation from plan: that gave pitch 6.3pt ->
-# an absurd 784 m corner-to-corner). Group by number-row, pool within-row gaps.
-from collections import defaultdict
-_rows = defaultdict(list)
-for k in names:
-    if k.startswith("AISLE"):
-        _rows[round(anchors[k][1] / 25)].append(anchors[k][0])
-_pitches = []
-for _xs in _rows.values():
-    _pitches += [d for d in np.diff(sorted(_xs)) if 10 < d < 35]  # skip stacks/block gaps
-pitch_pts = float(np.median(_pitches))
+# calibration: aisle pitch ~ 3.0 m. Group adjacent parallel aisle labels by
+# number-row; derive_aisle_pitch rejects stacked labels and block-sized gaps.
+pitch_pts = derive.derive_aisle_pitch(anchors)
 m_per_cell = 3.0 / (pitch_pts / engine.CELL)   # ponytail: coarse scale; label-only accuracy
 
 np.savez_compressed(f"{DIR}/profile.npz", free=free, cell=engine.CELL,
