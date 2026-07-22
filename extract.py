@@ -1,15 +1,75 @@
 #!/usr/bin/env python3
 """One-shot: H-E-B directory PDF (page 1 = map) -> geometry JSON.
 
-Usage: python3 extract_659.py [store]   (default 659)
-Reads guide-austin-<store>.pdf, writes data/<store>/geometry.json.
+Usage: python3 extract.py [store]   (default 659)
+Reads guide-<city>-<store>.pdf (resolved via router.derive.pdf_path),
+writes data/<store>/geometry.json.
 """
 import json, os, sys, fitz
+from router.derive import pdf_path
 
 STORE = "659"
-PDF = f"guide-austin-{STORE}.pdf"
+PDF = None            # resolved in __main__ (script-only entry point)
 OUT = f"data/{STORE}/geometry.json"
 WHITE = (1.0, 1.0, 1.0)
+
+
+def stitch_open_boundary(chains, width, height, join_tol=3.0):
+    """Close a fragmented perimeter whose chain endpoint meets another wall.
+
+    Some guide PDFs split the sales-floor outline into two open drawings. One
+    chain terminates on the middle of the other chain's last wall, so endpoint
+    equality alone cannot join them. Candidate loops must still span most of
+    the page and enclose substantial area; the largest such loop wins.
+    """
+    def projection(point, start, end):
+        dx, dy = end[0] - start[0], end[1] - start[1]
+        denom = dx * dx + dy * dy
+        if not denom:
+            return list(start), float("inf")
+        t = max(0.0, min(1.0, ((point[0] - start[0]) * dx
+                              + (point[1] - start[1]) * dy) / denom))
+        q = [start[0] + t * dx, start[1] + t * dy]
+        distance = ((point[0] - q[0]) ** 2 + (point[1] - q[1]) ** 2) ** .5
+        return q, distance
+
+    def polygon_area(poly):
+        return abs(sum(a[0] * b[1] - b[0] * a[1]
+                       for a, b in zip(poly, poly[1:]))) / 2
+
+    candidates = []
+    for i, first in enumerate(chains):
+        if len(first) < 2 or first[0] == first[-1]:
+            continue
+        for j, second in enumerate(chains):
+            if i == j or len(second) < 2 or second[0] == second[-1]:
+                continue
+            for endpoint in (0, -1):
+                oriented = list(reversed(first)) if endpoint == 0 else list(first)
+                join = oriented[-1]
+                for k, (start, end) in enumerate(zip(second, second[1:])):
+                    q, distance = projection(join, start, end)
+                    if distance > join_tol:
+                        continue
+                    continuations = [
+                        [q] + list(reversed(second[:k + 1])),
+                        [q] + list(second[k + 1:]),
+                    ]
+                    for continuation in continuations:
+                        poly = [list(p) for p in oriented]
+                        if distance > 1e-6:
+                            poly.append(q)
+                        poly.extend([list(p) for p in continuation[1:]])
+                        poly.append(list(poly[0]))
+                        xs, ys = zip(*poly)
+                        if (max(xs) - min(xs) <= .6 * width
+                                or max(ys) - min(ys) <= .6 * height):
+                            continue
+                        area = polygon_area(poly)
+                        if area > .25 * width * height:
+                            candidates.append((area, poly))
+    return max(candidates, default=(0, []), key=lambda item: item[0])[1]
+
 
 def extract():
     page = fitz.open(PDF)[1]
@@ -39,8 +99,8 @@ def extract():
         cx = sum(p[2] for p in parts) / len(parts)
         cy = sum(p[3] for p in parts) / len(parts)
         for label in ("ENTRANCE", "EXIT", "CHECK", "PRODUCE", "BAKERY", "DELI",
-                      "SEAFOOD", "MEAT", "DAIRY", "FLORAL", "PHARMACY",
-                      "FROZEN", "KITCHEN", "RESTROOM"):
+                      "SEAFOOD", "MEAT", "DAIRY", "FLORAL", "BLOOMS",
+                      "PHARMACY", "FROZEN", "KITCHEN", "RESTROOM"):
             if label in phrase:
                 anchors.setdefault(phrase if len(phrase) < 30 else label,
                                    [cx, cy])
@@ -180,6 +240,12 @@ def extract():
                     and (r.y1 - r.y0) > 0.6 * page.rect.height
                     and len(pts) > len(boundary)):
                 boundary = pts
+    if not boundary:
+        thick_chains = []
+        for dr in page.get_drawings():
+            if dr["type"] == "s" and (dr.get("width") or 0) >= 1.5:
+                thick_chains.extend(chains(dr))
+        boundary = stitch_open_boundary(thick_chains, W, H)
     assert boundary, "no closed thick-stroke boundary polygon found"
 
     geom = {"page": {"w": page.rect.width, "h": page.rect.height},
@@ -217,7 +283,7 @@ def overlay(geom):
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         STORE = sys.argv[1]
-        PDF = f"guide-austin-{STORE}.pdf"
         OUT = f"data/{STORE}/geometry.json"
+    PDF = pdf_path(STORE)
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     overlay(extract())

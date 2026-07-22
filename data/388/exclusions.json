@@ -1,0 +1,20 @@
+[
+  {"name": "Deli service block behind the counter (staff only): boxed in by the aisle-30 back wall x=767.8, the deli case y=356.7-366.6 on the north, the deli counter fixture x=873.6-884.3 / its diagonal end / the counter run y=530.2-540.1 on the east and south. Everything inside is the work side: the three drawn prep rooms (x 767.8-824.8, y 413-489) and their door swings. Customers are served from the east frontage (x>884) and the south frontage (y>540)",
+   "poly": [[768, 367], [874, 367], [874, 508], [852.5, 529.5],
+            [791, 529.5], [791, 540], [768, 540]]},
+
+  {"name": "East back-of-house zone (staff only): the sales floor stops at the 12.6-pt wall band drawn at x=979.9-992.5, which runs y=62 to y=470 with only three staff door gaps (y 170-197, 267-290, 366-384). East of that wall are the Market back room (double doors at x=1014-1039, y=105), the two prep/cooler rooms (x 992-1064, y 197-268 and x 978-1072, y 290-448) and the empty receiving hall along the east wall x=1064-1128; its south wall y=485.9-497 (door at x=1066-1091) is what separates it from Produce. Sealing it costs 287 m2. The only drawn content inside the rect is structural — the wall-band segments themselves, the door leaves, and the y=485.9-497 south wall — plus the red department words 'Bakery' (centroid 987.2,341.2) and 'Floral' (centroid 985.8,485.0), which are set ACROSS the wall band, not east of it: both departments' fixtures and frontage sit west of x=979 and stay open (probe: Bakery 0.74 m and Floral 0.59 m to reachable floor). No product-category label lies inside. Sales-floor frontage for Market/Bakery/Floral stays open in the x=955-979 corridor west of the wall",
+   "rect": [979, 58, 1131, 497]},
+
+  {"name": "north-wall service doorway west of the Frozen block: the 13.2-pt perimeter wall band [103.8,62.2,494,75.4] / [527.7,62.2,782.6,75.4] breaks here and the drawing shows jambs on both sides. Floor inside the wall thickness at a back-door opening — no shopper stands in it",
+   "rect": [493, 60, 529, 76]},
+
+  {"name": "north-wall service doorway behind the wine/Market bay — same wall-band break, jambs drawn both sides",
+   "rect": [781, 60, 808, 76]},
+
+  {"name": "west-wall service doorway beside aisle 15: break in the west wall band [103.8,136.6,116.9,540.7] with jambs drawn above and below",
+   "rect": [102, 113, 118, 138]},
+
+  {"name": "west-wall service doorway beside aisle 16 plus the dead nook where the west wall band ends (y=540.7) above the Pharmacy room's north wall (y=576.5) — wall-thickness floor, not sales floor",
+   "rect": [102, 540, 118, 577]}
+]

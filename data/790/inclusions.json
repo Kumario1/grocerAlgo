@@ -1,0 +1,20 @@
+[
+  {"name": "Kitchen (Gadgets) aisle-19 category label in an ordinary aisle corridor between shelf fixtures (customer)",
+   "rect": [664, 495, 692, 558]},
+  {"name": "Sushiya customer corridor west of the first Meal Simple island below Bakery",
+   "rect": [318, 493, 335, 563]},
+  {"name": "Meal Simple customer corridor between service islands 1 and 2 below Bakery",
+   "rect": [355, 493, 370, 563]},
+  {"name": "Meal Simple customer corridor between service islands 2 and 3 below Bakery",
+   "rect": [389, 493, 405, 563]},
+  {"name": "Meal Simple customer corridor east of service island 3 below Bakery",
+   "rect": [424, 493, 438, 563]},
+  {"name": "Frozen aisle 14 corridor (badged customer aisle; freezer-door swing arcs drawn fully open pinched it shut so sealing culled it - shoppers walk here with doors closed)",
+   "rect": [470, 392, 482, 562]},
+  {"name": "Frozen aisle 15 corridor (badged customer aisle; door-swing arcs, same as aisle 14)",
+   "rect": [518, 392, 526, 562]},
+  {"name": "Frozen aisle 16 corridor (badged customer aisle; door-swing arcs, same as aisle 14)",
+   "rect": [562, 392, 574, 562]},
+  {"name": "Frozen aisle 17 corridor (badged customer aisle; door-swing arcs, same as aisle 14)",
+   "rect": [610, 392, 622, 562]}
+]

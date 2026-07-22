@@ -3,11 +3,10 @@
 # Usage: ./rebuild.sh [store]   (default 659)
 set -e
 S=${1:-659}
-python3 extract_659.py "$S"
-if [ -f "data/$S/zones.json" ]; then
-    python3 build_profile.py "$S"
-else
-    echo "note: data/$S/zones.json missing - profile skipped (author zones first)"
-fi
-python3 map_qa.py "$S" | tee "data/$S/qa/stats.txt"
+python3 extract.py "$S"
+python3 build_profile.py "$S"
+# no pipe to tee: a pipeline's status is the LAST command's, which would
+# swallow a map_qa failure under set -e
+python3 map_qa.py "$S" > "data/$S/qa/stats.txt"
+cat "data/$S/qa/stats.txt"
 python3 -m pytest -q

@@ -1,0 +1,12 @@
+[
+  {"name": "Deli service island (staff behind counter; ~1.4 m pass-throughs)",
+   "pt": [846, 277], "r": 170, "bridge": 12},
+  {"name": "Bakery service island (staff)",
+   "pt": [857, 423], "r": 150, "bridge": 12},
+  {"name": "Seafood counter (staff)",
+   "pt": [1020, 409], "r": 130, "bridge": 12},
+  {"name": "Floral counter (staff)",
+   "pt": [884, 492], "r": 90, "bridge": 12},
+  {"name": "Checkstand lane bank — looser: checkout lanes are wider than service-counter gaps, so bridge more to seal the lanes while the wide front action-alley stays open",
+   "rect": [405, 518, 762, 576], "bridge": 20}
+]

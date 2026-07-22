@@ -4,7 +4,13 @@ from collections import deque
 from PIL import Image, ImageDraw
 from scipy import ndimage
 
-def build_grid(geom, cell=4.0, exclusions=()):
+# The one resolution knob (PDF-pt per grid cell). Was 4.0; halved to 2.0 to
+# resolve thin walkable crevices between fixtures that outward-rounding ate at
+# the coarser cell. Every cell-count threshold below derives from CELL, so this
+# is the ONLY number to change for a different resolution.
+CELL = 2.0
+
+def build_grid(geom, cell=CELL, exclusions=()):
     """True = walkable.
 
     Walkable space starts as the interior of the sales-floor boundary
@@ -67,42 +73,69 @@ def bfs(free, start):
 SERVICE_DEPTS = ("DELI", "BAKERY", "SEAFOOD", "SUSHI", "KITCHEN",
                  "PHARMACY", "MEAL SIMPLE", "COOKING")
 
-def seal_staff_gaps(free, seed_pt, cell=4.0, gap_kernel=2, max_pocket_cells=800,
+# chain-branding label aliases -> canonical department family. BLOOMS is
+# H-E-B's floral-shop brand (store 24 prints "Blooms" where 659 prints
+# "Floral"). Used by the seal-zone DERIVATION (router/derive.py) only —
+# never by the substring pocket-culling above.
+ALIASES = {"BLOOMS": "FLORAL"}
+
+def seal_staff_gaps(free, seed_pt, cell=CELL, seal_zones=(), max_pocket_cells=None,
                     protect_pts=(), service_pts=()):
     """Cull staff-only service interiors (deli/bakery islands, seafood
     counters...) that connect to the sales floor only through narrow
     staff pass-throughs.
 
-    H-E-B maps draw service counters with small gaps (~1-2 cells = 0.5-1 m)
-    that shoppers never use; customer openings are >=3 cells (~1.5 m+).
-    Recipe: morphologically bridge gaps <= gap_kernel cells, BFS from the
-    seed on the sealed grid, and classify the regions that became
-    unreachable:
+    Sealing is LOCALIZED to `seal_zones` so the fine grid's thin walkable
+    crevices elsewhere are never bridged shut. Each zone closes gaps up to
+    its own width — checkout lanes are wider than counter gaps, so their
+    zone runs looser:
+        {"pt": [x, y], "r": radius_pt, "bridge": pt}   disk zone, or
+        {"rect": [x0, y0, x1, y1], "bridge": pt}       box zone
+    (PDF points; an optional "name" is ignored). With no zones, one global
+    ~1.4 m bridge is used (legacy behaviour).
+
+    Recipe: inside each zone, morphologically bridge gaps <= its bridge
+    width; BFS from the seed on the sealed grid; classify the regions that
+    became unreachable:
       - pocket holds a service_pts label (DELI, BAKERY...) -> STAFF AREA,
         culled with no size cap (the printed label is authoritative);
       - pocket near a protect_pts badge and aisle-sized -> shopping
         corridor, kept;
-      - otherwise -> dead crevice between fixtures (leads nowhere), culled
-        if <= max_pocket_cells so an over-aggressive kernel can never
-        silently delete a real region.
-    Side effect (accepted, conservative): 2-cell checkout lanes seal too.
+      - otherwise -> dead crevice / checkout lane, culled if <=
+        max_pocket_cells so an over-aggressive bridge can never silently
+        delete a real region.
 
     protect_pts: PDF-point coordinates that mark known-customer space
-    (aisle badges). Real aisles and staff gaps can both be ~2 cells wide
-    at this resolution; the badge is the tiebreaker. Badges print at the
-    corridor MOUTH (which stays in the main region), so a small window is
-    needed, but it must stay tight: the wine-back staff strip sits ~4.5
-    cells from badge 14.
+    (aisle badges) — a badge-adjacent, aisle-sized pocket is a shopping
+    corridor, never culled.
 
     Returns (walkable, culled_pockets, staff_mask) — staff_mask flags the
     cells culled because a service label sat inside them.
     """
-    PROTECT_R = 4
-    st = np.ones((gap_kernel + 1, gap_kernel + 1), bool)
-    sealed = free & ~ndimage.binary_closing(~free, structure=st)
+    # cell-count thresholds derive from `cell` so a resolution change rescales
+    # them automatically; physical intents were calibrated at the 4-pt cell.
+    if max_pocket_cells is None:
+        max_pocket_cells = round(12800 / cell ** 2)  # dead-crevice cap ~180 m^2
+    PROTECT_R = max(1, round(16 / cell))             # badge window ~1.9 m
+    min_sz = round(400 / cell ** 2)                  # aisle-sized / nibble floor ~5.6 m^2
+    h, w = free.shape
+    if not seal_zones:                               # legacy: one global ~1.4 m bridge
+        seal_zones = [{"rect": [0, 0, w * cell, h * cell], "bridge": 12}]
+    Y, X = np.ogrid[:h, :w]
+    sealed = free.copy()
+    for z in seal_zones:                             # bridge each zone at its own width
+        k = max(1, round(z["bridge"] / cell))
+        bridged = free & ~ndimage.binary_closing(
+            ~free, structure=np.ones((k + 1, k + 1), bool))
+        if "r" in z:
+            cx, cy, rr = z["pt"][0] / cell, z["pt"][1] / cell, z["r"] / cell
+            zm = (X - cx) ** 2 + (Y - cy) ** 2 <= rr ** 2
+        else:
+            x0, y0, x1, y1 = (v / cell for v in z["rect"])
+            zm = (X >= x0) & (X <= x1) & (Y >= y0) & (Y <= y1)
+        sealed[zm] = bridged[zm]
     seed = nearest_free(sealed, seed_pt, cell)          # doorway-pinch safe
     dist, _ = bfs(sealed, seed)
-    h, w = free.shape
     pockets = free & ~(dist >= 0).reshape(h, w)
     labels, n = ndimage.label(pockets)
     protected = set()
@@ -129,17 +162,17 @@ def seal_staff_gaps(free, seed_pt, cell=4.0, gap_kernel=2, max_pocket_cells=800,
             culled.append((size, float(xs.mean() * cell),
                            float(ys.mean() * cell)))
             continue
-        if i in protected and size >= 25:
+        if i in protected and size >= min_sz:
             continue        # badge-adjacent AND aisle-sized -> real corridor
         if size <= max_pocket_cells:
             out[m] = False
-            if size >= 25:                              # ignore corner nibbles
+            if size >= min_sz:                          # ignore corner nibbles
                 ys, xs = np.where(m)
                 culled.append((size, float(xs.mean() * cell),
                                float(ys.mean() * cell)))
     return out, culled, staff
 
-def shape_mask(entries, shape, cell=4.0):
+def shape_mask(entries, shape, cell=CELL):
     """Bool grid mask from exclusion/inclusion entries.
 
     Each entry carries either "rect": [x0, y0, x1, y1] (fine for aisle-side
@@ -163,13 +196,13 @@ def shape_mask(entries, shape, cell=4.0):
         m |= np.array(poly_img, bool)
     return m
 
-def nearest_free(free, xy_pt, cell=4.0):
+def nearest_free(free, xy_pt, cell=CELL):
     """Nearest walkable cell to a PDF-point coordinate (ignores reachability).
     Use to seed the first BFS when the reference point (e.g. ENTRANCE, drawn
     on the boundary line itself) may not be walkable."""
     cx, cy = int(xy_pt[0] // cell), int(xy_pt[1] // cell)
     h, w = free.shape
-    for r in range(120):
+    for r in range(round(480 / cell)):                 # ~57 m search cap
         for dy in range(-r, r + 1):
             for dx in range(-r, r + 1):
                 if max(abs(dx), abs(dy)) != r:
@@ -179,11 +212,11 @@ def nearest_free(free, xy_pt, cell=4.0):
                     return (x, y)
     raise ValueError(f"no walkable cell near {xy_pt}")
 
-def snap(free, reachable_dist, xy_pt, cell=4.0):
+def snap(free, reachable_dist, xy_pt, cell=CELL):
     """Nearest walkable-and-reachable cell to a PDF-point coordinate."""
     cx, cy = int(xy_pt[0] // cell), int(xy_pt[1] // cell)
     h, w = free.shape
-    for r in range(80):
+    for r in range(round(320 / cell)):                 # ~38 m search cap
         for dy in range(-r, r + 1):
             for dx in range(-r, r + 1):
                 if max(abs(dx), abs(dy)) != r:
@@ -245,7 +278,7 @@ def tsp_order(D, n_stops):
                     order, improved = cand, True
     return cost(order), order
 
-def trace(parent, w, end_cell, cell=4.0):
+def trace(parent, w, end_cell, cell=CELL):
     """Walk parents back from end_cell; return PDF-point path start->end."""
     path, u = [], end_cell[1] * w + end_cell[0]
     while u != -1:
