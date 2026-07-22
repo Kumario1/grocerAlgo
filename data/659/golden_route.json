@@ -1,0 +1,493 @@
+{
+ "_": "Frozen route for the 25-item acceptance list on #659. Re-bless deliberately: see tests/test_route_golden.py.",
+ "items": [
+  "milk",
+  "bananas",
+  "shrimp",
+  "sourdough bread",
+  "sliced turkey",
+  "tortilla chips",
+  "pasta",
+  "ice cream",
+  "paper towels",
+  "toothpaste",
+  "dog food",
+  "shampoo",
+  "cereal",
+  "coffee",
+  "olive oil",
+  "rice",
+  "frozen pizza",
+  "yogurt",
+  "eggs",
+  "butter",
+  "salsa",
+  "peanut butter",
+  "dish soap",
+  "trash bags",
+  "batteries"
+ ],
+ "distance_m": 425.7,
+ "baseline_m": 818.1,
+ "saved_m": 392.4,
+ "stops": [
+  {
+   "n": 1,
+   "item": "shampoo",
+   "anchor": "AISLE 38",
+   "x": 320.17,
+   "y": 415.82,
+   "approx": false
+  },
+  {
+   "n": 2,
+   "item": "dog food",
+   "anchor": "LEFT WALL",
+   "x": 367.64,
+   "y": 288.22,
+   "approx": false
+  },
+  {
+   "n": 3,
+   "item": "dish soap",
+   "anchor": "AISLE 31",
+   "x": 308.94,
+   "y": 235.18,
+   "approx": false
+  },
+  {
+   "n": 4,
+   "item": "trash bags",
+   "anchor": "AISLE 28",
+   "x": 300.98,
+   "y": 155.06,
+   "approx": false
+  },
+  {
+   "n": 5,
+   "item": "paper towels",
+   "anchor": "AISLE 27",
+   "x": 314.11,
+   "y": 125.89,
+   "approx": false
+  },
+  {
+   "n": 6,
+   "item": "yogurt",
+   "anchor": "DAIRY",
+   "x": 464.68,
+   "y": 133.78,
+   "approx": true
+  },
+  {
+   "n": 7,
+   "item": "eggs",
+   "anchor": "DAIRY",
+   "x": 464.68,
+   "y": 133.78,
+   "approx": true
+  },
+  {
+   "n": 8,
+   "item": "tortilla chips",
+   "anchor": "AISLE 10",
+   "x": 576.76,
+   "y": 245.02,
+   "approx": false
+  },
+  {
+   "n": 9,
+   "item": "coffee",
+   "anchor": "AISLE 8",
+   "x": 619.21,
+   "y": 278.32,
+   "approx": false
+  },
+  {
+   "n": 10,
+   "item": "cereal",
+   "anchor": "AISLE 8",
+   "x": 628.71,
+   "y": 280.65,
+   "approx": false
+  },
+  {
+   "n": 11,
+   "item": "milk",
+   "anchor": "AISLE 7",
+   "x": 654.14,
+   "y": 241.71,
+   "approx": false
+  },
+  {
+   "n": 12,
+   "item": "pasta",
+   "anchor": "AISLE 6",
+   "x": 675.41,
+   "y": 134.97,
+   "approx": true
+  },
+  {
+   "n": 13,
+   "item": "rice",
+   "anchor": "AISLE 5",
+   "x": 696.89,
+   "y": 274.07,
+   "approx": false
+  },
+  {
+   "n": 14,
+   "item": "sourdough bread",
+   "anchor": "AISLE 4",
+   "x": 732.39,
+   "y": 279.12,
+   "approx": false
+  },
+  {
+   "n": 15,
+   "item": "peanut butter",
+   "anchor": "AISLE 4",
+   "x": 722.83,
+   "y": 243.5,
+   "approx": false
+  },
+  {
+   "n": 16,
+   "item": "salsa",
+   "anchor": "AISLE 4",
+   "x": 722.83,
+   "y": 243.5,
+   "approx": false
+  },
+  {
+   "n": 17,
+   "item": "butter",
+   "anchor": "AISLE 4",
+   "x": 722.83,
+   "y": 243.5,
+   "approx": false
+  },
+  {
+   "n": 18,
+   "item": "sliced turkey",
+   "anchor": "DELI",
+   "x": 846.14,
+   "y": 277.1,
+   "approx": true
+  },
+  {
+   "n": 19,
+   "item": "shrimp",
+   "anchor": "SEAFOOD",
+   "x": 1019.55,
+   "y": 409.38,
+   "approx": true
+  },
+  {
+   "n": 20,
+   "item": "bananas",
+   "anchor": "PRODUCE",
+   "x": 952.63,
+   "y": 485.04,
+   "approx": true
+  },
+  {
+   "n": 21,
+   "item": "frozen pizza",
+   "anchor": "FROZEN",
+   "x": 734.5,
+   "y": 414.0,
+   "approx": true
+  },
+  {
+   "n": 22,
+   "item": "batteries",
+   "anchor": "AISLE 22",
+   "x": 544.39,
+   "y": 367.13,
+   "approx": true
+  },
+  {
+   "n": 23,
+   "item": "ice cream",
+   "anchor": "CHECKSTANDS",
+   "x": 547.3,
+   "y": 573.1,
+   "approx": true
+  }
+ ],
+ "path": [
+  [
+   423.0,
+   589.0
+  ],
+  [
+   427.0,
+   571.0
+  ],
+  [
+   429.0,
+   531.0
+  ],
+  [
+   429.0,
+   415.0
+  ],
+  [
+   321.0,
+   415.0
+  ],
+  [
+   289.0,
+   415.0
+  ],
+  [
+   289.0,
+   289.0
+  ],
+  [
+   367.0,
+   289.0
+  ],
+  [
+   289.0,
+   281.0
+  ],
+  [
+   289.0,
+   235.0
+  ],
+  [
+   309.0,
+   235.0
+  ],
+  [
+   289.0,
+   223.0
+  ],
+  [
+   289.0,
+   155.0
+  ],
+  [
+   301.0,
+   155.0
+  ],
+  [
+   289.0,
+   145.0
+  ],
+  [
+   289.0,
+   125.0
+  ],
+  [
+   315.0,
+   125.0
+  ],
+  [
+   435.0,
+   127.0
+  ],
+  [
+   435.0,
+   131.0
+  ],
+  [
+   465.0,
+   133.0
+  ],
+  [
+   577.0,
+   147.0
+  ],
+  [
+   577.0,
+   245.0
+  ],
+  [
+   579.0,
+   339.0
+  ],
+  [
+   617.0,
+   339.0
+  ],
+  [
+   619.0,
+   279.0
+  ],
+  [
+   629.0,
+   281.0
+  ],
+  [
+   631.0,
+   339.0
+  ],
+  [
+   643.0,
+   339.0
+  ],
+  [
+   655.0,
+   241.0
+  ],
+  [
+   657.0,
+   135.0
+  ],
+  [
+   675.0,
+   135.0
+  ],
+  [
+   697.0,
+   147.0
+  ],
+  [
+   697.0,
+   275.0
+  ],
+  [
+   707.0,
+   341.0
+  ],
+  [
+   719.0,
+   341.0
+  ],
+  [
+   733.0,
+   279.0
+  ],
+  [
+   723.0,
+   243.0
+  ],
+  [
+   733.0,
+   143.0
+  ],
+  [
+   823.0,
+   147.0
+  ],
+  [
+   823.0,
+   163.0
+  ],
+  [
+   875.0,
+   181.0
+  ],
+  [
+   875.0,
+   187.0
+  ],
+  [
+   895.0,
+   211.0
+  ],
+  [
+   895.0,
+   221.0
+  ],
+  [
+   869.0,
+   255.0
+  ],
+  [
+   895.0,
+   291.0
+  ],
+  [
+   943.0,
+   347.0
+  ],
+  [
+   977.0,
+   363.0
+  ],
+  [
+   981.0,
+   437.0
+  ],
+  [
+   991.0,
+   437.0
+  ],
+  [
+   953.0,
+   477.0
+  ],
+  [
+   953.0,
+   485.0
+  ],
+  [
+   921.0,
+   487.0
+  ],
+  [
+   781.0,
+   493.0
+  ],
+  [
+   743.0,
+   491.0
+  ],
+  [
+   741.0,
+   479.0
+  ],
+  [
+   735.0,
+   415.0
+  ],
+  [
+   723.0,
+   353.0
+  ],
+  [
+   557.0,
+   353.0
+  ],
+  [
+   557.0,
+   365.0
+  ],
+  [
+   545.0,
+   367.0
+  ],
+  [
+   475.0,
+   379.0
+  ],
+  [
+   475.0,
+   491.0
+  ],
+  [
+   473.0,
+   547.0
+  ],
+  [
+   473.0,
+   563.0
+  ],
+  [
+   547.0,
+   573.0
+  ],
+  [
+   601.0,
+   579.0
+  ]
+ ],
+ "unmatched": [
+  "toothpaste",
+  "olive oil"
+ ]
+}

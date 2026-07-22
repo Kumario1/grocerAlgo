@@ -2,7 +2,7 @@
 # Autonomous store-onboarding pipeline: unknown H-E-B store number in,
 # converged + agent-audited map out, awaiting a human visual verdict.
 #
-#   ./pipeline.sh <store> [city-slug]        full run (agents included)
+#   ./pipeline.sh <store> [city]             full run (agents included)
 #   ./pipeline.sh <store> --no-agents        mechanical stages only
 #
 # Stages:
@@ -24,16 +24,17 @@
 # another agent session.
 set -e
 S=$1
-[ -n "$S" ] || { echo "usage: ./pipeline.sh <store> [city-slug|--no-agents]"; exit 2; }
-ARG2=$2
+[ -n "$S" ] || { echo "usage: ./pipeline.sh <store> [city|--no-agents]"; exit 2; }
+shift
+CITY="$*"
 AGENT=${PIPE_AGENT:-"claude --safe-mode --model opus --effort xhigh --disallowedTools Agent --dangerously-skip-permissions -p"}
 LOG="data/$S/qa"
 
 echo "==> [1/5] discover: store $S"
-if [ "$ARG2" = "--no-agents" ] || [ -z "$ARG2" ]; then
+if [ "$CITY" = "--no-agents" ] || [ -z "$CITY" ]; then
     python3 discover.py "$S"
 else
-    python3 discover.py "$S" "$ARG2"
+    python3 discover.py "$S" "$CITY"
 fi
 
 echo "==> [2/5] first mechanical pass"
@@ -45,7 +46,7 @@ else
     echo "    onboarding agent starts from $LOG/first_pass.log"
 fi
 
-if [ "$ARG2" = "--no-agents" ]; then
+if [ "$CITY" = "--no-agents" ]; then
     echo "==> --no-agents: stopping after mechanical stages"
     exit 0
 fi
