@@ -1,0 +1,14 @@
+[
+  {"name": "Seafood dept name printed on open Market corridor floor (counter cases are separate fixtures; shoppers walk here between left wall and cases)",
+   "rect": [95, 235, 145, 270]},
+  {"name": "Kitchen (Gadgets) aisle-19 category label in an ordinary aisle corridor between shelf fixtures (customer)",
+   "rect": [664, 495, 692, 558]},
+  {"name": "Frozen aisle 14 corridor (badged customer aisle; freezer-door swing arcs drawn fully open pinched it shut so sealing culled it - shoppers walk here with doors closed)",
+   "rect": [470, 392, 482, 562]},
+  {"name": "Frozen aisle 15 corridor (badged customer aisle; door-swing arcs, same as aisle 14)",
+   "rect": [518, 392, 526, 562]},
+  {"name": "Frozen aisle 16 corridor (badged customer aisle; door-swing arcs, same as aisle 14)",
+   "rect": [562, 392, 574, 562]},
+  {"name": "Frozen aisle 17 corridor (badged customer aisle; door-swing arcs, same as aisle 14)",
+   "rect": [610, 392, 622, 562]}
+]
