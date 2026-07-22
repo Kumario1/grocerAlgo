@@ -31,7 +31,7 @@ def test_zones_missing_entrance_is_actionable_hard_error():
 def test_deli_anchor_yields_disk():
     zones = derive.derive_seal_zones({"DELI": [648, 440]}, [])
     assert zones == [{"name": "auto:DELI", "pt": [648, 440],
-                      "r": derive.DISK_R, "bridge": derive.DISK_BRIDGE}]
+                      "r": derive.DISK_R, "bridge": 12}]
 
 
 def test_seafood_anchor_seals_wider_counter_entrances():

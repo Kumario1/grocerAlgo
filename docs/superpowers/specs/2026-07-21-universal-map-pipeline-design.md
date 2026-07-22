@@ -36,9 +36,13 @@ lives in small data files — authored, going forward, by a headless AI agent
     the CHECKSTANDS label. Missing → hard error with actionable message.
   - `derive_seal_zones(anchors, fixtures)` → service-dept anchors (STRICT name
     match against SERVICE_DEPTS + alias table, so noise anchors like
-    "CANNED MEAT" cannot spawn zones) → disks `{pt, r: 130, bridge: 12}`;
+    "CANNED MEAT" cannot spawn zones) → disks with `r: 130` and `bridge: 12`,
+    except SEAFOOD uses `bridge: 20` for its wider staff-counter entrances;
     CHECKSTANDS → rect = padded bbox of the fixture cluster around the label,
     `bridge: 20`. All constants defined here once, universal.
+    Store 790 requires the wider SEAFOOD bridge to disconnect its counter;
+    store 24 keeps all truth and coverage checks green, while store 659's
+    authored override and golden profile remain unchanged.
   - A single shared loader (`load_store`) used by BOTH `build_profile.py` and
     `map_qa.py`, so profile and QA can never disagree on config.
 - **Precedence: a per-store JSON, if present, wins verbatim** (full
