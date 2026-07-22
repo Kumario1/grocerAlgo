@@ -1,6 +1,6 @@
 #!/bin/sh
 # Autonomous store-onboarding pipeline: unknown H-E-B store number in,
-# converged + audited map out.
+# converged + agent-audited map out, awaiting a human visual verdict.
 #
 #   ./pipeline.sh <store> [city-slug]        full run (agents included)
 #   ./pipeline.sh <store> --no-agents        mechanical stages only
@@ -12,10 +12,12 @@
 #   3. onboard   — headless agent runs docs/onboarding.md (edits only
 #                  data/<store>/*.json truth files, loops to convergence)
 #   4. audit     — a SEPARATE headless agent runs docs/audit.md
-#                  adversarially; ships only on AUDIT CLEAN
-#   5. output    — data/<store>/profile.npz + qa/report.json + PNGs
+#                  adversarially; advances only on AUDIT CLEAN
+#   5. output    — data/<store>/profile.npz + qa/report.json + PNGs,
+#                  marked AWAITING VISUAL VERDICT
 #
-# Agent runner: claude -p (override: PIPE_AGENT='codex exec' etc.).
+# Agent runner: isolated Opus/xhigh Claude session with subagents disabled
+# (override the whole command with PIPE_AGENT='codex exec' etc.).
 # Runs with --dangerously-skip-permissions — the guardrails live in the
 # runbook prompts (data-files-only, no code, no goldens) and the golden +
 # test gates catch violations. Run from a terminal, not from inside
@@ -24,7 +26,7 @@ set -e
 S=$1
 [ -n "$S" ] || { echo "usage: ./pipeline.sh <store> [city-slug|--no-agents]"; exit 2; }
 ARG2=$2
-AGENT=${PIPE_AGENT:-"claude --dangerously-skip-permissions -p"}
+AGENT=${PIPE_AGENT:-"claude --safe-mode --model opus --effort xhigh --disallowedTools Agent --dangerously-skip-permissions -p"}
 LOG="data/$S/qa"
 
 echo "==> [1/5] discover: store $S"
@@ -67,7 +69,7 @@ echo "==> [4/5] audit agent (docs/audit.md, store $S — fresh context)"
 
 echo "==> [5/5] verdict + output"
 if grep -q "AUDIT CLEAN" "$LOG/audit.log"; then
-    echo "    AUDIT CLEAN — store $S onboarded"
+    echo "    AUDIT CLEAN — automated gates passed"
 else
     echo "    audit did NOT report clean — findings in $LOG/audit.log:"
     grep -A2 "AUDIT FAILED" "$LOG/audit.log" || tail -20 "$LOG/audit.log"
@@ -81,4 +83,5 @@ print(f"    walkable {r['walkable_pct']}%  reachable {r['reachable_pct']}%  "
       f"coverage {sum(len(v) for v in r['coverage'].values())}")
 EOF
 echo "    output: data/$S/profile.npz + data/$S/qa/"
+echo "    AWAITING VISUAL VERDICT — inspect walkable_overlay.png and reachable.png"
 command -v open >/dev/null && open "data/$S/qa/walkable_overlay.png"

@@ -42,6 +42,7 @@ DISK_R = 130        # pt — seal radius around a service-dept label (~15 m);
                     # 659's authored disks range 90-170
 DISK_BRIDGE = 12    # pt — staff pass-through gap width (~1.4 m), same as
                     # the legacy global bridge
+SEAFOOD_BRIDGE = 20 # pt — seafood counters use wider staff entrances
 CHECK_WIN_X = 200   # pt — half-window around the CHECKSTANDS label in which
 CHECK_WIN_Y = 45    # fixture centers count as checkstand-bank members
 CHECK_PAD = 8       # pt — padding around the checkstand-cluster bbox
@@ -110,7 +111,9 @@ def derive_seal_zones(anchors, fixtures):
         family = engine.ALIASES.get(first)
         if name in SEAL_DEPTS or family in SEAL_DEPTS:
             zones.append({"name": f"auto:{name}", "pt": list(anchors[name]),
-                          "r": DISK_R, "bridge": DISK_BRIDGE})
+                          "r": DISK_R,
+                          "bridge": (SEAFOOD_BRIDGE if name == "SEAFOOD"
+                                     else DISK_BRIDGE)})
     label = anchors.get("CHECKSTANDS") or anchors.get("CHECK STANDS")
     if label is not None:
         lx, ly = label

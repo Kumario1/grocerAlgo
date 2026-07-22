@@ -17,8 +17,10 @@ PDF — no scraping. See `plan.md` for the full product plan.
 
 discover (probe + download the guide PDF from H-E-B's CDN) → rebuild →
 onboarding agent (docs/onboarding.md) → adversarial audit agent
-(docs/audit.md) → ships only on AUDIT CLEAN. Agent runner defaults to
-`claude -p`; override with PIPE_AGENT. Run it from a terminal.
+(docs/audit.md) → human visual verdict. The automated run reaches the final
+gate only on `AUDIT CLEAN`, then prints `AWAITING VISUAL VERDICT`. The agent
+runner defaults to isolated Opus/xhigh Claude sessions with subagents
+disabled; override with `PIPE_AGENT`. Run it from a terminal.
 
 ## Universal map pipeline
 
@@ -36,7 +38,8 @@ The algorithm is frozen and store-agnostic; ALL per-store variation lives
 in small JSONs under data/<store>/ (zones, seal_zones, exclusions,
 inclusions, walk_truth). Onboarding convergence = `./rebuild.sh <store>`
 exits 0, report.json has zero VERIFY flags and empty coverage lists, and
-the separate audit role reports AUDIT CLEAN.
+the separate audit role reports AUDIT CLEAN. Final acceptance remains a
+human visual verdict on the walkable and reachable graphs.
 
 Golden gate: store 659's walkable grid is frozen pixel-by-pixel in
 data/659/golden_free.npy (tests/test_golden.py). Any universal-rule
