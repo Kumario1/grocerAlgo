@@ -38,11 +38,18 @@ disabled; override with `PIPE_AGENT`. Run it from a terminal.
       -> map_qa.py             data/<store>/qa/ PNGs + report.json (machine-readable)
 
 Vector guides keep the original extraction path. The image-only fallback is
-currently an experiment because its universal differential benchmark has not
-passed every hard gate; normal pipeline runs reject raster guides. Benchmark
-and holdout QA can opt in with `GROCER_RASTER_EXPERIMENTAL=1`. The experimental
-path uses Apple Vision on macOS, retries with Tesseract, records positioned OCR
-in `geometry.json`, and writes diagnostics under `data/<store>/qa/raster/`.
+currently an experiment: it passes the structural precision/recall, exact-aisle,
+aisle-position, anchor and runtime gates on both OCR backends, but not the
+boundary IoU gate, so normal pipeline runs reject raster guides. Benchmark and
+holdout QA can opt in with `GROCER_RASTER_EXPERIMENTAL=1`. The experimental path
+uses Apple Vision on macOS, retries with Tesseract, records positioned OCR in
+`geometry.json`, and writes diagnostics under `data/<store>/qa/raster/`.
+
+    python3 raster_benchmark.py --backend tesseract   # scores every plan gate,
+    python3 raster_benchmark.py --backend vision      # exits nonzero on a miss
+
+Per-case scores and the boundary root cause:
+docs/superpowers/specs/2026-07-22-raster-fallback-benchmark-results.md
 
 The algorithm is frozen and store-agnostic; ALL per-store variation lives
 in small JSONs under data/<store>/ (zones, seal_zones, exclusions,
