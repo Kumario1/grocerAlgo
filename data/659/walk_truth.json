@@ -1,0 +1,40 @@
+{
+  "must": [
+    [652, 568, "front action alley south of checkstands"],
+    [800, 130, "corridor in front of Dairy"],
+    [946, 485, "Produce area"],
+    [350, 122, "aisle 27 corridor, left wing"],
+    [808, 300, "aisle 15 corridor west of wine shelf"],
+    [332, 532, "Pharmacy pickup corridor, east of counter wall"],
+    [370, 510, "aisle 42 west end by pharmacy"],
+    [955, 430, "island east walkway beside cafe tables"],
+    [884, 500, "Floral front"],
+    [1100, 475, "Seafood south frontage"],
+    [390, 397, "left-wing aisle 37 corridor"],
+    [544, 450, "Toys aisle, south bank (badge 22)"],
+    [781, 300, "north-bank corridor by Tortillas shelf"],
+    [1110, 592, "Produce south walkway"]
+  ],
+  "must_not": [
+    [150, 150, "parking lot NW"],
+    [150, 400, "curbside pickup lanes"],
+    [230, 700, "drive-thru approach"],
+    [5, 5, "page corner NW"],
+    [1261, 5, "page corner NE"],
+    [5, 829, "page corner SW"],
+    [1261, 829, "page corner SE"],
+    [800, 80, "behind Dairy cases (exclusion)"],
+    [400, 80, "top-left wall service gap (exclusion)"],
+    [519, 660, "Lease room interior (enclosed)"],
+    [760, 700, "Texas Backyard interior (enclosed)"],
+    [851, 280, "Deli island interior (staff)"],
+    [880, 400, "Bakery interior (staff)"],
+    [833, 330, "wine-back service strip (staff gap)"],
+    [314, 624, "Pharmacy back area, below shelf row (staff)"],
+    [300, 532, "Pharmacy room behind counter wall (staff)"],
+    [1060, 400, "Seafood counter (staff)"],
+    [1090, 660, "Meal Simple prep block (staff)"],
+    [688, 545, "checkout lane between checkstands"],
+    [990, 430, "cafe table (rotated quad fixture)"]
+  ]
+}

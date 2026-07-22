@@ -9,5 +9,7 @@
   {"name": "Seafood counter + Kitchen-east back area (staff only; south frontage is customer space)",
    "rect": [1010, 305, 1139, 440]},
   {"name": "Meal Simple seating/prep block by right restrooms (per store owner markup)",
-   "rect": [1050, 628, 1139, 702]}
+   "rect": [1050, 628, 1139, 702]},
+  {"name": "cafe table cluster, island-east walkway (rotated-quad fixture; 2-pt grid frees the diamond's bounding-box corners the 4-pt grid rounded over)",
+   "rect": [982, 412, 1004, 435]}
 ]

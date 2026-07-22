@@ -47,5 +47,5 @@ def test_route_stays_inside_boundary():
                                "fixtures": [], "obstacle_paths": []})
     body = client.post("/api/route", json={"items": LIST_25}).json()
     outside = [(x, y) for x, y in body["path"]
-               if not bmask[int(y // 4), int(x // 4)]]
+               if not bmask[int(y // engine.CELL), int(x // engine.CELL)]]
     assert not outside, f"route leaves the store at {outside[:5]}"
