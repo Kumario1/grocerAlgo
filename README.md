@@ -7,12 +7,15 @@ PDF — no scraping. See `plan.md` for the full product plan.
 ## Run it
 
     pip install -r requirements.txt
+    brew install tesseract             # macOS raster-PDF OCR fallback
+    # apt install tesseract-ocr        # Debian/Ubuntu equivalent
     python3 -m uvicorn app:app --port 8000
     # open http://localhost:8000
 
 ## Autonomous onboarding (any H-E-B store)
 
     ./pipeline.sh <store>             # store number in, audited map out
+    ./pipeline.sh <store> Cedar Park  # city names are slugged automatically
     ./pipeline.sh <store> --no-agents # mechanical stages only (smoke test)
 
 discover (probe + download the guide PDF from H-E-B's CDN) → rebuild →
@@ -33,6 +36,21 @@ disabled; override with `PIPE_AGENT`. Run it from a terminal.
                                override, when present, wins verbatim
       -> build_profile.py      profile.npz (walkable grid, anchors, all-pairs D)
       -> map_qa.py             data/<store>/qa/ PNGs + report.json (machine-readable)
+
+Vector guides keep the original extraction path. The image-only fallback is
+currently an experiment: it passes the structural precision/recall, exact-aisle,
+aisle-position, anchor and runtime gates on both OCR backends, but not the
+boundary IoU gate, so normal pipeline runs reject raster guides. Benchmark and
+holdout QA can opt in with `GROCER_RASTER_EXPERIMENTAL=1`. The experimental path
+OCRs with Tesseract (it reads ~700 words per page to Apple Vision's ~400),
+records positioned OCR in `geometry.json`, and writes diagnostics under
+`data/<store>/qa/raster/`.
+
+    python3 raster_benchmark.py --backend tesseract   # scores every plan gate,
+    python3 raster_benchmark.py --backend vision      # exits nonzero on a miss
+
+Per-case scores and the boundary root cause:
+docs/superpowers/specs/2026-07-22-raster-fallback-benchmark-results.md
 
 The algorithm is frozen and store-agnostic; ALL per-store variation lives
 in small JSONs under data/<store>/ (zones, seal_zones, exclusions,

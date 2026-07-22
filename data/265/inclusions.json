@@ -1,0 +1,6 @@
+[
+  {"name": "north service-case frontage (customer): the Deli/Seafood/Market cases are the thin band drawn against the top wall (y 116-125), so the floor south of them - where the DELI/SEAFOOD/MARKET titles are printed - is the shopping aisle, not staff space",
+   "rect": [147, 125, 540, 160]},
+  {"name": "Pharmacy waiting corridor + pickup recess north of the counter (customer; the PHARMACY title is printed over this floor, and the counter's drawn notch x 657-692 / y 399-417 is where shoppers queue)",
+   "rect": [606, 382, 700, 417]}
+]

@@ -7,6 +7,18 @@ import pytest
 from router import derive
 
 
+def test_selected_guide_resolves_an_otherwise_ambiguous_store(
+        tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "guide-austin-265.pdf").touch()
+    (tmp_path / "guide-cedar-park-265.pdf").touch()
+    (tmp_path / "data/265").mkdir(parents=True)
+    (tmp_path / "data/265/source.json").write_text(
+        json.dumps({"pdf": "guide-cedar-park-265.pdf"}))
+
+    assert derive.pdf_path("265") == "guide-cedar-park-265.pdf"
+
+
 def test_larger_scale_aisle_pitch_fallback():
     anchors = {f"AISLE {i}": [100 + i * 40, 200] for i in range(1, 6)}
     assert derive.derive_aisle_pitch(anchors) == 40
