@@ -5,7 +5,7 @@ This document is your complete instruction set. Follow it exactly.
 
 ## Mission
 
-Input: `guide-austin-<N>.pdf` in the repo root (page 2 of the file is the
+Input: `guide-<city>-<N>.pdf` in the repo root (page 2 of the file is the
 store map). Output: a converged walkable map for `data/<N>/` — meaning
 `./rebuild.sh <N>` exits 0 AND `data/<N>/qa/report.json` has
 `"verify": []` AND `"coverage"` empty (both lists) — plus an authored
@@ -33,9 +33,12 @@ data, never code.
 
 ## The loop
 
-Repeat until converged:
+The pipeline already ran the first mechanical pass. Start from
+`data/<N>/qa/first_pass.log`, `report.json`, and the rendered PNGs; do not
+repeat that build before inspecting its evidence. Then repeat until converged:
 
-1. `./rebuild.sh <N>` (a nonzero exit is itself a finding — read the
+1. After making a batch of independently justified data edits, run
+   `./rebuild.sh <N>` (a nonzero exit is itself a finding — read the
    error; e.g. "cannot derive zones" means the map lacks an
    ENTRANCE/CHECKSTANDS label and you must author `zones.json`).
 2. Read `data/<N>/qa/report.json`. Look at, in order:
@@ -49,8 +52,10 @@ Repeat until converged:
      `sealed_floor_patches` = large painted-floor areas our rules sealed.
      They render on walkable_overlay.png as red X marks (label clusters)
      and red boxes (paint patches).
-   - `components` / `culled_pockets`: one giant component is right;
-     a large culled pocket near an aisle badge is a swallowed corridor.
+   - `components` / `culled_pockets`: one giant component is right. Locate
+     and classify every culled pocket printed in the top-ten stats; do not
+     dismiss smaller entries after explaining only the largest ones. A large
+     pocket near an aisle badge or service island can be a swallowed corridor.
    - `far_snaps`: an anchor snapping meters away from its label usually
      sits inside a wrongly-sealed or wrongly-open region.
    - `narrow`: corridors under ~0.5 m half-width are usually artifacts —
@@ -59,7 +64,10 @@ Repeat until converged:
 3. View the PNGs in `data/<N>/qa/` (you can read images): green =
    walkable, purple = sealed staff areas, orange = walkable but cut off
    from the entrance, dashed red circles = the VERIFY spots.
-   `corridor_width.png`: red = suspiciously tight. Compare against
+   `corridor_width.png`: red = suspiciously tight. Logos such as Sushiya or
+   Meal Simple can be vector artwork absent from extracted anchors: compare
+   the printed map to `geometry.json` and inspect every internal corridor in
+   any visible but unanchored department. Compare against
    `data/659/qa/walkable_overlay.png` — that is what "converged" looks
    like.
 4. For each VERIFY flag, decide from the map drawing:
@@ -87,7 +95,9 @@ the overlay PNG and `geometry.json` anchors):
   the entrance approach, several distinct aisle corridors.
 
 Points must describe ground truth about the STORE, not merely echo the
-current grid — they are what stops future regressions. Rerun
+current grid, and every coordinate must lie inside the feature its name
+claims rather than in an adjacent frontage. They are what stops future
+regressions. Rerun
 `./rebuild.sh <N>` after authoring: all tests must pass.
 
 ## File schemas (verbatim 659 examples)
@@ -160,8 +170,9 @@ counter, rect = checkstand bank; `bridge` = max gap width sealed, pt):
   with the evidence (report.json excerpt + what you saw on the PNG). Do
   not work around it in code.
 
-## After convergence: hand off to the audit
+## After convergence: stop for the audit
 
-Run the `docs/audit.md` role (a separate agent/context — NOT you continuing
-in this conversation; the audit exists because your blind spots pass your
-own tests). Onboarding finishes only when the audit reports CLEAN.
+Stop and return your result. Do NOT run `docs/audit.md`, spawn an audit agent,
+or continue into an audit yourself. `pipeline.sh` starts the required fresh
+audit context after you exit; onboarding finishes only when that separate
+role reports CLEAN.

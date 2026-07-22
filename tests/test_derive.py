@@ -34,6 +34,12 @@ def test_deli_anchor_yields_disk():
                       "r": derive.DISK_R, "bridge": derive.DISK_BRIDGE}]
 
 
+def test_seafood_anchor_seals_wider_counter_entrances():
+    zones = derive.derive_seal_zones({"SEAFOOD": [125, 252]}, [])
+    assert zones == [{"name": "auto:SEAFOOD", "pt": [125, 252],
+                      "r": derive.DISK_R, "bridge": 20}]
+
+
 def test_noise_anchors_yield_nothing():
     # substring would wrongly match MEAT/FROZEN-adjacent noise; strict must not
     zones = derive.derive_seal_zones(

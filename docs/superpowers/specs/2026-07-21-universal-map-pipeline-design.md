@@ -123,9 +123,10 @@ so its blind spots pass its own tests. Two additions close the class:
    not build the store re-runs the pipeline, sweeps the overlay crop by
    crop (the miss was invisible at page zoom), spot-probes ≥10 product
    labels against the shipped grid, and reviews walk_truth adequacy.
-   Onboarding is complete only on `AUDIT CLEAN`. Drawn-sealed shelf
-   sections (walled in the source PDF) are exempt from the nets by design
-   — the audit sweep owns them.
+   Automated onboarding advances only on `AUDIT CLEAN`; final acceptance
+   is a human visual verdict on the walkable/reachable renders.
+   Drawn-sealed shelf sections (walled in the source PDF) are exempt from
+   the nets by design — the audit sweep owns them.
 
 ## Trade-offs accepted
 

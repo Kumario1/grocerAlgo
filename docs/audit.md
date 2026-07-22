@@ -14,7 +14,7 @@ screenshot. Your job is to be that human, systematically.
 - `./rebuild.sh <N>` (rerun it yourself; do not trust committed artifacts)
 - `data/<N>/qa/report.json`, `walkable_overlay.png`, `reachable.png`,
   `corridor_width.png`, `extract_overlay.png`
-- `guide-austin-<N>.pdf` (page 2 = the map; the ground truth)
+- `guide-<city>-<N>.pdf` (page 2 = the map; the ground truth)
 - `data/<N>/*.json` (the truth files under audit)
 - Reference for "what converged looks like": `data/659/qa/*.png`
 
@@ -33,6 +33,10 @@ invisible at page zoom). For EVERY crop verify:
 - every aisle badge's corridor is green along its FULL length;
 - every department frontage (Produce/Dairy/Deli/Bakery/Seafood/Floral/
   Pharmacy pickup) has green in front of it;
+- every internal corridor around service islands is green when customer
+  accessible. Visible logos may be vector artwork absent from extracted
+  anchors (for example Sushiya/Meal Simple), so compare the printed map to
+  `geometry.json` and explicitly inspect every unanchored department;
 - staff areas are purple/untinted, enclosed rooms (lease, restrooms) are
   NOT green, outside-boundary is NOT green;
 - checkout: lanes sealed, front action alley green.
@@ -40,6 +44,9 @@ Compare each crop against the printed map underneath: floor paint with no
 green tint over it is a suspect unless it is a blessed staff/enclosed area.
 Note: drawn-sealed shelf sections (walled off in the source PDF itself) are
 exempt from the mechanical nets by design — ONLY this sweep catches those.
+Also locate and classify every culled pocket printed in the top-ten mechanical
+stats. An unexplained pocket is a finding even when the coverage lists are
+empty.
 
 **3. Label spot-probes.** Pick ≥10 product labels spread across all wings
 of the PDF (read them off the map: "Cotton Balls", "Dog Food", ...). For
@@ -50,7 +57,9 @@ and confirm reachable floor within ~2 m. Any miss = finding.
 **4. walk_truth adequacy.** Open `data/<N>/walk_truth.json`. Does every
 wing/section of the store have at least one `must` point? Does every
 sealed staff area, enclosed room, and the checkout-lane interior have a
-`must_not` point? Missing coverage = finding (propose the points).
+`must_not` point? Probe each coordinate and confirm it lies inside the named
+feature, not merely in an adjacent frontage. Missing or mislabeled coverage =
+finding (propose the points).
 
 **5. Config sanity.** Read `exclusions.json`/`inclusions.json` names —
 each must state a WHY consistent with what the map shows. An inclusion
