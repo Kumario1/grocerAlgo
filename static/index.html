@@ -8,10 +8,16 @@
   button { margin-top: 8px; padding: 8px 20px; font: inherit; cursor: pointer; }
   #map { flex: 1; min-width: 320px; }
   svg { width: 100%; height: auto; display: block; }
-  .fixture { fill: #d9d2c5; }
-  .route { fill: none; stroke: #1a73e8; stroke-width: 4; stroke-linejoin: round; }
+  .fixture { fill: #d9d2c5; opacity: .18; }   /* faint over the real map; the
+      only map if /api/map.png is unavailable */
+  .route { fill: none; stroke: #1a73e8; stroke-width: 2; stroke-linejoin: round;
+    marker-mid: url(#route-arrow); }
   .stop circle { fill: #d93025; } .stop text { fill: #fff; font: bold 11px system-ui;
     text-anchor: middle; dominant-baseline: central; }
+  /* hollow = we know the aisle but the guide prints no label for this item */
+  .approx circle { fill: #fff; stroke: #d93025; stroke-width: 3; }
+  .approx text { fill: #d93025; }
+  li small { color: #666; } li.approx small::after { content: ' (approx)'; }
   .term circle { fill: #188038; }
   #summary { margin-top: 12px; } .unmatched { color: #b00; }
   ol { padding-left: 20px; } li { margin: 2px 0; }
@@ -32,6 +38,17 @@ const el = (t, a) => { const e = document.createElementNS('http://www.w3.org/200
 async function init() {
   geom = await (await fetch('/api/geometry')).json();
   S.setAttribute('viewBox', `0 0 ${geom.page.w} ${geom.page.h}`);
+  const defs = el('defs', {});
+  const marker = document.createElementNS(S.namespaceURI, 'marker');
+  for (const [k, v] of Object.entries({id: 'route-arrow', viewBox: '0 0 8 8',
+      refX: 4, refY: 4, markerWidth: 7, markerHeight: 7, orient: 'auto',
+      markerUnits: 'userSpaceOnUse'})) marker.setAttribute(k, v);
+  const arrow = document.createElementNS(S.namespaceURI, 'path');
+  arrow.setAttribute('d', 'M 0 0 L 8 4 L 0 8 z');
+  arrow.setAttribute('fill', '#1a73e8');
+  marker.append(arrow); defs.append(marker);
+  el('image', {href: '/api/map.png', x: 0, y: 0,          // viewBox is pdf-pt space
+    width: geom.page.w, height: geom.page.h});            // so no transform needed
   for (const [x0, y0, x1, y1] of geom.fixtures)
     el('rect', {x: x0, y: y0, width: x1 - x0, height: y1 - y0, class: 'fixture'});
   for (const poly of geom.fixture_polys || [])
@@ -49,7 +66,14 @@ async function go() {
   if (!r.ok) { sum.textContent = 'Could not route that list.'; return; }
   const b = await r.json();
   S.querySelectorAll('.route, .stop, .term').forEach(e => e.remove());
-  el('polyline', {points: b.path.map(p => p.join(',')).join(' '), class: 'route'});
+  const arrowPoints = [b.path[0]];
+  for (const [a, z] of b.path.slice(1).map((z, i) => [b.path[i], z])) {
+    const n = Math.max(1, Math.ceil(Math.hypot(z[0] - a[0], z[1] - a[1]) / 28));
+    for (let i = 1; i <= n; i++)
+      arrowPoints.push([a[0] + (z[0] - a[0]) * i / n,
+                        a[1] + (z[1] - a[1]) * i / n]);
+  }
+  el('polyline', {points: arrowPoints.map(p => p.join(',')).join(' '), class: 'route'});
   const badge = (x, y, label, cls, r) => {
     const g = el('g', {class: cls});
     const c = document.createElementNS(S.namespaceURI, 'circle');
@@ -60,10 +84,12 @@ async function go() {
   };
   badge(b.path[0][0], b.path[0][1], 'S', 'term', 12);
   badge(b.path.at(-1)[0], b.path.at(-1)[1], '$', 'term', 12);
-  for (const s of b.stops) badge(s.x, s.y, s.n, 'stop', 10);
+  for (const s of b.stops) badge(s.x, s.y, s.n, s.approx ? 'stop approx' : 'stop', 10);
   sum.innerHTML = `<b>${b.distance_m} m</b> · ${b.stops.length} stops` +
+    (b.saved_m > 0 ? ` · saved <b>${b.saved_m} m</b>` : '') +
     `<ol>` + b.stops.map(s =>
-      `<li>${s.anchor.toLowerCase()} — ${s.items.join(', ')}</li>`).join('') + `</ol>` +
+      `<li class="${s.approx ? 'approx' : ''}">${s.item} ` +
+      `<small>${s.anchor.toLowerCase()}</small></li>`).join('') + `</ol>` +
     (b.unmatched.length ? `<div class="unmatched">Couldn't place: ` +
       b.unmatched.map(u => `${u.query} (try: ${u.suggestions.join(', ')})`).join('; ') +
       `</div>` : '');
