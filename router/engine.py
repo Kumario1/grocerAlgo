@@ -227,39 +227,65 @@ def snap(free, reachable_dist, xy_pt, cell=CELL):
     raise ValueError(f"no walkable cell near {xy_pt}")
 
 def held_karp(D, n_stops):
-    """Fixed start (index 0) and end (index 1); stops are indices 2..n+1."""
-    S = list(range(2, 2 + n_stops))
-    full = (1 << n_stops) - 1
-    dp = {}
+    """Exact open-path TSP. Fixed start (index 0) and end (index 1); stops are
+    indices 2..n+1. Returns (cost, [stop indices in visit order]).
+
+    dp[mask, j] = cheapest walk from the start that has collected the stop set
+    `mask` and is standing at stop j. Masks are handled a popcount layer at a
+    time, so an entire layer resolves in one gather + argmin rather than a
+    Python loop over 2^n dict entries -- every mask in a layer depends only on
+    the layer below it, so there is nothing to serialise.
+
+    That vectorisation is what makes §8.5's n<=18 cutoff affordable: 18 stops
+    costs ~130 ms here against ~3 s for the dict DP this replaced (which is why
+    the cutoff had been lowered to 14). The 25-item acceptance list consolidates
+    to exactly 18 stops, so it now solves exactly instead of heuristically.
+    """
+    if n_stops == 0:
+        return D[0][1], []
+    D = np.asarray(D, np.float32)      # exact for integer cell counts (< 2^24)
+    S = np.arange(2, 2 + n_stops)
+    Ds = D[np.ix_(S, S)]
+    N, full = 1 << n_stops, (1 << n_stops) - 1
+    dp = np.full((N, n_stops), np.inf, np.float32)
+    par = np.full((N, n_stops), -1, np.int8)
+    dp[1 << np.arange(n_stops), np.arange(n_stops)] = D[0, S]
+
+    masks = np.arange(N)
+    popcount = np.zeros(N, np.int16)
     for j in range(n_stops):
-        dp[(1 << j, j)] = (D[0][S[j]], -1)
-    for mask in range(1, full + 1):
+        popcount += ((masks >> j) & 1).astype(np.int16)
+    for p in range(2, n_stops + 1):
+        layer = masks[popcount == p]
         for j in range(n_stops):
-            if not mask & (1 << j) or (mask, j) not in dp:
+            sel = layer[((layer >> j) & 1) == 1]        # ... that end at j
+            if not sel.size:
                 continue
-            base = dp[(mask, j)][0]
-            for k in range(n_stops):
-                if mask & (1 << k):
-                    continue
-                nm = mask | (1 << k)
-                cand = base + D[S[j]][S[k]]
-                if (nm, k) not in dp or cand < dp[(nm, k)][0]:
-                    dp[(nm, k)] = (cand, j)
-    best, last = min((dp[(full, j)][0] + D[S[j]][1], j) for j in range(n_stops))
-    order, mask = [], full
-    while last != -1:
-        order.append(last)
-        mask, last = mask ^ (1 << last), dp[(mask, last)][1]
-    return best, [S[j] for j in reversed(order)]
+            # arrive at j from every possible k; unreachable k stay inf
+            cand = dp[sel ^ (1 << j)] + Ds[:, j]
+            k = np.argmin(cand, 1)
+            dp[sel, j] = cand[np.arange(sel.size), k]
+            par[sel, j] = k
+
+    total = dp[full] + D[S, 1]
+    j, mask, order = int(np.argmin(total)), full, []
+    best = float(total[j])
+    while j != -1:
+        order.append(j)
+        nxt = int(par[mask, j])
+        mask ^= 1 << j
+        j = nxt
+    return best, [int(S[j]) for j in reversed(order)]
 
 def tsp_order(D, n_stops):
-    """Exact <=14 stops; nearest-neighbor + 2-opt beyond (plan.md §8.5).
+    """Exact <=18 stops; nearest-neighbor + 2-opt beyond (plan.md §8.5).
 
-    Cutoff dropped from 18 to 14 per the Task 7 perf guard: pure-Python
-    Held-Karp on 18 stops is ~5 s (blows the <1 s G3 budget); the 2-opt
-    branch is within a few % of optimal for 15-18 stops.
+    Back up to the spec's 18 now that held_karp is vectorised (~130 ms at 18,
+    inside the §8.7 300 ms budget). Raising it further is not free: the DP is
+    O(n^2 * 2^n), so each extra stop roughly triples the cost -- 19 lands near
+    300 ms on its own and 20 blows the budget outright.
     """
-    if n_stops <= 14:
+    if n_stops <= 18:
         return held_karp(D, n_stops)
     S = list(range(2, 2 + n_stops))
     order, left, cur = [], set(S), 0
@@ -285,3 +311,90 @@ def trace(parent, w, end_cell, cell=CELL):
         path.append((u % w * cell + cell / 2, u // w * cell + cell / 2))
         u = parent[u]
     return path[::-1]
+
+def clear(free, a, b, cell=CELL):
+    """Line of sight: every cell the segment a->b touches is walkable.
+
+    Grid-marching (Amanatides-Woo), not point sampling: sampling a segment at
+    N places can step straight over a one-cell-thick shelf wall between two
+    samples, and a route that tunnels through a shelf is exactly what §8.1
+    calls the leak class. Marching visits every cell the segment enters, so a
+    wall of any thickness stops it.
+
+    Supercover, not a thin Bresenham line: when the segment crosses an exact
+    cell corner, BOTH cells flanking that corner must be walkable too — a
+    shopper cannot squeeze through the zero-width gap between two obstacles
+    touching at a diagonal.
+    """
+    h, w = free.shape
+    # float() up front: coords arrive as numpy scalars from trace(), and the
+    # marching loop below is much faster on plain Python numbers.
+    x0, y0 = float(a[0]) / cell, float(a[1]) / cell
+    x1, y1 = float(b[0]) / cell, float(b[1]) / cell
+    cx, cy, ex, ey = int(x0 // 1), int(y0 // 1), int(x1 // 1), int(y1 // 1)
+
+    def ok(x, y):
+        return 0 <= y < h and 0 <= x < w and free[y, x]
+
+    if not ok(cx, cy):
+        return False
+    dx, dy = x1 - x0, y1 - y0
+    sx = 1 if dx > 0 else -1 if dx < 0 else 0
+    sy = 1 if dy > 0 else -1 if dy < 0 else 0
+    inf = float("inf")
+    # t = fraction of the segment consumed when the next cell border is met
+    tx = ((cx + 1 if sx > 0 else cx) - x0) / dx if sx else inf
+    ty = ((cy + 1 if sy > 0 else cy) - y0) / dy if sy else inf
+    dtx = abs(1.0 / dx) if sx else inf          # ... and per whole cell after that
+    dty = abs(1.0 / dy) if sy else inf
+    for _ in range(abs(ex - cx) + abs(ey - cy) + 2):   # bounded: never spins
+        if cx == ex and cy == ey:
+            return True
+        if abs(tx - ty) < 1e-9:                 # exact corner: no diagonal squeeze
+            if not (ok(cx + sx, cy) and ok(cx, cy + sy)):
+                return False
+            cx, cy, tx, ty = cx + sx, cy + sy, tx + dtx, ty + dty
+        elif tx < ty:
+            cx, tx = cx + sx, tx + dtx
+        else:
+            cy, ty = cy + sy, ty + dty
+        if not ok(cx, cy):
+            return False
+    return cx == ex and cy == ey
+
+def path_is_legal(free, pts, cell=CELL):
+    """Indices of segments that leave walkable floor. Empty list = legal.
+
+    Returns the offenders rather than a bool so a failure says WHERE.
+    """
+    if len(pts) < 2:
+        x, y = int(pts[0][0] // cell), int(pts[0][1] // cell)
+        h, w = free.shape
+        return [] if (0 <= y < h and 0 <= x < w and free[y, x]) else [0]
+    return [i for i, (p, q) in enumerate(zip(pts, pts[1:]))
+            if not clear(free, p, q, cell)]
+
+def string_pull(free, pts, cell=CELL):
+    """Pull a BFS staircase taut, keeping only the corners it really turns.
+
+    ONE LEG AT A TIME. Smoothing a whole multi-stop route in one call is legal
+    and wrong: a clear sightline from the entrance to some late vertex lets the
+    greedy skip swallow the tour whole. Measured on #659 — 1265 pts / 294.7 m
+    collapsed to 3 pts / 21 m, visiting none of the stops, and path_is_legal
+    reported zero offending segments. Legality does not imply the route still
+    goes where it was sent; per-leg smoothing pins the stop endpoints so it
+    cannot skip one.
+
+    ponytail: greedy farthest-visible skip, O(n^2) sightline checks per leg
+    (~2 ms on a 659 leg). Swap in a shortcut graph only if legs get much longer.
+    """
+    if len(pts) < 3:
+        return list(pts)
+    out, i = [pts[0]], 0
+    while i < len(pts) - 1:
+        j = len(pts) - 1
+        while j > i + 1 and not clear(free, pts[i], pts[j], cell):
+            j -= 1
+        out.append(pts[j])
+        i = j
+    return out

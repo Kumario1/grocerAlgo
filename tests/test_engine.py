@@ -32,6 +32,37 @@ def test_held_karp_beats_naive_order():
     cost, order = engine.held_karp(D, 3)
     assert cost == 4 and order == [2, 3, 4]
 
+def test_held_karp_matches_brute_force():
+    """The vectorised DP against exhaustive enumeration.
+
+    Checks the returned ORDER actually walks the returned COST, not just that
+    the numbers agree — a bad backtrack gives the right cost with the wrong
+    sequence, which the map would happily draw.
+    """
+    import itertools
+    rng = np.random.default_rng(7)
+    for _ in range(20):
+        n = int(rng.integers(1, 7))
+        pts = rng.random((n + 2, 2)) * 100
+        D = np.round(np.abs(pts[:, None, :] - pts[None, :, :]).sum(-1)).astype(int).tolist()
+        cost, order = engine.held_karp(D, n)
+        walk = lambda o: (D[0][o[0]] + sum(D[a][b] for a, b in zip(o, o[1:]))
+                          + D[o[-1]][1])
+        best = min(walk(list(p)) for p in itertools.permutations(range(2, 2 + n)))
+        assert sorted(order) == list(range(2, 2 + n))     # every stop, once
+        assert abs(cost - best) < 1e-4                    # optimal
+        assert walk(order) == best                        # and the order proves it
+
+def test_tsp_order_is_exact_up_to_18_stops():
+    """§8.5's cutoff. The 25-item acceptance list consolidates to exactly 18,
+    so this is the difference between solving it exactly and approximating it."""
+    rng = np.random.default_rng(3)
+    pts = rng.random((20, 2)) * 100
+    D = np.round(np.abs(pts[:, None, :] - pts[None, :, :]).sum(-1)).astype(int).tolist()
+    exact, _ = engine.held_karp(D, 18)
+    cost, order = engine.tsp_order(D, 18)
+    assert cost == exact and sorted(order) == list(range(2, 20))
+
 def test_tsp_order_heuristic_over_18_stops():
     pos = list(range(25))                            # 0=start,1=end at 24
     pos[1] = 24

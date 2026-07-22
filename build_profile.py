@@ -49,3 +49,29 @@ np.savez_compressed(f"{DIR}/profile.npz", free=free, cell=engine.CELL,
                     names=names, cells=cells, D=D, parents=parents,
                     m_per_cell=m_per_cell)
 print(f"{n} anchors, grid {w}x{h}, m/cell={m_per_cell:.3f} -> {DIR}/profile.npz")
+
+# §8.1 corridor graph + §8.3 per-item shelf positions -> shelf_positions.json.
+# Optional: needs the guide PDF and a directory, so a store that has neither
+# just routes to aisle anchors as before.
+import json
+import os
+from router.directory import load_directory
+
+catalog = {}
+for csv_name in ("directory.csv", "departments.csv"):
+    if os.path.exists(f"{DIR}/{csv_name}"):
+        catalog.update(load_directory(f"{DIR}/{csv_name}", set(anchors)))
+if catalog:
+    try:
+        import fitz
+        from router import corridor, shelf
+        g = corridor.smooth_edges(corridor.build(free), free)
+        page = fitz.open(derive.pdf_path(STORE))[1]
+        sp = shelf.build(page, catalog, anchors, g, free, engine.CELL)
+        json.dump(sp, open(f"{DIR}/shelf_positions.json", "w"), indent=1)
+        exact = sum(1 for v in sp["items"].values() if not v["approx"])
+        print(f"corridor {len(g['nodes'])} nodes/{len(g['edges'])} edges; "
+              f"{exact}/{len(sp['items'])} items on a printed label "
+              f"-> {DIR}/shelf_positions.json")
+    except Exception as e:                       # never block the profile build
+        print(f"note: shelf positions skipped ({type(e).__name__}: {e})")
