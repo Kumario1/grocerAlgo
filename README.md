@@ -7,12 +7,15 @@ PDF — no scraping. See `plan.md` for the full product plan.
 ## Run it
 
     pip install -r requirements.txt
+    brew install tesseract             # macOS raster-PDF OCR fallback
+    # apt install tesseract-ocr        # Debian/Ubuntu equivalent
     python3 -m uvicorn app:app --port 8000
     # open http://localhost:8000
 
 ## Autonomous onboarding (any H-E-B store)
 
     ./pipeline.sh <store>             # store number in, audited map out
+    ./pipeline.sh <store> Cedar Park  # city names are slugged automatically
     ./pipeline.sh <store> --no-agents # mechanical stages only (smoke test)
 
 discover (probe + download the guide PDF from H-E-B's CDN) → rebuild →
@@ -33,6 +36,13 @@ disabled; override with `PIPE_AGENT`. Run it from a terminal.
                                override, when present, wins verbatim
       -> build_profile.py      profile.npz (walkable grid, anchors, all-pairs D)
       -> map_qa.py             data/<store>/qa/ PNGs + report.json (machine-readable)
+
+Vector guides keep the original extraction path. The image-only fallback is
+currently an experiment because its universal differential benchmark has not
+passed every hard gate; normal pipeline runs reject raster guides. Benchmark
+and holdout QA can opt in with `GROCER_RASTER_EXPERIMENTAL=1`. The experimental
+path uses Apple Vision on macOS, retries with Tesseract, records positioned OCR
+in `geometry.json`, and writes diagnostics under `data/<store>/qa/raster/`.
 
 The algorithm is frozen and store-agnostic; ALL per-store variation lives
 in small JSONs under data/<store>/ (zones, seal_zones, exclusions,

@@ -28,7 +28,7 @@ import numpy as np
 import fitz
 from PIL import Image, ImageDraw
 from scipy import ndimage
-from router import engine, derive, qa_checks
+from router import engine, derive, qa_checks, raster
 
 CELL = engine.CELL
 STORE = sys.argv[1] if len(sys.argv) > 1 else "659"
@@ -62,9 +62,8 @@ except Exception:
     m_per_cell = 0.1183 * CELL          # ~0.473 at 4-pt, scales with resolution
 
 page = fitz.open(PDF)[1]
-pix = page.get_pixmap(dpi=144)
-base = Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
-S = pix.width / geom["page"]["w"]          # pdf-pt -> render px
+base = raster.render_source(page, geom, dpi=144)
+S = base.width / geom["page"]["w"]          # pdf-pt -> render px
 
 
 def tint(img, mask, color, alpha=0.45):
@@ -145,7 +144,8 @@ Image.composite(Image.blend(base, heat, 0.6), base, mm) \
 # --- coverage nets (router/qa_checks.py): missed-section detectors that are
 # independent of any authored truth — the onboarding agent cannot pass its
 # own blind spots through these ---
-cov = qa_checks.coverage(page.get_text("words"), base, cfg, built, m_per_cell)
+cov = qa_checks.coverage(raster.coverage_words(page, geom), base, cfg, built,
+                         m_per_cell)
 label_clusters = cov["unreachable_shelf_labels"]
 floor_patches = cov["sealed_floor_patches"]
 

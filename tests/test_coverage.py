@@ -16,7 +16,7 @@ import numpy as np
 import pytest
 from PIL import Image
 
-from router import derive, qa_checks
+from router import derive, qa_checks, raster
 
 STORES = sorted(
     os.path.basename(os.path.dirname(p))
@@ -29,11 +29,11 @@ def test_no_missed_sections(store):
     cfg = derive.load_store(f"data/{store}")
     built = derive.build_free(cfg)
     page = fitz.open(derive.pdf_path(store))[1]
-    pix = page.get_pixmap(dpi=144)
-    base = Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
+    base = raster.render_source(page, cfg["geom"], dpi=144)
     m = float(np.load(f"data/{store}/profile.npz",
                       allow_pickle=True)["m_per_cell"])
-    cov = qa_checks.coverage(page.get_text("words"), base, cfg, built, m)
+    cov = qa_checks.coverage(raster.coverage_words(page, cfg["geom"]), base,
+                             cfg, built, m)
     assert cov["unreachable_shelf_labels"] == [], \
         f"shelf labels with no reachable frontage: {cov['unreachable_shelf_labels']}"
     assert cov["sealed_floor_patches"] == [], \
