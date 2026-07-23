@@ -1,0 +1,15 @@
+walkable: 27.5% of page (27.5% entrance-reachable)
+components: 1  sizes: [33322]
+anchors: 43  |  exclusions: 5
+service pockets sealed (service + dead crevices): 2
+    243 cells at (496,414) near AISLE 14
+    174 cells at (420,415) near CHECKSTANDS
+tightest corridors at anchors (half-width capacity):
+  MARKET: 1.04 m
+  PRODUCE: 1.10 m
+  AISLE 17: 1.16 m
+  AISLE 18: 1.16 m
+  AISLE 19: 1.16 m
+  BAKERY: 1.16 m
+  TORTILLERIA: 1.16 m
+  DAIRY: 1.30 m
