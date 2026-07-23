@@ -328,19 +328,24 @@ class HEBClient:
     async def _fetch(self, url):
         if not self._page:
             raise HEBConnectionError("Connect H-E-B first")
-        try:
-            text = await self._page.evaluate(
-                """async url => {
-                  const response = await fetch(url, {credentials: 'include'});
-                  return await response.text();
-                }""", url)
-        except Exception as e:
-            await self.close()
-            raise HEBConnectionError("H-E-B reconnect required") from e
-        if "_Incapsula_Resource" in text or '"errorCode" : "15"' in text:
-            self.connected = self.map_ready = False
-            raise HEBConnectionError("H-E-B reconnect required")
-        return text
+        for attempt in range(2):
+            try:
+                response = await self._page.goto(
+                    f"https://www.heb.com{url}",
+                    wait_until="domcontentloaded")
+                text = await response.text()
+            except Exception as e:
+                await self.close()
+                raise HEBConnectionError("H-E-B reconnect required") from e
+            challenge = (
+                "_Incapsula_Resource" in text
+                or '"errorCode" : "15"' in text)
+            if not challenge:
+                return text
+            if attempt == 0:
+                await asyncio.sleep(1)
+        self.connected = self.map_ready = False
+        raise HEBConnectionError("H-E-B reconnect required")
 
     async def confirm(self):
         html = await self._fetch("/search?q=milk")

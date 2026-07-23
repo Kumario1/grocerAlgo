@@ -183,19 +183,80 @@ def test_heb_client_launches_normal_chrome_instead_of_automation_mode():
     assert not any("enable-automation" in arg for arg in command)
 
 
-def test_heb_client_reports_incapsula_error_15_as_reconnect_required():
+def test_heb_client_reports_incapsula_error_15_as_reconnect_required(
+        monkeypatch):
     client = HEBClient()
     client.connected = client.map_ready = True
 
-    class Page:
-        async def evaluate(self, script, url):
+    class Response:
+        async def text(self):
             return '{"errorCode" : "15"}'
 
+    class Page:
+        async def goto(self, url, wait_until):
+            return Response()
+
+    async def no_wait(_):
+        pass
+
+    monkeypatch.setattr("router.heb.asyncio.sleep", no_wait)
     client._page = Page()
 
     with pytest.raises(HEBConnectionError, match="reconnect required"):
         asyncio.run(client._fetch("/search?q=milk"))
     assert client.status()["connected"] is False
+
+
+def test_heb_client_navigates_instead_of_using_blocked_page_fetch():
+    client = HEBClient()
+    navigated = []
+
+    class Response:
+        async def text(self):
+            return "normal H-E-B response"
+
+    class Page:
+        async def goto(self, url, wait_until):
+            navigated.append((url, wait_until))
+            return Response()
+
+        async def evaluate(self, script, url):
+            return '{"errorCode" : "15"}'
+
+    client._page = Page()
+
+    assert asyncio.run(client._fetch("/search?q=milk")) == (
+        "normal H-E-B response")
+    assert navigated == [(
+        "https://www.heb.com/search?q=milk", "domcontentloaded")]
+
+
+def test_heb_client_retries_a_transient_incapsula_page(monkeypatch):
+    client = HEBClient()
+    replies = iter(['{"errorCode" : "15"}', "normal H-E-B response"])
+    navigated = []
+
+    class Response:
+        def __init__(self, text):
+            self.body = text
+
+        async def text(self):
+            return self.body
+
+    class Page:
+        async def goto(self, url, wait_until):
+            navigated.append(url)
+            return Response(next(replies))
+
+    async def no_wait(_):
+        pass
+
+    monkeypatch.setattr("router.heb.asyncio.sleep", no_wait)
+    client._page = Page()
+
+    assert asyncio.run(client._fetch("/search?q=milk")) == (
+        "normal H-E-B response")
+    assert len(navigated) == 2
 
 
 def test_atlas_map_becomes_router_geometry_and_psa_index():
