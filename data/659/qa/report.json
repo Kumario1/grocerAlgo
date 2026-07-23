@@ -1,0 +1,225 @@
+{
+ "components": {
+  "n": 4,
+  "sizes": [
+   63445,
+   207,
+   98,
+   5
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 3282,
+   "near": "AISLE 14",
+   "x": 850.4,
+   "y": 349.5
+  },
+  {
+   "cells": 2925,
+   "near": "RESTROOMS",
+   "x": 769.9,
+   "y": 703.4
+  },
+  {
+   "cells": 1674,
+   "near": "PHARMACY",
+   "x": 315.0,
+   "y": 624.0
+  },
+  {
+   "cells": 880,
+   "near": "RESTROOMS",
+   "x": 519.0,
+   "y": 659.0
+  },
+  {
+   "cells": 717,
+   "near": "PRODUCE",
+   "x": 1038.2,
+   "y": 506.2
+  },
+  {
+   "cells": 504,
+   "near": "RESTROOMS",
+   "x": 655.4,
+   "y": 665.6
+  },
+  {
+   "cells": 439,
+   "near": "SEAFOOD",
+   "x": 1068.9,
+   "y": 450.7
+  },
+  {
+   "cells": 306,
+   "near": "RESTROOMS",
+   "x": 664.6,
+   "y": 632.6
+  },
+  {
+   "cells": 252,
+   "near": "RESTROOMS",
+   "x": 712.0,
+   "y": 669.0
+  },
+  {
+   "cells": 249,
+   "near": "SEAFOOD",
+   "x": 998.8,
+   "y": 387.9
+  },
+  {
+   "cells": 212,
+   "near": "KITCHEN",
+   "x": 1084.0,
+   "y": 299.0
+  },
+  {
+   "cells": 165,
+   "near": "KITCHEN",
+   "x": 976.0,
+   "y": 310.0
+  },
+  {
+   "cells": 165,
+   "near": "KITCHEN",
+   "x": 976.0,
+   "y": 330.0
+  },
+  {
+   "cells": 149,
+   "near": "CHECKOUT",
+   "x": 682.4,
+   "y": 539.5
+  },
+  {
+   "cells": 147,
+   "near": "RESTROOMS",
+   "x": 708.1,
+   "y": 645.6
+  },
+  {
+   "cells": 135,
+   "near": "RESTROOMS",
+   "x": 707.9,
+   "y": 623.6
+  },
+  {
+   "cells": 112,
+   "near": "RESTROOMS",
+   "x": 743.0,
+   "y": 667.0
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 18.8,
+   "meters": 4.46,
+   "name": "BAKERY"
+  },
+  {
+   "cells": 14.3,
+   "meters": 3.38,
+   "name": "SEAFOOD"
+  },
+  {
+   "cells": 12.2,
+   "meters": 2.9,
+   "name": "ENTRANCE"
+  }
+ ],
+ "m_per_cell": 0.2365,
+ "narrow": [
+  {
+   "half_width_m": 0.71,
+   "name": "EXIT"
+  },
+  {
+   "half_width_m": 0.71,
+   "name": "KITCHEN"
+  },
+  {
+   "half_width_m": 0.85,
+   "name": "RESTROOMS"
+  },
+  {
+   "half_width_m": 0.95,
+   "name": "MEAT"
+  },
+  {
+   "half_width_m": 1.0,
+   "name": "AISLE 20"
+  },
+  {
+   "half_width_m": 1.0,
+   "name": "AISLE 39"
+  },
+  {
+   "half_width_m": 1.0,
+   "name": "AISLE 44"
+  },
+  {
+   "half_width_m": 1.06,
+   "name": "AISLE 22"
+  }
+ ],
+ "provenance": {
+  "drift": {
+   "seal_zones": {
+    "derived_n": 7,
+    "derived_names": [
+     "auto:BAKERY",
+     "auto:DELI",
+     "auto:FLORAL",
+     "auto:KITCHEN",
+     "auto:PHARMACY",
+     "auto:SEAFOOD",
+     "auto:CHECKSTANDS"
+    ],
+    "file_n": 5,
+    "file_names": [
+     "Deli service island (staff behind counter; ~1.4 m pass-throughs)",
+     "Bakery service island (staff)",
+     "Seafood counter (staff)",
+     "Floral counter (staff)",
+     "Checkstand lane bank \u2014 looser: checkout lanes are wider than service-counter gaps, so bridge more to seal the lanes while the wide front action-alley stays open"
+    ]
+   },
+   "zones": {
+    "CHECKOUT": {
+     "derived": [
+      547.2969512939453,
+      573.0809936523438
+     ],
+     "file": [
+      600.0,
+      578.0
+     ]
+    },
+    "ENTRANCE": {
+     "derived": [
+      447.48699951171875,
+      612.317626953125
+     ],
+     "file": [
+      447.5,
+      612.3
+     ]
+    }
+   }
+  },
+  "exclusions": "file",
+  "inclusions": "file",
+  "seal_zones": "file",
+  "zones": "file"
+ },
+ "reachable_pct": 24.0,
+ "store": "659",
+ "verify": [],
+ "walkable_pct": 24.2
+}

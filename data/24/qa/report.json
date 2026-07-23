@@ -1,0 +1,265 @@
+{
+ "components": {
+  "n": 1,
+  "sizes": [
+   62087
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 3725,
+   "near": "BAKERY",
+   "x": 755.9,
+   "y": 465.7
+  },
+  {
+   "cells": 2735,
+   "near": "PHARMACY",
+   "x": 298.3,
+   "y": 485.0
+  },
+  {
+   "cells": 2016,
+   "near": "SEAFOOD",
+   "x": 1017.5,
+   "y": 358.6
+  },
+  {
+   "cells": 975,
+   "near": "BLOOMS RESTROOMS",
+   "x": 701.4,
+   "y": 549.9
+  },
+  {
+   "cells": 875,
+   "near": "PHARMACY",
+   "x": 234.5,
+   "y": 541.2
+  },
+  {
+   "cells": 725,
+   "near": "BAKERY",
+   "x": 818.0,
+   "y": 514.4
+  },
+  {
+   "cells": 649,
+   "near": "SEAFOOD",
+   "x": 921.4,
+   "y": 443.1
+  },
+  {
+   "cells": 582,
+   "near": "AISLE 40",
+   "x": 533.9,
+   "y": 639.7
+  },
+  {
+   "cells": 486,
+   "near": "KITCHEN",
+   "x": 603.0,
+   "y": 298.0
+  },
+  {
+   "cells": 486,
+   "near": "KITCHEN",
+   "x": 629.0,
+   "y": 298.0
+  },
+  {
+   "cells": 486,
+   "near": "CANNED MEAT",
+   "x": 767.0,
+   "y": 298.0
+  },
+  {
+   "cells": 461,
+   "near": "CANNED MEAT",
+   "x": 792.9,
+   "y": 302.1
+  },
+  {
+   "cells": 450,
+   "near": "DELI",
+   "x": 641.8,
+   "y": 441.2
+  },
+  {
+   "cells": 403,
+   "near": "AISLE 19",
+   "x": 569.1,
+   "y": 476.2
+  },
+  {
+   "cells": 381,
+   "near": "ENTRANCE",
+   "x": 824.7,
+   "y": 627.5
+  },
+  {
+   "cells": 337,
+   "near": "AISLE 19",
+   "x": 547.1,
+   "y": 465.2
+  },
+  {
+   "cells": 337,
+   "near": "BAKERY",
+   "x": 830.5,
+   "y": 328.9
+  },
+  {
+   "cells": 300,
+   "near": "AISLE 41",
+   "x": 321.0,
+   "y": 574.9
+  },
+  {
+   "cells": 299,
+   "near": "CHECKSTANDS",
+   "x": 690.2,
+   "y": 723.4
+  },
+  {
+   "cells": 275,
+   "near": "SEAFOOD",
+   "x": 1034.0,
+   "y": 538.0
+  },
+  {
+   "cells": 272,
+   "near": "EXIT",
+   "x": 765.9,
+   "y": 730.7
+  },
+  {
+   "cells": 269,
+   "near": "CHECKSTANDS",
+   "x": 784.8,
+   "y": 643.4
+  },
+  {
+   "cells": 214,
+   "near": "AISLE 43",
+   "x": 482.0,
+   "y": 725.4
+  },
+  {
+   "cells": 214,
+   "near": "CHECKSTANDS",
+   "x": 655.9,
+   "y": 639.7
+  },
+  {
+   "cells": 200,
+   "near": "AISLE 22",
+   "x": 525.8,
+   "y": 445.8
+  },
+  {
+   "cells": 182,
+   "near": "BLOOMS RESTROOMS",
+   "x": 838.4,
+   "y": 541.5
+  },
+  {
+   "cells": 181,
+   "near": "BLOOMS RESTROOMS",
+   "x": 779.5,
+   "y": 512.8
+  },
+  {
+   "cells": 179,
+   "near": "CHECKSTANDS",
+   "x": 739.3,
+   "y": 639.4
+  },
+  {
+   "cells": 154,
+   "near": "BLOOMS RESTROOMS",
+   "x": 758.1,
+   "y": 512.5
+  },
+  {
+   "cells": 151,
+   "near": "SEAFOOD",
+   "x": 1034.1,
+   "y": 496.4
+  },
+  {
+   "cells": 142,
+   "near": "SEAFOOD",
+   "x": 1030.4,
+   "y": 371.8
+  },
+  {
+   "cells": 121,
+   "near": "SEAFOOD",
+   "x": 950.0,
+   "y": 351.1
+  },
+  {
+   "cells": 103,
+   "near": "CHECKSTANDS",
+   "x": 698.6,
+   "y": 635.6
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 14.4,
+   "meters": 3.22,
+   "name": "ENTRANCE"
+  }
+ ],
+ "m_per_cell": 0.2243,
+ "narrow": [
+  {
+   "half_width_m": 0.81,
+   "name": "AISLE 41"
+  },
+  {
+   "half_width_m": 0.81,
+   "name": "PHARMACY"
+  },
+  {
+   "half_width_m": 0.81,
+   "name": "POT PIE FROZEN DESSERTS"
+  },
+  {
+   "half_width_m": 0.9,
+   "name": "CANNED MEAT"
+  },
+  {
+   "half_width_m": 0.9,
+   "name": "EXIT"
+  },
+  {
+   "half_width_m": 0.9,
+   "name": "KITCHEN"
+  },
+  {
+   "half_width_m": 0.92,
+   "name": "FROZEN FOODS"
+  },
+  {
+   "half_width_m": 0.95,
+   "name": "AISLE 43"
+  }
+ ],
+ "provenance": {
+  "drift": null,
+  "exclusions": "absent",
+  "inclusions": "file",
+  "seal_zones": "derived",
+  "zones": "derived"
+ },
+ "reachable_pct": 23.5,
+ "store": "24",
+ "verify": [],
+ "walkable_pct": 23.5
+}

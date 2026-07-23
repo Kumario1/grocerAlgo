@@ -1,0 +1,26 @@
+walkable: 40.0% of page (40.0% entrance-reachable)
+components: 1  sizes: [96825]
+anchors: 43  |  exclusions: 6
+service pockets sealed (service + dead crevices): 18
+   1669 cells at (146,627) near PHARMACY
+    219 cells at (574,614) near CHECKSTANDS
+    175 cells at (730,610) near AISLE 30
+    136 cells at (546,610) near CHECKSTANDS
+    126 cells at (248,623) near AISLE 19
+    123 cells at (684,609) near AISLE 29
+    123 cells at (484,609) near AISLE 24
+    123 cells at (464,609) near AISLE 24
+    120 cells at (247,603) near AISLE 19
+    113 cells at (602,609) near CHECKSTANDS
+snaps moved >12 cells (check reachable.png):
+  ENTRANCE: 16 cells (~2.3 m)
+  PHARMACY: 13 cells (~2.0 m)
+tightest corridors at anchors (half-width capacity):
+  AISLE 1: 0.74 m
+  AISLE 10: 0.74 m
+  AISLE 11: 0.74 m
+  AISLE 12: 0.74 m
+  AISLE 13: 0.74 m
+  AISLE 14: 0.74 m
+  AISLE 15: 0.74 m
+  AISLE 16: 0.74 m
