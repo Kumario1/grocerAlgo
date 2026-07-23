@@ -1,0 +1,13 @@
+[
+  {"name": "west back-of-house band (Deli/Tortilleria/Bakery production): 60x220 pt of floor with no fixture and no product label, walled off from the sales floor by the deli-alcove wall x=120 (y 107-151), a pair of drawn swing doors at x 121-129 (y 149-160), the Tortilleria walls (y 163-191), the sawtooth case x 144-148 (y 203-229) and the bakery wall x 139-146 (y 237-324); shoppers use the 15 pt aisle east of that line",
+   "rect": [86, 103, 146.5, 324]},
+  {"name": "walled back room west of Produce (x 89-140, y 324-368): four drawn walls with a door swing in its south wall at x 103-112 - staff/receiving, not sales floor",
+   "rect": [86, 322, 146.5, 372]},
+  {"name": "Pharmacy dispensary behind the drawn counter (traced from PDF strokes: counter x=606 wall, step down to (657,418), counter run to (692,418), jog north to (692,399), east wall x=717, south wall y=437) - staff only; the pickup recess north of the counter is customer space",
+   "poly": [[606, 401], [647, 401], [657, 418], [692, 418], [692, 399],
+            [717, 399], [717, 437], [606, 437]]},
+  {"name": "receiving-door recess in the north wall between the Deli and Seafood case runs (x 248-262 between the two drawn jambs, door swing arc at the top) - staff door, not shopping floor",
+   "rect": [247, 96, 264, 125]},
+  {"name": "Sushiya counter kiosk at the south end of the west shelf run (drawn roundel + counter box centred (186,372), r~9.5 pt; vector artwork the raster extractor did not capture as a fixture)",
+   "rect": [177, 361, 195, 381]}
+]

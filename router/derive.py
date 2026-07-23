@@ -22,6 +22,14 @@ def pdf_path(store):
     never matches a store-124 file."""
     hits = sorted(p for p in glob.glob(f"guide-*-{store}.pdf")
                   if p.endswith(f"-{store}.pdf"))
+    selected = _load_json(f"data/{store}/source.json")
+    if selected is not None:
+        chosen = selected.get("pdf")
+        if chosen not in hits or os.path.dirname(chosen):
+            raise SystemExit(
+                f"selected guide for store {store} is unavailable or unsafe: "
+                f"{chosen!r}; rerun discover.py")
+        return chosen
     if not hits:
         raise SystemExit(f"no guide-*-{store}.pdf in the repo root — run: "
                          f"python3 discover.py {store}")
