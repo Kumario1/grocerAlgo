@@ -1,0 +1,4 @@
+[
+  {"name": "Checkstand lane bank: 17 checkstands at a 13.4 pt pitch span x 332-548, and only their bodies (y 404-424) are drawn, so the zone is clipped to that band - the front action alley north of it (aisle-shelf ends stop at y=380.5) and the front walkway south of it stay open. Lanes measure 8-16 pt between bodies, so the bridge is 16 pt (wider than a service-counter pass-through, as at 659)",
+   "rect": [322, 404, 552, 424], "bridge": 16}
+]

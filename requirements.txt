@@ -1,8 +1,10 @@
 pymupdf>=1.27
 numpy
 scipy
+scikit-image
 rapidfuzz
 fastapi
 uvicorn
 pytest
 httpx
+opencv-python-headless

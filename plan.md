@@ -9,8 +9,8 @@
 > - Every substantive edit → one line in the **§16 Changelog**.
 > - Confidence tags on findings: `confirmed` (observed in live data / official docs), `strong` (multiple independent implementations agree), `inferred` (reasoned, not yet verified), `unconfirmed` (needs a test).
 
-**Version:** 1.4 · **Last updated:** 2026-07-21 · **Owner:** RAM
-**Prototype status:** Routing engine proven end-to-end on a real floor plan (see §15).
+**Version:** 1.6 · **Last updated:** 2026-07-22 · **Owner:** RAM
+**Prototype status:** #659 routable end-to-end; universal map pipeline live across 5 stores (see §15).
 
 ---
 
@@ -125,6 +125,8 @@ Three planes. **The scraping agent is never in the user's hot path** — the loa
 **User-supplied maps.** Accepted: H-E-B app screenshot, chain-site map, photo of a printed directory. They enter the §9.1 ingestion pipeline and activate after QA. We **render our own stylized map from parsed geometry** (walls, fixtures, anchors) — cleaner UX and avoids redistributing chain artwork.
 
 **Onboarding automation (future expansion — noted 2026-07-20).** The OFFLINE plane is deliberately a **human process for now**: RAM runs it by hand for the first pilot store(s). Planned expansion: when a user selects a store we have no data for, a **headless onboarding agent** runs the entire offline pipeline autonomously — acquire a source (published directory PDF → §7 Tier 0; else vector asset; else raster map), parse it (§8.1), **self-verify in a loop** using the same checks the human QA pass applies (marker count, VLM read-back of badge digits, connectivity + route-legality checks, corridor-graph inspection, calibration sanity — §8.1), retry/adjust until checks pass or it escalates — then writes the store profile and kicks off the Location DB warm-up. Human QA becomes the escalation path, not a pipeline stage. Tracked as P2 #17.
+
+**Update 2026-07-22: shipped for the map half.** `docs/onboarding.md` (headless-agent runbook), `docs/audit.md` (independent adversarial audit role — the onboarding agent never grades its own work), `discover.py`/`pipeline.sh` (guide-PDF acquisition), `rebuild.sh` + machine-readable `data/<N>/qa/report.json` (the self-verify loop). Human QA is now the escalation path, exactly as planned. See §13 Phase 1.5.
 
 ---
 
@@ -284,7 +286,7 @@ trips             (list_id, route jsonb, events jsonb[checkoff|skip|correction],
 14. Category→aisle prediction model for cold-start stores.
 15. Multi-entrance stores; route from a chosen entrance.
 16. Shared/household lists; recurring staples.
-17. **Agent-automated store onboarding** — headless agent runs the offline pipeline end-to-end (map acquisition → parse → self-verify loop → store profile → warm-up) when an unmapped store is selected; human-run for pilot store(s) until then (§6).
+17. **Agent-automated store onboarding** — headless agent runs the offline pipeline end-to-end (map acquisition → parse → self-verify loop → store profile → warm-up) when an unmapped store is selected. **Shipped for the map half 2026-07-22 (§6 update, §13 Phase 1.5);** remaining: Location-DB warm-up + on-demand triggering from store selection.
 
 ---
 
@@ -312,15 +314,17 @@ trips             (list_id, route jsonb, events jsonb[checkoff|skip|correction],
 > **Reordered 2026-07-21 (v1.3): H-E-B first.** Kroger-first existed to dodge H-E-B scraping risk; HEB-F7/F8 dissolved that risk (official directory + vector map, zero scraping) and the #659 assets are already parsed — the shortest path to a routable real store is now H-E-B. Kroger moves to Phase 2 as the precision tier and second-provider proof. Pilot store **resolved: Austin #659** (assets in hand); the A&M store becomes store #2 in Phase 2 so the beta still lands on the audience.
 
 - **Phase 0 — done.** Routing engine on a real floor plan: markers 41/41, occupancy grid, BFS distances, exact TSP, rendered route, ~48% measured savings vs average order (§15).
-- **Phase 1 (wks 1–3): H-E-B #659 end-to-end — directory-powered, zero scraping.**
-  1. **Store profile** — package the extracted #659 vector data (anchors, fixtures, corridor geometry) into the store-profile format: grid/corridor graph, all-pairs anchor distance matrix, entrance/checkout marked. Mostly assembly, not new parsing.
-  2. **Location DB seed** — load `heb659_directory.csv` (165 entries), parsing ranges ("33 – 35"), multi-locations ("Checkstands, 19"), and named zones ("Left Wall") → anchor keys.
-  3. **Product resolution** — fuzzy match (RapidFuzz) of typed/pasted list lines against directory entries; autocomplete over the 165 entries; unmatched → top-3 suggestions or flagged, never dropped. No SKU catalog, no scraping in this phase.
-  4. **Web app** — store fixed to #659: list in → optimal route on the stylized rebuilt map (numbered stops, entrance→checkout, distance).
-  **Exit:** a stranger can paste a 25-item list and get a correct routed map for #659 in <1 s, ≥85% auto-located.
-  *(Dropped from old Phase 1: ingestion QA tool + digit OCR — vector extraction made them unnecessary for this store class; revisit when a raster-only store shows up.)*
-- **Phase 2 (wks 4–7): shopping mode + second store + Kroger.** Interactive check-off + re-route; probe A&M-area directory PDFs (Q8) and onboard the A&M store for the beta audience; Kroger adapter (stores, catalog, aisle/side/bay — the precision tier and second-provider proof); Tier-2 HEB scraper only if directory coverage gaps demand it; 20-user beta. **Exit:** ≥85% auto-locate, ≥30% median distance reduction on real trips (G1/G2).
-- **Phase 3 (wks 8+):** corrections/crowdsourcing loop, 5 stores, cold-chain constraint, category→aisle prior, trip-time model.
+- **Phase 1 — done (2026-07-21).** H-E-B #659 end-to-end, directory-powered, zero scraping: store profile from vector assets, directory-seeded location data (165 entries incl. ranges/multi-locations/named zones), fuzzy resolution + autocomplete over the directory, web app (`app.py`) rendering the optimal route on the rebuilt map. Exit met: stranger-usable routed map for #659. Routing runs on the v0 primitives (grid BFS + Held-Karp in `router/engine.py`).
+- **Phase 1.5 — done (2026-07-21→22, unplanned pull-forward of P2 #17).** **Universal map pipeline — data, not code.** Extraction/build/QA code frozen and store-agnostic; ALL store-specific truth lives in `data/<N>/` JSON (geometry, zones, seal_zones, exclusions, inclusions, walk_truth); zones/seal-zones auto-derive from extracted labels; #659 pixel-golden regression (`golden_free.npy`). Headless-agent onboarding runbook (`docs/onboarding.md`) + independent adversarial audit role (`docs/audit.md`); coverage nets (unreachable-shelf-labels, sealed-floor-patches) added after store 24 shipped with its pharmacy wing sealed and every other signal green; `discover.py` + `pipeline.sh` as the autonomous acquisition interface (Q8: URL pattern confirmed). **Stores onboarded: #24, #388 (fragmented guide), #790 (Plano); #265 (Cedar Park, raster-scan guide) in flight** on the guarded raster-extraction fallback (`router/raster.py` — OCR, deskew, boundary discovery).
+- **Phase 2 (now): the main route algorithm — #659 as base store.** Upgrade routing from the Phase-1 v0 primitives to the §8 target model. Built and tuned on #659 only, but written store-agnostic from day one — no store constant may live outside `data/659/`:
+  1. **Corridor graph** (§8.1) — medial-axis skeleton of the walkable grid → sparse node/edge graph; aisle badges and department anchors assigned to *segments* (real entry/exit endpoints), not points; persisted in the store profile.
+  2. **Distance layer** (§8.4) — all-pairs anchor matrix precomputed at build time into the profile; request-time assembly is dict lookups only; path trace + line-of-sight string-pulling for rendering.
+  3. **Stops & solve** (§8.5) — items → aisle-segment stops (consolidation, entry-direction-aware intra-segment order); Held-Karp ≤18 stops, 2-opt beyond; fixed entrance→checkout endpoints; every solve also scores the user's list order (savings telemetry, G1).
+  4. **Legality + goldens** — every rendered route validated against the free grid (no through-shelf legs — the §8.1 leak class must be impossible at the route layer too); frozen route golden for a fixed 25-item list on #659.
+  **Exit:** #659 routes on the corridor model, <300 ms p95 (§8.7), route golden frozen, algorithm reads store truth exclusively from `data/659/`.
+- **Phase 3: routing as data — every onboarded store routes.** Run the untouched Phase-2 algorithm across #24, #388, #790, #265. Per-store directory extraction from each guide PDF (today only #659 has `directory.csv`); per-store route goldens; discrepancies fixed by editing `data/<N>/`, never the algorithm — the Phase-1.5 onboarding discipline extended to routing. Shopping mode (check-off → re-solve remaining sub-TSP, §8.6) lands here. **Exit:** all 5 stores route end-to-end through the same code path; a new store needs only its `data/<N>/` folder.
+- **Phase 4 (was Phase 2): second provider + beta.** Kroger adapter (stores, catalog, aisle/side/bay — the precision tier and second-provider proof); onboard the A&M-area store for the beta audience; Tier-2 HEB scraper only if directory coverage gaps demand it; 20-user beta. **Exit:** ≥85% auto-locate, ≥30% median distance reduction on real trips (G1/G2).
+- **Phase 5 (was Phase 3):** corrections/crowdsourcing loop, cold-chain constraint, category→aisle prior, trip-time model.
 
 **Metrics recap** — *leading:* auto-locate rate, route latency p95, % trips ≥80% checked off, measured distance saved/trip. *lagging:* repeat routed trips/user/month (≥2), D30 retention, corrections/trip trending down.
 
@@ -334,7 +338,7 @@ trips             (list_id, route jsonb, events jsonb[checkoff|skip|correction],
 | Q5 | How loud should "unknown location" items be in the route UI (end bucket vs inline badge) | Design | Phase 2 | Open |
 | Q6 | Kroger `filter.locationId` — is `side`/`bay` populated for all SKUs or only some? Affects bay-snap coverage | Eng | No | Open → verify during Phase 1 |
 | Q7 | Is H-E-B's in-app store map backed by a vector/structured asset (aisle geometry, maybe item pins)? If yes, vector-first ingestion (§8.1) skips raster CV entirely and may reopen the pin_xy path (HEB-F2) | Eng | No (big simplifier if yes) | **Resolved (better than asked)** → §14.1-F7/F8: official published *directory PDFs* are fully vector with live text — exact geometry + item→aisle list in one document; raster CV skipped for this class. In-app map itself unprobed, moot where a directory exists |
-| Q8 | Directory PDF coverage: does H-E-B publish these for all/most stores, and at a guessable URL pattern (`guide-<city>-<store#>.pdf`)? Determines how far Tier 0 scales | Eng | No | Open → probe during Phase 2 |
+| Q8 | Directory PDF coverage: does H-E-B publish these for all/most stores, and at a guessable URL pattern (`guide-<city>-<store#>.pdf`)? Determines how far Tier 0 scales | Eng | No | **Largely resolved (2026-07-22)** → pattern confirmed; `discover.py` fetched guides for 5 stores (24, 265, 388, 659, 790). Variants found: fragmented guides (#388), raster-scan guides (#265 → raster fallback). Residual: coverage breadth across the full chain |
 
 ---
 
@@ -445,12 +449,15 @@ Implication: Reinforces cache-first + nightly top-N warm even for the official p
 - **Rendering:** optimal route drawn on the map (numbered stops, entrance→checkout, distance readout).
 - **Measured result:** optimized route ~390 m vs ~460 m list-order and ~760 m average-random-order → **~48% shorter than an unordered list**.
 - **Vector ingestion (2026-07-21, store #659):** official directory PDF parsed exactly — 165-entry item→aisle table (`heb659_directory.csv`/`.json`, the Location-DB seed), 45/45 aisle badges + departments + entrances/checkstands + 563 fixture rectangles with coordinates, alignment proof (`heb659_overlay.png`), full stylized rebuild from primitives alone (`heb659_vector_reconstruction.png`). Note: the Phase-0 CV prototype above ran on a *different* 41-aisle floor plan — the two stores/maps are not the same asset.
-- Files: `store_router.py` (engine), `optimal_route.png` (rendered demo), `guide-austin-659.pdf` (source directory), `heb659_*` (vector-ingestion deliverables).
+- **Universal map pipeline (2026-07-21→22):** frozen store-agnostic extract/build/QA code (`extract.py`, `build_profile.py`, `map_qa.py`, `router/` package); per-store truth as data under `data/<N>/`; #659 pixel-golden regression; headless onboarding runbook + adversarial audit role (`docs/`); `rebuild.sh`/`pipeline.sh`/`discover.py` automation. Stores #24, #388, #790 onboarded and audited; #265 (raster guide) in flight on the raster fallback.
+- **Web app (Phase 1 exit):** `app.py` — list in → routed map for #659 via `router/engine.py` (grid BFS + Held-Karp v0 primitives; corridor-graph upgrade is §13 Phase 2).
+- Files: `router/` (engine + pipeline), `app.py` (web app), `store_router.py` (Phase-0 prototype), `data/<N>/` (store truth), `guide-*.pdf` (source directories), `heb659_*` (vector-ingestion deliverables).
 
 ---
 
 ## 16. Changelog
 
+- **2026-07-22 — v1.6.** Roadmap restructured around what actually shipped (§13): **Phase 1.5 recorded** — universal map pipeline (data-not-code, frozen algorithm, per-store JSON truth, #659 pixel golden), headless onboarding + adversarial audit (P2 #17 shipped for the map half — §6 update), coverage nets, stores #24/#388/#790 onboarded, #265 raster fallback in flight. **Phase 2 redefined as the main route algorithm on #659** (corridor graph, precomputed anchor matrix, segment stops, route legality + goldens); **Phase 3 = same algorithm fitted to all stores as data**; Kroger + beta → Phase 4; growth loop → Phase 5. Q8 largely resolved (`discover.py`, 5 guides fetched; fragmented + raster variants found). §15 updated.
 - **2026-07-21 — v1.5.** Exact-geometry extraction: HEB-F11 (non-rect linework is load-bearing — chains/polys/quads/beziers captured exactly; degenerate fills are walls; behind-shelf space auto-culls once real walls exist; H-E-B app item locator = per-shelf ground truth). `geometry.json` gains `fixture_polys`; engine rasterizes them; extract overlay now renders walls + polys; web map draws polygon fixtures. #659: 403 poly fixtures (rotated-quad cafe tables now block). #24: VERIFY flags 4→2 with zero hand data.
 - **2026-07-21 — v1.4.** Walkable-area correctness pass from store-owner QA markup: HEB-F10 (boundary polygon is the sales floor; service areas drawn open but staff-only; staff gaps ≤~1 m vs customer openings ≥~1.5 m). Engine gains boundary rasterization + `seal_staff_gaps`; map_qa gains service-label VERIFY pass + per-store folders (`data/<store>/`); walkability ground-truth tests added; validated on stores #659 and #24.
 - **2026-07-21** — Phase 1 exit reached: #659 routable end-to-end via web app (see README).
