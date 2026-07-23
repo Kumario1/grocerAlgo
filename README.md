@@ -1,8 +1,9 @@
 # grocerAlgo — in-store route optimizer
 
-Paste a grocery list, get the provably shortest walking route through
-H-E-B #659 (Austin). Powered by the store's official published directory
-PDF — no scraping. See `plan.md` for the full product plan.
+Search H-E-B's live catalog, select exact products, and get the shortest
+legal walking route through Lakeline H-E-B Plus! #659 (Austin). Product
+placement uses H-E-B PALS data against the current 41-aisle Atlas map.
+See `plan.md` for the full product plan.
 
 ## Run it
 
@@ -11,6 +12,16 @@ PDF — no scraping. See `plan.md` for the full product plan.
     # apt install tesseract-ocr        # Debian/Ubuntu equivalent
     python3 -m uvicorn app:app --port 8000
     # open http://localhost:8000
+
+On first run, choose **Connect H-E-B**. A persistent local Chrome profile
+opens; select Lakeline H-E-B Plus! #659 there, return to the app, and confirm.
+The profile is stored under `.heb-659/` and ignored by git. Credentials are
+never stored by grocerAlgo.
+
+The live Atlas profile was imported from the saved H-E-B product page:
+
+    python3 import_heb.py "Fresh Sweet Cob Corn - Texas-Size Pack - Shop Corn at H-E-B.html"
+    python3 build_profile.py 659-atlas
 
 ## Autonomous onboarding (any H-E-B store)
 

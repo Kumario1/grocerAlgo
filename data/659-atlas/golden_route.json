@@ -1,0 +1,76 @@
+{
+ "products": [
+  {
+   "id": "1538360",
+   "name": "H-E-B Sweet Mini Cob Corn, 12 CT",
+   "brand": "H-E-B",
+   "size": "12 CT",
+   "image_url": "https://images.heb.com/is/image/HEBGrocery/prd-small/001538360.jpg",
+   "inventory_state": "IN_STOCK",
+   "location_label": "In Produce on the Front Wall",
+   "selectable": true
+  },
+  {
+   "id": "1657904",
+   "name": "Fresh Sweet Cob Corn - Texas-Size Pack, 8 ct",
+   "brand": "Fresh",
+   "size": "8 ct",
+   "image_url": "https://images.heb.com/is/image/HEBGrocery/prd-small/001657904.jpg",
+   "inventory_state": "IN_STOCK",
+   "location_label": "In Produce on the Front Wall",
+   "selectable": true
+  },
+  {
+   "id": "374788",
+   "name": "Fresh Corn",
+   "brand": "Fresh",
+   "size": "Each",
+   "image_url": "https://images.heb.com/is/image/HEBGrocery/prd-small/000374788.jpg",
+   "inventory_state": "IN_STOCK",
+   "location_label": "In Produce on the Right Wall",
+   "selectable": true
+  },
+  {
+   "id": "929898",
+   "name": "Fresh Sweet Cob Corn, 4 ct",
+   "brand": "Fresh",
+   "size": "4 ct",
+   "image_url": "https://images.heb.com/is/image/HEBGrocery/prd-small/000929898.jpg",
+   "inventory_state": "IN_STOCK",
+   "location_label": "In Produce on the Front Wall",
+   "selectable": true
+  }
+ ],
+ "stops": [
+  {"n": 1, "product_id": "1538360", "quantity": 2},
+  {"n": 2, "product_id": "1657904", "quantity": 1},
+  {"n": 3, "product_id": "374788", "quantity": 1},
+  {"n": 4, "product_id": "929898", "quantity": 1}
+ ],
+ "distance_m": 160.6,
+ "baseline_m": 160.6,
+ "saved_m": 0.0,
+ "path": [
+  [657.0, 617.0],
+  [671.0, 617.0],
+  [683.0, 423.0],
+  [743.0, 405.0],
+  [885.0, 407.0],
+  [877.0, 457.0],
+  [865.0, 487.0],
+  [781.0, 483.0],
+  [865.0, 487.0],
+  [877.0, 455.0],
+  [885.0, 407.0],
+  [687.0, 405.0],
+  [687.0, 423.0],
+  [661.0, 509.0],
+  [625.0, 585.0],
+  [615.0, 593.0],
+  [517.0, 593.0],
+  [511.0, 585.0],
+  [477.0, 585.0],
+  [439.0, 507.0],
+  [411.0, 507.0]
+ ]
+}

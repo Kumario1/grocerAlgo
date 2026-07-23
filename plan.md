@@ -9,8 +9,8 @@
 > - Every substantive edit → one line in the **§16 Changelog**.
 > - Confidence tags on findings: `confirmed` (observed in live data / official docs), `strong` (multiple independent implementations agree), `inferred` (reasoned, not yet verified), `unconfirmed` (needs a test).
 
-**Version:** 1.6 · **Last updated:** 2026-07-22 · **Owner:** RAM
-**Prototype status:** #659 routable end-to-end; universal map pipeline live across 5 stores (see §15).
+**Version:** 1.7 · **Last updated:** 2026-07-23 · **Owner:** RAM
+**Prototype status:** #659 routes selected live H-E-B products on the current Atlas map; universal map pipeline live across 5 stores (see §15).
 
 ---
 
@@ -75,7 +75,7 @@ Shoppers with 15–40 items waste time backtracking because lists are written in
 ## 5. User Flow (v1)
 
 1. **Pick store** — geolocate → nearby stores from provider → confirm (persisted as default).
-2. **Build list** — autocomplete against that store's catalog, or paste free text.
+2. **Build list** — autocomplete against that store's catalog and select exact products. Free-text paste remains a later fallback.
 3. **Route** — one tap → optimal route on the map: numbered stops, entrance → checkout, total distance/time.
 4. **Shop** — check items off; route re-solves from current stop; skipped items re-insert optimally.
 5. **Done** — trip summary: distance walked, estimate of distance/time saved.
@@ -151,7 +151,7 @@ Free public developer program, OAuth2 client-credentials. Locations API → stor
 No public API (§14.1) — but H-E-B **publishes official per-store directory PDFs** (HEB-F7/F8), which flipped the strategy on 2026-07-21: published directories are the primary item→aisle source; scraping is a fallback tier, not the plan. Tiers:
 - **Tier 0 — official store directory (seed, once per store).** Parse the published directory PDF → item/category→aisle for the whole store in one pass (pilot store #659: 165 entries incl. ranges, "Left Wall", "Checkstands" — F7). Zero scraping, customer-facing artifact → minimal ToS exposure; keeps working no matter what heb.com does. Seeds the Location DB at onboarding; the map half of the same PDF feeds §8.1 vector ingestion.
 - **Tier 1 — Location DB (our cache).** Hit → ~10 ms. Serves ~all traffic after seeding/warm-up.
-- **Tier 2 — background lookup on miss (fallback-only since F7).** For SKU-level detail and items the directory doesn't list: persisted-query / SSR client first (fast, brittle); Playwright headless agent when the WAF challenges or a session refresh is needed. Result written with TTL. **Detail: fills `aisle`/`dept` string only — no `pin_xy` (§14.1).**
+- **Tier 2 — background lookup on miss (fallback-only since F7).** For SKU-level detail and items the directory doesn't list: persisted-query / SSR client first (fast, brittle); Playwright browser session when the WAF challenges or a session refresh is needed. The product object itself fills only the displayed location string, but the separate PALS endpoint plus Atlas PSA index yields precise store-map placement when available (HEB-F12). Result written with TTL.
 - **Tier 3 — model prior + crowdsourcing.** Still unknown → category→aisle prediction (§9.8) with visible uncertainty, plus one-tap in-store confirmation. **User confirmations are the long-term moat** — they make us progressively independent of scraping *and* of directory availability.
 
 **Why cache-first wins on every axis:** top ~3k SKUs cover ~90% of list lines (Pareto), so warm-up is a few thousand agent lookups once per store, then a trickle — and a directory-seeded store (Tier 0) already covers category→aisle wall-to-wall, shrinking agent warm-up to SKU-specific gaps. Tiny volume → low block risk + low ToS exposure. Hot path is a DB read. If scraping breaks, the product keeps running on cached + crowdsourced data. Planograms are stable for weeks–months → TTL 60–90 days; a "wrong spot" report invalidates + re-queues; a spike of corrections in one store triggers a bulk refresh (drift detector).
@@ -195,7 +195,8 @@ Pipeline (vector-first; raster CV is the fallback):
 
 ### 8.3 Location snapping (location record → map coordinate) — §9.3 detail
 Records arrive in shapes; each has a deterministic snap rule. **Which shapes a provider actually returns is in §14.** Vector-ingested stores (HEB-F8) supply *exact* anchor coordinates straight from the source geometry — nothing detected, nothing to eyeball.
-- **Aisle label** ("Aisle 14") → aisle anchor. *(HEB norm — §14.1.)*
+- **H-E-B PALS placement** → exact or approximate PSA point in the Atlas vector map; missing PALS data falls back to the displayed aisle/department anchor (HEB-F12).
+- **Aisle label** ("Aisle 14") → aisle anchor.
 - **Aisle + side/bay** → the aisle *segment* comes directly from the corridor graph (§8.1) — the skeleton edge the disc labels, with its two real endpoints (v0 fallback: walk the corridor from the anchor to both walls); bay index → linear interpolation along the segment; side → small offset toward that shelf face. *(Kroger — §14.2.)*
 - **Department** ("SEAFOOD") → department anchor.
 - **Map-pin (x, y)** in the chain's map frame → affine transform into our frame (least-squares from ≥3 correspondences, once per store). *(Not available for HEB — §14.1; keep the code path for future providers.)*
@@ -331,13 +332,13 @@ trips             (list_id, route jsonb, events jsonb[checkoff|skip|correction],
 ### Open questions
 | # | Question | Owner | Blocking? | Status |
 |---|---|---|---|---|
-| Q1 | Does HEB's `productLocation` object hide any field beyond `.location` (e.g. coordinates)? | Eng | No (snap precision only) | **Mostly resolved** → §14.1-F2: string only in every known impl; one raw-payload fetch to fully close |
+| Q1 | Does HEB's `productLocation` object hide any field beyond `.location` (e.g. coordinates)? | Eng | No (snap precision only) | **Resolved** → §14.1-F12: the product object exposes location text only; precise placement comes from the separate PALS endpoint joined to Atlas PSA elements |
 | Q2 | Acceptable posture on unofficial HEB access at beta scale; when to open partnership talks | Founder/Legal | Before Phase 2 launch | Open |
 | Q3 | Standalone app vs distribution through GGC's A&M audience (shared login, cross-promo) | Founder | Phase 2 | Open |
 | Q4 | Custom Held-Karp+2-opt vs OR-Tools as the single solver (constraints vs dependency footprint / on-device) | Eng | No | Open |
 | Q5 | How loud should "unknown location" items be in the route UI (end bucket vs inline badge) | Design | Phase 2 | Open |
 | Q6 | Kroger `filter.locationId` — is `side`/`bay` populated for all SKUs or only some? Affects bay-snap coverage | Eng | No | Open → verify during Phase 1 |
-| Q7 | Is H-E-B's in-app store map backed by a vector/structured asset (aisle geometry, maybe item pins)? If yes, vector-first ingestion (§8.1) skips raster CV entirely and may reopen the pin_xy path (HEB-F2) | Eng | No (big simplifier if yes) | **Resolved (better than asked)** → §14.1-F7/F8: official published *directory PDFs* are fully vector with live text — exact geometry + item→aisle list in one document; raster CV skipped for this class. In-app map itself unprobed, moot where a directory exists |
+| Q7 | Is H-E-B's in-app store map backed by a vector/structured asset (aisle geometry, maybe item pins)? If yes, vector-first ingestion (§8.1) skips raster CV entirely and may reopen the pin_xy path (HEB-F2) | Eng | No (big simplifier if yes) | **Resolved** → §14.1-F12: Atlas is a structured SVG with fixtures, landmarks, 41 aisle labels, and PSA points; PALS joins products to those points |
 | Q8 | Directory PDF coverage: does H-E-B publish these for all/most stores, and at a guessable URL pattern (`guide-<city>-<store#>.pdf`)? Determines how far Tier 0 scales | Eng | No | **Largely resolved (2026-07-22)** → pattern confirmed; `discover.py` fetched guides for 5 stores (24, 265, 388, 659, 790). Variants found: fragmented guides (#388), raster-scan guides (#265 → raster fallback). Residual: coverage breadth across the full chain |
 
 ---
@@ -355,7 +356,7 @@ trips             (list_id, route jsonb, events jsonb[checkoff|skip|correction],
 
 ### 14.1 H-E-B  (unofficial)
 
-**Summary as of 2026-07-20:** No public API. Data is reachable via HEB's Next.js SSR JSON endpoints + persisted GraphQL, gated by a rotating `buildId`, rotating query hashes, browser session cookies, and an Incapsula WAF. **Product location is an aisle STRING only — no coordinates.** Store-scoped; sometimes null.
+**Summary as of 2026-07-23:** No public API. Data is reachable through H-E-B's browser session and is gated by Incapsula. The product object contains a store-scoped display string, while the separate PALS service plus Atlas SVG provides precise placement when available (F12).
 
 **Update 2026-07-21:** H-E-B **publishes official per-store directory PDFs** (alphabetical item→aisle list + fully-vector floor plan). These are now the **primary** item-location source; the scraping stack above demotes to fallback (F7–F9).
 
@@ -417,6 +418,11 @@ Source: store-owner QA rounds on #659 ("small things such as these cannot be cap
 What: (a) Store #659's map holds **909 non-rectangular fill drawings and ~6,800 bezier/quad items** — diagonal counters, stepped kiosks, curved demo loops (Cooking Connection), and **rotated-quad cafe tables** — which bounding-box capture distorts and quad/curve-dropping deletes outright. (b) Some walls are drawn as **degenerate fills** (zero-width 2-line white fills, e.g. the seafood/kitchen counter walls) that any area-based filter discards. (c) **Open space behind a shelf's back face is not visitable** even when geometrically open; with exact walls captured, those spaces become enclosed pockets that reachability culling removes automatically — no hand exclusions needed.
 Implication: The extractor converts every drawing to **point chains** (lines chained, beziers sampled ×8, quads/rects as closed 4-pt chains): closed furniture-sized chains → exact fixtures (`fixtures` rects + `fixture_polys` vertex lists in geometry.json), thin/degenerate/open chains → wall segments, `<2 pt` chains → icon confetti, skipped. Validated: #659 gains 403 poly fixtures (cafe tables now block; the old "walkway" test point was standing on a table), #24 gains 158 with zero hand-authored data and its VERIFY flags drop 4→2 (PHARMACY and SEAFOOD now seal themselves via their own drawn counter walls). Ground truth for per-shelf visitability: the **H-E-B app's item locator** highlights the visitable shelf face for any searched product — screenshot + match against the map to verify anchors/walkability where the drawing is ambiguous.
 
+#### HEB-F12 — PALS plus Atlas provides precise product placement (2026-07-23, confirmed)
+Source: saved current H-E-B product page for store #659 and its shipped browser JavaScript; locally parsed `__NEXT_DATA__`, PALS responses, and Atlas SVG.
+What: Search `__NEXT_DATA__` returns ranked store-specific products with product ID, brand, size, inventory state, image, and display location. The product object still has location text only. A separate `/pals/v2.0/location/store/{store}/products/{product}` response supplies exact PSA records or an approximate PSA. Atlas `/atlas/v1.0/image` is a structured SVG whose `(area, aisle, side, section)` PSA elements resolve those records to coordinates. The current Lakeline asset has **41 aisle labels, 494 combined fixtures, and 2,677 unique PSA keys**. Incapsula challenges fresh HTTP clients, so the local pilot uses one persistent anonymous Playwright Chrome profile and verifies the active store and Atlas structural hash before enabling search.
+Implication: Supersedes F2's routing implication, not its observation about the product object. #659 now routes actual selected Catalog Products at PSA precision when possible, falls back visibly to aisle/department anchors, and fails closed if Atlas structure drifts. The prior 2018 `data/659` golden remains untouched; current map data lives in `data/659-atlas`.
+
 *(Next HEB findings append here.)*
 
 ### 14.2 Kroger  (official)
@@ -450,13 +456,14 @@ Implication: Reinforces cache-first + nightly top-N warm even for the official p
 - **Measured result:** optimized route ~390 m vs ~460 m list-order and ~760 m average-random-order → **~48% shorter than an unordered list**.
 - **Vector ingestion (2026-07-21, store #659):** official directory PDF parsed exactly — 165-entry item→aisle table (`heb659_directory.csv`/`.json`, the Location-DB seed), 45/45 aisle badges + departments + entrances/checkstands + 563 fixture rectangles with coordinates, alignment proof (`heb659_overlay.png`), full stylized rebuild from primitives alone (`heb659_vector_reconstruction.png`). Note: the Phase-0 CV prototype above ran on a *different* 41-aisle floor plan — the two stores/maps are not the same asset.
 - **Universal map pipeline (2026-07-21→22):** frozen store-agnostic extract/build/QA code (`extract.py`, `build_profile.py`, `map_qa.py`, `router/` package); per-store truth as data under `data/<N>/`; #659 pixel-golden regression; headless onboarding runbook + adversarial audit role (`docs/`); `rebuild.sh`/`pipeline.sh`/`discover.py` automation. Stores #24, #388, #790 onboarded and audited; #265 (raster guide) in flight on the raster fallback.
-- **Web app (Phase 1 exit):** `app.py` — list in → routed map for #659 via `router/engine.py` (grid BFS + Held-Karp v0 primitives; corridor-graph upgrade is §13 Phase 2).
+- **Web app (2026-07-23):** exact H-E-B product search and selection, locally persisted List Entries, PALS/Atlas Placement resolution, current-map route generation, and add/remove re-routing. The existing grid BFS, path-legality, and Held-Karp/heuristic TSP primitives remain unchanged.
 - Files: `router/` (engine + pipeline), `app.py` (web app), `store_router.py` (Phase-0 prototype), `data/<N>/` (store truth), `guide-*.pdf` (source directories), `heb659_*` (vector-ingestion deliverables).
 
 ---
 
 ## 16. Changelog
 
+- **2026-07-23 — v1.7.** Real-product routing for Lakeline #659: HEB-F12 records the PALS↔Atlas placement join; current 41-aisle Atlas imported into isolated `data/659-atlas`; persistent anonymous browser connection with store/map verification; product search picker, locally saved draft, placement rehydration, dynamic selected-product TSP, visible approximations/unrouted products, derived-geometry map rendering, and parser/API/profile/golden-route tests. Legacy `data/659` route goldens remain intact.
 - **2026-07-22 — v1.6.** Roadmap restructured around what actually shipped (§13): **Phase 1.5 recorded** — universal map pipeline (data-not-code, frozen algorithm, per-store JSON truth, #659 pixel golden), headless onboarding + adversarial audit (P2 #17 shipped for the map half — §6 update), coverage nets, stores #24/#388/#790 onboarded, #265 raster fallback in flight. **Phase 2 redefined as the main route algorithm on #659** (corridor graph, precomputed anchor matrix, segment stops, route legality + goldens); **Phase 3 = same algorithm fitted to all stores as data**; Kroger + beta → Phase 4; growth loop → Phase 5. Q8 largely resolved (`discover.py`, 5 guides fetched; fragmented + raster variants found). §15 updated.
 - **2026-07-21 — v1.5.** Exact-geometry extraction: HEB-F11 (non-rect linework is load-bearing — chains/polys/quads/beziers captured exactly; degenerate fills are walls; behind-shelf space auto-culls once real walls exist; H-E-B app item locator = per-shelf ground truth). `geometry.json` gains `fixture_polys`; engine rasterizes them; extract overlay now renders walls + polys; web map draws polygon fixtures. #659: 403 poly fixtures (rotated-quad cafe tables now block). #24: VERIFY flags 4→2 with zero hand data.
 - **2026-07-21 — v1.4.** Walkable-area correctness pass from store-owner QA markup: HEB-F10 (boundary polygon is the sales floor; service areas drawn open but staff-only; staff gaps ≤~1 m vs customer openings ≥~1.5 m). Engine gains boundary rasterization + `seal_staff_gaps`; map_qa gains service-label VERIFY pass + per-store folders (`data/<store>/`); walkability ground-truth tests added; validated on stores #659 and #24.

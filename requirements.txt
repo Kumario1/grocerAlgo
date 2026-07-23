@@ -8,3 +8,4 @@ uvicorn
 pytest
 httpx
 opencv-python-headless
+playwright

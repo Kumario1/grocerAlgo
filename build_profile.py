@@ -4,7 +4,11 @@
 
 Usage: python3 build_profile.py [store]   (default 659; reads/writes data/<store>/)
 """
-import sys, numpy as np
+import json
+import os
+import sys
+
+import numpy as np
 from router import engine, derive
 
 STORE = sys.argv[1] if len(sys.argv) > 1 else "659"
@@ -45,16 +49,18 @@ assert (D >= 0).all(), "disconnected anchor pair"
 pitch_pts = derive.derive_aisle_pitch(anchors)
 m_per_cell = 3.0 / (pitch_pts / engine.CELL)   # ponytail: coarse scale; label-only accuracy
 
+source_path = f"{DIR}/source.json"
+source_sha256 = ""
+if os.path.exists(source_path):
+    source_sha256 = json.load(open(source_path)).get("sha256", "")
 np.savez_compressed(f"{DIR}/profile.npz", free=free, cell=engine.CELL,
                     names=names, cells=cells, D=D, parents=parents,
-                    m_per_cell=m_per_cell)
+                    m_per_cell=m_per_cell, source_sha256=source_sha256)
 print(f"{n} anchors, grid {w}x{h}, m/cell={m_per_cell:.3f} -> {DIR}/profile.npz")
 
 # §8.1 corridor graph + §8.3 per-item shelf positions -> shelf_positions.json.
 # Optional: needs the guide PDF and a directory, so a store that has neither
 # just routes to aisle anchors as before.
-import json
-import os
 from router.directory import load_directory
 
 catalog = {}
