@@ -122,25 +122,20 @@
     #summary ol { padding-left: 1.45rem; }
     #summary li { margin: .3rem 0; }
     .warning { margin-top: .65rem; color: #9c2638; }
-    #map-shell { position: relative; min-width: 0; background: #ee9497; }
+    #map-shell {
+      position: relative; min-width: 0; height: calc(100vh - 57px);
+      background: #ee9497;
+    }
     #map-title {
       position: absolute; top: 1rem; left: 1rem; z-index: 1;
       padding: .4rem .6rem; border-radius: 6px; color: var(--muted);
       background: #fffdf8dd; font-size: .78rem;
     }
-    #map { width: 100%; height: calc(100vh - 57px); display: block; }
-    .walkability { image-rendering: pixelated; }
-    .boundary {
-      fill: none; stroke: #2f2c28; stroke-width: 2;
-      vector-effect: non-scaling-stroke;
+    #floor-map, #map {
+      position: absolute; inset: 0; width: 100%; height: 100%;
     }
-    .fixture { fill: #fffdf8; stroke: #5f5a52; stroke-width: .8; }
-    .map-label {
-      fill: #785b3d; font: 8px ui-sans-serif, system-ui; text-anchor: middle;
-      font-weight: 650;
-      pointer-events: none;
-    }
-    .aisle-label { font-size: 6px; font-weight: 700; }
+    #floor-map { object-fit: contain; }
+    #map { display: block; }
     .route {
       fill: none; stroke: var(--blue); stroke-width: 4; stroke-linecap: round;
       stroke-linejoin: round; vector-effect: non-scaling-stroke;
@@ -209,7 +204,9 @@
     </section>
 
     <section id="map-shell" aria-label="Lakeline H-E-B route map">
-      <div id="map-title">Current 41-aisle H‑E‑B Atlas map</div>
+      <div id="map-title">Exact Lakeline #659 walkable overlay</div>
+      <img id="floor-map" src="/api/walkability.png"
+           alt="Lakeline H-E-B walkable floor map">
       <svg id="map" role="img" aria-label="Store floor map"></svg>
     </section>
   </main>
@@ -318,33 +315,6 @@
 
     function renderMap(geometry) {
       svg.setAttribute('viewBox', `0 0 ${geometry.page.w} ${geometry.page.h}`);
-      svgElement('image', {
-        href: '/api/walkability.png',
-        x: 0, y: 0, width: geometry.page.w, height: geometry.page.h,
-        preserveAspectRatio: 'none', class: 'walkability',
-      });
-      svgElement('polygon', {
-        points: geometry.boundary.map(point => point.join(',')).join(' '),
-        class: 'boundary',
-      });
-      for (const [x0, y0, x1, y1] of geometry.fixtures) {
-        svgElement('rect', {
-          x: x0, y: y0, width: x1 - x0, height: y1 - y0, class: 'fixture',
-        });
-      }
-      for (const polygon of geometry.fixture_polys || []) {
-        svgElement('polygon', {
-          points: polygon.map(point => point.join(',')).join(' '),
-          class: 'fixture',
-        });
-      }
-      for (const [name, [x, y]] of Object.entries(geometry.anchors)) {
-        if (['ENTRANCE', 'CHECKOUT', 'CHECKSTANDS'].includes(name)) continue;
-        const label = svgElement('text', {
-          x, y, class: `map-label ${name.startsWith('AISLE ') ? 'aisle-label' : ''}`,
-        });
-        label.textContent = name.replace('AISLE ', '');
-      }
     }
 
     function baseProduct(product) {

@@ -2,7 +2,8 @@
 
 Search H-E-B's live catalog, select exact products, and get the shortest
 legal walking route through Lakeline H-E-B Plus! #659 (Austin). Product
-placement uses H-E-B PALS data against the current 41-aisle Atlas map.
+location uses H-E-B data mapped onto the exact 2018 #659 guide profile; those
+cross-version placements are visibly approximate.
 See `plan.md` for the full product plan.
 
 ## Run it
@@ -18,7 +19,8 @@ opens; select Lakeline H-E-B Plus! #659 there, return to the app, and confirm.
 The profile is stored under `.heb-659/` and ignored by git. Credentials are
 never stored by grocerAlgo.
 
-The live Atlas profile was imported from the saved H-E-B product page:
+The live Atlas snapshot used to validate the H-E-B connection was imported
+from the saved product page:
 
     python3 import_heb.py "Fresh Sweet Cob Corn - Texas-Size Pack - Shop Corn at H-E-B.html"
     python3 build_profile.py 659-atlas

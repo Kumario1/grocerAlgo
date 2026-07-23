@@ -33,6 +33,10 @@ Placement resolution descends from exact PALS-to-PSA, to approximate PALS,
 to aisle/department anchors. A product with no defensible position has no
 Placement and is visibly unrouted.
 
+The displayed route uses the exact 2018 #659 guide profile. Current Atlas
+positions are mapped to that guide's aisle/department anchors and therefore
+remain approximate; they are never presented as exact shelf positions.
+
 ## Route Stop
 
 One customer visit used by the route solver. Catalog Products sharing a PALS

@@ -1,10 +1,10 @@
-"""Frozen selected-product route on the current Lakeline #659 Atlas profile."""
+"""Frozen selected-product route on the exact Lakeline #659 guide profile."""
 import json
 
 import pytest
 from fastapi.testclient import TestClient
 
-from app import ATLAS_FREE, ATLAS_CELL, LOCATED_PRODUCTS, app
+from app import CELL, FREE, LOCATED_PRODUCTS, app
 from router import engine
 
 
@@ -18,7 +18,7 @@ def clean_located_products():
     LOCATED_PRODUCTS.clear()
 
 
-def test_real_659_product_route_matches_the_atlas_golden(
+def test_real_659_product_route_matches_the_exact_map_golden(
         monkeypatch, clean_located_products):
     golden = json.load(open("data/659-atlas/golden_route.json"))
 
@@ -50,4 +50,4 @@ def test_real_659_product_route_matches_the_atlas_golden(
     assert body["saved_m"] == golden["saved_m"]
     assert body["path"] == golden["path"]
     assert engine.path_is_legal(
-        ATLAS_FREE, body["path"], ATLAS_CELL) == []
+        FREE, body["path"], CELL) == []

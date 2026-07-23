@@ -2,14 +2,13 @@
 """Lakeline #659 product picker and optimal in-store route API."""
 import json
 import math
-from io import BytesIO
+import re
 from functools import lru_cache
 import numpy as np
-from PIL import Image
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import breadth_first_order
 from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import FileResponse, Response
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 from router import engine
 from router.directory import load_directory
@@ -29,6 +28,9 @@ FREE = _p["free"]
 M_PER_CELL = float(_p["m_per_cell"])
 CELL = float(_p["cell"])
 W = FREE.shape[1]
+START = tuple(int(v) for v in CELLS[IDX["ENTRANCE"]])
+END = tuple(int(v) for v in CELLS[IDX["CHECKOUT"]])
+REACH, _ = engine.bfs(FREE, START)
 DIRECTORY = {**load_directory("data/659/directory.csv", set(NAMES)),
              **load_directory("data/659/departments.csv", set(NAMES))}
 
@@ -36,20 +38,6 @@ ATLAS = {
     "geometry": json.load(open("data/659-atlas/geometry.json")),
     "psas": json.load(open("data/659-atlas/psas.json")),
 }
-ATLAS_SOURCE = json.load(open("data/659-atlas/source.json"))
-_atlas_profile = np.load("data/659-atlas/profile.npz", allow_pickle=True)
-if ("source_sha256" not in _atlas_profile.files
-        or str(_atlas_profile["source_sha256"]) != ATLAS_SOURCE["sha256"]):
-    raise RuntimeError("659 Atlas profile is stale; rebuild and verify it")
-ATLAS_NAMES = [str(n) for n in _atlas_profile["names"]]
-ATLAS_IDX = {n: i for i, n in enumerate(ATLAS_NAMES)}
-ATLAS_CELLS = _atlas_profile["cells"]
-ATLAS_FREE = _atlas_profile["free"]
-ATLAS_CELL = float(_atlas_profile["cell"])
-ATLAS_M_PER_CELL = float(_atlas_profile["m_per_cell"])
-ATLAS_START = tuple(int(v) for v in ATLAS_CELLS[ATLAS_IDX["ENTRANCE"]])
-ATLAS_END = tuple(int(v) for v in ATLAS_CELLS[ATLAS_IDX["CHECKOUT"]])
-ATLAS_REACH, _ = engine.bfs(ATLAS_FREE, ATLAS_START)
 LOCATED_PRODUCTS = {}
 
 # SciPy runs the same 4-neighbour BFS as engine.bfs, but in compiled code. It
@@ -109,47 +97,6 @@ def leg_path(start, end):
     return tuple(engine.string_pull(FREE, path[::-1], CELL))
 
 
-def make_leg_path(free, cell):
-    """Build a cached shortest-path function for one store profile."""
-    width = free.shape[1]
-    ids = np.arange(free.size).reshape(free.shape)
-    lr = ids[:, :-1][free[:, :-1] & free[:, 1:]]
-    ud = ids[:-1][free[:-1] & free[1:]]
-    rows = np.concatenate((lr, lr + 1, ud, ud + width))
-    cols = np.concatenate((lr + 1, lr, ud + width, ud))
-    graph = csr_matrix((np.ones(len(rows), np.uint8), (rows, cols)),
-                       shape=(free.size, free.size))
-
-    @lru_cache(maxsize=128)
-    def tree(start):
-        source = start[1] * width + start[0]
-        return breadth_first_order(
-            graph, source, directed=True, return_predecessors=True)[1]
-
-    @lru_cache(maxsize=1024)
-    def path(start, end):
-        if start == end:
-            return ((start[0] * cell + cell / 2,
-                     start[1] * cell + cell / 2),)
-        source = start[1] * width + start[0]
-        node = end[1] * width + end[0]
-        parent, points = tree(start), []
-        while node != source:
-            if node < 0:
-                raise ValueError(
-                    f"unreachable route cell: {start} -> {end}")
-            points.append((node % width * cell + cell / 2,
-                           node // width * cell + cell / 2))
-            node = int(parent[node])
-        points.append((start[0] * cell + cell / 2,
-                       start[1] * cell + cell / 2))
-        return tuple(engine.string_pull(free, points[::-1], cell))
-
-    return path
-
-
-atlas_leg_path = make_leg_path(ATLAS_FREE, ATLAS_CELL)
-
 def path_length(pts):
     return sum(math.hypot(q[0] - p[0], q[1] - p[1])
                for p, q in zip(pts, pts[1:]))
@@ -198,9 +145,6 @@ def walked_m(pts):
     return path_length(pts) / CELL * M_PER_CELL
 
 
-def atlas_walked_m(pts):
-    return path_length(pts) / ATLAS_CELL * ATLAS_M_PER_CELL
-
 @lru_cache(maxsize=128)
 def anchor_order(anchor_keys):
     names = ("ENTRANCE", "CHECKOUT") + anchor_keys
@@ -237,22 +181,12 @@ def index():
 
 @app.get("/api/geometry")
 def geometry():
-    return ATLAS["geometry"]
-
-
-@lru_cache(maxsize=1)
-def walkability_png():
-    pixels = np.empty((*ATLAS_FREE.shape, 3), dtype=np.uint8)
-    pixels[:] = (238, 148, 151)
-    pixels[ATLAS_FREE] = (157, 211, 177)
-    output = BytesIO()
-    Image.fromarray(pixels, "RGB").save(output, format="PNG")
-    return output.getvalue()
+    return GEOM
 
 
 @app.get("/api/walkability.png")
 def walkability():
-    return Response(walkability_png(), media_type="image/png")
+    return FileResponse("data/659/qa/walkable_overlay.png")
 
 
 @app.get("/api/heb/status")
@@ -287,6 +221,27 @@ async def products(q: str = Query(min_length=3)):
         raise HTTPException(503, str(e)) from e
 
 
+def exact_map_point(location_label, placement):
+    """Map current H-E-B location text onto the exact #659 guide profile."""
+    label = re.sub(r"\s+", " ", (location_label or "").upper())
+    aisle = re.search(r"\bAISLE\s+(\d+)\b", label)
+    if aisle:
+        number = int(aisle[1])
+        anchor = f"AISLE {number + 4 if number >= 23 else number}"
+        return GEOM["anchors"].get(anchor)
+
+    aliases = {
+        "FROZEN": "FROZEN FOODS",
+        "MARKET": "MEAT",
+        "CHECKSTANDS": "CHECKOUT",
+    }
+    group = placement["group"].removeprefix("ANCHOR:")
+    for name in sorted(GEOM["anchors"], key=len, reverse=True):
+        if not name.startswith("AISLE ") and name in label:
+            return GEOM["anchors"][name]
+    return GEOM["anchors"].get(aliases.get(group, group))
+
+
 @app.post("/api/products/locate")
 async def locate_products(req: LocateReq):
     located = []
@@ -303,20 +258,22 @@ async def locate_products(req: LocateReq):
             "placement_group": None,
         }
         if placement:
+            point = exact_map_point(
+                placement.get("location_label") or model.location_label,
+                placement)
             try:
-                route_cell = engine.snap(
-                    ATLAS_FREE, ATLAS_REACH, placement["point"], ATLAS_CELL)
-            except ValueError:
+                route_cell = engine.snap(FREE, REACH, point, CELL)
+            except (TypeError, ValueError):
                 placement = None
             else:
                 result |= {
                     "routable": True,
-                    "approx": placement["approx"],
+                    "approx": True,
                     "location_label": placement.get("location_label")
                                       or model.location_label,
                     "placement_group": placement["group"],
-                    "x": placement["point"][0],
-                    "y": placement["point"][1],
+                    "x": point[0],
+                    "y": point[1],
                     "route_cell": route_cell,
                 }
         LOCATED_PRODUCTS[model.id] = result
@@ -325,7 +282,7 @@ async def locate_products(req: LocateReq):
     return {"products": located}
 
 def selected_route(items):
-    """Route resolved H-E-B products against their current Atlas cells."""
+    """Route resolved H-E-B products on the exact #659 walkable profile."""
     quantities, requested = {}, []
     for item in items:
         if item.product_id not in quantities:
@@ -366,23 +323,23 @@ def selected_route(items):
     # sharing a PALS aisle/area or fallback anchor stay one solver stop, while
     # routed() still walks through and displays every product in that group.
     representatives = [groups[key][0]["route_cell"] for key in group_keys]
-    cells = [ATLAS_START, ATLAS_END] + representatives
+    cells = [START, END] + representatives
     matrix = [[0.0] * len(cells) for _ in cells]
     for i, start in enumerate(cells):
         for j in range(i + 1, len(cells)):
-            distance = path_length(atlas_leg_path(start, cells[j]))
+            distance = path_length(leg_path(start, cells[j]))
             matrix[i][j] = matrix[j][i] = distance
     order = engine.tsp_order(matrix, len(group_keys))[1]
     ordered_keys = [group_keys[index - 2] for index in order]
 
     path, directed = routed(
         [groups[key] for key in ordered_keys],
-        ATLAS_START, ATLAS_END, atlas_leg_path)
+        START, END, leg_path)
     baseline_path, _ = routed(
         [groups[key] for key in group_keys],
-        ATLAS_START, ATLAS_END, atlas_leg_path)
-    baseline = atlas_walked_m(baseline_path)
-    distance = atlas_walked_m(path)
+        START, END, leg_path)
+    baseline = walked_m(baseline_path)
+    distance = walked_m(path)
 
     stops, number = [], 1
     for group in directed:
@@ -449,16 +406,14 @@ def route(req: RouteReq):
             p["route_cell"] = tuple(p["cell"]) if p.get("cell") else fallback_cell
         picks[key] = sorted(placed, key=lambda p: p["t"])
 
-    start = tuple(int(v) for v in CELLS[IDX["ENTRANCE"]])
-    end = tuple(int(v) for v in CELLS[IDX["CHECKOUT"]])
     route_keys = [names[si] for si in order]
-    path, directed = routed([picks[k] for k in route_keys], start, end)
+    path, directed = routed([picks[k] for k in route_keys], START, END)
 
     # G1 telemetry: the same list walked in the order it was written, measured
     # the same way, so "you saved N m" is a real comparison and not two metrics.
     # Both choose their best aisle directions, so the difference is ordering.
     list_keys = list(dict.fromkeys(m["anchors"][0] for m in matched))
-    baseline_path, _ = routed([picks[k] for k in list_keys], start, end)
+    baseline_path, _ = routed([picks[k] for k in list_keys], START, END)
     baseline = walked_m(baseline_path)
 
     out_stops, n = [], 1

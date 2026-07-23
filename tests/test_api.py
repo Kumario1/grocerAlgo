@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from fastapi.testclient import TestClient
 from app import app
 
@@ -7,23 +9,19 @@ from route_demo import ACCEPTANCE_LIST as LIST_25   # one canonical acceptance l
 
 def test_geometry_endpoint():
     g = client.get("/api/geometry").json()
-    assert g["page"]["w"] > 0 and len(g["fixtures"]) > 100
+    aisles = [name for name in g["anchors"] if name.startswith("AISLE ")]
+
+    assert g["page"] == {"w": 1266.0, "h": 834.0}
+    assert len(aisles) == 45
 
 
-def test_walkability_overlay_matches_the_current_route_grid():
-    from io import BytesIO
-    from PIL import Image
-    from app import ATLAS_FREE
-
+def test_walkability_endpoint_returns_the_exact_659_qa_overlay():
     response = client.get("/api/walkability.png")
-    image = Image.open(BytesIO(response.content))
 
     assert response.status_code == 200
     assert response.headers["content-type"] == "image/png"
-    assert image.size == (ATLAS_FREE.shape[1], ATLAS_FREE.shape[0])
-    colors = set(image.getdata())
-    assert (157, 211, 177) in colors  # reachable customer floor
-    assert (238, 148, 151) in colors  # exterior, fixtures, staff-only
+    assert response.content == Path(
+        "data/659/qa/walkable_overlay.png").read_bytes()
 
 
 def test_route_small_list():
@@ -243,8 +241,13 @@ def test_selected_products_route_consolidates_quantity_and_reports_unrouted(
         "image_url": None, "inventory_state": "IN_STOCK",
         "location_label": None, "selectable": True,
     }]
-    assert client.post("/api/products/locate",
-                       json={"products": products}).status_code == 200
+    located = client.post(
+        "/api/products/locate", json={"products": products})
+    assert located.status_code == 200
+    milk = next(product for product in located.json()["products"]
+                if product["id"] == "milk")
+    from app import GEOM
+    assert [milk["x"], milk["y"]] == GEOM["anchors"]["AISLE 45"]
 
     response = client.post("/api/route", json={"items": [
         {"product_id": "milk", "quantity": 1},
