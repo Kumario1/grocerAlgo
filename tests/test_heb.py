@@ -174,6 +174,30 @@ def test_heb_client_refreshes_a_challenged_existing_browser():
     assert navigated == [("https://www.heb.com/", "domcontentloaded")]
 
 
+def test_heb_client_launches_normal_chrome_instead_of_automation_mode():
+    command = HEBClient()._chrome_command(9223)
+
+    assert command[0].endswith(
+        "Google Chrome.app/Contents/MacOS/Google Chrome")
+    assert "--remote-debugging-port=9223" in command
+    assert not any("enable-automation" in arg for arg in command)
+
+
+def test_heb_client_reports_incapsula_error_15_as_reconnect_required():
+    client = HEBClient()
+    client.connected = client.map_ready = True
+
+    class Page:
+        async def evaluate(self, script, url):
+            return '{"errorCode" : "15"}'
+
+    client._page = Page()
+
+    with pytest.raises(HEBConnectionError, match="reconnect required"):
+        asyncio.run(client._fetch("/search?q=milk"))
+    assert client.status()["connected"] is False
+
+
 def test_atlas_map_becomes_router_geometry_and_psa_index():
     svg = """
     <svg id="store-map" viewBox="10,20,100,80">

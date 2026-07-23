@@ -1,7 +1,10 @@
 """H-E-B #659 catalog and Atlas-map helpers."""
+import asyncio
 import hashlib
 import json
 import re
+import socket
+import subprocess
 import time
 from html.parser import HTMLParser
 from pathlib import Path
@@ -238,7 +241,8 @@ class HEBClient:
             Path(source_path).read_text())["sha256"]
         self.connected = False
         self.map_ready = False
-        self._playwright = self._context = self._page = None
+        self._playwright = self._browser = self._context = self._page = None
+        self._chrome = None
         self._search_cache = {}
         self._placement_cache = {}
 
@@ -272,18 +276,54 @@ class HEBClient:
         from playwright.async_api import async_playwright
 
         try:
+            with socket.socket() as sock:
+                sock.bind(("127.0.0.1", 0))
+                port = sock.getsockname()[1]
+            self._chrome = subprocess.Popen(
+                self._chrome_command(port),
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
             self._playwright = await async_playwright().start()
-            self._context = (
-                await self._playwright.chromium.launch_persistent_context(
-                    self.profile_dir, channel="chrome", headless=False))
-            self._page = self._context.pages[0] if self._context.pages else (
-                await self._context.new_page())
-            await self._page.goto(
-                "https://www.heb.com/", wait_until="domcontentloaded")
+            last_error = None
+            for _ in range(40):
+                if self._chrome.poll() is not None:
+                    break
+                try:
+                    self._browser = (
+                        await self._playwright.chromium.connect_over_cdp(
+                            f"http://127.0.0.1:{port}"))
+                    break
+                except Exception as e:
+                    last_error = e
+                    await asyncio.sleep(0.25)
+            if not self._browser:
+                raise last_error or RuntimeError("Chrome closed before startup")
+            self._context = self._browser.contexts[0]
+            pages = self._context.pages
+            self._page = next(
+                (page for page in pages if page.url.startswith(
+                    "https://www.heb.com")),
+                pages[0] if pages else await self._context.new_page(),
+            )
+            if not self._page.url.startswith("https://www.heb.com"):
+                await self._page.goto(
+                    "https://www.heb.com/", wait_until="domcontentloaded")
         except Exception as e:
             await self.close()
             raise HEBConnectionError(f"Could not open H-E-B: {e}") from e
         return self.status()
+
+    def _chrome_command(self, port):
+        """Launch user-facing Chrome without Playwright automation switches."""
+        return [
+            "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+            f"--user-data-dir={Path(self.profile_dir).resolve()}",
+            f"--remote-debugging-port={port}",
+            "--no-first-run",
+            "--no-default-browser-check",
+            "https://www.heb.com/",
+        ]
 
     async def _fetch(self, url):
         if not self._page:
@@ -351,12 +391,14 @@ class HEBClient:
         return placement
 
     async def close(self):
-        context, playwright = self._context, self._playwright
-        self._playwright = self._context = self._page = None
+        browser, playwright, chrome = (
+            self._browser, self._playwright, self._chrome)
+        self._playwright = self._browser = self._context = self._page = None
+        self._chrome = None
         self.connected = self.map_ready = False
-        if context:
+        if browser:
             try:
-                await context.close()
+                await browser.close()
             except Exception:
                 pass
         if playwright:
@@ -364,3 +406,10 @@ class HEBClient:
                 await playwright.stop()
             except Exception:
                 pass
+        if chrome and chrome.poll() is None:
+            chrome.terminate()
+            try:
+                await asyncio.to_thread(chrome.wait, 5)
+            except subprocess.TimeoutExpired:
+                chrome.kill()
+                await asyncio.to_thread(chrome.wait)

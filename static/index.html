@@ -122,17 +122,22 @@
     #summary ol { padding-left: 1.45rem; }
     #summary li { margin: .3rem 0; }
     .warning { margin-top: .65rem; color: #9c2638; }
-    #map-shell { position: relative; min-width: 0; background: var(--cream); }
+    #map-shell { position: relative; min-width: 0; background: #ee9497; }
     #map-title {
       position: absolute; top: 1rem; left: 1rem; z-index: 1;
       padding: .4rem .6rem; border-radius: 6px; color: var(--muted);
       background: #fffdf8dd; font-size: .78rem;
     }
     #map { width: 100%; height: calc(100vh - 57px); display: block; }
-    .boundary { fill: #fff; stroke: #b8afa1; stroke-width: 3; }
-    .fixture { fill: #d7d0c3; stroke: #c3baac; stroke-width: .6; }
+    .walkability { image-rendering: pixelated; }
+    .boundary {
+      fill: none; stroke: #2f2c28; stroke-width: 2;
+      vector-effect: non-scaling-stroke;
+    }
+    .fixture { fill: #fffdf8; stroke: #5f5a52; stroke-width: .8; }
     .map-label {
-      fill: #817a70; font: 8px ui-sans-serif, system-ui; text-anchor: middle;
+      fill: #785b3d; font: 8px ui-sans-serif, system-ui; text-anchor: middle;
+      font-weight: 650;
       pointer-events: none;
     }
     .aisle-label { font-size: 6px; font-weight: 700; }
@@ -313,6 +318,11 @@
 
     function renderMap(geometry) {
       svg.setAttribute('viewBox', `0 0 ${geometry.page.w} ${geometry.page.h}`);
+      svgElement('image', {
+        href: '/api/walkability.png',
+        x: 0, y: 0, width: geometry.page.w, height: geometry.page.h,
+        preserveAspectRatio: 'none', class: 'walkability',
+      });
       svgElement('polygon', {
         points: geometry.boundary.map(point => point.join(',')).join(' '),
         class: 'boundary',

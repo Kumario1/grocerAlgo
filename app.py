@@ -2,12 +2,14 @@
 """Lakeline #659 product picker and optimal in-store route API."""
 import json
 import math
+from io import BytesIO
 from functools import lru_cache
 import numpy as np
+from PIL import Image
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import breadth_first_order
 from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, Field
 from router import engine
 from router.directory import load_directory
@@ -236,6 +238,21 @@ def index():
 @app.get("/api/geometry")
 def geometry():
     return ATLAS["geometry"]
+
+
+@lru_cache(maxsize=1)
+def walkability_png():
+    pixels = np.empty((*ATLAS_FREE.shape, 3), dtype=np.uint8)
+    pixels[:] = (238, 148, 151)
+    pixels[ATLAS_FREE] = (157, 211, 177)
+    output = BytesIO()
+    Image.fromarray(pixels, "RGB").save(output, format="PNG")
+    return output.getvalue()
+
+
+@app.get("/api/walkability.png")
+def walkability():
+    return Response(walkability_png(), media_type="image/png")
 
 
 @app.get("/api/heb/status")

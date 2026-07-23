@@ -9,6 +9,23 @@ def test_geometry_endpoint():
     g = client.get("/api/geometry").json()
     assert g["page"]["w"] > 0 and len(g["fixtures"]) > 100
 
+
+def test_walkability_overlay_matches_the_current_route_grid():
+    from io import BytesIO
+    from PIL import Image
+    from app import ATLAS_FREE
+
+    response = client.get("/api/walkability.png")
+    image = Image.open(BytesIO(response.content))
+
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "image/png"
+    assert image.size == (ATLAS_FREE.shape[1], ATLAS_FREE.shape[0])
+    colors = set(image.getdata())
+    assert (157, 211, 177) in colors  # reachable customer floor
+    assert (238, 148, 151) in colors  # exterior, fixtures, staff-only
+
+
 def test_route_small_list():
     r = client.post("/api/route", json={"items": ["milk", "dog food", "bread"]})
     assert r.status_code == 200
