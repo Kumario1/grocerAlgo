@@ -5,6 +5,7 @@ import math
 import re
 from functools import lru_cache
 import numpy as np
+from scipy.interpolate import LinearNDInterpolator
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import breadth_first_order
 from fastapi import FastAPI, HTTPException, Query
@@ -39,6 +40,43 @@ ATLAS = {
     "psas": json.load(open("data/659-atlas/psas.json")),
 }
 LOCATED_PRODUCTS = {}
+
+
+def _atlas_to_guide_transform():
+    """Calibrate current Atlas coordinates onto the accepted #659 floor plan."""
+    source = [
+        [0.0, 22.68],
+        [897.0786, 22.68],
+        [897.0786, 638.28],
+        [0.0, 638.28],
+    ]
+    target = [
+        [260.1532897949219, 59.77337646484375],
+        [1030.0013427734375, 64.49637603759766],
+        [1138.6302490234375, 681.6343994140625],
+        [260.1532897949219, 656.4453735351562],
+    ]
+    anchor_pairs = {
+        **{f"AISLE {n}": f"AISLE {n}" for n in range(1, 23)},
+        **{f"AISLE {n}": f"AISLE {n + 4}" for n in range(23, 42)},
+        "BAKERY": "BAKERY",
+        "CHECKSTANDS": "CHECKSTANDS",
+        "DAIRY": "DAIRY",
+        "DELI": "DELI",
+        "FLORAL": "FLORAL",
+        "FROZEN": "FROZEN FOODS",
+        "PHARMACY": "PHARMACY",
+        "PRODUCE": "PRODUCE",
+        "SEAFOOD": "SEAFOOD",
+    }
+    for atlas_name, guide_name in anchor_pairs.items():
+        source.append(ATLAS["geometry"]["anchors"][atlas_name])
+        target.append(GEOM["anchors"][guide_name])
+    return LinearNDInterpolator(np.asarray(source), np.asarray(target))
+
+
+ATLAS_TO_GUIDE = _atlas_to_guide_transform()
+
 
 # SciPy runs the same 4-neighbour BFS as engine.bfs, but in compiled code. It
 # makes request-time paths between product cells cheap enough to choose which
@@ -222,7 +260,14 @@ async def products(q: str = Query(min_length=3)):
 
 
 def exact_map_point(location_label, placement):
-    """Map current H-E-B location text onto the exact #659 guide profile."""
+    """Map the live Atlas point onto the accepted #659 guide profile."""
+    atlas_point = placement.get("point")
+    if atlas_point:
+        mapped = np.asarray(ATLAS_TO_GUIDE(
+            np.asarray(atlas_point, dtype=float))).reshape(-1)
+        if len(mapped) == 2 and np.all(np.isfinite(mapped)):
+            return mapped.tolist()
+
     label = re.sub(r"\s+", " ", (location_label or "").upper())
     aisle = re.search(r"\bAISLE\s+(\d+)\b", label)
     if aisle:
@@ -266,14 +311,16 @@ async def locate_products(req: LocateReq):
             except (TypeError, ValueError):
                 placement = None
             else:
+                x = route_cell[0] * CELL + CELL / 2
+                y = route_cell[1] * CELL + CELL / 2
                 result |= {
                     "routable": True,
                     "approx": True,
                     "location_label": placement.get("location_label")
                                       or model.location_label,
                     "placement_group": placement["group"],
-                    "x": point[0],
-                    "y": point[1],
+                    "x": x,
+                    "y": y,
                     "route_cell": route_cell,
                 }
         LOCATED_PRODUCTS[model.id] = result

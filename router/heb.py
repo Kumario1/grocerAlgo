@@ -181,7 +181,10 @@ def resolve_placement(pals, atlas, location_label=None):
     """Resolve H-E-B placement metadata to an Atlas point."""
     results = pals.get("results") or []
     result = results[0] if results else {}
-    psas = result.get("psas") or []
+    psas = sorted(
+        result.get("psas") or [],
+        key=lambda psa: {1: 0, None: 1}.get(psa.get("type"), 2),
+    )
     candidates = [(psa, False) for psa in psas]
     if result.get("approximateLocation"):
         candidates.append((result["approximateLocation"], True))

@@ -321,6 +321,28 @@ def test_product_uses_first_pals_psa_present_in_the_atlas():
     assert resolve_placement(pals, atlas, "Aisle 2")["point"] == [12.5, 6.0]
 
 
+def test_product_prefers_primary_pals_placement_over_alternate():
+    atlas = {
+        "psas": {
+            "35|6|A|75": [30.0, 30.0],
+            "01|13|A|11": [12.5, 6.0],
+        },
+        "geometry": {"anchors": {}},
+    }
+    pals = {"results": [{
+        "psas": [
+            {"area": "35", "aisle": 6, "side": "A", "section": 75,
+             "type": 2},
+            {"area": "01", "aisle": 13, "side": "A", "section": 11,
+             "type": 1},
+        ],
+    }]}
+
+    placement = resolve_placement(pals, atlas, "Aisle 13")
+    assert placement["point"] == [12.5, 6.0]
+    assert placement["group"] == "PSA:01:13"
+
+
 def test_product_location_falls_back_without_silent_guessing():
     atlas = {
         "psas": {"03|2|A|14": [12.5, 6.0]},

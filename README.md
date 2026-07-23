@@ -2,8 +2,9 @@
 
 Search H-E-B's live catalog, select exact products, and get the shortest
 legal walking route through Lakeline H-E-B Plus! #659 (Austin). Product
-location uses H-E-B data mapped onto the exact 2018 #659 guide profile; those
-cross-version placements are visibly approximate.
+location uses H-E-B PSA coordinates calibrated onto the exact 2018 #659 guide
+profile and snapped to the reachable customer floor; those cross-version
+placements are visibly approximate.
 See `plan.md` for the full product plan.
 
 ## Run it

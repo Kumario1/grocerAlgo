@@ -33,9 +33,11 @@ Placement resolution descends from exact PALS-to-PSA, to approximate PALS,
 to aisle/department anchors. A product with no defensible position has no
 Placement and is visibly unrouted.
 
-The displayed route uses the exact 2018 #659 guide profile. Current Atlas
-positions are mapped to that guide's aisle/department anchors and therefore
-remain approximate; they are never presented as exact shelf positions.
+The displayed route uses the exact 2018 #659 guide profile. Current Atlas PSA
+coordinates are carried through a calibrated current-to-guide transform, then
+snapped to the nearest entrance-reachable customer cell. Fallback placements
+use aisle/department anchors. Because the two maps are different vintages,
+all cross-version placements remain visibly approximate.
 
 ## Route Stop
 

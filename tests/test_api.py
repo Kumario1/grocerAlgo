@@ -210,6 +210,64 @@ def test_locate_products_returns_reachable_atlas_placements(monkeypatch):
     assert rehydrated["routable"] is True
 
 
+def test_locate_products_preserves_exact_pals_section_on_the_guide(monkeypatch):
+    class FakeHEB:
+        async def locate(self, product_id, location_label, atlas):
+            return {
+                "point": [225.5742, 177.3972],
+                "group": "PSA:01:13",
+                "approx": False,
+                "location_label": "Aisle 13",
+            }
+
+    monkeypatch.setattr(app.state, "heb", FakeHEB(), raising=False)
+    response = client.post("/api/products/locate", json={"products": [{
+        "id": "2102898",
+        "name": "Aisle 13 product",
+        "location_label": "Aisle 13",
+    }]})
+
+    assert response.status_code == 200
+    product = response.json()["products"][0]
+    from app import CELL, FREE, GEOM
+    assert [product["x"], product["y"]] == [485.0, 141.0]
+    assert [product["x"], product["y"]] != GEOM["anchors"]["AISLE 13"]
+    assert product["x"] % CELL == CELL / 2
+    assert product["y"] % CELL == CELL / 2
+    assert FREE[int(product["y"] // CELL), int(product["x"] // CELL)]
+
+
+def test_department_edge_pin_is_the_reachable_route_stop(monkeypatch):
+    class FakeHEB:
+        async def locate(self, product_id, location_label, atlas):
+            return {
+                "point": [625.05, 410.1768],
+                "group": "PSA:05:86",
+                "approx": False,
+                "location_label": "On the Left Edge of Bakery",
+            }
+
+    monkeypatch.setattr(app.state, "heb", FakeHEB(), raising=False)
+    product = {
+        "id": "2118487",
+        "name": "Cake",
+        "location_label": "On the Left Edge of Bakery",
+    }
+    located = client.post(
+        "/api/products/locate", json={"products": [product]}
+    ).json()["products"][0]
+    route = client.post("/api/route", json={"items": [{
+        "product_id": "2118487",
+        "quantity": 1,
+    }]}).json()
+
+    from app import CELL, FREE, GEOM
+    assert [located["x"], located["y"]] != GEOM["anchors"]["BAKERY"]
+    assert FREE[int(located["y"] // CELL), int(located["x"] // CELL)]
+    assert [located["x"], located["y"]] in route["path"]
+    assert [route["stops"][0]["x"], route["stops"][0]["y"]] in route["path"]
+
+
 def test_selected_products_route_consolidates_quantity_and_reports_unrouted(
         monkeypatch):
     placed = {
@@ -246,8 +304,11 @@ def test_selected_products_route_consolidates_quantity_and_reports_unrouted(
     assert located.status_code == 200
     milk = next(product for product in located.json()["products"]
                 if product["id"] == "milk")
-    from app import GEOM
-    assert [milk["x"], milk["y"]] == GEOM["anchors"]["AISLE 45"]
+    from app import CELL, FREE, GEOM
+    dairy = GEOM["anchors"]["DAIRY"]
+    assert abs(milk["x"] - dairy[0]) <= CELL
+    assert abs(milk["y"] - dairy[1]) <= CELL
+    assert FREE[int(milk["y"] // CELL), int(milk["x"] // CELL)]
 
     response = client.post("/api/route", json={"items": [
         {"product_id": "milk", "quantity": 1},
