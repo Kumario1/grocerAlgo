@@ -1,0 +1,32 @@
+Audit complete. Store 388's **map** is in good shape — the store-24 failure mode is genuinely absent. But the store shipped with two code-level problems and a metrics band violation.
+
+## What passed (evidence, not vibes)
+
+- **30/30 aisle corridors 100 % green end-to-end** (sampled every 2 pt across each bank's full length; longest blocked run 0.0 pt on every aisle).
+- **295/295 in-boundary labels have reachable floor**, worst case 2.54 m — and that worst case is the `Pharmacy` department word itself, sealed inside its own drawn-closed room. Probed with **no** blessed-exemption, so a bad exclusion could not hide.
+- **0 isolated (orange) pockets**; single component.
+- **All 18 culled pockets classified**: 1 = pharmacy staff room (drawn sealed, no door, no product labels inside), 15 = checkout lane interiors, 2 = OTC aisles culled by the auto PHARMACY disk and restored by `inclusions[2]` (both reachable in the shipped grid).
+- **Config seals only 364 m² that the drawing leaves open** — east back-of-house 287, deli work side 70, checkout lanes 8.6. Nothing else. Verified by diffing the shipped grid against a drawing-only rebuild.
+- All 44 original walk_truth points pass, each blocked by a *meaningful* mechanism (exclusion / staff-mask / checkout-rect / boundary), not by accident.
+
+## Findings
+
+**1. BLOCKER — `m_per_cell` is NaN; three diagnostics are silently dead.** `build_profile.py:54` harvests aisle pitch only from gaps in `10 < d < 35` pt. Store 388's pitch is ~40.7 pt (all gaps 36.4–45.6), so `_pitches` is empty → `np.median([])` → NaN. Consequences: `corridor_width.png` is a uniform gray wash (mean RGB `[185,184,184]`, R≈G everywhere) versus 659's real heat map — the sliver-corridor detector renders zero information; all 8 `narrow[].half_width_m` and both `far_snaps[].meters` are NaN; and `PATCH_MIN_M2` in `qa_checks.coverage` net 2 is disabled (`NaN < 25.0` is False), so the net born from the store-24 regression no longer behaves as calibrated. No test asserts the value is finite — `tests/test_coverage.py:35` feeds the NaN straight into the gate. Correct value is 0.1474; recomputed metrics are all sane (tightest half-width 0.74 m, ENTRANCE snap 2.30 m), so nothing is hiding behind it — but the store shipped blind. *Code fix, not applied.*
+
+**2. BLOCKER — 388 required 64 unreviewed lines in `extract.py`.** `git diff` shows a new `stitch_open_boundary()` plus untracked `tests/test_extract.py`. It is load-bearing (388's perimeter is two open chains; `assert boundary` would fire without it) and it is inert for other stores behind `if not boundary:` — golden and all tests pass. But the onboarding guardrails allow only the five per-store JSONs, and a shared extraction path changed as a side effect of onboarding one store. *Code review, not applied.*
+
+**3. `walkable_pct` 39.95 % — outside the runbook's 20–35 % band, and 116 cells (2.5 m²) below the hard `test_walkable_fraction_sane` bound of 0.40.** Other stores have 11.5–16.5 % headroom. Root cause is source-map fidelity, not sealing: 388's guide draws fixtures covering only **24.2 %** of the sales floor vs 31.9 % (659), 33.9 % (24), 38.1 % (790) — 171 rect fixtures / 48 polys / 949 obstacle paths vs 659's 303/188/5366. This is the *opposite* of store 24 (over-open, not over-sealed) and strands no product, but any future change opening ~2.5 m² turns 388 red in a way that will read as an unrelated regression.
+
+**4. `exclusions.json[1]` stated a WHY the map contradicts.** It claimed "zero fixtures and zero product labels anywhere in 150 m2". The rect actually contains 10 extracted fixtures, the red **Bakery** (987.2, 341.2) and **Floral** (985.8, 485.0) labels, and seals **287 m²**. The geometry is defensible — both words are set *across* the wall band, their fixtures and frontage are west of x=979 and green (Bakery 0.74 m, Floral 0.59 m) — but the justification was exactly the kind of prose a future reviewer would trust. **Fixed** (text only, zero geometry change).
+
+**5. walk_truth had no `must_not` for the four wall-doorway exclusions.** Each is load-bearing (removing them re-opens 2.4 / 1.6 / 1.1 / 2.3 m²) and was entirely untested. **Fixed**: added must_not at (509,68), (794,68), (110,125), (110,556).
+
+**6. walk_truth had no `must` for two wings.** The Wine / Cold Beer / Meal Deal bay (x 790–880) is a distinct product bay between aisle 1 and the Market frontage with no coverage; the north back alley had a single must at x=300 covering 675 pt of alley. **Fixed**: added must at (830,240), (868,190), (700,88).
+
+**7. Minor — `report.json` `culled_pockets` misleads.** The 126- and 120-cell pockets at (248,623)/(247,603) print in the top-ten stats as sealed "near AISLE 19", but both are reachable in the shipped grid (restored by `inclusions[2]`). Report accuracy only.
+
+Also noted, not counted: `inclusions[1]` ("Deli east frontage") is a no-op — removing it closes 0.0 m². It's defensible insurance (the merged `DELI FLORAL` anchor is a `service_pts` substring match) and does not overlap the deli staff exclusion (poly max x=874 vs rect x0=886).
+
+Post-fix rebuild: exit 0, `verify: []`, both coverage lists empty, 1 component, **229 passed** (up from 222 — the 7 new points), walkable cells unchanged at 96 825. My edits touched only `data/388/walk_truth.json` and `data/388/exclusions.json`.
+
+`AUDIT FAILED — store 388: 7 findings` (4 fixed in per-store JSONs; findings 1–3 are code/policy blockers left for a human — I did not touch `extract.py`, `build_profile.py`, `router/`, `tests/`, goldens, or any other store)

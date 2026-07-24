@@ -40,7 +40,7 @@ def load(store):
     p = np.load(f"data/{store}/profile.npz", allow_pickle=True)
     names = [str(n) for n in p["names"]]
     return {"free": p["free"], "cell": float(p["cell"]),
-            "m_per_cell": float(p["m_per_cell"]), "names": names,
+            "m_per_cell": float(p["m_per_cell"]), "names": names, "D": p["D"],
             "cells": p["cells"], "idx": {n: i for i, n in enumerate(names)}}
 
 
@@ -195,6 +195,69 @@ def render_corridor(prof, store, out_path):
     return g, fixed
 
 
+# department anchors worth a directional tour, in rough preference order — any
+# not present in a given store are simply skipped (route_directional.png)
+TOUR_DEPTS = ("PRODUCE", "BAKERY", "SEAFOOD", "MEAT", "FISH/MEAT/CHILI", "DELI",
+              "MARKET/DELI", "DAIRY", "FROZEN FOODS", "KITCHEN")
+
+
+def render_directional(prof, store, out_path):
+    """ENTRANCE -> TSP over the store's departments -> CHECKOUT, drawn with
+    travel-direction arrows (same look as the web app's marker-mid route)."""
+    idx, cells, free, cell, w = (prof["idx"], prof["cells"], prof["free"],
+                                 prof["cell"], prof["free"].shape[1])
+    depts = [d for d in TOUR_DEPTS if d in idx]
+    names = ("ENTRANCE", "CHECKOUT") + tuple(depts)
+    ids = [idx[n] for n in names]
+    Dsub = [[int(prof["D"][a][b]) for b in ids] for a in ids]
+    _, order = engine.tsp_order(Dsub, len(depts))
+    tour = ["ENTRANCE"] + [names[i] for i in order] + ["CHECKOUT"]
+
+    def acell(n):
+        return (int(cells[idx[n]][0]), int(cells[idx[n]][1]))
+
+    path, stops = [], []
+    for a, b in zip(tour, tour[1:]):
+        dist, par = engine.bfs(free, acell(a))
+        bc = acell(b)
+        sm = engine.string_pull(free, engine.trace(par, w, bc, cell), cell)
+        path += sm if not path else sm[1:]
+        if b not in ("ENTRANCE", "CHECKOUT"):
+            stops.append((sm[-1], b))
+
+    im = render(prof, [], store, out_path)               # map background only
+    geom = json.load(open(f"data/{store}/geometry.json"))
+    S = im.width / geom["page"]["w"]
+    dr = ImageDraw.Draw(im)
+    dr.line([(x * S, y * S) for x, y in path], fill="#1a73e8",
+            width=max(2, round(2 * S)), joint="curve")
+    size = 6 * S
+    for i in range(1, len(path)):                        # arrowhead per ~28pt step
+        (ax, ay), (bx, by) = path[i - 1], path[i]
+        seg = np.hypot(bx - ax, by - ay)
+        if seg < 1e-6:
+            continue
+        n = max(1, int(np.ceil(seg / 28)))
+        ux, uy = (bx - ax) / seg, (by - ay) / seg
+        for k in range(1, n + 1):
+            px, py = ax + (bx - ax) * k / n, ay + (by - ay) * k / n
+            cx, cy = px * S, py * S
+            dr.polygon([(cx + ux * size, cy + uy * size),
+                        (cx - ux * size + -uy * size * 0.7,
+                         cy - uy * size + ux * size * 0.7),
+                        (cx - ux * size - -uy * size * 0.7,
+                         cy - uy * size - ux * size * 0.7)], fill="#1a73e8")
+    for k, ((sx, sy), _name) in enumerate(stops, 1):     # numbered red stops
+        x, y, r = sx * S, sy * S, 15
+        dr.ellipse([x - r, y - r, x + r, y + r], fill="#d93025", outline="#fff", width=3)
+        dr.text((x - (4 if k < 10 else 9), y - 7), str(k), fill="#fff")
+    for pt in (path[0], path[-1]):                       # green start / end
+        x, y, r = pt[0] * S, pt[1] * S, 17
+        dr.ellipse([x - r, y - r, x + r, y + r], fill="#188038", outline="#fff", width=3)
+    im.save(out_path)
+    return tour, engine.path_is_legal(free, path, cell)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("store", nargs="?", default="659")
@@ -209,9 +272,17 @@ def main():
                     help="render the app's real route for the acceptance list instead")
     ap.add_argument("--corridor", action="store_true",
                     help="render the corridor graph and anchor->segment assignment")
+    ap.add_argument("--directional", action="store_true",
+                    help="render a department tour with travel-direction arrows")
     a = ap.parse_args()
 
     prof = load(a.store)
+    if a.directional:
+        out = a.out or f"data/{a.store}/qa/route_directional.png"
+        tour, bad = render_directional(prof, a.store, out)
+        print(f"  {len(tour)} anchors  {'FAIL ' + str(bad[:3]) if bad else 'PASS'}")
+        print(f"-> {out}")
+        return 1 if bad else 0
     if a.corridor:
         out = a.out or f"data/{a.store}/qa/corridor.png"
         g, fixed = render_corridor(prof, a.store, out)

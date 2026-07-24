@@ -16,5 +16,21 @@
   {"name": "Frozen aisle 16 corridor (badged customer aisle; door-swing arcs, same as aisle 14)",
    "rect": [562, 392, 574, 562]},
   {"name": "Frozen aisle 17 corridor (badged customer aisle; door-swing arcs, same as aisle 14)",
-   "rect": [610, 392, 622, 562]}
+   "rect": [610, 392, 622, 562]},
+  {"name": "Market gondola slot + its cross-corridor east of the Seafood case run (customer): the slot x 204-216 is an ordinary gap between two Market island gondolas, green at its north mouth y 132-150 but sealed y 152-254, while its identical twin slot at x 242-254 stays green - the only difference is that the auto SEAFOOD disk (r=130 about the label at 124.8,252.4) reaches x~255 and the twin sits just outside it. Rect starts at x=158, east of the case run's east face x=155.7, so the Seafood back-of-counter area stays sealed",
+   "rect": [158, 128, 258, 258]},
+  {"name": "Sushiya / Meal Simple north frontage band, upper strip (customer): open floor between the Bakery block's drawn south counter (ends y=474) and the north ends of the three Meal Simple islands (start y=493), where the SUSHIYA and MEAL SIMPLE logos are printed. No counter is drawn across it - it is the frontage linking the four island corridors already restored above - but the BAKERY disk rim sealed it",
+   "rect": [332, 472, 440, 483]},
+  {"name": "Same frontage band, lower strip WEST of the MEAL SIMPLE logo. The band is split at x 364-406 because the logo's vector artwork was extracted as obstacle geometry, so the enclosed counters of its letterforms are free cells with no 4-connected route out; covering them would restore unreachable specks instead of floor",
+   "rect": [332, 483, 364, 493]},
+  {"name": "Same frontage band, lower strip EAST of the MEAL SIMPLE logo (see the west strip for why the logo span is skipped)",
+   "rect": [406, 483, 440, 493]},
+  {"name": "East ends of the aisle 35/36 corridors north of the Pharmacy room (customer): the corridor y 520-535 runs between the Hair Accessories/Hair Color shelf run and the pharmacy room's north wall (y=538); it is green at x 1020-1032 and x 1080-1096 but the auto PHARMACY disk (r=130 about the label at 1091.6,612.1) sealed the x 1036-1078 middle. Clipped to y<=536 so the pharmacy room itself stays sealed",
+   "rect": [1030, 516, 1082, 536]},
+  {"name": "Seasonal Items north-south slot west of the Seasonal shelf run (customer): a continuous 1.2 m slot in the drawing from y=495 to y=563 between the Toys shelf run (x 774-786) and the Seasonal Items shelves (x 802-846), broken into disconnected segments by the KITCHEN disk rim - KITCHEN here is the 'Kitchen Gadgets' category label, not a service counter",
+   "rect": [784, 498, 806, 564]},
+  {"name": "Aisle 1 north mouth and the unbadged slot east of it (customer): the DELI disk (r=130 about the label at 381.1,176.0) reaches x~505 and sealed a band across aisle 1's corridor at y 136-142, cutting the aisle off from the north action alley, plus the slot x 498-508 down to y=162",
+   "rect": [472, 130, 512, 166]},
+  {"name": "Aisle 2/3 north mouths (customer): the BAKERY disk (r=130 about the label at 395.3,423.0) reaches x~505 at y~365 and sealed the corridor immediately north of the AISLE 2 badge (503.2,379.9) - this is why the first-pass report listed AISLE 2 at only 0.80 m half-width",
+   "rect": [480, 348, 512, 378]}
 ]

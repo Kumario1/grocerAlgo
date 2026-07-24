@@ -1,0 +1,36 @@
+Store 265 is converged. Here's the result.
+
+## Outcome
+
+`data/265/qa/report.json` after the final rebuild:
+
+```
+verify:      []
+coverage:    {"sealed_floor_patches": [], "unreachable_shelf_labels": []}
+components:  n=1, sizes=[33322]
+far_snaps:   []
+walkable:    27.5%  (27.5% entrance-reachable)
+narrow:      min half-width 1.04 m
+culled:      2 pockets, both checkout lanes (243 @ 496,414 · 174 @ 420,415)
+```
+
+The first pass had shipped at **9.6% walkable** with the entire west half of the store purple: the auto-derived `DISK_R=130 pt` service disks (DELI/BAKERY/SEAFOOD/FLORAL/PHARMACY) and an auto checkstand rect of `[253, 340, 689, 449]` overlap on this store's smaller page, and a 12–20 pt bridge closes aisle corridors that are only 8–17 pt wide here. PRODUCE was snapping 36.7 m to reach floor.
+
+## Files authored (`data/265/`, four of five — `zones.json` not needed, ENTRANCE/CHECKSTANDS derive cleanly)
+
+- **`seal_zones.json`** — full override, one zone: the checkstand lane bank, clipped to the checkstand *bodies'* band `y 404–424` so the 20 pt front action alley above and the front walkway below stay open. Bridge 16 pt (lanes measure 8–16 pt at a 13.4 pt checkstand pitch).
+- **`exclusions.json`** — west back-of-house band (60×220 pt with zero fixtures and zero product labels, fenced from the floor by the deli-alcove wall, two drawn swing doors at x 121–129, the Tortilleria walls, the sawtooth case and the bakery wall); the walled back room west of Produce (door swing in its south wall); the Pharmacy dispensary traced from the counter strokes; the north-wall receiving-door recess; the Sushiya kiosk roundel the raster pass missed.
+- **`inclusions.json`** — the north service-case frontage (the Deli/Seafood/Market cases are the thin band against the top wall, so the floor carrying those titles is shopping aisle) and the Pharmacy waiting corridor + pickup recess. Both also clear the VERIFY flags.
+- **`walk_truth.json`** — 20 `must` / 18 `must_not`, all probed against the shipped `profile.npz`; every sealed staff area, both parking sides, all four page corners and three lane interiors are covered.
+
+I also ran the audit's own checks myself: a 3×3 crop sweep of `walkable_overlay.png` (every aisle corridor green end to end, every department frontage green, lanes white, staff areas pink, outside pink) and 19 product-label frontage probes across all wings — max distance to walkable floor 1.04 m.
+
+## Two things you need to decide on
+
+**1. `./rebuild.sh 265` exits 1 without `GROCER_RASTER_EXPERIMENTAL=1`.** Store 265's guide is an image-only PDF, and `docs/superpowers/specs/2026-07-22-raster-fallback-benchmark-results.md` names 265 as the raster *holdout* store while the fallback stays disabled by default (boundary-IoU gate unpassed). The guard's own message points at that env var "for benchmark/holdout QA only", so I used it for every run — but strictly, the runbook's "exits 0" cannot be met for this store until the raster path is activated. Not fixable in data files.
+
+**2. `tests/test_route_golden.py` fails (4 tests) — not from my work.** It asserts store 659's frozen route. It fails identically with all four of my 265 files moved out of the tree. The cause is in-flight work in the repo: `tests/test_route_golden.py` appeared at 16:26, `router/shelf.py` was edited at 16:42, 659's `profile.npz`/`shelf_positions.json` were regenerated at 16:43 by a concurrent 659 build, and `data/659/golden_route.json` was blessed at 16:46. I may not touch `router/`, `tests/`, or another store's data, so I left it.
+
+Everything else is green: **339 passed** with only that file excluded, including 659's pixel-frozen `golden_free.npy` gate and all 43 store-265 walkability assertions.
+
+Per the runbook I stopped here rather than running `docs/audit.md` — the fresh audit context is next.

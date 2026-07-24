@@ -1,7 +1,7 @@
-walkable: 23.5% of page (23.5% entrance-reachable)
-components: 1  sizes: [62087]
-anchors: 58  |  exclusions: 0
-service pockets sealed (service + dead crevices): 33
+walkable: 24.3% of page (24.3% entrance-reachable)
+components: 1  sizes: [64074]
+anchors: 58  |  exclusions: 2
+service pockets sealed (service + dead crevices): 32
    3725 cells at (756,466) near BAKERY
    2735 cells at (298,485) near PHARMACY
    2016 cells at (1017,359) near SEAFOOD

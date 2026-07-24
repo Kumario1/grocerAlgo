@@ -2,7 +2,7 @@
  "components": {
   "n": 1,
   "sizes": [
-   75107
+   76766
   ]
  },
  "coverage": {
@@ -35,22 +35,16 @@
    "y": 618.2
   },
   {
-   "cells": 442,
-   "near": "AISLE 19",
-   "x": 614.8,
-   "y": 488.9
-  },
-  {
-   "cells": 438,
-   "near": "FROZEN FOODS",
-   "x": 521.4,
-   "y": 490.8
-  },
-  {
    "cells": 395,
    "near": "SEAFOOD",
    "x": 206.2,
    "y": 209.1
+  },
+  {
+   "cells": 394,
+   "near": "AISLE 19",
+   "x": 615.1,
+   "y": 480.9
   },
   {
    "cells": 332,
@@ -65,16 +59,10 @@
    "y": 467.4
   },
   {
-   "cells": 314,
+   "cells": 299,
    "near": "FROZEN FOODS",
-   "x": 568.5,
-   "y": 501.4
-  },
-  {
-   "cells": 189,
-   "near": "AISLE 21",
-   "x": 805.6,
-   "y": 544.1
+   "x": 568.4,
+   "y": 499.2
   },
   {
    "cells": 172,
@@ -101,10 +89,22 @@
    "y": 616.8
   },
   {
+   "cells": 118,
+   "near": "AISLE 21",
+   "x": 793.7,
+   "y": 542.9
+  },
+  {
    "cells": 117,
    "near": "EXIT",
    "x": 831.7,
    "y": 618.3
+  },
+  {
+   "cells": 111,
+   "near": "AISLE 15",
+   "x": 520.2,
+   "y": 433.7
   },
   {
    "cells": 111,
@@ -175,8 +175,8 @@
  ],
  "far_snaps": [
   {
-   "cells": 31.2,
-   "meters": 6.03,
+   "cells": 26.0,
+   "meters": 5.04,
    "name": "BAKERY"
   },
   {
@@ -204,6 +204,10 @@
  "narrow": [
   {
    "half_width_m": 0.58,
+   "name": "BAKERY"
+  },
+  {
+   "half_width_m": 0.58,
    "name": "FROZEN FOODS"
   },
   {
@@ -219,7 +223,7 @@
    "name": "RESTROOMS"
   },
   {
-   "half_width_m": 0.8,
+   "half_width_m": 0.97,
    "name": "AISLE 2"
   },
   {
@@ -229,21 +233,38 @@
   {
    "half_width_m": 0.97,
    "name": "AISLE 28"
-  },
-  {
-   "half_width_m": 0.97,
-   "name": "AISLE 29"
   }
  ],
  "provenance": {
-  "drift": null,
+  "drift": {
+   "seal_zones": {
+    "derived_n": 6,
+    "derived_names": [
+     "auto:BAKERY",
+     "auto:DELI",
+     "auto:KITCHEN",
+     "auto:PHARMACY",
+     "auto:SEAFOOD",
+     "auto:CHECKSTANDS"
+    ],
+    "file_n": 6,
+    "file_names": [
+     "Deli service island (staff behind the drawn counter walls of the Deli/Bakery block) - carried over verbatim from the auto-derivation, which is correct here",
+     "Bakery service island (same drawn block as Deli; staff) - carried over verbatim from the auto-derivation",
+     "Kitchen label disk - carried over verbatim from the auto-derivation. NOTE: on this store KITCHEN is the 'Kitchen Gadgets' category label printed in badged aisles 19/20, not a service counter (the real service kitchen is Cooking Connection), so its disk rim over-seals customer corridors; those are restored by inclusions.json rather than by shrinking the disk",
+     "Pharmacy counter/dispensary (staff; the room is drawn with walls x=1038-1106, y=538-676) - carried over verbatim from the auto-derivation",
+     "Seafood back-of-counter area (staff; enclosed by the west wall x=79.1, the north wall, the seafood case run x=141.7-155.7 and the chamfered counter poly (155.5,343.5)-(74.6,365.0) that closes its south end, with only 1.1-2.0 m staff gaps) - carried over verbatim from the auto-derivation",
+     "Checkstand lane bank, clipped in y to the drawn checkstand bodies. The auto-derived rect started at y=543.4, which is 46 pt NORTH of where the grocery shelf runs end (their bottom edges are y=560.1-562.2); with bridge=20 it therefore bridged the 12-18 pt gaps between the shelf-run ends and sealed the SOUTH MOUTHS of aisles 19/20/21 and their neighbours (x 640-652, 668-684, 700-712, 732-744, 760-772 at y 545-563). That cost a shopper 4.8 m north of the front alley a 44.7 m detour to reach checkout. The checkstand fixtures themselves all start at y0>=589.4, so clipping the north edge to y=580 seals every lane and the customer-service counter block while leaving the aisle mouths and the front action alley open"
+    ]
+   }
+  },
   "exclusions": "absent",
   "inclusions": "file",
-  "seal_zones": "derived",
+  "seal_zones": "file",
   "zones": "derived"
  },
- "reachable_pct": 28.5,
+ "reachable_pct": 29.1,
  "store": "790",
  "verify": [],
- "walkable_pct": 28.5
+ "walkable_pct": 29.1
 }

@@ -1,0 +1,30 @@
+Done — store 790 is converged and verified. Stopping here for the separate audit role, as the runbook requires.
+
+## Result
+
+`./rebuild.sh 790` exits 0 · `"verify": []` · `"coverage"` both lists empty · **1 component** · walkable **29.1%** (was 28.5%) · **367 tests pass**, including store 659's pixel-frozen golden gate (50 golden/659 tests green).
+
+## Important context first
+
+790 arrived *already passing every mechanical gate*, with a committed `data/790/qa/audit.log` reading `AUDIT CLEAN — store 790`. **That audit was stale** — it describes 6 inclusions / 30.0% walkable / 79,298 cells / 166 tests, but the actual shipped state was 9 / 28.5% / 75,107 / 345. Commit `da4854e` changed the map after it. So I treated the whole thing as unverified and re-derived every conclusion. The green gates were hiding seven real defects.
+
+## Findings fixed
+
+**1. Checkstand seal rect ate the grocery aisle mouths** *(severe)* — the auto-derived rect started at y=543.4, ~46 pt **north** of where the shelf runs end (bottoms at y=560.1–562.2). With `bridge=20` it bridged the 12–18 pt gaps between shelf-run ends and sealed the south mouths of aisles 19/20/21 and neighbours. Measured cost: a shopper 4.8 m north of the front alley in aisle 21 had to walk **49.8 m** to reach it (aisle 20: 44.7 m). This is the runbook's documented case for a `seal_zones.json` override, so I authored one — five disks carried over verbatim, rect clipped to y=580 (checkstand bodies all start at y≥589.4). All three aisles now reach the alley in 4.8 m.
+
+**2–7. Service-disk rim over-seals** → six inclusions. Each is a customer corridor cut mid-run by an r=130 disk rim: a Market gondola slot green at its mouth but sealed below while its *identical twin* 30 pt away stayed green; the Sushiya/Meal Simple north frontage; the aisle 35/36 east ends by the Pharmacy; the Seasonal Items slot; the aisle 1 and aisle 2 north mouths (this is why the first pass reported AISLE 2 at 0.80 m — now 0.97 m).
+
+**walk_truth**: `(580,595)` was labelled "Blooms floral seating" but sits at the checkstand bank (the seating is x 353–433); `(930,612)` claimed "Pharmacy pickup frontage" but is 106 pt west of the counter wall; `(560,600)` named the customer-service staff block but landed **on a counter fixture**, not the staff interior — so it would not have caught that pocket being wrongly opened. All corrected, plus 11 regression pins, each verified sealed-before / walkable-after.
+
+## One correction I made against myself
+
+I initially concluded the Seafood west strip (155 m²) was wrongly-sealed customer walkway — no wall is drawn, the department title sits on it, and store 265 has an inclusion asserting exactly that pattern. Probing the geometry instead of trusting the picture showed a chamfered **counter poly** `(155.5,343.5)→(74.6,365.0)` closing its south end. It's a genuine back-of-counter area enclosed on all four sides with only 1.1–2.0 m staff gaps. Sealing is correct and I left it alone. Had I shipped that inclusion it would have opened a staff room.
+
+## Verification performed
+
+Every sealed-open-floor region ≥20 cells is now accounted for: 4 genuine enclosures (Deli/Bakery walled block, Seafood back-of-counter, Pharmacy room, customer-service counter U) + 13 checkout lanes, nothing else. Full 3×3 crop sweep against the source PDF. All **108** product labels have reachable floor within 2.0 m — zero misses. Remaining `far_snaps` (BAKERY 5.0 m, DELI 4.3 m, SEAFOOD 3.1 m) are labels printed inside those legitimately sealed enclosures; no `narrow` entry is below 0.5 m half-width.
+
+## Two things you should know
+
+- **A concurrent process is onboarding store 24 in this same worktree** — `data/24/{inclusions,walk_truth,profile}.json` changed during my session (mtimes 01:16–01:31) and HEAD advanced by four commits. Not mine; I did not touch it. My diff is confined to `data/790/{seal_zones,inclusions,walk_truth}.json`. Worth confirming that's intentional parallelism rather than two agents colliding.
+- I did **not** run `docs/audit.md` or spawn an audit agent, per the runbook. Onboarding isn't finished until that separate role reports CLEAN.

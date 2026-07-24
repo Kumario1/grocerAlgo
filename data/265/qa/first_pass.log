@@ -1,0 +1,1 @@
+raster fallback remains experimental because the universal differential benchmark has not passed; inspect docs/superpowers/specs/2026-07-22-raster-fallback-benchmark-results.md or set GROCER_RASTER_EXPERIMENTAL=1 for benchmark/holdout QA only

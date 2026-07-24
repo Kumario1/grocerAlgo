@@ -1,0 +1,6 @@
+[
+  {"name": "Sushiya sushi-bar counter interior — the drawing is a horseshoe counter open to the north (measured x=926..959, y=395..428); staff work inside the U, customers stand outside it, so the pocket the legs enclose is staff-only. It was left walkable because no SUSHI anchor exists: 'Sushiya' IS real text on the page at (965,391), but extract.py's anchor whitelist does not carry SUSHI, so engine.SERVICE_DEPTS' substring pocket-culling never sees it (corrected 2026-07-23 — the earlier note claimed the label was vector artwork, which is wrong)",
+   "rect": [931, 394, 955, 423]},
+  {"name": "Cooking Connection demo-kitchen counter interior — same horseshoe drawn north of Sushiya (measured x=936..968, y=338..369); the pocket between its legs is the demonstrator's station, staff-only. Same cause: 'Cooking Connection' is real text at (952,375) but is not in extract.py's anchor whitelist, so the COOKING entry in SERVICE_DEPTS can never fire here",
+   "rect": [939, 339, 961, 367]}
+]

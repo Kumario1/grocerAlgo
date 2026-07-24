@@ -1,0 +1,33 @@
+Store 24 is converged. Handing off for the audit.
+
+## Result
+
+`./rebuild.sh 24` exits 0, 355 tests pass (includes 659's pixel-frozen golden). `data/24/qa/report.json`:
+
+```
+verify        : []
+coverage      : {"sealed_floor_patches": [], "unreachable_shelf_labels": []}
+components    : {"n": 1, "sizes": [63718]}
+walkable_pct  : 24.1   reachable_pct: 24.1
+```
+
+## What the first pass had wrong
+
+The first pass already reported `verify: []` and empty coverage lists — the mechanical nets were clean. Four separate customer areas were still sealed, all invisible to the nets because they carry no printed shelf label and no aisle badge inside the sealed patch (net 2 needs that corroboration):
+
+1. **Aisle 2 was severed mid-corridor.** The auto `BAKERY` disk (r=130 from 802,434) bridged the 13-pt corridor at x 813–825 shut for y=278…356, plus three cross-gaps between the Beer/Wine gondolas. Badge 2 sits at (818,202) — green at the mouth, white deeper in, exactly the documented store-24 failure mode. The "Wine" label printed at (816,370) is inside that corridor.
+2. **The Market prepared-foods floor** around Sushiya / Meal Simple (649 + 80 + 54 cells). The `SEAFOOD` disk reaches to x=897 and its 20-pt bridge closed the gaps between the freestanding display tables. `Sushiya`/`Meal Simple` are extracted as words but sit on fixtures, so net 1 passed them.
+3. **The Market corridor at x 968–982, y 336–366**, between the Cooking Connection horseshoe and the seafood back-of-house wall — open above and below, bridged shut because it abuts the 16-pt staff doorway at x=984.
+4. **The walkway east of the checkstand bank** (x 813–846, y 596–664), swallowed by the derived `CHECKSTANDS` rect's 20-pt bridge although it is open at both ends.
+
+Going the other way, the **Sushiya horseshoe interior was walkable** — staff work inside the U. Both horseshoe counters (Sushiya, Cooking Connection) are now excluded.
+
+## Files written (store 24 only)
+
+- `data/24/exclusions.json` — new; the two horseshoe counter interiors.
+- `data/24/inclusions.json` — four new rects for the above, plus the existing five carried over (one south edge nudged 558→560 to stop leaving a 1-cell corridor sliver).
+- `data/24/walk_truth.json` — rewritten: 29 `must` / 26 `must_not`. Every fix has a `must` point that would have caught it, and the two horseshoes plus the seafood staff doorway have `must_not` points so an inclusion can't leak through later. I also corrected several inherited names that pointed at the wrong feature (e.g. `[604,300]` was labelled "aisle 6 / Kitchen Gadgets" but is aisle 10's corridor; `[735,222]` was labelled aisle 7 but is aisle 5), and moved `[830,330]` out of `must_not` — that "wine-back staff strip" is aisle 2.
+
+No code, tests, goldens, or other stores touched.
+
+Two things worth flagging that are **not** mine: the working tree moved during the session — the branch is now `main` (was `codex/raster-pdf-fallback`) after a PR #4 merge, and `data/790/*` is being rewritten concurrently (mtimes 01:12–01:26, including a new `seal_zones.json`). Another onboarding run appears to be active in the same checkout. My last full-suite run was green regardless.

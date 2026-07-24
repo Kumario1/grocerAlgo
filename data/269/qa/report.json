@@ -1,0 +1,256 @@
+{
+ "components": {
+  "n": 3,
+  "sizes": [
+   73015,
+   7,
+   2
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 2099,
+   "near": "RESTROOMS",
+   "x": 1095.4,
+   "y": 518.9
+  },
+  {
+   "cells": 651,
+   "near": "RESTROOMS",
+   "x": 1097.7,
+   "y": 413.6
+  },
+  {
+   "cells": 455,
+   "near": "BAKERY",
+   "x": 238.7,
+   "y": 325.6
+  },
+  {
+   "cells": 320,
+   "near": "SEAFOOD",
+   "x": 275.6,
+   "y": 267.6
+  },
+  {
+   "cells": 290,
+   "near": "FROZEN FOODS",
+   "x": 538.8,
+   "y": 515.3
+  },
+  {
+   "cells": 289,
+   "near": "FROZEN FOODS",
+   "x": 581.1,
+   "y": 507.0
+  },
+  {
+   "cells": 200,
+   "near": "ENTRANCE",
+   "x": 359.8,
+   "y": 622.4
+  },
+  {
+   "cells": 151,
+   "near": "EXIT",
+   "x": 377.0,
+   "y": 549.4
+  },
+  {
+   "cells": 144,
+   "near": "AISLE 20",
+   "x": 755.6,
+   "y": 476.3
+  },
+  {
+   "cells": 127,
+   "near": "CHECKSTANDS",
+   "x": 480.6,
+   "y": 624.1
+  },
+  {
+   "cells": 126,
+   "near": "AISLE 21",
+   "x": 760.0,
+   "y": 529.0
+  },
+  {
+   "cells": 125,
+   "near": "CHECKSTANDS",
+   "x": 520.2,
+   "y": 624.9
+  },
+  {
+   "cells": 125,
+   "near": "CHECKSTANDS",
+   "x": 638.2,
+   "y": 624.9
+  },
+  {
+   "cells": 123,
+   "near": "CHECKSTANDS",
+   "x": 618.3,
+   "y": 624.7
+  },
+  {
+   "cells": 120,
+   "near": "AISLE 1",
+   "x": 479.0,
+   "y": 253.0
+  },
+  {
+   "cells": 118,
+   "near": "CHECKSTANDS",
+   "x": 500.7,
+   "y": 624.5
+  },
+  {
+   "cells": 118,
+   "near": "CHECKSTANDS",
+   "x": 598.7,
+   "y": 624.5
+  },
+  {
+   "cells": 117,
+   "near": "KITCHEN",
+   "x": 618.0,
+   "y": 554.0
+  },
+  {
+   "cells": 112,
+   "near": "ENTRANCE",
+   "x": 438.0,
+   "y": 627.0
+  },
+  {
+   "cells": 112,
+   "near": "KITCHEN",
+   "x": 651.0,
+   "y": 555.0
+  },
+  {
+   "cells": 112,
+   "near": "KITCHEN",
+   "x": 677.0,
+   "y": 555.0
+  },
+  {
+   "cells": 106,
+   "near": "CHECKSTANDS",
+   "x": 461.0,
+   "y": 625.8
+  },
+  {
+   "cells": 105,
+   "near": "CHECKSTANDS",
+   "x": 559.5,
+   "y": 624.1
+  },
+  {
+   "cells": 105,
+   "near": "CHECKSTANDS",
+   "x": 579.5,
+   "y": 624.1
+  },
+  {
+   "cells": 105,
+   "near": "AISLE 21",
+   "x": 657.5,
+   "y": 624.1
+  },
+  {
+   "cells": 104,
+   "near": "CHECKSTANDS",
+   "x": 539.6,
+   "y": 624.0
+  },
+  {
+   "cells": 104,
+   "near": "AISLE 21",
+   "x": 759.8,
+   "y": 506.0
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 34.2,
+   "meters": 6.68,
+   "name": "SEAFOOD"
+  },
+  {
+   "cells": 21.7,
+   "meters": 4.24,
+   "name": "BAKERY"
+  },
+  {
+   "cells": 20.8,
+   "meters": 4.06,
+   "name": "DELI"
+  },
+  {
+   "cells": 15.9,
+   "meters": 3.1,
+   "name": "RESTROOMS"
+  },
+  {
+   "cells": 15.5,
+   "meters": 3.02,
+   "name": "MARKET/DELI"
+  },
+  {
+   "cells": 14.8,
+   "meters": 2.89,
+   "name": "DAIRY"
+  }
+ ],
+ "m_per_cell": 0.1951,
+ "narrow": [
+  {
+   "half_width_m": 0.44,
+   "name": "FROZEN FOODS"
+  },
+  {
+   "half_width_m": 0.78,
+   "name": "KITCHEN"
+  },
+  {
+   "half_width_m": 0.8,
+   "name": "DAIRY"
+  },
+  {
+   "half_width_m": 0.98,
+   "name": "ENTRANCE"
+  },
+  {
+   "half_width_m": 0.98,
+   "name": "FISH/MEAT/CHILI"
+  },
+  {
+   "half_width_m": 0.98,
+   "name": "MARKET/DELI"
+  },
+  {
+   "half_width_m": 0.98,
+   "name": "RESTROOMS"
+  },
+  {
+   "half_width_m": 0.98,
+   "name": "SEAFOOD"
+  }
+ ],
+ "provenance": {
+  "drift": null,
+  "exclusions": "file",
+  "inclusions": "file",
+  "seal_zones": "derived",
+  "zones": "derived"
+ },
+ "reachable_pct": 30.1,
+ "store": "269",
+ "verify": [],
+ "walkable_pct": 30.1
+}

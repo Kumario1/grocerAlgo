@@ -2,7 +2,7 @@
  "components": {
   "n": 1,
   "sizes": [
-   62087
+   64074
   ]
  },
  "coverage": {
@@ -197,12 +197,6 @@
    "y": 371.8
   },
   {
-   "cells": 121,
-   "near": "SEAFOOD",
-   "x": 950.0,
-   "y": 351.1
-  },
-  {
    "cells": 103,
    "near": "CHECKSTANDS",
    "x": 698.6,
@@ -253,13 +247,13 @@
  ],
  "provenance": {
   "drift": null,
-  "exclusions": "absent",
+  "exclusions": "file",
   "inclusions": "file",
   "seal_zones": "derived",
   "zones": "derived"
  },
- "reachable_pct": 23.5,
+ "reachable_pct": 24.3,
  "store": "24",
  "verify": [],
- "walkable_pct": 23.5
+ "walkable_pct": 24.3
 }

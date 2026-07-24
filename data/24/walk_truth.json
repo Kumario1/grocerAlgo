@@ -1,231 +1,80 @@
 {
  "must": [
-  [
-   688,
-   680,
-   "front action alley south of checkstands"
-  ],
-  [
-   604,
-   300,
-   "aisle 6 corridor at 'Kitchen Gadgets' shelf label (restored from bogus auto KITCHEN disk)"
-  ],
-  [
-   526,
-   450,
-   "aisle 22 corridor by Seasonal/Toys (restored from deli disk rim cut)"
-  ],
-  [
-   320,
-   575,
-   "aisle 39 west end by Pharmacy (restored from pharmacy disk rim cut)"
-  ],
-  [
-   940,
-   640,
-   "Produce area walkway at the label"
-  ],
-  [
-   450,
-   208,
-   "Dairy corridor along the top wall"
-  ],
-  [
-   300,
-   315,
-   "Frozen Foods corridor between coffin freezers"
-  ],
-  [
-   1000,
-   520,
-   "Market south walkway toward Seafood"
-  ],
-  [
-   970,
-   300,
-   "Market corridor east of aisle 1"
-  ],
-  [
-   640,
-   478,
-   "Deli south frontage at aisle 17-19 badges"
-  ],
-  [
-   802,
-   590,
-   "walkway south of Bakery toward Blooms"
-  ],
-  [
-   860,
-   660,
-   "Produce west walkway toward right entrance"
-  ],
-  [
-   850,
-   710,
-   "right entrance vestibule walkway"
-  ],
-  [
-   388,
-   675,
-   "left Entrance/Exit approach corridor"
-  ],
-  [
-   735,
-   222,
-   "top cross corridor at the aisle-7 badge mouth"
-  ],
-  [
-   262,
-   560,
-   "Pharmacy pickup corridor east of counter"
-  ],
-  [
-   985,
-   440,
-   "Seafood west frontage (customer side)"
-  ],
-  [
-   300,
-   420,
-   "pharmacy-wing corridor, lotion/skin-care row (coverage-net restore)"
-  ],
-  [
-   300,
-   462,
-   "pharmacy-wing corridor, foot/eye-care row (coverage-net restore)"
-  ],
-  [
-   300,
-   508,
-   "pharmacy-wing corridor, baby row (coverage-net restore)"
-  ],
-  [
-   300,
-   530,
-   "pharmacy-wing corridor, dental/oral row (coverage-net restore)"
-  ],
-  [
-   311,
-   397,
-   "aisle 31 corridor at Dog Food label (audit: pet/laundry section had no must point)"
-  ],
-  [
-   302,
-   348,
-   "aisle 29 corridor at Laundry Detergent label (audit: pet/laundry section)"
-  ]
+  [688, 690, "front action alley south of the checkstand bank (Checkstands label at 688,677)"],
+  [818, 320, "aisle 2 corridor mid-block, between the aisle-2/3 shelf and the Beer/Wine gondolas (badge 2 at 818,202; 'Wine' label printed in this corridor at 816,370) — the BAKERY seal disk severed it here"],
+  [840, 340, "cross-gap between the 4th and 5th Beer/Wine gondolas — orphaned with the aisle-2 corridor by the same disk rim"],
+  [906, 440, "Market prepared-foods floor west of the Sushiya bar, among the freestanding display tables — the SEAFOOD disk reached to x=897 and culled this open floor whole"],
+  [940, 434, "Market floor immediately south of the Sushiya horseshoe counter (customer side of the bar)"],
+  [950, 522, "Market floor between the Meal Simple cases and the Produce display run"],
+  [974, 350, "Market corridor between the Cooking Connection horseshoe and the seafood back-of-house wall — through-corridor, open above y=336 and below y=366"],
+  [818, 630, "walkway east of the checkstand bank, between the cart corral and the freestanding display bins — swallowed by the derived CHECKSTANDS rect"],
+  [1004, 500, "Seafood customer frontage west of the display case (case at x=1015-1023, glass front hatched on its west side)"],
+  [975, 440, "customer floor west of the angled Seafood counter"],
+  [940, 638, "Produce centre walkway at the Produce label"],
+  [860, 660, "front walkway between the checkstand bank and Produce"],
+  [640, 478, "aisle 17 badge mouth — Deli/Bakery south frontage"],
+  [760, 412, "customer corridor along the north face of the Deli/Bakery service counters"],
+  [700, 580, "walkway along the south face of the Blooms floral shop"],
+  [802, 590, "walkway south of the Restrooms/Admin block, between it and the checkstand bank"],
+  [690, 725, "open front-end bay between the Lease room partition (x=674) and the Tobacco kiosk (x=706) — 21-pt mouth onto the front alley at y=704, no wall across it and no lane drawn inside; the derived CHECKSTANDS rect's 20-pt bridge sealed it"],
+  [660, 720, "the twin bay immediately west (x=646..674) — same front wall recess, 28-pt mouth, survived the CHECKSTANDS bridge; the two must agree"],
+  [262, 560, "Pharmacy/First Aid end-cap corridor east of the pharmacy counter room (First Aid label at 263,552)"],
+  [300, 508, "aisle 36 corridor, Baby Food / Baby Accessories row (pharmacy wing)"],
+  [300, 420, "aisle 32 corridor, Hair Care / Shampoo row (pharmacy wing)"],
+  [320, 441, "aisle 33 corridor, Cotton Balls / Hair Accessories row — pharmacy wing, per-aisle cover for the wing that shipped wholly sealed on 2026-07-21; the inclusion rects that hold 33-38 open are hand-drawn, so each row needs its own point"],
+  [320, 461, "aisle 34 corridor, Lotion/Cream / Facial Care / Skin Care row (pharmacy wing)"],
+  [320, 485, "aisle 35 corridor, Foot Care / Eye Care / Deodorant row (pharmacy wing)"],
+  [320, 529, "aisle 37 corridor, Baby Wipes / Diapers / Feminine Hygiene row (pharmacy wing)"],
+  [320, 553, "aisle 38 corridor, Dental/Oral Care / Hosiery / Incontinence row (pharmacy wing)"],
+  [320, 575, "aisle 39 west end at the Nutritional Aids/Bars and Vitamins labels"],
+  [311, 398, "aisle 31 corridor at the Dog Food label"],
+  [300, 290, "aisle 27 corridor at the Pot Pie / Frozen Desserts freezer row"],
+  [375, 205, "top cross corridor in front of the Dairy cases (Dairy label at 375,193)"],
+  [604, 300, "aisle 10 corridor at the Coffee / Cookies labels"],
+  [605, 220, "aisle 10 MOUTH onto the top cross-aisle — the gondola ends stop at y=218 and the drawing leaves the mouth open; the KITCHEN disk rim sealed y=218..224 across the full corridor width until the inclusion's north edge was carried to 216"],
+  [630, 220, "aisle 9 mouth onto the top cross-aisle — same KITCHEN-disk rim bar"],
+  [767, 220, "aisle 4 mouth onto the top cross-aisle — same KITCHEN-disk rim bar"],
+  [735, 222, "aisle 5 corridor at its badge mouth, Rice / Beans (Dry) labels"],
+  [526, 450, "aisle 22 corridor (Toys / Seasonal Items block)"],
+  [466, 300, "aisle 15 corridor, Bags/Wrap / Trash Bags / Facial Tissue row — top-west block had no point of its own"],
+  [525, 300, "aisle 13 corridor, Water / Charcoal / Coconut Water row (top-west block)"],
+  [300, 240, "aisle 26 corridor along the Frozen Foods freezer rows (north-west block)"],
+  [862, 300, "Beer/Wine cross-walk east of the aisle-1 shelf, between the gondolas and the Market floor"],
+  [970, 640, "Produce east walkway between the Produce display run and the east-wall cases"],
+  [432, 650, "aisle 42 corridor in the Healthy Living block"],
+  [300, 625, "aisle 41 corridor, Healthy Living block west end"],
+  [300, 675, "aisle 43 corridor at the Nutritional Aids/Bars label (south-west block)"],
+  [394, 684, "left Entrance/Exit approach corridor inside the south-west doors"],
+  [862, 694, "right Entrance approach — the cell the ENTRANCE anchor snaps to"]
  ],
  "must_not": [
-  [
-   5,
-   5,
-   "page corner NW"
-  ],
-  [
-   1261,
-   5,
-   "page corner NE"
-  ],
-  [
-   5,
-   829,
-   "page corner SW"
-  ],
-  [
-   1261,
-   829,
-   "page corner SE"
-  ],
-  [
-   100,
-   100,
-   "parking lot NW"
-  ],
-  [
-   150,
-   500,
-   "curbside pickup lanes west of the store"
-  ],
-  [
-   190,
-   623,
-   "pharmacy drive-thru lane (outside boundary)"
-  ],
-  [
-   900,
-   100,
-   "Admin offices above the sales floor (outside boundary)"
-  ],
-  [
-   642,
-   441,
-   "Deli island interior (staff)"
-  ],
-  [
-   802,
-   440,
-   "Bakery interior (staff)"
-  ],
-  [
-   1020,
-   360,
-   "Seafood counter back area (staff)"
-  ],
-  [
-   240,
-   520,
-   "Pharmacy room behind counter (staff)"
-  ],
-  [
-   830,
-   330,
-   "wine-back strip behind Beer/Wine shelving (staff gap, mirrors 659)"
-  ],
-  [
-   700,
-   550,
-   "Blooms floral shop room (enclosed)"
-  ],
-  [
-   770,
-   520,
-   "Restrooms interior (enclosed)"
-  ],
-  [
-   480,
-   725,
-   "back room off the south entry vestibule (enclosed)"
-  ],
-  [
-   690,
-   660,
-   "checkout lane between checkstands"
-  ],
-  [
-   534,
-   640,
-   "express/self-checkout lane"
-  ],
-  [
-   1020,
-   230,
-   "NE enclosed room off the Market top corridor (audit: enclosed, was uncovered)"
-  ],
-  [
-   287,
-   165,
-   "enclosed room on the top wall west of Dairy (audit: enclosed, was uncovered)"
-  ],
-  [
-   1057,
-   400,
-   "east service corridor behind Seafood/Market (audit: staff, was uncovered)"
-  ],
-  [
-   820,
-   515,
-   "Admin room east of Restrooms (audit: enclosed, was uncovered)"
-  ]
+  [5, 5, "page corner NW"],
+  [1261, 5, "page corner NE"],
+  [5, 829, "page corner SW"],
+  [1261, 829, "page corner SE"],
+  [100, 100, "parking lot NW, outside the sales-floor boundary"],
+  [150, 500, "curbside pickup lanes west of the store"],
+  [190, 623, "pharmacy drive-thru lane (outside boundary)"],
+  [600, 100, "Admin offices at the top of the sheet, outside the sales floor"],
+  [920, 112, "Loading Dock, outside the sales floor"],
+  [642, 441, "Deli island interior — staff side of the counter (Deli label at 649,441)"],
+  [802, 440, "Bakery interior — staff side of the counter (Bakery label at 802,434)"],
+  [1020, 300, "Seafood back-of-house behind the counter wall at x=985"],
+  [988, 352, "staff doorway through the seafood back-of-house wall — the Market inclusion must not leak through it"],
+  [943, 408, "Sushiya horseshoe counter interior — staff work inside the U"],
+  [950, 352, "Cooking Connection horseshoe counter interior — staff demo station"],
+  [236, 540, "Pharmacy room behind the counter (staff)"],
+  [697, 551, "Blooms floral shop interior — drawn as an enclosed room"],
+  [778, 515, "Restrooms interior"],
+  [820, 515, "Admin room east of the Restrooms (Admin label at 818,514)"],
+  [838, 542, "Admin block SE cell (814,516)-(852,558) — enclosed by the Admin office's stepped partition N+W, a tall fixture E, shelving S; the only way in is a door hinged at (793,543) swinging onto the corridor. Staff space: no product label, no department frontage, nothing to shop for. Human call 2026-07-23 closing audit finding #3"],
+  [1034, 538, "east back-of-house corridor behind the seafood cases"],
+  [1020, 230, "NE enclosed room off the Market top corridor"],
+  [287, 165, "enclosed room on the top wall west of Dairy"],
+  [699, 640, "checkout lane interior between two checkstands"],
+  [534, 640, "express/self-checkout lane interior"],
+  [637, 720, "Lease tenant room in the front vestibule — the walled room at x=629..646 with its own door at its SE corner ('Lease' label at 635,724). The old must_not sat at (690,725), which is NOT this room but the open bay two partitions east, and so blessed a 15 m^2 seal the drawing does not support"],
+  [766, 731, "enclosed room off the front vestibule east of the Tobacco kiosk (x=741..798) — drawn sealed with a single door on its west wall"],
+  [480, 725, "back room off the south entry vestibule"]
  ]
 }

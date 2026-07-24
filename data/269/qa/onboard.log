@@ -1,0 +1,39 @@
+Store 269 is converged. Summary of the work:
+
+## Result
+
+`./rebuild.sh 269` → exit 0, **437 tests pass** (390 before + store 269 joining the parametrized suites).
+
+```
+walkable: 30.1% of page (30.1% entrance-reachable)
+components: 3  sizes: [73015, 7, 2]
+verify: []
+coverage: {"sealed_floor_patches": [], "unreachable_shelf_labels": []}
+provenance: zones=derived, seal_zones=derived, exclusions=file, inclusions=file
+```
+
+Files authored (only store 269's): `exclusions.json`, `inclusions.json`, `walk_truth.json`. `zones.json`/`seal_zones.json` weren't needed — auto-derivation was correct in shape.
+
+## What the first pass got wrong
+
+**39.4% walkable, 5 VERIFY flags.** The guide draws this store's back-of-house as blank floor inside the exterior wall, so three staff regions were fully green — 5 300 sq ft of them:
+
+- **Northwest block** `[39,76,223.5,408]` — 173×330 pt with *zero* fixtures and *zero* product labels, walled by the 12.6-pt band `[210.9,115.5,223.5,184.1]`/`[213.5,192.3,223.3,387.6]` (case scallops on its east face) and the y=408.6 wall run. The SEAFOOD and BAKERY titles are printed inside it — hence both VERIFYs.
+- **North band** `[222,76,899,131]` — 676×40 pt behind the 13.3-pt back-wall band, whose south face carries the shelf hooks and Market/Deli cases. Leaked through two jamb-drawn service doorways at x=514.6–536.3 and x=811.6–833.4. Holds the MARKET/DELI title.
+- **Deli production room** `[339,158,432,400]` — 81×228 pt, empty, entered only by a drawn double swing door (leaf polys + arcs at x=414–430) and one staff gap. Holds the DELI title.
+
+Text-in-exclusion check: the only words inside all three rects are `Seafood`, `Bakery`, `Market/Deli`, `Deli` — no product labels.
+
+Nine inclusions then restored what the auto seal zones over-cut: the four disks are centred on titles that sit *inside* those back rooms (or, for KITCHEN at (651,518.6), on the "Kitchen Gadgets" shelf label — same as stores 24/388/790), and the CHECKSTANDS rect starts at y=540.4 because seven Blooms floral tables joined its fixture cluster. That cost the Market floor, the Beer & Wine bay, aisles 13–20, the Seasonal bays, the floral floor and the cart-corral walkway.
+
+## Things the audit should know, stated plainly
+
+- **3 components, not 1.** The 7- and 2-cell strays are letter counters inside the `HOME` logo, which extract.py captures as fixture polys. I trimmed every other inclusion to avoid this (160 → 3 components); these two can't be avoided without leaving floor under the logo culled.
+- **FROZEN FOODS corridor half-width 0.44 m.** This guide draws every freezer door swung fully open; the arcs fence off ~5 pt on each side of aisles 13–16, and inclusions can only restore `free_raw` cells, not unblock strokes. Store 790 reports 0.58 m for the identical artifact. The corridors are green end to end.
+- **6 far_snaps (SEAFOOD 6.7 m, BAKERY 4.2 m, DELI 4.1 m, MARKET/DELI 3.0 m, RESTROOMS 3.1 m, DAIRY 2.9 m)** — all department titles printed on back-of-house or solid blocks, snapping forward to their customer frontage. Expected consequence of the exclusions.
+- **All 27 culled pockets classified**: 12 checkout lanes + 2 end lanes (by design), pharmacy dispensary 79.9 m² and restrooms 24.8 m² (drawn-enclosed — I confirmed `raw_reachable=False`, so no rule of ours sealed them), and one 1.1 m² nibble inside the west wall band's south end.
+- Every shelf-adjacent word on the page (209 of them) has reachable floor at 0.00 m except `Restrooms` (3.12), `Dairy` (2.95) and `Foods` (1.57) — all department titles, not products.
+
+`walk_truth.json` has 22 `must` / 18 `must_not` points; I verified each lies inside the feature its name claims and matches the shipped grid.
+
+Stopping here as instructed — I have not run `docs/audit.md`.

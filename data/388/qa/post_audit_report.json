@@ -1,0 +1,180 @@
+{
+ "components": {
+  "n": 1,
+  "sizes": [
+   96825
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 1669,
+   "near": "PHARMACY",
+   "x": 145.5,
+   "y": 626.8
+  },
+  {
+   "cells": 219,
+   "near": "CHECKSTANDS",
+   "x": 574.3,
+   "y": 613.6
+  },
+  {
+   "cells": 175,
+   "near": "AISLE 30",
+   "x": 729.9,
+   "y": 609.6
+  },
+  {
+   "cells": 136,
+   "near": "CHECKSTANDS",
+   "x": 546.4,
+   "y": 610.4
+  },
+  {
+   "cells": 126,
+   "near": "AISLE 19",
+   "x": 248.0,
+   "y": 623.0
+  },
+  {
+   "cells": 123,
+   "near": "AISLE 24",
+   "x": 463.9,
+   "y": 609.4
+  },
+  {
+   "cells": 123,
+   "near": "AISLE 24",
+   "x": 483.9,
+   "y": 609.4
+  },
+  {
+   "cells": 123,
+   "near": "AISLE 29",
+   "x": 683.9,
+   "y": 609.4
+  },
+  {
+   "cells": 120,
+   "near": "AISLE 19",
+   "x": 247.0,
+   "y": 603.0
+  },
+  {
+   "cells": 113,
+   "near": "CHECKSTANDS",
+   "x": 602.5,
+   "y": 608.8
+  },
+  {
+   "cells": 111,
+   "near": "AISLE 24",
+   "x": 442.8,
+   "y": 609.0
+  },
+  {
+   "cells": 111,
+   "near": "CHECKSTANDS",
+   "x": 524.8,
+   "y": 609.0
+  },
+  {
+   "cells": 111,
+   "near": "AISLE 28",
+   "x": 642.8,
+   "y": 609.0
+  },
+  {
+   "cells": 107,
+   "near": "AISLE 23",
+   "x": 422.5,
+   "y": 609.6
+  },
+  {
+   "cells": 107,
+   "near": "CHECKSTANDS",
+   "x": 504.5,
+   "y": 609.6
+  },
+  {
+   "cells": 107,
+   "near": "AISLE 27",
+   "x": 622.5,
+   "y": 609.6
+  },
+  {
+   "cells": 107,
+   "near": "AISLE 29",
+   "x": 704.5,
+   "y": 609.6
+  },
+  {
+   "cells": 106,
+   "near": "AISLE 28",
+   "x": 663.2,
+   "y": 608.6
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 15.6,
+   "meters": NaN,
+   "name": "ENTRANCE"
+  },
+  {
+   "cells": 13.4,
+   "meters": NaN,
+   "name": "PHARMACY"
+  }
+ ],
+ "m_per_cell": NaN,
+ "narrow": [
+  {
+   "half_width_m": NaN,
+   "name": "AISLE 1"
+  },
+  {
+   "half_width_m": NaN,
+   "name": "AISLE 10"
+  },
+  {
+   "half_width_m": NaN,
+   "name": "AISLE 11"
+  },
+  {
+   "half_width_m": NaN,
+   "name": "AISLE 12"
+  },
+  {
+   "half_width_m": NaN,
+   "name": "AISLE 13"
+  },
+  {
+   "half_width_m": NaN,
+   "name": "AISLE 14"
+  },
+  {
+   "half_width_m": NaN,
+   "name": "AISLE 15"
+  },
+  {
+   "half_width_m": NaN,
+   "name": "AISLE 16"
+  }
+ ],
+ "provenance": {
+  "drift": null,
+  "exclusions": "file",
+  "inclusions": "file",
+  "seal_zones": "derived",
+  "zones": "derived"
+ },
+ "reachable_pct": 40.0,
+ "store": "388",
+ "verify": [],
+ "walkable_pct": 40.0
+}

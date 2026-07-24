@@ -1,0 +1,28 @@
+Audit complete. Both findings are fixed and verified; the map geometry itself was sound.
+
+## Findings
+
+### 1 — `walk_truth` has no guard on the Market↔Deli spine, and the point that claims to cover it is on the wrong side of the building
+**Where:** corridor x 304–330, y 102–470 (PDF pt) — ~2.5 m wide, ~36 m long, ~90 m².
+**Evidence:** `/tmp/crops/r0c0.png` + `r1c0.png` (green, correct); scan `x=316 → free y 102–470`. Guard status: nearest printed word 64–140 pt away and it is `Deli`/`Bakery` — the department names *inside* the sealed block, which net 1 skips as `staff_mask`-blessed; nearest aisle badge 168–186 pt (16–18 m), so net 2's badge corroboration can never fire; it sits inside **both** the DELI disk (d=64 ≤ r=130) and the BAKERY disk (d=79 ≤ r=130), surviving only because 26 pt > the 12 pt bridge.
+**Truth:** customer floor — the west wing's only north–south spine, serving the Market gondola east faces and the Deli/Bakery block west wall.
+**Counterfactual (run):** sealing it yields `walkable_pct 28.1`, `components 1`, `verify []`, both coverage lists empty — **every mechanical net green**, and the pre-audit `walk_truth` does not fail. That is the store-24 signature exactly.
+**Compounding:** `[475, 200, "Deli customer frontage on the Market corridor"]` sits 159 pt away on the *east* side of the Deli block, in the aisle-1 corridor. The coordinate is fine for Deli frontage; the description names a corridor it isn't in, so the file reads as covering this spine when it doesn't.
+**Fix type:** `walk_truth` points — added `[316,165]`, `[316,300]`, `[316,440]`; corrected the `[475,200]` description to name the aisle-1 corridor and the east-facing cooler run (body x 453–464, arcs to x=473).
+
+### 2 — Pharmacy pickup alcove unguarded
+**Where:** x 1036–1078, y 628–652 (~8 m²) — the customer notch stepped into the pharmacy room's west wall, reached along the aisle-40 corridor.
+**Evidence:** `/tmp/crops/z_pharmpickup.png`; `y=638 → free x 1000–1078`, `y=650 → free x 1018–1036`. Inside the PHARMACY disk (d≈40 ≤ r=130); only word within 50 pt is `Pharmacy`, blessed staff_mask; nearest badge 151 pt.
+**Truth:** customer floor, distinct from the dispensary at (1075,620) which must stay sealed.
+**Counterfactual (run):** sealing it yields `walkable_pct 29.0` with all nets green and no `walk_truth` failure. `[1020,600]` pins the flat wall frontage 53 pt away, not the alcove.
+**Fix type:** `walk_truth` point — added `[1055,640]`.
+
+## What passed
+- **Mechanical:** `./rebuild.sh 790` exit 0, `verify: []`, coverage lists empty, 1 component (76766), 29.1% walkable. All 27 culled pockets classified: Seafood back-of-counter (155 m²), customer-service counter block (33 m²), 13 checkout lanes — the only floor our rules removed; Deli/Bakery (318 m²) and Pharmacy (87 m²) were already drawn-sealed; the rest restored by inclusions. No unexplained pocket.
+- **Visual sweep:** 3×3 crops plus targeted zooms on BBQ, Curbside/restrooms, Meal Simple/Sushiya/Blooms, Cooking Connection, Deli, Seafood chamfer, pharmacy. Every aisle corridor traced end-to-end — 24–41 reach x=1092 except 37/38/39/41, which correctly stop at the pharmacy wall x=1038. Net 2 with corroboration stripped: **0 patches**. Drawn-sealed non-fixture floor: 5 regions, all correctly staff or sub-metre slivers. 0 orange. Every unanchored logo department (Sushiya, Meal Simple, Blooms, Cooking Connection, HOME, Healthy Living, BBQ, Curbside) inspected against `geometry.json`.
+- **Label probes:** all 252 printed words checked, not just 10. Only 7 lack frontage — `Deli`, `Bakery`, `Seafood`, `Pharmacy` (blessed staff), `Restrooms` and both `Entrance` (outside boundary). Zero product labels stranded.
+- **Config:** 0 inclusion rects intrude on any staff/enclosed area, 0 staff-mask overlap; no exclusions (correctly absent). seal_zones 6 file vs 6 auto, same set; the single delta — CHECKSTANDS rect y0 543.4→580 — is verified against the deriver and pinned by three aisle south-mouth musts (aisle 19 mouth → checkout queue is 3.5 m, ratio 1.34).
+
+Post-fix: `./rebuild.sh 790` exit 0, **371 passed**, report still `verify: []` / empty coverage / 1 component / 29.1%. Only `data/790/walk_truth.json` was edited; `router/`, `extract.py`, `tests/`, goldens and other stores untouched.
+
+`AUDIT FAILED — store 790: 2 findings` (both fixed and re-verified)

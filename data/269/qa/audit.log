@@ -1,0 +1,48 @@
+Audit complete. `./rebuild.sh 269` → exit 0, 445 passed (was 437; +8 new truth tests), grid byte-identical.
+
+## Findings — worst first
+
+### 1. East service alley, rect `[1059.5, 76.8, 1118.7, 361.3]` pt — 156.7 m² of blank back-corridor ships as customer floor, and `walk_truth` asserts it
+**Evidence:** overlay crop pt 1030–1200 × 60–400; PDF crops of both wall gaps.
+- Zero fixtures (29 cells of stray artwork), zero of the page's 265 printed words, 5.78 m × 27.8 m, **dead-ends against the north exterior wall**.
+- Bounded east by the thick-walled H-E-B Curbside staging block `[1118.7,76.8,1181.6,361.3]`, west by the 12-pt wall band `[1047.3,131.5,1059.5,195.4]`/`[1047.6,209.3,1059.6,348.5]` whose east face (x=1059.5) is collinear with the Dairy back-of-house block's east face (x=1059.0).
+- Only two openings, both ≈14 pt (1.36 m): y 195.4–209.3 and y 348.5–362.4.
+
+This is the exact signature the repo treats as back-of-house elsewhere: store 388's exclusion `[979,58,1131,497]` seals "the empty receiving hall along the east wall x=1064-1128" on identical evidence, and 269's own NW-block exclusion is worded the same way.
+
+**Why I did not apply it:** the guide draws no hatching, no door leaves and no staff marking here — unlike the north-band doorway at x=514.6–536.3, which has a double swing door drawn just inside it. And 269's front action alley is also ~190 m² of blank floor, so "blank" alone is not proof. Sealing 156.7 m² on inference is the error class this audit exists to prevent, so it needs a human eye.
+
+**Truth should be:** staff back corridor, purple/untinted. **Fix:** exclusion `{"rect":[1059.5,76,1118.7,362]}` + `must_not [1090,250]`, and delete the current `must [1090,250,"east action alley…"]`, which asserts the opposite. Blocker on human confirmation.
+
+### 2. walk_truth blind spot — six independently-restored customer regions were unguarded (FIXED)
+Demonstrated by simulation: dropping one inclusion rect silently loses customer floor — no VERIFY, both coverage nets `[]`, no truth failure, walkable_pct moves ≤0.1%:
+
+| regression | lost | signal |
+|---|---|---|
+| aisles 17–20 rect east edge 792→725 | 14.5 m² (Seasonal Items / HOME bay) | none |
+| aisle 16 rect | 10.7 m² | none |
+| Beer & Wine rect | 9.3 m² (corridor north mouth + wine slot) | none |
+| aisle 14 / 13 / Market west-wall rects | 2.7 / 1.9 / 2.4 m² | none |
+
+The nets structurally cannot see these: net 1 needs ≥3 failing product words within 40 pt and the aisle 13–16 corridors carry **zero** product words; net 2 needs ≥25 m² and these are 1.9–14.5 m². Same mechanism as store 24.
+
+**Fixed:** added 7 `must` points (`226,340` · `450,178` · `310,428` · `454,556` · `496,556` · `581,500` · `757,478`). Leave-one-out over all 10 inclusions is now **CAUGHT for every one**.
+
+### 3. `must_not [1095,410]` "restrooms interior" was vacuous (FIXED)
+That cell is the restroom pictogram artwork, not room floor — with every authored exclusion and all sealing removed it is *still* non-walkable, so the assertion can never fail and never guarded the enclosure. **Fixed:** moved to `[1075,400]`, real room floor (584 cells / 22.2 m² of raw-unreachable floor inside the room); verified non-vacuous.
+
+### 4. Second north-band service doorway had no `must_not` (FIXED)
+The exclusion seals two jamb-drawn doorways (x 514.6–536.3 and x 811.6–833.4); only the first had a point. **Fixed:** added `[822,122]`, verified non-vacuous.
+
+### Observation — code-side, not fixed (reported per the runbook)
+`extract.py` captures the two large "Exit" arrow roundels as fixture polys (`[325.6,651.3,360.6,686.2]`, `[779.3,652.2,814.2,687.1]`, 11.6 m² each). Their in-boundary parts block ~15 m² of the front action alley and pinch it to ~1.2 m at x≈337–361 and x≈779–800. Connectivity holds, so this is fidelity, not a break — same class as the HOME logo letter counters that leave the 7- and 2-cell strays.
+
+## What passed
+- **Mechanical:** exit 0, `verify: []`, both coverage lists empty, walkable 30.1% = reachable, dominant component 73015/73024 cells (99.99%); byte-identical across three independent rebuilds.
+- **Visual sweep:** all 9 grid crops + 8 targeted zooms. Complete non-green inventory — inside the boundary the *only* non-fixture floor that is not green is the pharmacy dispensary (79.9 m², drawn-enclosed), restrooms (24.8 m², drawn-enclosed), the 14 checkout lanes (by design), and two nibbles of 1.1 and 0.6 m² inside wall thickness. All 27 culled pockets classified. All 35 aisle corridors green end to end (272-point scans, worst gap 0 pt); every cross-aisle and action alley continuous.
+- **Label probes:** all 265 printed words probed — 249 product labels at 0.00 m; the 16 with any distance are department titles or vestibule signage. 20 named labels across every wing + 11 logo-only departments (Sushiya, Meal Simple, Blooms, HOME, Healthy Living, Beer & Wine, H-E-B Baby, Loves, Pharmacy pickup) all ≤0.59 m. Cross-checked against the guide's own page-1 index: every referenced location (aisles 1–12, 17–35, Dairy, Checkstands, End of aisle 19/20) reachable.
+- **Config sanity:** inclusion∩exclusion overlap 6.7 m² restores 0 cells (exclusions win structurally); no inclusion reaches into restrooms/pharmacy/Curbside/front-east room; only 4 of 265 words are hidden by the blessing rule, all four department titles with green customer frontage. The 583 m² NW-block exclusion is independently corroborated — dropping it changes the grid by 1 m², because the pipeline's own SEAFOOD/BAKERY label-condemnation seals 538 m² of it regardless.
+
+Files touched: `data/269/walk_truth.json` only (22→29 `must`, 18→19 `must_not`). No code, no goldens, no other store.
+
+`AUDIT FAILED — store 269: 4 findings` (3 fixed, 1 open pending human confirmation)

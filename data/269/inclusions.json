@@ -1,0 +1,31 @@
+[
+  {"name": "Market department shopping floor between the back-of-house wall and the Deli room (customer): the gondola runs [254.3,159.6,274.3,257.2]/[295.6,161.1,315.3,256.6] and [248.9,273.7,273.1,330.5]/[289.6,274,313.8,330.2], the cross-corridors between them, and the frontage in front of the wall-case scallops (west edge held at x=230 because the case arcs drawn on the wall face x=223.3 fence off 4-pt niches out to x=228 that are not floor). The auto SEAFOOD disk (r=130 about the title at 156.9,265.4) and BAKERY disk (r=130 about 169.8,367.5) are centred on titles printed inside the sealed NW back-of-house block, so their rims land 8-13 m away in the middle of this floor and bridged it shut — 320 cells of the gondola cross-corridor at (275.6,267.6) and 455 cells of the case frontage + cross-aisle at (238.7,325.6)",
+   "rect": [230, 131, 340, 405]},
+
+  {"name": "Market west-wall frontage below the case run (customer): the aisle-end floor between the back-of-house wall face x=223.3 and the gondola cross-corridor, from the bottom of the case scallops (y=320) down to the wall corner at y=405. Same BAKERY-disk over-reach as the rect above — it left 66 cells culled at (226,339) after the main Market rect was held back to x=230 to keep the scallop niches out. Split off as its own rect precisely because the scallop band y=280-320 must stay out",
+   "rect": [224, 320, 232, 405]},
+
+  {"name": "Beer & Wine bay and the aisle 1 north mouth east of the Deli room wall (customer): the north-south corridor x=444-460 between the deli block's east wall [431.9,166.2,444.1,566.1] and the wine shelf comb [460.7,207.7,500.1,219.4] ... [461.7,395.2,500.7,405.3], plus the 15-pt shopper slots between those shelf rows. The auto DELI disk (r=130 about the title at 391.7,200.6, printed inside the sealed Deli production room) reaches 10 m east into this bay and bridged the corridor's north mouth (78 cells at 451,178), one shelf slot (120 cells at 479,253) and the aisle 2 mouth nibble (26 cells at 507,181)",
+   "rect": [444, 158, 513, 402]},
+
+  {"name": "Aisle 13 frozen corridor between the Deli room's east wall and gondola [463.7,431.7,486.3,568.3] (badged customer aisle: AISLE 13 at 459.8,422.7). Kept to the x=450-458 centre strip: this guide draws every freezer door swung fully open, and those arcs fence the corridor's outer 5 pt into niches that no inclusion can reconnect. Sealed at its south mouth (58 cells at 454.4,555.9) by the auto CHECKSTANDS rect, whose north edge sits at y=540.4 because seven Blooms floral tables joined its fixture cluster",
+   "rect": [450, 428, 459, 575]},
+
+  {"name": "Aisle 14 frozen corridor between gondolas [463.7,431.7,486.3,568.3] and [507.2,431.5,529.8,568] (badged customer aisle: AISLE 14 at 498,423.1). Centre strip x=490-500 for the same freezer-door-arc reason as aisle 13. Its south mouth was sealed by the over-tall CHECKSTANDS rect (90 cells at 496,557.4)",
+   "rect": [490, 428, 501, 575]},
+
+  {"name": "Aisle 15 frozen corridor between gondolas [507.2,431.5,529.8,568] and [550,432.2,572.6,568.7] (badged customer aisle: AISLE 15 at 541.9,422.7). Centre strip x=534-544 for the same freezer-door-arc reason as aisle 13. The auto KITCHEN disk (r=130 about 651,518.6) bridged this one shut over its whole length — 290 cells at (538.8,515.3)",
+   "rect": [534, 428, 545, 575]},
+
+  {"name": "Aisle 16 frozen corridor between gondolas [550,432.2,572.6,568.7] and [591.2,433.5,609.4,567.9] (badged customer aisle: AISLE 16 at 582.3,422.7). Centre strip x=576-586 for the same freezer-door-arc reason as aisle 13. Also bridged shut over its whole length by the KITCHEN disk — 289 cells at (581.1,507)",
+   "rect": [576, 428, 587, 575]},
+
+  {"name": "Aisles 17-20 corridors and the Seasonal Items / HOME bays east of aisle 20 (customer): badged shopping aisles AISLE 17 (619.7,422.7), 18 (651.2,422.7), 19 (678.8,422.8) and 20 (706.2,421.8) between gondolas [591.2,433.5,609.4,567.9] ... [712.6,431.9,722.4,568.2], plus the open floor carrying the four 'Seasonal Items' shelf rows out to x=790. The KITCHEN anchor at (651,518.6) is NOT a service kitchen on this store — it is the 'Kitchen Gadgets' category label printed in the aisle 18 corridor, exactly as on stores 24, 388 and 790 — yet it earns an auto r=130 seal disk which, together with the over-tall CHECKSTANDS rect, culled the aisle 17/18/19/20 south mouths (117/112/112/98 cells at y=542-570) and the Seasonal bays (144 cells at 755.6,476.3; 126 at 760,529; 104 at 759.8,506). Restoring this rect also suppresses the KITCHEN VERIFY, the correct call for a shelf-category label. The few untinted specks left inside the HOME logo at x=746 and x=778 are letter counters: extract.py captures the logo as fixture polys, so the strokes really do fence them off",
+   "rect": [609, 425, 792, 575]},
+
+  {"name": "Blooms floral display floor and the west end of the front cross-aisle (customer): open shopping floor around the floral tables [359.4,551.3,363.2,558.2] ... [411.9,550.9,415.7,557.8] below Produce and north of the checkstand bank. Those tables are exactly the fixtures that dragged the auto CHECKSTANDS rect's north edge up to y=540.4, and its looser 20-pt checkout bridge then sealed the floor they stand on — 151 cells at (377,549) and 46 cells at (421.2,553)",
+   "rect": [340, 530, 435, 578]},
+
+  {"name": "Cart-corral approach walkway inside the west front door (customer): the 24-pt bay between the cart corral [336.4,603,351.6,648] with its nested-cart scallops and the front-end counter run at x=376-407. It holds no checkstand — the bank's first belt is at x=447.5 — but it falls inside the auto CHECKSTANDS rect, whose 20-pt bridge closed its mouth and culled 200 cells at (359.8,622.4). Shoppers coming through the west entrance take a cart here",
+   "rect": [350, 598, 378, 652]}
+]

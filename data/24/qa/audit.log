@@ -1,0 +1,57 @@
+# Adversarial audit — H-E-B store 24
+
+**Passes run:** all five. `./rebuild.sh 24` rerun from scratch (artifacts not trusted); 3×3 overlay grid plus ~20 targeted high-dpi zooms comparing the printed page against the shipped `profile.npz` grid; all 274 in-boundary PDF labels probed (not just 10); every aisle corridor traced end to end; all 73 walk_truth points probed; both config files checked against measured drawing geometry.
+
+**Pass 1 was green on the as-shipped state** — exit 0, `verify: []`, both coverage lists empty, 24.1% walkable, one component. Every finding below survived that.
+
+---
+
+## Findings, worst first
+
+### 1. HIGH — aisles 4, 9 and 10 severed from the top cross-aisle *(fixed)*
+A 6 pt bar across the **full corridor width** at `y = 218–224`, at x≈762–772 (a4), 625–634 (a9), 600–609 (a10).
+
+`/tmp/a24/g_a10mouth.png` (1400 dpi, PDF-pt grid) shows the gondolas' north ends stopping at y=218 with the mouths drawn wide open — identical to aisle 11's, which ships green. All three shipped as cul-de-sacs enterable only from the south, so every route to Rice/Beans (a4), Pudding/Dried Fruit (a9), Coffee/Creamer (a10) took the long way.
+
+Cause: `auto:KITCHEN` disk (685.9, 298.9, r=130, bridge 12) — derived from the *shelf* label "Kitchen Gadgets". `inclusions.json` #1 was authored to repair exactly this but its north edge sat at y=225, 7 pt below the mouth.
+
+**Why nothing caught it:** net 1 passes (labels keep frontage from the south); net 2's corroboration gate rejects it (no failing label, and badges sit at y=202, outside the band); component count stays 1; no VERIFY. Only the sweep reaches it.
+
+Fix: inclusion #1 rect `[540,225,805,392]` → `[540,216,805,392]`. New `must` [605,220], [630,220], [767,220].
+
+### 2. MEDIUM — 15 m² front-end bay sealed, blessed by a mislabeled `must_not` *(fixed)*
+Bay at **(675,704)–(706,741)**, mouth 21 pt wide at y=704. `/tmp/a24/lease_grid.png` shows no wall across the mouth and no lane inside; the identical bay immediately west (646–674, 28 pt mouth) ships green.
+
+Cause: derived `auto:CHECKSTANDS` rect `[497, 592.4, 897.2, 733.2]`, bridge 20 (11×11 structure = 22 pt) closes a 21 pt mouth but not a 28 pt one.
+
+It survived because `must_not [690,725]` was labelled *"Lease tenant room in the front vestibule"* — **the Lease room is the walled room at x=629–646** with its own door, 44 pt west. The truth file was blessing the bug.
+
+Fix: inclusion `[675,704,707,741]`; `must_not` moved to [637,720] (real Lease room); `must` [690,725] + [660,720]; `must_not` [766,731] added for the drawn-sealed room east of Tobacco, which had no coverage at all.
+
+### 3. LOW — 9.2 m² unexplained sealed nook behind the Admin office *(open — needs a human call, not fixed)*
+**(814,516)–(852,558)**. The drawing leaves it open through a ~8 pt slot at (805–815, 550–557); the `auto:BAKERY` disk bridged it shut. Dead end, bounded by the Admin office's stepped wall N+W, a tall fixture at x=853–860 E, low fixtures S. No product label, no department frontage.
+
+I did **not** edit this. The drawing carries no positive evidence either way and a walk_truth point is an assertion of ground truth I don't have. Resolution: service nook → `must_not [838,542]`; customer floor → inclusion `[815,514,853,558]` + `must [838,542]`.
+
+### 4. LOW — restroom entry alcove sealed *(accepted)*
+**(748,546)–(790,554)**, the space in front of the two restroom doors, reached through a gap in the block's south wall at x≈764–775; `auto:BLOOMS RESTROOMS` disk bridged it. Left as-is — the runbook blesses restrooms as not-green. Recorded so it isn't rediscovered.
+
+### 5. LOW — two ~1 m² slots between end-cap gondolas *(accepted)*
+(724,394)–(732,400) and (688,394)–(696,400). 0.7–0.9 m crevices; the designed cross-over at the aisle-8 position (654–668, 14 pt) ships open.
+
+### 6. BLOCKER (code — reported, not fixed)
+`engine.SERVICE_DEPTS` contains `"SUSHI"` and `"COOKING"`, but `extract.py:130-132`'s anchor whitelist does not. "Sushiya" (965,391) and "Cooking Connection" (952,375) are **real text on the page**, yet never become anchors, so `service_pts` never sees them and those counter pockets are never auto-condemned. Store 24 is only covered because someone hand-wrote the two exclusions; the next store with these counters ships them walkable. `extract.py` is off-limits, so this is escalated, not patched.
+
+---
+
+## Cleared
+
+- **Not findings, verified:** the 3,725-cell Deli/Bakery pocket is one drawn-enclosed back-of-house with staff doors on its west wall; Blooms is drawn fully enclosed with a single door to the staff side (raw-unreachable — the drawing's own statement, not our rules); the 582-cell west group is five real checkstand units; the Market corridor inclusion `[966,334,983,370]` stops 6 pt short of the staff doorway measured at (989,345)–(1001,358). The green back strip along the north wall matches reference store 659.
+- **Pass 3:** all 274 in-boundary labels have reachable floor; worst non-staff distance 1.12 m. Only >2 m case is "Seafood", printed on the counter itself, with frontage pinned at [1004,500]/[975,440].
+- **Pass 5:** both exclusion rects match the measured horseshoes; no inclusion blankets a staff room. I corrected one factually wrong WHY in `exclusions.json` (it claimed "Sushiya" was vector artwork rather than a non-whitelisted label).
+
+## Final state after fixes
+
+`./rebuild.sh 24` → exit 0, **389 passed**. `walkable 24.3%`, one component `[64074]`, `verify: []`, both coverage lists empty. walk_truth now 46 `must` + 27 `must_not`, zero failures — including per-aisle cover for 33/34/35/37/38, the wing that shipped wholly sealed on 2026-07-21. Edits confined to `data/24/{inclusions,walk_truth,exclusions}.json`; no code, goldens, or other stores touched. The one remaining far-snap (ENTRANCE, 3.22 m) is expected — that label is printed outside the boundary polygon — and is pinned by `must [862,694]`.
+
+`AUDIT FAILED — store 24: 6 findings`

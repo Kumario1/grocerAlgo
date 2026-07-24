@@ -1,0 +1,58 @@
+54 anchors, 247 rect fixtures + 243 poly fixtures, 16450 wall segments, boundary 13 vertices -> data/790/geometry.json
+overlay -> data/790/extract_overlay.png
+service pockets culled: 27 (largest 8478 cells)
+55 anchors, grid 633x417, m/cell=0.194 -> data/790/profile.npz
+walkable: 29.1% of page (29.1% entrance-reachable)
+components: 1  sizes: [76766]
+anchors: 55  |  exclusions: 0
+service pockets sealed (service + dead crevices): 27
+   8478 cells at (397,300) near AISLE 14
+   4137 cells at (111,218) near SEAFOOD
+   2162 cells at (1074,603) near PHARMACY
+    884 cells at (526,618) near FROZEN FOODS
+    395 cells at (206,209) near SEAFOOD
+    394 cells at (615,481) near AISLE 19
+    332 cells at (423,501) near BAKERY
+    316 cells at (476,467) near FROZEN FOODS
+    299 cells at (568,499) near FROZEN FOODS
+    172 cells at (361,520) near BAKERY
+snaps moved >12 cells (check reachable.png):
+  BAKERY: 26 cells (~5.0 m)
+  DELI: 22 cells (~4.3 m)
+  RESTROOMS: 18 cells (~3.5 m)
+  ENTRANCE: 17 cells (~3.3 m)
+  SEAFOOD: 16 cells (~3.1 m)
+tightest corridors at anchors (half-width capacity):
+  BAKERY: 0.58 m
+  FROZEN FOODS: 0.58 m
+  FISH/MEAT/CHILI/PASTA: 0.77 m
+  PHARMACY: 0.77 m
+  RESTROOMS: 0.77 m
+  AISLE 2: 0.97 m
+  AISLE 21: 0.97 m
+  AISLE 28: 0.97 m
+........................................................................ [ 19%]
+........................................................................ [ 38%]
+........................................................................ [ 57%]
+........................................................................ [ 76%]
+........................................................................ [ 95%]
+.................                                                        [100%]
+=============================== warnings summary ===============================
+../../../../opt/anaconda3/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /opt/anaconda3/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+<frozen importlib._bootstrap>:488
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type swigvarlink has no __module__ attribute
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+377 passed, 6 warnings in 35.66s
+sys:1: DeprecationWarning: builtin type swigvarlink has no __module__ attribute

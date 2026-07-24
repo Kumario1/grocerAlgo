@@ -1,0 +1,38 @@
+Store 388 is converged. Handing off for the audit.
+
+## Result
+
+`./rebuild.sh 388` → **exit 0, 222 passed**. `data/388/qa/report.json`:
+
+```
+"verify": []
+"coverage": {"sealed_floor_patches": [], "unreachable_shelf_labels": []}
+"components": {"n": 1, "sizes": [96825]}
+"walkable_pct": 40.0   (0.39952)
+"provenance": zones derived, seal_zones derived, exclusions file, inclusions file
+```
+
+Four files authored, all under `data/388/`; no code, tests, goldens or other stores touched.
+
+## What the evidence showed
+
+**Two VERIFY flags, both resolved as customer space (inclusions):**
+- `KITCHEN (394.7,137.6)` is the *"Kitchen Gadgets"* category label printed in badged aisle 9 between gondolas x=387.4 and x=425.4 — not a service kitchen.
+- `DELI FLORAL (924,483.6)` is the centroid of a merged `Deli`+`Floral` text run; it lands on open floor between the deli counter (east face x=884.3) and the floral display blocks (x=941.6).
+
+**Two staff areas the drawing left open (exclusions):**
+- *Deli work block* — the sales floor is walled at x=767.8; the block is closed by the deli case (y=366.6), the counter run (x=873.6–884.3 and y=530.2) and holds the three drawn prep rooms. Its only ways in are a north throat and a 15-pt slot beside the counter — both staff. Customer frontage east (x>884) and south (y>540) stays green.
+- *East back-of-house* — the sales floor stops at a 12.6-pt wall band at x=979.9–992.5 running y=62→470 with three staff-door gaps. East of it: the Market back room (double doors), two cooler/prep rooms, and a 150 m² receiving hall with **zero fixtures and zero product labels**; its south wall (y=485.9–497, door at x=1066–1091) separates it from Produce.
+- Four perimeter wall-band breaks (two north, two west) are drawn as doorways with jambs — floor inside the wall thickness, excluded.
+
+**One swallowed corridor found and reopened:** the auto `PHARMACY` seal disk (r=130 pt) reached x=269 and bridged the ~14-pt aisles between the OTC shelf rows shut at their west ends (pockets at (247,603) and (248,623)). Restored by inclusion.
+
+All 18 remaining culled pockets are classified: pharmacy room (1669, label-condemned staff), and 17 checkout-lane interiors along y≈590–636. Every printed word on the map now sits within 6 pt of reachable floor except the department names printed over service blocks (`Deli`, `Bakery`, `Floral`, `Pharmacy`) and the labels outside the sales-floor boundary (`Carts`, `Chase Bank`, `Business Center`, `Restrooms`, the two `Entrance` markers).
+
+`walk_truth.json`: 24 `must` (every wing, both entrances, 10 distinct aisle corridors, each department frontage, both pharmacy aisles) and 20 `must_not` (page corners, outside, each sealed staff area and prep room, the BOH hall and alcove, two checkout lanes, restrooms/Business Center/Chase Bank, cart corral). All 44 verified against the shipped grid.
+
+## Two things to flag
+
+1. **Blocker, needs a code change — `m_per_cell` is `NaN`.** `build_profile.py` derives scale from aisle pitch with a hard window `10 < d < 35` pt. Store 388's aisle pitch is 36–46 pt (its page is 1224×792 and drawn larger than 659/790/24's 1266×834), so every gap is filtered out and `np.median([])` → NaN. Consequences: `report.json` emits bare `NaN` for `m_per_cell`, `far_snaps[].meters` and `narrow[].half_width_m` (invalid strict JSON), and `corridor_width.png` renders garbage (`RuntimeWarning: invalid value encountered in cast`). I did **not** work around it in data. It does not weaken the coverage nets — `qa_checks` net 2 compares `m2 < PATCH_MIN_M2`, which is `False` for NaN, so the net ran with *no* size floor and still reported zero patches. I substituted a hand-measured scale (40 pt = 3.0 m) to check corridor widths; nothing is tight.
+
+2. **`walkable_pct` sits at the very top of the sane band** — 0.39952 vs the `test_walkable_fraction_sane` ceiling of 0.40, a margin of ~116 cells. That is a property of this guide's drawing style, not of the truth files: it draws dry-grocery gondolas as ~8-pt schematic bars (0.6 m) rather than their real ~1.2 m depth, so fixture coverage is 0.242 of the boundary vs 0.319/0.381/0.339 for 659/790/24 — and its page is 66% building (no parking drawn) vs 45–59%. Normalized, 388 lands mid-pack: `free/boundary + fixture/boundary` = 0.850, against 0.807 (659), 0.863 (790), 0.859 (24). I searched hard for further non-customer floor and found none — the largest remaining fixture-free, label-free regions are the front action alley and the entrance lobbies.

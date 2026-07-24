@@ -1,12 +1,22 @@
 [
-  {"name": "grocery aisles 1-8 corridors around the 'Kitchen Gadgets' shelf label — on this store KITCHEN is aisle shelving (the service kitchen is Cooking Connection), so the auto KITCHEN seal disk wrongly guillotined four aisle corridors at its rim; customer space",
-   "rect": [540, 225, 805, 392]},
+  {"name": "grocery aisles 1-8 corridors around the 'Kitchen Gadgets' shelf label — on this store KITCHEN is aisle shelving (the service kitchen is Cooking Connection), so the auto KITCHEN seal disk wrongly guillotined four aisle corridors at its rim; customer space. North edge carried from 225 up to 216 (2026-07-23 audit): the gondolas' north ends are at y=218, so a rect starting at 225 left a 6-pt bar of the disk rim across the FULL width of the aisle 4, 9 and 10 mouths (y=218..224), severing them from the top cross-aisle and making all three cul-de-sacs enterable only from the south. Nothing but corridor mouth and shelf top lies in y=216..225 here, and inclusions only restore cells the drawing already leaves open",
+   "rect": [540, 216, 805, 392]},
   {"name": "aisles 20-22 corridors (Seasonal/Toys/School Supplies) west of the Deli island — deli disk rim cut them at the badge mouths; customer space",
    "rect": [514, 408, 582, 552]},
   {"name": "aisle 39-41 west ends east of Pharmacy (Diet Aids/Vitamins, Cough & Cold, Laxatives corridors) — pharmacy disk rim cut them; badge 39 marks the corridor; customer space",
    "rect": [256, 565, 400, 630]},
   {"name": "pharmacy-wing aisles 33-36 corridors (Lotion/Skin Care, Shaving, Foot/Eye Care, Baby rows) — the pharmacy seal disk merged them with the counter room into one pocket and culled it whole (2026-07-21 coverage-net finding: 38 shelf labels with no reachable frontage); customer space north of the counter room",
    "rect": [222, 412, 380, 488]},
-  {"name": "pharmacy-wing aisles 36-38 corridors east of the counter room (Baby Wipes/Diapers, Dental/Oral, Hosiery rows) — same pocket, room carved out at x<258 so it stays sealed staff space",
-   "rect": [258, 488, 380, 558]}
+  {"name": "pharmacy-wing aisles 36-38 corridors east of the counter room (Baby Wipes/Diapers, Dental/Oral, Hosiery rows) — same pocket, room carved out at x<258 so it stays sealed staff space; south edge carried to 560 so the last corridor row above the aisle-38 shelf is not left behind as a 1-cell sliver",
+   "rect": [258, 488, 380, 560]},
+  {"name": "aisle 2 corridor and the Beer/Wine cross-gaps — the BAKERY disk's north rim bridged this 13-pt corridor shut from y=278 to y=356, severing aisle 2 (badge at 818,202) in the middle and orphaning three gaps between the wine gondolas; the aisle-2 shelf's east face (Bread, Tortillas, Salad Dressing, Pastries, Vinegar, Wine) has no other frontage; customer space",
+   "rect": [813, 276, 862, 368]},
+  {"name": "Market prepared-foods floor around the Sushiya bar and the Meal Simple cases — the SEAFOOD disk (r=130 from 1027,435) reaches to x=897 and its 20-pt bridge closed the gaps between the freestanding display tables, culling the open floor whole; nothing here is drawn as a counter and the two horseshoe interiors are carved out by exclusions.json; customer space",
+   "rect": [894, 400, 970, 554]},
+  {"name": "Market corridor between the Cooking Connection horseshoe and the seafood back-of-house wall — walkable above y=336 and below y=366 but bridged shut in between because it abuts the 16-pt staff doorway at x=984; the doorway itself stays sealed (this rect stops at x=982); customer space",
+   "rect": [966, 334, 983, 370]},
+  {"name": "walkway east of the checkstand bank, between the cart corral and the three freestanding display bins — the derived CHECKSTANDS rect (bridge 20 pt) swallowed this 13-pt through-corridor for y=596..664 although the drawing leaves it open at both ends; it is the route from the right-hand Entrance past the checkouts, not a checkout lane; customer space",
+   "rect": [811, 595, 847, 666]},
+  {"name": "open front-end bay between the Lease room's partition wall (x=674, drawn only from y=706 down) and the west face of the Tobacco kiosk (x=706) — the same derived CHECKSTANDS rect, whose south edge runs to y=733, bridged this bay's 21-pt mouth shut (its 20-pt bridge closes gaps up to 22 pt) and culled 15 m^2 of front-end floor. The drawing puts no wall across the mouth at y=704 and draws no checkout lane inside; the identical bay immediately west (x=646..674, 28-pt mouth) survived the same bridge and ships walkable, so sealing this one is an artefact of the bridge width, not of the map (2026-07-23 audit; it had been blessed by a must_not mislabelled 'Lease tenant room' — the Lease room is the walled room at x=629..646 with its own door)",
+   "rect": [675, 704, 707, 741]}
 ]
