@@ -185,11 +185,12 @@ Logs land in `logs/app.log` (rotating, gitignored): every catalog fetch with
 timing, every disconnect with its exception, and every placement as
 `atlas → mapped → shown` with the snap distance.
 
-The Atlas snapshot that the connection check validates against was imported
-once from a saved product page, and is re-importable:
+The Atlas snapshot that the connection check validates against lives in
+`data/659-atlas/store-map.svg`, and is re-importable from it or from any
+rendered H-E-B page:
 
 ```bash
-python3 import_heb.py "Fresh Sweet Cob Corn - Texas-Size Pack - Shop Corn at H-E-B.html"
+python3 import_heb.py data/659-atlas/store-map.svg
 python3 build_profile.py 659-atlas
 ```
 

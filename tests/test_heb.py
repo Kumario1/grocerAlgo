@@ -382,11 +382,11 @@ def test_product_location_falls_back_without_silent_guessing():
 
 
 def test_saved_atlas_snapshot_is_the_current_659_layout():
-    page = Path(
-        "Fresh Sweet Cob Corn - Texas-Size Pack - Shop Corn at H-E-B.html"
-    ).read_text()
-
-    atlas = parse_atlas(extract_atlas_svg(page))
+    # The snapshot used to be a whole saved product page — 9.5 MB of Next.js
+    # around one <svg id="store-map">. Only the map is evidence, so only the
+    # map is kept, and extract_atlas_svg still reads it the same way.
+    atlas = parse_atlas(extract_atlas_svg(
+        Path("data/659-atlas/store-map.svg").read_text()))
     source = json.loads(Path("data/659-atlas/source.json").read_text())
     profile = np.load("data/659-atlas/profile.npz", allow_pickle=True)
 
