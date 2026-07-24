@@ -236,6 +236,7 @@
     let activeResult = -1;
     let searchTimer;
     let searchRequest = 0;
+    let searchAbort = null;
 
     function svgElement(tag, attributes, parent = svg) {
       const node = document.createElementNS(NS, tag);
@@ -394,6 +395,11 @@
     async function runSearch() {
       const query = search.value.trim();
       const request = ++searchRequest;
+      // One search in flight at a time — the server drives a single browser
+      // page, so a superseded keystroke is a navigation nobody is waiting for.
+      searchAbort?.abort();
+      searchAbort = new AbortController();
+      const {signal} = searchAbort;
       results = [];
       activeResult = -1;
       renderSuggestions();
@@ -404,7 +410,8 @@
       searchStatus.textContent = 'Searching Lakeline H‑E‑B…';
       search.setAttribute('aria-busy', 'true');
       try {
-        const body = await jsonFetch(`/api/products?q=${encodeURIComponent(query)}`);
+        const body = await jsonFetch(
+          `/api/products?q=${encodeURIComponent(query)}`, {signal});
         if (request !== searchRequest) return;
         results = body.products;
         searchStatus.textContent = results.length
@@ -412,7 +419,7 @@
           : 'No products found.';
         renderSuggestions();
       } catch (error) {
-        if (request !== searchRequest) return;
+        if (error.name === 'AbortError' || request !== searchRequest) return;
         searchStatus.textContent = error.message;
         if (error.status === 503) showReconnect();
       } finally {

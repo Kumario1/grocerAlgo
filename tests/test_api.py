@@ -230,8 +230,11 @@ def test_locate_products_preserves_exact_pals_section_on_the_guide(monkeypatch):
     assert response.status_code == 200
     product = response.json()["products"][0]
     from app import CELL, FREE, GEOM
-    assert [product["x"], product["y"]] == [485.0, 141.0]
-    assert [product["x"], product["y"]] != GEOM["anchors"]["AISLE 13"]
+    # On aisle 13's corridor, and half way down it — the PALS section is
+    # mid-aisle, not at the mouth where the aisle number is printed.
+    assert [product["x"], product["y"]] == [491.0, 239.0]
+    assert abs(product["x"] - GEOM["anchors"]["AISLE 13"][0]) < CELL
+    assert product["y"] > GEOM["anchors"]["AISLE 13"][1] + 50
     assert product["x"] % CELL == CELL / 2
     assert product["y"] % CELL == CELL / 2
     assert FREE[int(product["y"] // CELL), int(product["x"] // CELL)]
@@ -270,8 +273,10 @@ def test_department_edge_pin_is_the_reachable_route_stop(monkeypatch):
 
 def test_selected_products_route_consolidates_quantity_and_reports_unrouted(
         monkeypatch):
+    # resolve_placement only falls back to a department ANCHOR when the label
+    # names no aisle, so these labels are department-only on purpose.
     placed = {
-        "milk": ("DAIRY", "Aisle 41"),
+        "milk": ("DAIRY", "In Dairy on the Back Wall"),
         "cheese": ("DAIRY", "In Dairy"),
         "bread": ("BAKERY", "In Bakery"),
     }
@@ -349,3 +354,92 @@ def test_selected_route_is_422_when_nothing_is_routable(monkeypatch):
     })
     assert response.status_code == 422
     assert response.json()["detail"] == "no selected product is routable"
+
+
+def test_transform_does_not_bend_a_shelf_face():
+    """Mapping a straight shelf run must not make it wider than it is.
+
+    The rubber-sheet transform this guards against was fitted through label
+    positions lying on three near-collinear lines, so it stretched aisle 17's
+    35 pt-wide shelf run across 93 pt of guide — nearly three aisles — and
+    products pinned beside the aisle they were really in.
+    """
+    import collections
+
+    import app
+
+    faces = collections.defaultdict(list)
+    for key, point in app.ATLAS["psas"].items():
+        area, _, side, _ = key.split("|")
+        faces[(area, key.split("|")[1], side)].append(point)
+
+    def thin_spread(points):
+        axis = min((0, 1), key=lambda a: max(p[a] for p in points)
+                   - min(p[a] for p in points))
+        return axis, (max(p[axis] for p in points)
+                      - min(p[axis] for p in points))
+
+    checked = 0
+    for points in faces.values():
+        if len(points) < 6:
+            continue
+        axis, before = thin_spread(points)
+        mapped = [app.atlas_to_guide(p) for p in points]
+        after = (max(p[axis] for p in mapped) - min(p[axis] for p in mapped))
+        assert after <= before * 1.05 + 1, (
+            f"a {before:.0f} pt shelf run became {after:.0f} pt of guide")
+        checked += 1
+    assert checked > 100
+
+
+def test_aisle_products_land_on_the_aisle_the_label_names():
+    import app
+
+    ice_cream = app.exact_map_point("Aisle 17", {
+        "point": app.ATLAS["psas"]["04|17|A|12"],
+        "psa_key": "04|17|A|12",
+        "group": "PSA:04:17",
+    })
+    aisle = app.GEOM["anchors"]["AISLE 17"]
+    # On aisle 17's corridor — the neighbouring aisles are 39 and 69 pt away.
+    assert abs(ice_cream[0] - aisle[0]) < 5
+    # ...and down the aisle, not parked at its mouth.
+    assert ice_cream[1] > aisle[1]
+
+
+def test_off_floor_pallet_slot_defers_to_the_printed_aisle():
+    """H-E-B answers for some bulk packs with a slot off the shopping floor.
+
+    16|88 is a pallet bay in the bottom-left vestibule that H-E-B itself
+    labels "Aisle 13". Trusting the point parked a 40-pack of water at the
+    store entrance, 32 m from the aisle the shopper was told to walk to.
+    """
+    import app
+
+    stray = app.exact_map_point("Aisle 13", {
+        "point": app.ATLAS["psas"]["16|88|A|4"],
+        "psa_key": "16|88|A|4",
+        "group": "PSA:16:88",
+    })
+    assert stray == app.GEOM["anchors"]["AISLE 13"]
+    assert app.snap_distance_m(stray) <= app.MAX_SNAP_M
+
+
+def test_no_psa_can_strand_a_product_off_the_shopping_floor():
+    """Every Atlas PSA either lands on the floor or defers to its label."""
+    import app
+
+    stranded = []
+    for key, point in app.ATLAS["psas"].items():
+        group = "PSA:" + ":".join(key.split("|")[:2])
+        mapped = app.exact_map_point(None, {"point": point, "group": group})
+        if app.snap_distance_m(mapped) > app.MAX_SNAP_M:
+            stranded.append(key)
+    # Without a usable label there is nothing better to fall back to, so a
+    # handful of pallet bays stay off-floor — but they must stay a handful.
+    assert len(stranded) <= 16, stranded
+    for key in stranded:
+        labelled = app.exact_map_point("Aisle 13", {
+            "point": app.ATLAS["psas"][key],
+            "group": "PSA:" + ":".join(key.split("|")[:2])})
+        assert app.snap_distance_m(labelled) <= app.MAX_SNAP_M

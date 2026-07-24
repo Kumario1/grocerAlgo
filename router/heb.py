@@ -2,10 +2,13 @@
 import asyncio
 import hashlib
 import json
+import logging
 import re
 import socket
 import subprocess
 import time
+
+log = logging.getLogger("grocer.heb")
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import quote
@@ -195,6 +198,7 @@ def resolve_placement(pals, atlas, location_label=None):
         if point:
             return {
                 "point": point,
+                "psa_key": key,
                 "group": f"PSA:{psa['area']}:{psa['aisle']}",
                 "approx": approximate,
                 "location_label": location_label,
@@ -222,6 +226,7 @@ def resolve_placement(pals, atlas, location_label=None):
     if anchor:
         return {
             "point": anchors[anchor],
+            "psa_key": None,
             "group": f"ANCHOR:{anchor}",
             "approx": True,
             "location_label": location_label or result.get("subDepartmentName"),
@@ -248,6 +253,10 @@ class HEBClient:
         self._chrome = None
         self._search_cache = {}
         self._placement_cache = {}
+        # One page, one navigation at a time. Typeahead fires overlapping
+        # /api/products calls, and a second page.goto() aborts the first —
+        # which used to read as "H-E-B dropped us" and tear down the browser.
+        self._nav = asyncio.Lock()
 
     def status(self):
         return {
@@ -257,6 +266,12 @@ class HEBClient:
         }
 
     async def connect(self):
+        # Guarded by the same lock as navigation: two 503s racing a reconnect
+        # used to launch two Chromes against one profile directory.
+        async with self._nav:
+            return await self._connect()
+
+    async def _connect(self):
         if self._context:
             try:
                 alive = self._page and not self._page.is_closed()
@@ -313,8 +328,10 @@ class HEBClient:
                 await self._page.goto(
                     "https://www.heb.com/", wait_until="domcontentloaded")
         except Exception as e:
+            log.error("connect failed: %s: %s", type(e).__name__, e)
             await self.close()
             raise HEBConnectionError(f"Could not open H-E-B: {e}") from e
+        log.info("connect ok %s", self.status())
         return self.status()
 
     def _chrome_command(self, port):
@@ -329,24 +346,43 @@ class HEBClient:
         ]
 
     async def _fetch(self, url):
+        async with self._nav:
+            return await self._navigate(url)
+
+    async def _navigate(self, url):
         if not self._page:
             raise HEBConnectionError("Connect H-E-B first")
-        for attempt in range(2):
+        for attempt in range(3):
+            started = time.monotonic()
             try:
                 response = await self._page.goto(
                     f"https://www.heb.com{url}",
                     wait_until="domcontentloaded")
                 text = await response.text()
             except Exception as e:
+                log.warning("fetch %s attempt=%d failed after %dms: %s: %s",
+                            url, attempt, (time.monotonic() - started) * 1000,
+                            type(e).__name__, e)
+                # A single navigation can fail transiently (renderer swap, a
+                # slow redirect). Only a repeat failure means the session is
+                # actually gone; dropping the browser on the first one is what
+                # made the H-E-B connection look flaky.
+                if attempt < 2:
+                    await asyncio.sleep(0.5)
+                    continue
+                log.error("disconnect: navigation to %s failed twice", url)
                 await self.close()
                 raise HEBConnectionError("H-E-B reconnect required") from e
             challenge = (
                 "_Incapsula_Resource" in text
                 or '"errorCode" : "15"' in text)
             if not challenge:
+                log.info("fetch %s ok %dms %dB attempt=%d", url,
+                         (time.monotonic() - started) * 1000, len(text), attempt)
                 return text
-            if attempt == 0:
-                await asyncio.sleep(1)
+            log.warning("fetch %s attempt=%d hit bot challenge", url, attempt)
+            await asyncio.sleep(1)
+        log.error("disconnect: %s stayed behind a bot challenge", url)
         self.connected = self.map_ready = False
         raise HEBConnectionError("H-E-B reconnect required")
 

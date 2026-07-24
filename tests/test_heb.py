@@ -300,6 +300,7 @@ def test_product_uses_exact_pals_shelf_position():
 
     assert resolve_placement(pals, atlas, "Aisle 2") == {
         "point": [12.5, 6.0],
+        "psa_key": "03|2|A|14",
         "group": "PSA:03:2",
         "approx": False,
         "location_label": "Aisle 2",
@@ -438,3 +439,34 @@ def test_atlas_profile_has_reachable_terminals_and_product_snaps():
         assert engine.path_is_legal(free, path, cell) == []
         assert engine.path_is_legal(furniture, path, cell) == []
         current = snapped
+
+
+def test_concurrent_fetches_do_not_overlap_on_the_single_page():
+    """Typeahead fires overlapping searches; a second goto() on the same page
+    aborts the first, which used to surface as 'H-E-B reconnect required'."""
+    client = HEBClient()
+    client.connected = client.map_ready = True
+    overlapping = []
+
+    class Response:
+        async def text(self):
+            return "normal H-E-B response"
+
+    class Page:
+        in_flight = 0
+
+        async def goto(self, url, wait_until):
+            Page.in_flight += 1
+            overlapping.append(Page.in_flight)
+            await asyncio.sleep(0)
+            Page.in_flight -= 1
+            return Response()
+
+    client._page = Page()
+
+    async def race():
+        return await asyncio.gather(*(
+            client._fetch(f"/search?q=chicke{'n' * i}") for i in range(6)))
+
+    assert len(asyncio.run(race())) == 6
+    assert max(overlapping) == 1, f"navigations overlapped: {overlapping}"

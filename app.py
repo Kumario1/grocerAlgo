@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 """Lakeline #659 product picker and optimal in-store route API."""
+import collections
 import json
+import logging
+import logging.handlers
 import math
+import os
 import re
+from contextlib import asynccontextmanager
 from functools import lru_cache
 import numpy as np
-from scipy.interpolate import LinearNDInterpolator
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import breadth_first_order
 from fastapi import FastAPI, HTTPException, Query
@@ -16,7 +20,26 @@ from router.directory import load_directory
 from router.resolve import resolve
 from router.heb import HEBClient, HEBConnectionError
 
-app = FastAPI(title="grocerAlgo — HEB #659")
+os.makedirs("logs", exist_ok=True)
+_handler = logging.handlers.RotatingFileHandler(
+    "logs/app.log", maxBytes=2_000_000, backupCount=3)
+_handler.setFormatter(logging.Formatter(
+    "%(asctime)s %(levelname)s %(name)s %(message)s"))
+logging.getLogger("grocer").addHandler(_handler)
+logging.getLogger("grocer").addHandler(logging.StreamHandler())
+logging.getLogger("grocer").setLevel(logging.INFO)
+log = logging.getLogger("grocer.app")
+
+@asynccontextmanager
+async def lifespan(api):
+    yield
+    # Without this the spawned Chrome outlives the server and keeps the
+    # .heb-659 profile locked, so the next connect() dies with
+    # "Chrome closed before startup".
+    await api.state.heb.close()
+
+
+app = FastAPI(title="grocerAlgo — HEB #659", lifespan=lifespan)
 app.state.heb = HEBClient()
 
 GEOM = json.load(open("data/659/geometry.json"))
@@ -42,40 +65,80 @@ ATLAS = {
 LOCATED_PRODUCTS = {}
 
 
-def _atlas_to_guide_transform():
-    """Calibrate current Atlas coordinates onto the accepted #659 floor plan."""
-    source = [
-        [0.0, 22.68],
-        [897.0786, 22.68],
-        [897.0786, 638.28],
-        [0.0, 638.28],
-    ]
-    target = [
-        [260.1532897949219, 59.77337646484375],
-        [1030.0013427734375, 64.49637603759766],
-        [1138.6302490234375, 681.6343994140625],
-        [260.1532897949219, 656.4453735351562],
-    ]
-    anchor_pairs = {
-        **{f"AISLE {n}": f"AISLE {n}" for n in range(1, 23)},
-        **{f"AISLE {n}": f"AISLE {n + 4}" for n in range(23, 42)},
-        "BAKERY": "BAKERY",
-        "CHECKSTANDS": "CHECKSTANDS",
-        "DAIRY": "DAIRY",
-        "DELI": "DELI",
-        "FLORAL": "FLORAL",
-        "FROZEN": "FROZEN FOODS",
-        "PHARMACY": "PHARMACY",
-        "PRODUCE": "PRODUCE",
-        "SEAFOOD": "SEAFOOD",
-    }
-    for atlas_name, guide_name in anchor_pairs.items():
-        source.append(ATLAS["geometry"]["anchors"][atlas_name])
-        target.append(GEOM["anchors"][guide_name])
-    return LinearNDInterpolator(np.asarray(source), np.asarray(target))
+def _axis_fit(atlas_names, guide_names, axis):
+    """Scale + offset carrying one Atlas axis onto the guide's."""
+    return np.polyfit(
+        [ATLAS["geometry"]["anchors"][n][axis] for n in atlas_names],
+        [GEOM["anchors"][n][axis] for n in guide_names], 1)
 
 
-ATLAS_TO_GUIDE = _atlas_to_guide_transform()
+# Both drawings are axis-aligned plans of the same floor, so one scale and
+# offset per axis is the entire relationship. Each axis is fitted where that
+# axis carries physical spacing: x from the top row of aisles, y from the
+# left-hand column. Residual is under 2.2 pt across all 32 of those anchors.
+#
+# The rubber-sheet interpolator this replaces was fitted through every anchor
+# including the department *labels*, which are text placed by eye and sit
+# metres from their counterpart on the other map. Its control points also lay
+# on three near-collinear lines with nothing in the store interior, so the
+# sliver triangles between them smeared a single straight aisle's shelf points
+# across up to 140 pt — two aisles' worth — which is where products were
+# landing beside the aisle they were actually in.
+X_FIT = _axis_fit([f"AISLE {n}" for n in range(1, 14)],
+                  [f"AISLE {n}" for n in range(1, 14)], 0)
+Y_FIT = _axis_fit([f"AISLE {n}" for n in range(23, 42)],
+                  [f"AISLE {n + 4}" for n in range(23, 42)], 1)
+
+
+def atlas_to_guide(point):
+    return [float(X_FIT[0] * point[0] + X_FIT[1]),
+            float(Y_FIT[0] * point[1] + Y_FIT[1])]
+
+
+def _corridors():
+    """Atlas centre-line of every (area, aisle) shelf run.
+
+    A PSA is a spot on a shelf FACE, and an aisle's two faces straddle the
+    corridor the shopper actually walks — so a product's pin belongs on the
+    midline between them. Each run is long and thin, so the axis with the
+    smaller extent is the one across it; anything squarer than 2:1 is a
+    department blob rather than a run and is left alone.
+
+    Taken from the Atlas's own PSA geometry, so it needs no correspondence
+    between Atlas and guide aisle NUMBERS — which is just as well, because 40
+    of #659's aisle numbers are reused by several departments at opposite ends
+    of the store.
+    """
+    runs = collections.defaultdict(list)
+    for key, point in ATLAS["psas"].items():
+        area, aisle, _, _ = key.split("|")
+        runs[(area, aisle)].append(point)
+    lines = {}
+    for run, points in runs.items():
+        if len(points) < 4:
+            continue
+        low = [min(p[a] for p in points) for a in (0, 1)]
+        high = [max(p[a] for p in points) for a in (0, 1)]
+        extent = [high[a] - low[a] for a in (0, 1)]
+        axis = 0 if extent[0] < extent[1] else 1
+        if extent[axis] * 2 > extent[1 - axis]:
+            continue
+        lines[run] = (axis, (low[axis] + high[axis]) / 2)
+    return lines
+
+
+CORRIDORS = _corridors()
+
+
+def on_corridor(group, point):
+    """Move an Atlas shelf point onto the corridor of its own aisle."""
+    line = CORRIDORS.get(tuple(group.split(":")[1:]))
+    if not line:
+        return point
+    axis, value = line
+    point = list(point)
+    point[axis] = value
+    return point
 
 
 # SciPy runs the same 4-neighbour BFS as engine.bfs, but in compiled code. It
@@ -259,15 +322,25 @@ async def products(q: str = Query(min_length=3)):
         raise HTTPException(503, str(e)) from e
 
 
-def exact_map_point(location_label, placement):
-    """Map the live Atlas point onto the accepted #659 guide profile."""
-    atlas_point = placement.get("point")
-    if atlas_point:
-        mapped = np.asarray(ATLAS_TO_GUIDE(
-            np.asarray(atlas_point, dtype=float))).reshape(-1)
-        if len(mapped) == 2 and np.all(np.isfinite(mapped)):
-            return mapped.tolist()
+MAX_SNAP_M = 5.0        # nothing on a shelf is further than this from a corridor
 
+
+def snap_distance_m(point):
+    """How far a shopper would be walked off `point` to stand somewhere legal.
+
+    Large means the point is not on the shopping floor at all, so whatever
+    produced it should not be believed.
+    """
+    try:
+        cell = engine.snap(FREE, REACH, point, CELL)
+    except (TypeError, ValueError):
+        return math.inf
+    return math.hypot(cell[0] * CELL + CELL / 2 - point[0],
+                      cell[1] * CELL + CELL / 2 - point[1]) / CELL * M_PER_CELL
+
+
+def label_map_point(location_label, placement):
+    """Where the printed shelf label says the product is."""
     label = re.sub(r"\s+", " ", (location_label or "").upper())
     aisle = re.search(r"\bAISLE\s+(\d+)\b", label)
     if aisle:
@@ -280,11 +353,37 @@ def exact_map_point(location_label, placement):
         "MARKET": "MEAT",
         "CHECKSTANDS": "CHECKOUT",
     }
-    group = placement["group"].removeprefix("ANCHOR:")
     for name in sorted(GEOM["anchors"], key=len, reverse=True):
         if not name.startswith("AISLE ") and name in label:
             return GEOM["anchors"][name]
+    group = placement["group"].removeprefix("ANCHOR:")
     return GEOM["anchors"].get(aliases.get(group, group))
+
+
+def exact_map_point(location_label, placement):
+    """Map the live Atlas placement onto the accepted #659 guide profile.
+
+    A PSA is physical shelf geometry and is transformed. A department ANCHOR
+    is a text label placed by eye — the two drawings put "Dairy" 50 pt apart —
+    so it is matched to the guide's own anchor by NAME instead of warped.
+    """
+    exact = None
+    if placement["group"].startswith("PSA:") and placement.get("point"):
+        exact = atlas_to_guide(
+            on_corridor(placement["group"], placement["point"]))
+        if snap_distance_m(exact) <= MAX_SNAP_M:
+            return exact
+        # H-E-B answers for some bulk packs with a pallet slot off the shopping
+        # floor while its own label names a real aisle — 16|88 sits in the
+        # bottom-left vestibule and is labelled "Aisle 13". Snapping such a
+        # point to the nearest legal cell silently parks the product at the
+        # entrance, so believe the label instead.
+        log.warning("placement %s maps %s off the floor; using the label %r",
+                    placement["group"], [round(v, 1) for v in exact],
+                    location_label)
+
+    named = label_map_point(location_label, placement)
+    return named if named is not None else exact
 
 
 @app.post("/api/products/locate")
@@ -309,10 +408,23 @@ async def locate_products(req: LocateReq):
             try:
                 route_cell = engine.snap(FREE, REACH, point, CELL)
             except (TypeError, ValueError):
+                log.warning("locate %s %r group=%s atlas=%s mapped=%s NO-SNAP",
+                            model.id, model.location_label, placement["group"],
+                            placement.get("point"), point)
                 placement = None
             else:
                 x = route_cell[0] * CELL + CELL / 2
                 y = route_cell[1] * CELL + CELL / 2
+                # Two error sources stack here: the Atlas->guide warp that
+                # produced `point`, and the walk to the nearest walkable cell.
+                # Logging both separately is what tells them apart.
+                log.info(
+                    "locate %s %r psa=%s group=%s atlas=%s mapped=%.1f,%.1f "
+                    "shown=%.1f,%.1f snap=%.1f",
+                    model.id, placement.get("location_label")
+                    or model.location_label, placement.get("psa_key"),
+                    placement["group"], placement.get("point"),
+                    point[0], point[1], x, y, math.hypot(x - point[0], y - point[1]))
                 result |= {
                     "routable": True,
                     "approx": True,
