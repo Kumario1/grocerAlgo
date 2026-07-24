@@ -1,4 +1,4 @@
-"""Load heb659_directory.csv; parse messy aisle_raw values into anchor keys."""
+"""Load data/<store>/directory.csv; parse messy aisle_raw values into anchor keys."""
 import csv, re, sys
 
 def parse_aisle_raw(raw):

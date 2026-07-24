@@ -262,6 +262,9 @@ online ordering, multi-store trip splitting. Full reasoning in
 | `router/` | engine (TSP, BFS), map derivation, H-E-B client, QA checks |
 | `static/index.html` | the whole front end |
 | `data/<store>/` | per-store truth: geometry, profile, zones, QA artifacts |
+| `guide-*.pdf` | source store guides; `discover.py` downloads them to this name |
 | `plan.md` | living master plan — PRD, architecture, provider findings |
 | `CONTEXT.md` | canonical domain vocabulary used in code, tests and UI |
 | `docs/` | onboarding and audit runbooks for the agent loop |
+| `docs/evidence/` | proof artifacts behind dated findings in `plan.md` §14 |
+| `docs/archive/` | the Phase-0 prototype, superseded by the vector pipeline |
