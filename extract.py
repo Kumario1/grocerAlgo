@@ -105,10 +105,16 @@ def extract():
     words = page.get_text("words")  # (x0, y0, x1, y1, text, ...)
 
     anchors, seen = {}, []
+    # Stacked digit spans share one bbox and only the last-painted shows:
+    # store #658 leaves a stale "21" hidden under aisle 10's badge. Keep the
+    # visible winner — within a block, word order is content (paint) order.
+    badges = {}
     for x0, y0, x1, y1, t, *_ in words:
         if t.isdigit() and 1 <= int(t) <= 60:
-            seen.append(int(t))
-            anchors[f"AISLE {int(t)}"] = [(x0 + x1) / 2, (y0 + y1) / 2]
+            badges[round(x0, 1), round(y0, 1)] = (int(t), x0, y0, x1, y1)
+    for n, x0, y0, x1, y1 in badges.values():
+        seen.append(n)
+        anchors[f"AISLE {n}"] = [(x0 + x1) / 2, (y0 + y1) / 2]
     # aisle badges must be a clean 1..N run, each number exactly once
     # (store #659: 45, store #24: 43); duplicates or holes mean the map
     # page carries stray digits and needs a smarter filter.
