@@ -1,0 +1,18 @@
+Store **811 (H-E-B Manor) is converged.** `./rebuild.sh 811` exits 0, `report.json` has `"verify": []` and both coverage lists empty, and the full suite is green at **565 passed** (was 520 — the 45 new tests are 811's 38 walk-truth points plus its 7 per-store gates).
+
+## What I found on arrival
+
+The first mechanical pass had already been run *with* an `exclusions.json`/`inclusions.json` in place, and its report was already clean. I did not take that on trust — I rebuilt an independent classification render (outside-boundary / fixture / excluded / sealed / staff / unreachable / walkable) and checked every authored entry against the PDF linework and `geometry.json` fixture extents. All eleven entries hold up:
+
+- **5 exclusions** — the north band behind the wall gondolas (their scallops face *south*, fixtures at `y=122–135`), the NW and west strips behind the Market/Seafood wall cases and the Produce gondola, the 9 m blank east strip (blocked at `x=1085`, Curbside fixture takes over at `y=446`), and the Deli/Bakery back-of-house boxed in by the west-facing service cases, the Beer & Wine cooler backs (door swings drawn on the *east* face → beer is shopped from aisle 1) and the Sushiya counter. Every one is blank on the drawing and carries no label.
+- **6 inclusions** — all correct false-positive corrections: the DELI/BAKERY/SEAFOOD labels are printed on the customer floor west/east of their counters (confirmed against the counter fixtures), and `KITCHEN` is a false service anchor harvested from the **"Kitchen Gadgets"** shelf label in aisle 18 (confirmed from the PDF word list: it sits among Cookware/Hardware/Auto). The derived CHECKSTANDS rect had eaten the aisle 13–21 mouths, the floral bay and the walkway east of the last lane.
+
+I classified **every** culled pocket in the top ten, not just the large ones: the pharmacy room (1491 cells — correctly sealed, it holds only the logo, and the queue alcove west of the stepped counter wall stays open), the checkout lanes (11 separate pockets, correctly sealed), two enclosed rooms in the front-lobby wall band, and the rest are pockets the inclusions deliberately restore. `far_snaps` is only ENTRANCE (4.33 m) — the label sits in the right-hand vestibule, outside the drawn sales floor, and snaps to the lobby corridor just inside the doors; comparable to 659's 4.46 m BAKERY snap. No seal-zone override was needed, so `zones`/`seal_zones` stay derived.
+
+## What I authored
+
+Only `data/811/walk_truth.json` — 20 `must` + 18 `must_not` points. Each was placed by reading the drawing first, then verified against the grid *and* against free-span scans so no point sits within a couple of points of a wall: every department frontage (Dairy, Produce, Market meat islands, Deli, Bakery, Seafood, Sushiya, Meal Simple, Blooms floral, Pharmacy alcove), six distinct aisle corridors plus the east cross aisle, the front action alley, the lane-exit corridor and the lobby entrance approach; and against them the four page corners, three outside-the-building points, the interior of all five exclusions, the pharmacy dispensing room, the Curbside room, a checkout-lane interior and the two enclosed lobby rooms.
+
+Two benign observations for the visual verdict, neither a blocker: the frozen-food door-swing arcs pinch aisles 13–16 to ~0.9 m and spawn ~130 one-to-five-cell orange pockets inside the arcs (hence `components: 172` on the uncut grid — the shipped profile is a single component of 74,075 cells); and the restroom vestibules at the front lobby are drawn open, so they read as walkable, which is correct for customers.
+
+Final numbers: walkable **28.2%**, entrance-reachable **28.1%**, m/cell **0.2018**, 52 anchors, all anchor pairs connected. Stopping here for the separate audit role.

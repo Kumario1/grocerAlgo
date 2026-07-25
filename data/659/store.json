@@ -1,0 +1,9 @@
+{
+ "name": "Lakeline H-E-B Plus! #659",
+ "atlas": "data/659-atlas",
+ "atlas_fit": {
+  "x": {"atlas": [1, 13], "guide": [1, 13]},
+  "y": {"atlas": [23, 41], "guide": [27, 45]}
+ },
+ "aisle_label_shift": {"from": 23, "add": 4}
+}

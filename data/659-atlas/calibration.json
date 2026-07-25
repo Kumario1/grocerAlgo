@@ -1,0 +1,113 @@
+{
+ "notes": [
+  "atlas aisles 41, guide aisles 45",
+  "pinned by data/<store>/store.json"
+ ],
+ "gates": {
+  "residual": true,
+  "margin": true,
+  "scale_skew": true,
+  "floor": {
+   "psas": 2677,
+   "on_floor_pct": 99.4,
+   "pass": true,
+   "off_floor": [
+    [
+     "16|88|A|4",
+     24.9
+    ],
+    [
+     "16|88|A|6",
+     24.6
+    ],
+    [
+     "16|88|A|3",
+     24.0
+    ],
+    [
+     "16|88|A|5",
+     23.8
+    ],
+    [
+     "16|88|A|2",
+     22.9
+    ],
+    [
+     "16|88|A|1",
+     22.5
+    ],
+    [
+     "22|50|A|1",
+     7.4
+    ],
+    [
+     "22|94|A|4",
+     7.4
+    ],
+    [
+     "22|94|A|1",
+     7.2
+    ],
+    [
+     "22|94|A|5",
+     6.6
+    ]
+   ]
+  }
+ },
+ "x": {
+  "scale": 0.9895040501581802,
+  "offset": 254.61315879833194,
+  "inliers": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13
+  ],
+  "aisle_offset": 0,
+  "source_axis": 0,
+  "pinned": true,
+  "max_residual_pt": 2.009
+ },
+ "y": {
+  "scale": 0.9751627967768415,
+  "offset": 65.95428214807207,
+  "inliers": [
+   23,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37,
+   38,
+   39,
+   40,
+   41
+  ],
+  "aisle_offset": 4,
+  "source_axis": 1,
+  "pinned": true,
+  "max_residual_pt": 2.161
+ },
+ "store": "659",
+ "verdict": "pass",
+ "verified": null
+}

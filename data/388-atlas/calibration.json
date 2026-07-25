@@ -1,0 +1,145 @@
+{
+ "notes": [
+  "atlas aisles 32, guide aisles 30",
+  "y: no aisle spans this axis, so its scale is the other axis's and its offset was found by sliding the shelves onto the floor",
+  "aisle offsets x-2 y=floor: 100% of sampled shelves land on a walkable cell and 8 anchors agree, against 100%/8 for x-1 y=floor"
+ ],
+ "gates": {
+  "residual": true,
+  "margin": false,
+  "scale_skew": true,
+  "floor": {
+   "psas": 1710,
+   "on_floor_pct": 99.65,
+   "pass": true,
+   "off_floor": [
+    [
+     "16|88|A|1",
+     Infinity
+    ],
+    [
+     "16|88|A|2",
+     Infinity
+    ],
+    [
+     "16|88|A|5",
+     Infinity
+    ],
+    [
+     "16|88|A|6",
+     Infinity
+    ],
+    [
+     "16|88|A|4",
+     Infinity
+    ],
+    [
+     "16|88|A|3",
+     Infinity
+    ]
+   ]
+  },
+  "labels": false
+ },
+ "x": {
+  "scale": 1.5836430095055465,
+  "offset": 152.54725131218774,
+  "inliers": [
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   22
+  ],
+  "max_residual_pt": 1.019,
+  "aisle_offset": -2,
+  "source_axis": 0
+ },
+ "y": {
+  "scale": 1.5836430095055465,
+  "offset": 7.0,
+  "inliers": [],
+  "aisle_offset": null,
+  "source_axis": 1,
+  "derived": true,
+  "max_residual_pt": null
+ },
+ "store": "388",
+ "verdict": "fail",
+ "verified": {
+  "checked": 11,
+  "agreed": 0,
+  "misses": [
+   {
+    "product": "H-E-B Split Top Honey Wheat Enriched Sliced\u00a0Bread, 20 oz",
+    "label": "Aisle 4",
+    "want": "AISLE 4",
+    "got": "AISLE 2"
+   },
+   {
+    "product": "H-E-B Original Fajita Flour Tortillas, 20 ct",
+    "label": "Aisle 4",
+    "want": "AISLE 4",
+    "got": "AISLE 2"
+   },
+   {
+    "product": "General Mills Cinnamon Toast Crunch Cereal - Mega Size, 27 oz",
+    "label": "Aisle 9",
+    "want": "AISLE 9",
+    "got": "AISLE 7"
+   },
+   {
+    "product": "H-E-B Garlic & Herb Pasta Sauce, 24 oz",
+    "label": "Aisle 5",
+    "want": "AISLE 5",
+    "got": "AISLE 3"
+   },
+   {
+    "product": "CAFE Ol\u00e9 by H-E-B Texas Pecan Medium Roast Ground Coffee, 12 oz",
+    "label": "Aisle 11",
+    "want": "AISLE 11",
+    "got": "AISLE 8"
+   },
+   {
+    "product": "Dove Coconut & Hydration Shampoo & Conditioner, 2 Pk, 24 oz",
+    "label": "Aisle 27",
+    "want": "AISLE 27",
+    "got": "AISLE 21"
+   },
+   {
+    "product": "H-E-B Our Finest Invent-A-Size Paper Towels, 6 Triple Rolls",
+    "label": "Aisle 22",
+    "want": "AISLE 22",
+    "got": "AISLE 10"
+   },
+   {
+    "product": "H-E-B Uncured Pepperoni Thin Crust Frozen Pizza, 14.15 oz",
+    "label": "Aisle 12",
+    "want": "AISLE 12",
+    "got": "AISLE 2"
+   },
+   {
+    "product": "H-E-B Made in Texas Creamy Peanut Butter, 28 oz",
+    "label": "Aisle 4",
+    "want": "AISLE 4",
+    "got": "AISLE 2"
+   },
+   {
+    "product": "H-E-B Black Beans, 15 oz",
+    "label": "Aisle 7",
+    "want": "AISLE 7",
+    "got": "AISLE 5"
+   },
+   {
+    "product": "Field & Future by H-E-B Dishwashing Liquid\u00a0-\u00a0Citrus & Bergamot, 24 oz",
+    "label": "Aisle 23",
+    "want": "AISLE 23",
+    "got": "AISLE 10"
+   }
+  ],
+  "pass": false
+ }
+}

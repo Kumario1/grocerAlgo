@@ -4,11 +4,12 @@ import json
 import pytest
 from fastapi.testclient import TestClient
 
-from app import CELL, FREE, LOCATED_PRODUCTS, app
+from app import LOCATED_PRODUCTS, app, load_store
 from router import engine
 
 
 client = TestClient(app)
+STORE = load_store("659")
 
 
 @pytest.fixture
@@ -50,4 +51,4 @@ def test_real_659_product_route_matches_the_exact_map_golden(
     assert body["saved_m"] == golden["saved_m"]
     assert body["path"] == golden["path"]
     assert engine.path_is_legal(
-        FREE, body["path"], CELL) == []
+        STORE.free, body["path"], STORE.cell) == []

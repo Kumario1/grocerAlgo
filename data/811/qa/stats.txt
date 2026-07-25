@@ -1,0 +1,42 @@
+walkable: 28.2% of page (28.1% entrance-reachable)
+components: 172  sizes: [74110, 10, 5, 5, 5]...
+anchors: 52  |  exclusions: 5
+service pockets sealed (service + dead crevices): 32
+   1491 cells at (1048,629) near AISLE 36
+   1117 cells at (319,368) near SEAFOOD
+   1069 cells at (240,502) near PRODUCE
+    530 cells at (813,542) near AISLE 33
+    503 cells at (457,723) near CHECKSTANDS
+    352 cells at (541,725) near RESTROOMS
+    334 cells at (502,498) near AISLE 13
+    325 cells at (640,501) near FROZEN FOODS
+    250 cells at (447,542) near BAKERY
+    242 cells at (618,624) near CHECKSTANDS
+snaps moved >12 cells (check reachable.png):
+  ENTRANCE: 21 cells (~4.3 m)
+tightest corridors at anchors (half-width capacity):
+  FROZEN FOODS: 0.64 m
+  KITCHEN: 0.81 m
+  CHILI/MEAT/FISH: 1.01 m
+  ENTRANCE: 1.01 m
+  EXIT: 1.01 m
+  MEAT: 1.01 m
+  RESTROOMS: 1.01 m
+  AISLE 25: 1.14 m
+unexplained sealed clusters >= 2.4 m^2: 17 (the audit accounts for each)
+    76.9 m^2 at (686,622) near CHECKSTANDS
+    67.1 m^2 at (1046,630) near AISLE 36
+    60.0 m^2 at (510,724) near RESTROOMS
+     9.9 m^2 at (494,472) near AISLE 13
+     7.5 m^2 at (782,717) near EXIT
+     6.7 m^2 at (632,499) near FROZEN FOODS
+     6.4 m^2 at (510,495) near AISLE 13
+     6.2 m^2 at (236,702) near PRODUCE
+     6.2 m^2 at (540,498) near FROZEN FOODS
+     5.9 m^2 at (190,205) near DELI
+printed labels furthest from reachable floor:
+   0.81 m  Foods at (626,482)
+   0.40 m  Frozen at (558,482)
+   0.00 m  Accessories at (1014,520)
+   0.00 m  Accessories at (1012,444)
+   0.00 m  Aid at (912,636)

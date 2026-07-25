@@ -344,6 +344,28 @@ def test_product_prefers_primary_pals_placement_over_alternate():
     assert placement["group"] == "PSA:01:13"
 
 
+def test_product_pins_at_the_shelf_its_label_names_not_the_display():
+    # Store 811's tortillas: PAL lists the Tortilleria display first by type,
+    # but the shopper-visible label says Aisle 4 — the shelf must win.
+    atlas = {
+        "psas": {
+            "16|88|A|3": [397.0, 735.0],
+            "01|4|B|10": [120.0, 60.0],
+        },
+        "geometry": {"anchors": {}},
+    }
+    pals = {"results": [{
+        "psas": [
+            {"area": "16", "aisle": 88, "side": "A", "section": 3, "type": 1},
+            {"area": "01", "aisle": 4, "side": "B", "section": 10, "type": 2},
+        ],
+    }]}
+
+    placement = resolve_placement(pals, atlas, "Aisle 4")
+    assert placement["point"] == [120.0, 60.0]
+    assert placement["group"] == "PSA:01:4"
+
+
 def test_product_location_falls_back_without_silent_guessing():
     atlas = {
         "psas": {"03|2|A|14": [12.5, 6.0]},

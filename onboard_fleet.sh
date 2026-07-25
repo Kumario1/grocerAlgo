@@ -32,6 +32,13 @@ REF=${FLEET_REF:-HEAD}
 echo "==> worktree for store $S at $WT ($REF)"
 git worktree add "$WT" "$REF"
 
+# Seed any guide this checkout already holds, so the worktree's discover stage
+# validates it locally instead of asking the CDN again — 380 re-downloads
+# saved, and the fleet keeps running when the CDN throttles us (it has).
+for pdf in "$ROOT"/guide-*-"$S".pdf; do
+    [ -f "$pdf" ] && cp "$pdf" "$WT/"
+done
+
 STATUS=0
 if [ -n "$CITY" ]; then
     (cd "$WT" && PIPE_NO_BROWSER=1 ./pipeline.sh "$S" "$CITY") || STATUS=$?

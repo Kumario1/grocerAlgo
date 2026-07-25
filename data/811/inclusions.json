@@ -1,0 +1,19 @@
+[
+ {"name": "Market / Deli / Bakery / Seafood customer floor — the wing between the west wall cases (x=254-266) and the west faces of the Deli and Bakery service cases (x=387-398), holding the free-standing meat islands and 4-way racks. The DELI (368,271), BAKERY (378,428) and SEAFOOD (291,434) labels are all printed on this floor, not inside a counter: the counters face west onto it and the staff side is the back-of-house sealed by exclusions.json. The derived DELI/BAKERY/SEAFOOD disks (r=130 pt, bridge 12-20 pt) bridged the gaps between the free-standing islands and culled 45 m^2 of it whole",
+  "rect": [266, 138, 387, 504]},
+
+ {"name": "Produce floor between the west wall gondola (x=139-150) and the Seafood/Bakery frontage — the SEAFOOD disk reaches y=564 and its 20 pt bridge closed the gaps between the produce tables, culling the walkway between the two long display runs (43 m^2 at 180-296, 480-528) and the bay at 274-298, 548-564. Customer space: every fixture in it is an open produce table",
+  "rect": [155, 440, 330, 600]},
+
+ {"name": "Sushiya frontage and the Meal Simple cases — customer side of the sushi bar. The Sushiya counter (rounded corner at 387-400, 490-502, arms east along y=501-513) is the SOUTH wall of the market back-of-house, so the floor south and west of it is where customers stand; the BAKERY disk's rim and the derived CHECKSTANDS rect (bridge 20 pt) sealed it, including the ring of floor around the east Meal Simple case (434-452, 529-568). South edge carried to y=594 so the cases' SOUTH frontage — the open walkway between them and the Blooms bay, where the MEAL SIMPLE logo is printed — is customer floor too; at y=580-592 the CHECKSTANDS rect had left a 14x10 pt island of painted floor sealed under the logo, in the gap between this rect and the Blooms rect below",
+  "rect": [330, 504, 470, 594]},
+
+ {"name": "aisle 13-21 corridors (Frozen Foods freezer runs and the GM/Seasonal block) — the BAKERY disk rim cut aisle 13's mouth at y=438, the KITCHEN disk (auto-derived from the 'Kitchen Gadgets' SHELF label at 714,552, not a service kitchen — this store's prepared-foods counters are Sushiya and Meal Simple) cut aisles 15-21, and the derived CHECKSTANDS rect (top edge y=521, bridge 20 pt) closed every corridor's south mouth. All nine corridors carry aisle badges and product labels (Charcoal, Foil-ware, Hardware, Light Bulbs, Toys, Party, Cookware, Kitchen Gadgets, Auto, Cards, Seasonal) and run between the front alley (y=568-598) and the cross alley (y=400-428): customer space end to end",
+  "rect": [490, 420, 856, 578]},
+
+ {"name": "front-end walkway east of the checkstand bank — the drawing leaves 21 pt open between the last checkstand lane (ends x=826) and the two front-end bins at x=848-869, and it is the route from the right-hand Entrance/Exit (863,714) north to the front action alley. The derived CHECKSTANDS rect's 20 pt bridge sealed it as if it were a lane",
+  "rect": [818, 594, 852, 664]},
+
+ {"name": "Blooms floral bay at the west end of the front alley — the strip between the floral case's east display front (x=458) and the first cart corral (x=472), and the gap between the Blooms tables and that case's west front. Both are customer frontage for a case that is drawn with display fronts on both faces; the derived CHECKSTANDS rect bridged them shut",
+  "rect": [415, 592, 480, 660]}
+]

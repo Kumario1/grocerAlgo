@@ -1,4 +1,4 @@
-"""H-E-B #659 catalog and Atlas-map helpers."""
+"""H-E-B catalog and Atlas-map helpers, for whichever store is selected."""
 import asyncio
 import hashlib
 import json
@@ -180,14 +180,43 @@ def parse_atlas(svg, scale=0.18, boundary=None):
     return {"geometry": geometry, "psas": psas, "digest": digest}
 
 
+def write_atlas(directory, store, atlas, page, scale=0.18):
+    """Persist a parsed Atlas as the three files the app reads.
+
+    source.json's sha256 is the fail-closed gate: the app refuses to place
+    products when the live drawing no longer matches the one its calibration
+    was measured against.
+    """
+    out = Path(directory)
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "geometry.json").write_text(
+        json.dumps(atlas["geometry"], indent=1) + "\n")
+    (out / "psas.json").write_text(json.dumps(atlas["psas"], indent=1) + "\n")
+    (out / "source.json").write_text(json.dumps({
+        "kind": "heb-atlas",
+        "store": str(store),
+        "scale": scale,
+        "sha256": atlas["digest"],
+        "page": page,
+    }, indent=1) + "\n")
+    return out
+
+
 def resolve_placement(pals, atlas, location_label=None):
     """Resolve H-E-B placement metadata to an Atlas point."""
     results = pals.get("results") or []
     result = results[0] if results else {}
-    psas = sorted(
-        result.get("psas") or [],
-        key=lambda psa: {1: 0, None: 1}.get(psa.get("type"), 2),
-    )
+    labelled = re.search(r"\baisle\s+(\d+)\b", location_label or "", re.I)
+
+    def rank(psa):
+        # A product can be placed twice — its aisle shelf and a department
+        # display (store 811's Tortilleria). The shopper's label names the
+        # shelf, so a placement that agrees with it outranks PAL type order.
+        aisle = str(psa.get("aisle", ""))
+        agrees = labelled and aisle.isdigit() and int(aisle) == int(labelled[1])
+        return (not agrees, {1: 0, None: 1}.get(psa.get("type"), 2))
+
+    psas = sorted(result.get("psas") or [], key=rank)
     candidates = [(psa, False) for psa in psas]
     if result.get("approximateLocation"):
         candidates.append((result["approximateLocation"], True))
@@ -239,14 +268,18 @@ class HEBConnectionError(RuntimeError):
 
 
 class HEBClient:
-    """One persistent local browser session for Lakeline H-E-B #659."""
+    """One persistent local browser session, for one store at a time.
 
-    def __init__(self, store_id=659, profile_dir=".heb-659",
-                 source_path="data/659-atlas/source.json"):
-        self.store_id = store_id
-        self.profile_dir = profile_dir
-        self.expected_digest = json.loads(
-            Path(source_path).read_text())["sha256"]
+    H-E-B's own session carries the selected store, so the app can serve one
+    store at a time and no more. Each store gets its own Chrome profile
+    directory, which is what lets a switch remember the store selection
+    instead of asking for it again.
+    """
+
+    def __init__(self, store_id=659, profile_dir=None, source_path=None):
+        self.store_id = int(store_id)
+        self.profile_dir = profile_dir or f".heb-{self.store_id}"
+        self.expected_digest = self._digest(source_path)
         self.connected = False
         self.map_ready = False
         self._playwright = self._browser = self._context = self._page = None
@@ -258,14 +291,48 @@ class HEBClient:
         # which used to read as "H-E-B dropped us" and tear down the browser.
         self._nav = asyncio.Lock()
 
-    def status(self):
+    def _digest(self, source_path=None):
+        """The Atlas snapshot this store was calibrated against, if captured."""
+        path = Path(source_path or f"data/{self.store_id}-atlas/source.json")
+        try:
+            return json.loads(path.read_text())["sha256"]
+        except (FileNotFoundError, KeyError):
+            return None
+
+    def status(self, store=None):
+        # A status poll for another store must never tear this session down;
+        # it just reports that store as not connected, which it is.
+        if store is not None and int(store) != self.store_id:
+            return {"connected": False, "map_ready": False,
+                    "store_id": int(store)}
         return {
             "connected": self.connected,
             "map_ready": self.map_ready,
             "store_id": self.store_id,
         }
 
-    async def connect(self):
+    async def use(self, store):
+        """Point the session at another store, closing the browser it had.
+
+        Switching is deliberate — it is the user picking a different store —
+        so it is the one place a live browser is allowed to be discarded.
+        """
+        store = int(store)
+        if store == self.store_id:
+            return
+        await self.close()
+        self.store_id = store
+        self.profile_dir = f".heb-{store}"
+        self.expected_digest = self._digest()
+        # Both caches answer per store: a search is store-scoped and a
+        # placement is a shelf in one building.
+        self._search_cache.clear()
+        self._placement_cache.clear()
+        log.info("session switched to store %s", store)
+
+    async def connect(self, store=None):
+        if store is not None:
+            await self.use(store)
         # Guarded by the same lock as navigation: two 503s racing a reconnect
         # used to launch two Chromes against one profile directory.
         async with self._nav:
@@ -386,26 +453,46 @@ class HEBClient:
         self.connected = self.map_ready = False
         raise HEBConnectionError("H-E-B reconnect required")
 
-    async def confirm(self):
-        html = await self._fetch("/search?q=milk")
-        if not extract_products(html, self.store_id):
-            raise HEBConnectionError(
-                f"Select Lakeline H-E-B #{self.store_id} in the opened browser")
+    async def atlas_svg(self):
+        """This store's live Atlas drawing."""
         svg = await self._fetch(
-            "/atlas/v1.0/image?locationNumber=659&format=svg&style=none"
-            "&label=false&drawPsas=true&drawAisleMarkers=true&landmarks=all"
-            "&drawCombinedFixtures=true&drawDepartmentLabels=true"
-            "&hidePartnerFixtures=true")
+            f"/atlas/v1.0/image?locationNumber={self.store_id}&format=svg"
+            "&style=none&label=false&drawPsas=true&drawAisleMarkers=true"
+            "&landmarks=all&drawCombinedFixtures=true"
+            "&drawDepartmentLabels=true&hidePartnerFixtures=true")
         if "<svg" not in svg:
             raise HEBConnectionError("H-E-B store map unavailable")
+        return svg
+
+    async def sees_store(self):
+        """Whether the session's own catalog answers for this store."""
+        html = await self._fetch("/search?q=milk")
+        return bool(extract_products(html, self.store_id))
+
+    async def confirm(self, store=None):
+        if store is not None and int(store) != self.store_id:
+            raise HEBConnectionError(f"Connect store #{store} first")
+        if self.expected_digest is None:
+            raise HEBConnectionError(
+                f"store #{self.store_id} has no captured Atlas — run "
+                f"capture_atlas.py {self.store_id}")
+        if not await self.sees_store():
+            raise HEBConnectionError(
+                f"Select H-E-B #{self.store_id} in the opened browser")
+        svg = await self.atlas_svg()
         self.connected = True
+        # Fails closed: the calibration that places products was measured
+        # against one drawing, so a changed drawing invalidates it.
         self.map_ready = parse_atlas(svg)["digest"] == self.expected_digest
         if not self.map_ready:
             raise HEBConnectionError(
-                "H-E-B's #659 map changed; rebuild and verify the Atlas profile")
+                f"H-E-B's #{self.store_id} map changed; recapture and "
+                "recalibrate the Atlas profile")
         return self.status()
 
-    async def search(self, query):
+    async def search(self, query, store=None):
+        if store is not None and int(store) != self.store_id:
+            raise HEBConnectionError(f"Connect store #{store} first")
         if not self.map_ready:
             raise HEBConnectionError("Connect and verify H-E-B first")
         key = " ".join(query.lower().split())

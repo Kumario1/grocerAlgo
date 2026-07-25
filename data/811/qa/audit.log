@@ -1,0 +1,59 @@
+All passes complete, all fixes verified. Here is the audit.
+
+---
+
+# Store map audit — H‑E‑B 811 (Manor)
+
+## Pass 1 — Mechanical ✅
+`./rebuild.sh 811` rerun from scratch (3×, once per fix batch). Final state:
+
+| check | value |
+|---|---|
+| exit code | 0 |
+| `verify` | `[]` |
+| `coverage` | `{"sealed_floor_patches": [], "unreachable_shelf_labels": []}` |
+| walkable / reachable | 28.2% / 28.1% (inside the normal 20–35%) |
+| components | 74110, then 10, 5, 5 — one dominant component |
+| tests | 568 passed |
+
+`far_snaps: ENTRANCE 4.33 m` is **not** a defect: the printed "Entrance" word sits at (863,756) inside the right‑hand vestibule, which is outside the extracted sales‑floor boundary. It snaps to pdf (821,713) — 2 pt inside the doorway wall at x=823.3. Routes start just inside the doors, correctly.
+
+## Pass 2 — Visual sweep ✅ (1 finding)
+3×3 crops of `walkable_overlay.png` viewed individually, plus 15 zoomed PDF-vs-overlay region comparisons. Backed by a mechanical net I built for this audit: cluster every cell inside the boundary that is sealed but is **not** a fixture and **not** under an authored exclusion. Post‑fix, every cluster ≥2.4 m² is accounted for: checkout lanes (76.8 m²), pharmacy dispensing room (67.3), lobby utility rooms (59.9+7.5), and 6‑pt wall/door‑swing traces along shelf faces.
+
+Specifically confirmed against the printed map:
+- Every aisle corridor 1–38 walked from its badge — green end to end; every "gap" is a real gondola, the pharmacy wall, or the back‑of‑house line.
+- **Pharmacy wing (the store‑24 analogue) is correct**: aisles 33–38 green to their east ends, and the waiting bay the counter wall steps back to make (x 1009–1034, y 583–638) is green. Only the dispensing room east of the wall is sealed.
+- Unanchored logo departments inspected explicitly — Sushiya, Meal Simple, Blooms, Tobacco, ICE: all with green frontage.
+- East strip (x 1086–1177): **staff double doors at (1074–1083, 119–146)** in the PDF confirm exclusion #4's back‑of‑house claim.
+- Checkout: 14 lane interiors sealed, front action alley and front‑end corridor both green.
+- All 32 culled pockets classified: 1 pharmacy room + 3 lobby rooms + 14 checkout lanes stay sealed; 14 customer‑floor pockets restored by inclusions and now green.
+
+## Pass 3 — Label probes ✅
+Rather than 10, I probed **all 300 printed words** on the map. Worst product/department label → nearest reachable floor: **0.81 m** ("Frozen Foods", printed mid‑aisle). The only words beyond 2 m are `Entrance`/`Exit`/`Carts` in the two vestibules. No stranded label anywhere.
+
+## Pass 4 — walk_truth adequacy ⚠️ (2 findings)
+## Pass 5 — Config sanity ✅
+All 5 exclusions state a WHY the drawing supports, and each stops at the customer face of the neighbouring fixture — notably #5 ends at x=480, leaving the Beer & Wine cooler's east shopping face open. No inclusion blankets a staff room; structurally it cannot, since `free_raw` already has exclusions and fixtures blocked before `free |= free_raw & incl_mask`.
+
+---
+
+## Findings — worst first (all 3 fixed and re‑verified)
+
+**1. `walk_truth` "Pharmacy waiting alcove" does not lie in the alcove — the store‑24 failure mode was undefended.** (walk_truth point)
+`must [997, 600]` sits in the aisle 34–38 north‑south corridor (open floor x 986–1008), 11 pt west of the alcove mouth at x=1009. The pharmacy waiting bay itself (x 1009–1034, y 583–638) had no point at all. Proven by simulation: adding an exclusion over the bay leaves `[997,600]` **still free** (regression missed) while the replacement `[1022,614]` **fails** (regression caught). Evidence: ASCII transect of the shipped grid at x 984–1052; crop `pdf/wo 960–1200 × 540–720`.
+→ Fixed: point moved to `[1022, 614, "Pharmacy waiting bay: the alcove the counter wall steps back to make (x 1009-1034, y 583-637), east of the aisle 34-38 corridor"]`.
+
+**2. No `must_not` for the 104 m² enclosed room on the west wall (x 88–138, y 500–701).** (walk_truth point)
+Third‑largest sealed area in the store, extracted as a single fixture rect. The nearest existing point, `[110,450]`, is in the *excluded* back‑of‑house band above it (exclusion #3's poly, y 353–502) — a different feature with a different failure mode. The third lobby‑band room (x 565–593, y 709–742, the 208‑cell pocket) was likewise uncovered. Evidence: crop `pdf/wo 80–340 × 330–720`; fixture list.
+→ Fixed: added `must_not [110, 600]` and `[578, 725]`.
+
+**3. 1.4 m² of printed customer floor sealed at the Meal Simple south frontage (x 436–450, y 582–592).** (inclusion)
+Open painted floor — not a fixture, not under any exclusion — culled by the derived CHECKSTANDS rect and left closed by a 12‑pt gap between inclusion #3 (south edge y=580) and inclusion #6 (north edge y=592). It sat directly under the printed MEAL SIMPLE logo, i.e. on that department's own frontage, forcing a 1 m detour between the grab‑and‑go cases and the Blooms bay. Invisible to every mechanical net (labels reachable, no coverage entry) — the sweep caught it. Evidence: crop `wo 400–500 × 555–620 @12×`; raw‑vs‑final ASCII transect.
+→ Fixed: inclusion #3 south edge 580 → 594, WHY amended. Grid diff after rebuild: **+35 cells, exactly that block, nothing else opened or closed.** New `must [443, 587]` locks it in.
+
+Files touched — only `data/811/inclusions.json` and `data/811/walk_truth.json`. No code, no goldens, no other store. `walk_truth` now 21 `must` / 20 `must_not`, 0 violations; `./rebuild.sh 811` exits 0 with 568 tests green.
+
+**AUDIT FAILED — store 811: 3 findings**
+
+(All three are remediated in data and re‑verified against a fresh rebuild; the current artifacts are clean. I am reporting FAILED rather than CLEAN because the sweep did produce findings — one of them the exact class that shipped broken at store 24 — so a human should confirm the three data edits before the pipeline advances.)
