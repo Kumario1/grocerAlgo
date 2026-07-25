@@ -30,6 +30,12 @@
     }
     header strong { font-size: 1.1rem; letter-spacing: -.01em; }
     header span { font-size: .82rem; opacity: .88; }
+    #store {
+      max-width: 60%; padding: .35rem .5rem; border: 1px solid #ffffff59;
+      border-radius: 7px; color: #fff; background: #ffffff26; font-size: .85rem;
+    }
+    #store option { color: var(--ink); background: #fff; }
+    #store option:disabled { color: var(--muted); }
     main {
       display: grid; grid-template-columns: minmax(300px, 390px) 1fr;
       min-height: calc(100vh - 57px);
@@ -147,14 +153,39 @@
       fill: #fff; font: bold 8px ui-sans-serif, system-ui;
       text-anchor: middle; dominant-baseline: central;
     }
-    .stop.approx circle { fill: #fff; stroke: var(--red); stroke-width: 2; }
-    .stop.approx text { fill: var(--red); }
+    /* A dashed ring means H-E-B gave a department, not a shelf: the pin is
+       the department, not a spot in it. A solid one is a real shelf face. */
+    .stop.department circle {
+      fill: #fff; stroke: var(--red); stroke-width: 2; stroke-dasharray: 2.2 1.8;
+    }
+    .stop.department text { fill: var(--red); }
     .term circle { fill: var(--green); stroke: #fff; stroke-width: 1.5; }
     .visually-hidden {
       position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
       overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
     }
     [hidden] { display: none !important; }
+    dialog {
+      width: min(560px, 92vw); padding: 1.25rem; border: 1px solid var(--line);
+      border-radius: 12px; color: inherit; background: #fff;
+    }
+    dialog::backdrop { background: #2b241566; }
+    dialog h2 { margin: 0 0 .3rem; font-size: 1.1rem; }
+    dialog p { margin: 0 0 .9rem; color: var(--muted); font-size: .88rem; }
+    .onboard-fields { display: flex; gap: .5rem; flex-wrap: wrap; }
+    .onboard-fields input {
+      flex: 1 1 8rem; min-height: 42px; padding: .5rem .7rem;
+      border: 1px solid #aaa297; border-radius: 8px;
+    }
+    #onboard-log {
+      max-height: 40vh; margin: .9rem 0 0; padding: .7rem; overflow: auto;
+      border-radius: 8px; background: var(--cream); font-size: .74rem;
+      white-space: pre-wrap;
+    }
+    #onboard-log:empty { display: none; }
+    .dialog-actions {
+      display: flex; gap: .5rem; justify-content: flex-end; margin-top: .9rem;
+    }
     @media (max-width: 760px) {
       main { grid-template-columns: 1fr; }
       #panel { border-right: 0; border-bottom: 1px solid var(--line); }
@@ -166,7 +197,8 @@
 <body>
   <header>
     <strong>grocerAlgo</strong>
-    <span>Lakeline H‑E‑B Plus! · #659</span>
+    <label class="visually-hidden" for="store">Store</label>
+    <select id="store" aria-describedby="store-note"></select>
   </header>
   <main>
     <section id="panel" aria-labelledby="page-title">
@@ -174,11 +206,11 @@
       <p class="lede">Choose the exact products you plan to pick up.</p>
 
       <div id="connection" class="connection" hidden>
-        <p id="connection-copy">Connect H‑E‑B to search Lakeline’s live catalog.</p>
+        <p id="connection-copy">Connect H‑E‑B to search this store’s live catalog.</p>
         <div class="connection-actions">
           <button id="connect" class="button" type="button">Connect H‑E‑B</button>
           <button id="confirm" class="button secondary" type="button" hidden>
-            I selected Lakeline #659
+            <span id="confirm-label">I selected this store</span>
           </button>
         </div>
       </div>
@@ -205,10 +237,10 @@
       <div id="summary" aria-live="polite"></div>
     </section>
 
-    <section id="map-shell" aria-label="Lakeline H-E-B route map">
-      <div id="map-title">Exact Lakeline #659 walkable overlay</div>
+    <section id="map-shell" aria-label="H-E-B route map">
+      <div id="map-title">Walkable overlay</div>
       <img id="floor-map" src="/api/walkability.png"
-           alt="Lakeline H-E-B walkable floor map">
+           alt="H-E-B walkable floor map">
       <svg id="map" role="img" aria-label="Store floor map">
         <defs>
           <marker id="arrow" markerUnits="userSpaceOnUse" orient="auto"
@@ -221,11 +253,70 @@
     </section>
   </main>
 
+  <dialog id="onboard-dialog" aria-labelledby="onboard-title">
+    <h2 id="onboard-title">Onboard another store</h2>
+    <p>
+      Give an H‑E‑B store number. The pipeline finds its published guide,
+      builds a walkable map, runs the onboarding and audit agents, then
+      captures and calibrates the Atlas. It takes about an hour and drives a
+      headless agent with permissions skipped — run it from a machine you are
+      watching.
+    </p>
+    <p>
+      A store that already got through the agents resumes instead: stage 5 is
+      the verdict and full test suite, <strong>stage 6 is Atlas capture and
+      calibration</strong>, which opens a browser and needs that store selected
+      in it.
+    </p>
+    <p id="onboard-blocked" hidden>
+      Stores with a map that cannot place products yet — click one to fill it
+      in: <span id="onboard-blocked-list"></span>
+    </p>
+    <div class="onboard-fields">
+      <input id="onboard-store" inputmode="numeric" placeholder="Store number, e.g. 452">
+      <input id="onboard-city" placeholder="City (optional), e.g. cedar-park">
+      <input id="onboard-from" inputmode="numeric"
+             placeholder="Resume at stage (optional), 1–6">
+      <button id="onboard-start" class="button" type="button">Start</button>
+      <button id="onboard-verify" class="button secondary" type="button">
+        Verify with live labels
+      </button>
+    </div>
+    <pre id="onboard-log" aria-live="polite"></pre>
+    <div class="dialog-actions">
+      <button id="onboard-retry" class="button" type="button" hidden></button>
+      <button id="onboard-stop" class="button secondary" type="button" hidden>
+        Stop
+      </button>
+      <button id="onboard-close" class="button secondary" type="button">
+        Close
+      </button>
+    </div>
+  </dialog>
+
   <script>
-    const STORE_ID = 659;
-    const DRAFT_KEY = 'grocerAlgo:draft:v1:heb659';
     const DRAFT_VERSION = 1;
+    const STORE_KEY = 'grocerAlgo:store';
+    // The list is per store, and so is every coordinate on the map, so the
+    // store is part of the key rather than something to reconcile later.
+    const draftKey = () => `grocerAlgo:draft:v1:heb${storeId}`;
+    const withStore = path =>
+      `${path}${path.includes('?') ? '&' : '?'}store=${encodeURIComponent(storeId)}`;
+    let storeId = localStorage.getItem(STORE_KEY) || '659';
+    let knownStores = [];
+    let storeName = '';
     const svg = document.querySelector('#map');
+    const storeSelect = document.querySelector('#store');
+    const floorMap = document.querySelector('#floor-map');
+    const mapTitle = document.querySelector('#map-title');
+    const onboardDialog = document.querySelector('#onboard-dialog');
+    const onboardLog = document.querySelector('#onboard-log');
+    const onboardStart = document.querySelector('#onboard-start');
+    const onboardStop = document.querySelector('#onboard-stop');
+    const onboardRetry = document.querySelector('#onboard-retry');
+    const onboardVerify = document.querySelector('#onboard-verify');
+    const blockedBox = document.querySelector('#onboard-blocked');
+    const blockedList = document.querySelector('#onboard-blocked-list');
     const search = document.querySelector('#search');
     const searchStatus = document.querySelector('#search-status');
     const suggestions = document.querySelector('#suggestions');
@@ -292,16 +383,17 @@
       connection.hidden = connected;
       if (!connected) showReconnect(
         status.connected && !status.map_ready
-          ? 'H‑E‑B’s map has changed. Rebuild and verify the #659 profile before routing.'
-          : 'Connect H‑E‑B to search Lakeline’s live catalog.');
+          ? `H‑E‑B’s map for ${storeName} has changed. Recapture and recalibrate it before routing.`
+          : `Connect H‑E‑B to search ${storeName}’s live catalog.`);
       updateRouteButton();
     }
 
     async function connectHEB() {
       connectButton.disabled = true;
-      connectionCopy.textContent = 'Opening H‑E‑B… select Lakeline H‑E‑B Plus! #659 there.';
+      connectionCopy.textContent =
+        `Opening H‑E‑B… select ${storeName} (store #${storeId}) there.`;
       try {
-        await jsonFetch('/api/heb/connect', {method: 'POST'});
+        await jsonFetch(withStore('/api/heb/connect'), {method: 'POST'});
         connectButton.hidden = true;
         confirmButton.hidden = false;
       } catch (error) {
@@ -313,9 +405,9 @@
 
     async function confirmHEB() {
       confirmButton.disabled = true;
-      connectionCopy.textContent = 'Verifying Lakeline #659 and its map…';
+      connectionCopy.textContent = `Verifying ${storeName} and its map…`;
       try {
-        applyStatus(await jsonFetch('/api/heb/connect/confirm', {method: 'POST'}));
+        applyStatus(await jsonFetch(withStore('/api/heb/connect/confirm'), {method: 'POST'}));
         if (connected && entries.length) await locateEntries(entries);
       } catch (error) {
         connectionCopy.textContent = error.message;
@@ -342,9 +434,9 @@
     }
 
     function saveDraft() {
-      localStorage.setItem(DRAFT_KEY, JSON.stringify({
+      localStorage.setItem(draftKey(), JSON.stringify({
         version: DRAFT_VERSION,
-        store_id: STORE_ID,
+        store_id: storeId,
         entries: entries.map(entry => ({
           product: baseProduct(entry.product),
           quantity: entry.quantity,
@@ -353,19 +445,24 @@
     }
 
     function restoreDraft() {
+      // Always leaves `entries` describing THIS store: a store with no saved
+      // list gets an empty one, not the previous store's products.
+      entries = [];
       try {
-        const draft = JSON.parse(localStorage.getItem(DRAFT_KEY));
-        if (draft?.version !== DRAFT_VERSION || draft?.store_id !== STORE_ID) return;
-        entries = draft.entries
-          .filter(entry => entry?.product?.id && entry.quantity > 0)
-          .map(entry => ({
-            product: entry.product,
-            quantity: entry.quantity,
-            placement: null,
-            pending: true,
-          }));
+        const draft = JSON.parse(localStorage.getItem(draftKey()));
+        if (draft?.version === DRAFT_VERSION
+            && String(draft?.store_id) === String(storeId)) {
+          entries = draft.entries
+            .filter(entry => entry?.product?.id && entry.quantity > 0)
+            .map(entry => ({
+              product: entry.product,
+              quantity: entry.quantity,
+              placement: null,
+              pending: true,
+            }));
+        }
       } catch (_) {
-        localStorage.removeItem(DRAFT_KEY);
+        localStorage.removeItem(draftKey());
       }
       renderDraft();
     }
@@ -421,7 +518,7 @@
       search.setAttribute('aria-busy', 'true');
       try {
         const body = await jsonFetch(
-          `/api/products?q=${encodeURIComponent(query)}`, {signal});
+          withStore(`/api/products?q=${encodeURIComponent(query)}`), {signal});
         if (request !== searchRequest) return;
         results = body.products;
         searchStatus.textContent = results.length
@@ -494,7 +591,7 @@
       targets.forEach(entry => entry.pending = true);
       renderDraft();
       try {
-        const body = await jsonFetch('/api/products/locate', {
+        const body = await jsonFetch(withStore('/api/products/locate'), {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({products: targets.map(entry => baseProduct(entry.product))}),
@@ -592,7 +689,8 @@
       badge(body.path[0][0], body.path[0][1], 'S', 'term', 8.5);
       badge(body.path.at(-1)[0], body.path.at(-1)[1], '$', 'term', 8.5);
       body.stops.forEach(stop =>
-        badge(stop.x, stop.y, stop.n, `stop${stop.approx ? ' approx' : ''}`, 7.5));
+        badge(stop.x, stop.y, stop.n,
+          `stop${stop.approximation_state === 'exact' ? '' : ' department'}`, 7.5));
 
       const headline = document.createElement('p');
       headline.append(
@@ -607,7 +705,8 @@
         const row = document.createElement('li');
         row.textContent = `${stop.quantity > 1 ? `${stop.quantity} × ` : ''}${stop.item}`;
         row.append(textNode('span',
-          ` — ${stop.location_label || 'store placement'}${stop.approx ? ' (approx.)' : ''}`,
+          ` — ${stop.location_label || 'store placement'}` +
+          `${stop.approximation_state === 'exact' ? '' : ' · department'}`,
           'location'));
         ordered.append(row);
       });
@@ -626,7 +725,7 @@
       routeButton.disabled = true;
       routeButton.textContent = 'Routing…';
       try {
-        const body = await jsonFetch('/api/route', {
+        const body = await jsonFetch(withStore('/api/route'), {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({items: entries.map(entry => ({
@@ -672,15 +771,230 @@
     confirmButton.addEventListener('click', confirmHEB);
     routeButton.addEventListener('click', generateRoute);
 
-    async function init() {
+    const ONBOARD = 'onboard';
+
+    async function loadStores() {
+      const body = await jsonFetch('/api/stores');
+      knownStores = body.stores;
+      showBlockedStores();
+      // A store that cannot place products exactly is shown, and shown why —
+      // it is not silently missing, and it is not silently approximate.
+      if (!body.stores.some(store => store.id === storeId && store.ready)) {
+        storeId = (body.stores.find(store => store.ready) || {}).id
+          || body.default;
+      }
+      storeSelect.replaceChildren();
+      body.stores.forEach(store => {
+        const option = document.createElement('option');
+        option.value = store.id;
+        // Not disabled: a blocked store is the one you most want to act on,
+        // and picking it opens the dialog that can finish it rather than
+        // switching the app to a store it cannot route.
+        option.textContent = store.ready ? store.name
+          : `${store.name} — ${store.blocked_reason}`;
+        option.selected = store.id === storeId;
+        storeSelect.append(option);
+      });
+      const onboard = document.createElement('option');
+      onboard.value = ONBOARD;
+      onboard.textContent = '＋ Onboard another store…';
+      storeSelect.append(onboard);
+      storeName = (body.stores.find(store => store.id === storeId) || {}).name
+        || `store #${storeId}`;
+      document.querySelector('#confirm-label').textContent =
+        `I selected ${storeName}`;
+      mapTitle.textContent = `Exact walkable overlay · ${storeName}`;
+      document.title = `${storeName} route`;
+      return body;
+    }
+
+    async function showStore() {
+      localStorage.setItem(STORE_KEY, storeId);
+      floorMap.src = withStore('/api/walkability.png');
+      floorMap.alt = `${storeName} walkable floor map`;
+      clearRoute();
+      routeHasRun = false;
       restoreDraft();
       const [geometry, status] = await Promise.all([
-        jsonFetch('/api/geometry'),
-        jsonFetch('/api/heb/status'),
+        jsonFetch(withStore('/api/geometry')),
+        jsonFetch(withStore('/api/heb/status')),
       ]);
       renderMap(geometry);
       applyStatus(status);
       if (connected && entries.length) await locateEntries(entries);
+    }
+
+    storeSelect.addEventListener('change', async () => {
+      const picked = knownStores.find(store => store.id === storeSelect.value);
+      if (storeSelect.value === ONBOARD || (picked && !picked.ready)) {
+        storeSelect.value = storeId;          // stay on a store that can route
+        if (picked) prepareOnboarding(picked);
+        onboardDialog.showModal();
+        pollOnboarding();
+        return;
+      }
+      storeId = storeSelect.value;
+      await loadStores();
+      await showStore();
+    });
+
+    let onboardTimer;
+
+    // "==> [4/6] audit agent (…)" -> 4. Which stage a run died in is the only
+    // thing that decides where a retry should pick up, and stages 3 and 4 are
+    // ~50 minutes of agent time each.
+    function lastStage(logText) {
+      const stages = (logText || '').match(/==> \[(\d)\/6\]/g) || [];
+      return stages.length
+        ? Number(stages[stages.length - 1].match(/\[(\d)/)[1]) : null;
+    }
+
+    async function pollOnboarding() {
+      clearTimeout(onboardTimer);
+      const run = await jsonFetch('/api/stores/onboard');
+      onboardLog.textContent = run.log ||
+        (run.store ? `store ${run.store}: waiting for output…` : '');
+      // One line under the tail, not a second pane: the dialog still shows
+      // exactly one run. The queue is only who takes the slot next.
+      if (run.queue && run.queue.length) {
+        onboardLog.textContent += `\n\nqueued: ${run.queue.join(', ')}`;
+      }
+      onboardLog.scrollTop = onboardLog.scrollHeight;
+      // Start stays live during a run: a second store now gets in line behind
+      // it instead of being refused.
+      onboardStart.disabled = false;
+      onboardStop.hidden = !run.running;
+      onboardRetry.hidden = true;
+      if (run.running) {
+        onboardTimer = setTimeout(pollOnboarding, 2000);
+        return;
+      }
+      if (!run.store) return;
+      await loadStores();
+      // Report the store's actual state, never the exit code's opinion of it:
+      // "finished" over a store the picker lists as blocked is the same lie as
+      // saying nothing at all.
+      const store = knownStores.find(s => s.id === run.store);
+      if (store && store.ready) {
+        onboardLog.textContent +=
+          `\n\nStore ${run.store} is ready — pick it from the store menu.`;
+      } else {
+        // Every ending is reported. A run that stops with nothing said reads
+        // as a hang, which is exactly how store 811 looked for a day.
+        const stage = lastStage(run.log);
+        onboardLog.textContent += store
+          ? `\n\nStore ${run.store} has a map but cannot place products yet:` +
+            `\n${store.blocked_reason}`
+          : `\n\nStore ${run.store} stopped in stage ${stage || '?'} of 6` +
+            (run.returncode === null ? '' : ` (exit ${run.returncode})`) +
+            `. Its map work so far is on disk.`;
+        if (stage) {
+          onboardRetry.textContent = `Retry from stage ${stage}`;
+          onboardRetry.dataset.store = run.store;
+          onboardRetry.dataset.stage = stage;
+          onboardRetry.hidden = false;
+        }
+      }
+      onboardLog.scrollTop = onboardLog.scrollHeight;
+    }
+
+    async function startOnboarding(body) {
+      onboardStart.disabled = true;
+      onboardRetry.hidden = true;
+      let run;
+      try {
+        run = await jsonFetch('/api/stores/onboard', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(body),
+        });
+      } catch (error) {
+        onboardLog.textContent = error.message;
+        onboardStart.disabled = false;
+        return;
+      }
+      await pollOnboarding();
+      // Submitting while something runs is no longer a refusal, so say what
+      // actually happened: the slot was taken, this store has a place in line.
+      if (run.store !== body.store) {
+        onboardLog.textContent += `\n\nStore ${body.store} is queued — it ` +
+          `starts when store ${run.store} finishes.`;
+        onboardLog.scrollTop = onboardLog.scrollHeight;
+      }
+    }
+
+    onboardStart.addEventListener('click', () => startOnboarding({
+      store: document.querySelector('#onboard-store').value.trim(),
+      city: document.querySelector('#onboard-city').value.trim() || null,
+      from: document.querySelector('#onboard-from').value.trim() || null,
+    }));
+
+    // The last step that used to need a terminal. It drives the same browser
+    // the app uses, so that browser has to be on the store being verified.
+    onboardVerify.addEventListener('click', async () => {
+      const store = document.querySelector('#onboard-store').value.trim();
+      if (!store) {
+        onboardLog.textContent = 'Give the store number to verify.';
+        return;
+      }
+      onboardVerify.disabled = true;
+      onboardRetry.hidden = true;
+      try {
+        await jsonFetch(`/api/stores/${encodeURIComponent(store)}/verify`,
+                        {method: 'POST'});
+      } catch (error) {
+        onboardLog.textContent = error.message;
+      } finally {
+        onboardVerify.disabled = false;
+      }
+      pollOnboarding();
+    });
+
+    // Picking a blocked store in the menu lands here: the dialog opens already
+    // aimed at it, saying what it needs, with the action that finishes it.
+    function prepareOnboarding(store) {
+      document.querySelector('#onboard-store').value = store.id;
+      onboardLog.textContent =
+        `Store ${store.id} has a map but cannot place products yet:\n` +
+        `${store.blocked_reason}`;
+    }
+
+    function showBlockedStores() {
+      const blocked = knownStores.filter(store => !store.ready);
+      blockedBox.hidden = !blocked.length;
+      blockedList.replaceChildren(...blocked.map(store => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'button secondary';
+        chip.textContent = `#${store.id}`;
+        chip.title = store.blocked_reason;
+        chip.addEventListener('click', () => {
+          document.querySelector('#onboard-store').value = store.id;
+          onboardLog.textContent = `Store ${store.id}: ${store.blocked_reason}`;
+        });
+        return chip;
+      }));
+    }
+
+    onboardRetry.addEventListener('click', () => startOnboarding({
+      store: onboardRetry.dataset.store,
+      city: document.querySelector('#onboard-city').value.trim() || null,
+      from: onboardRetry.dataset.stage,
+    }));
+
+    onboardStop.addEventListener('click', async () => {
+      await fetch('/api/stores/onboard', {method: 'DELETE'});
+      pollOnboarding();
+    });
+
+    document.querySelector('#onboard-close').addEventListener('click', () => {
+      clearTimeout(onboardTimer);
+      onboardDialog.close();
+    });
+
+    async function init() {
+      await loadStores();
+      await showStore();
     }
 
     init().catch(error => {

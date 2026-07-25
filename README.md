@@ -29,14 +29,27 @@ sequence the whole trip. That gap is the product.
 
 ## Where it is today
 
-A working local app against **Lakeline H-E-B Plus! #659** in Austin, plus a
-map pipeline that has onboarded **6 stores**.
+A working local app with a **store picker**, a map pipeline that has onboarded
+**7 stores**, and an in-app button to onboard the next one.
 
 - Search H-E-B's **live catalog** — real products, real stock state, real
   shelf labels, scoped to one store.
 - Pick exact products, set quantities, get a numbered route on the floor plan.
 - Route re-solves on every list change in **under a second**.
 - Items H-E-B can't place are shown as explicitly unrouted, never dropped.
+
+**A store is only offered once it can place products exactly.** Being mapped is
+not enough: the store's live Atlas has to be captured and calibrated onto its
+guide, and that calibration has to pass its gates. **Six of the seven pass** —
+24, 265, 269, 659, 790 and 811, each landing 99.4–100% of its shelf positions
+on walkable floor. #388 does not: its guide is a 2011 drawing of a store that
+has since been remodelled. The map converges and the geometry even calibrates
+cleanly, but live shelf labels disagree with where products land — 0 of 11
+checks, and not by any single shift a pin could express — so it is listed with
+that reason instead of being served pins that only look precise. `discover.py`
+now reads those tells off the PDF itself (creation year, foreign store number
+in the title, QuarkXPress tooling, sparse drawings) and warns before an
+onboarding run is spent.
 
 Against the goals in [`plan.md`](plan.md):
 
@@ -60,6 +73,38 @@ locations through PALS — a product resolves to a PSA (a spot on a specific
 shelf face) and a printed label like "Aisle 17" or "In Dairy on the Back Wall".
 grocerAlgo drives a local browser session to read the catalog the way a
 customer's browser does, then maps each PSA onto the store's floor plan.
+
+That mapping is a per-store transform, and it has to be *earned* before the
+store is offered. `capture_atlas.py` pulls the store's live Atlas; `calibrate.py`
+searches for the correspondence between the two drawings' aisle numbers — #659's
+left-hand column is numbered four lower on the guide than on today's shelf
+labels — and then tries to disprove the answer it found:
+
+| Gate | What it rules out |
+|---|---|
+| residual ≤ 3 pt over ≥8 anchors per axis | a fit dragged by outliers (#659: 2.2 pt / 32) |
+| scale within 5% between axes | an offset the aisle pitch absorbed into its intercept |
+| ≥99% of PSAs land on reachable floor | a transform that puts products inside the shelves |
+| live labels agree (`--verify`) | everything above being self-consistent and still wrong |
+
+On #659 the search recovers the hand-derived correspondence on its own, and
+places products within **1 pt** of the calibration a human spent a day on. On
+#24 it disagreed with its own first answer: the correspondence two aisles off
+had *more* agreeing anchors and put a fifth of the store's shelves inside the
+fixtures, which is why the floor decides the correspondence and the anchors
+only break ties.
+
+Some stores have no aisle spanning one axis at all — every numbered aisle in one
+row — so that axis has nothing to fit. Its scale comes from the other axis,
+because both drawings are to scale, and its offset is found by sliding the
+shelves along until they land on the floor. That is how 265 and 388 are fitted.
+
+**Exact means exact.** A product is drawn as a shelf position only when H-E-B
+gave shelf geometry for it *and* that store passed those gates. When PALS
+answers with a department instead — "In Produce" — the pin is drawn as a
+department, because that is all anyone knows. Across a real session's 156
+placements, 85 were shelf-exact with a median snap of 0.9 pt; the other 71 were
+departments, and pretending otherwise would have been a nicer-looking lie.
 
 ### 2 · Turn a map image into a routable graph
 
@@ -139,22 +184,25 @@ the session. Navigation is now serialised and a single failure retries.
 
 ## Tests
 
-**479 tests**, ~40 s. The suite is weighted toward the things that are
+**598 tests**, ~47 s. The suite is weighted toward the things that are
 expensive to get wrong.
 
 | Suite | Tests | What it defends |
 |---|---:|---|
-| `test_walkability.py` | 328 | every store's floor: shelves solid, corridors open, no orphans |
+| `test_walkability.py` | 374 | every store's floor: shelves solid, corridors open, no orphans |
+| `test_stores.py` | 46 | the picker, onboarding queue, admin auth, per-store isolation |
 | `test_api.py` | 23 | routing endpoints, placement, off-floor guards |
+| `test_calibrate.py` | 17 | the fitter finds #659's answer, and refuses bad ones |
+| `test_placement_state.py` | 4 | exact is earned; departments say department |
 | `test_raster.py` | 21 | image-only guide fallback, gate by gate |
-| `test_heb.py` | 19 | catalog parsing, session handling, concurrency |
+| `test_heb.py` | 20 | catalog parsing, session handling, concurrency |
 | `test_legality.py` | 17 | no path ever crosses a fixture |
 | `test_derive.py` | 14 | per-store config derives from labels alone |
-| `test_coverage.py` | 12 | no section of a store goes unmapped |
+| `test_coverage.py` | 15 | no section of a store goes unmapped |
 | `test_corridor.py` | 10 | corridor width matches real cart capacity |
 | `test_engine.py` | 8 | TSP, BFS, string pulling |
 | `test_golden.py` + `test_route_golden.py` | 8 | frozen grid and frozen route, pixel-exact |
-| others | 19 | directory resolution, extraction, PDF discovery |
+| others | 21 | directory resolution, extraction, PDF discovery + stale-guide preflight |
 
 ```bash
 python3 -m pytest -q
@@ -176,40 +224,87 @@ python3 -m uvicorn app:app --port 8000
 # open http://localhost:8000
 ```
 
-Choose **Connect H-E-B**. A persistent local Chrome profile opens — select
-Lakeline H-E-B Plus! #659 there, return to the app, and confirm. The profile
-lives in `.heb-659/` and is gitignored. **grocerAlgo never stores credentials**;
-the session belongs to your own browser profile.
+Pick a store in the header, then choose **Connect H-E-B**. A persistent local
+Chrome profile opens — select that store there, return to the app, and confirm.
+Each store gets its own profile (`.heb-<store>/`, gitignored), so switching
+stores does not mean picking the store again. **grocerAlgo never stores
+credentials**; the session belongs to your own browser profile.
+
+One store at a time: H-E-B's own session carries the selected store, so the app
+reports any other store as disconnected rather than quietly placing its products
+through the wrong building's catalog.
 
 Logs land in `logs/app.log` (rotating, gitignored): every catalog fetch with
 timing, every disconnect with its exception, and every placement as
 `atlas → mapped → shown` with the snap distance.
 
 The Atlas snapshot that the connection check validates against lives in
-`data/659-atlas/store-map.svg`, and is re-importable from it or from any
+`data/<store>-atlas/store-map.svg`, and is re-importable from it or from any
 rendered H-E-B page:
 
 ```bash
-python3 import_heb.py data/659-atlas/store-map.svg
-python3 build_profile.py 659-atlas
+python3 capture_atlas.py 659          # live: session -> data/659-atlas/
+python3 import_heb.py data/659-atlas/store-map.svg --store 659   # offline replay
+python3 calibrate.py 659 --verify     # fit, gate, and check live shelf labels
 ```
+
+The connection fails closed: if H-E-B's drawing no longer matches the one a
+store was calibrated against, that store stops placing products rather than
+placing them from a stale transform.
 
 ### Onboarding another store
 
+From the app: pick **＋ Onboard another store…** in the store menu, give a store
+number, and watch the log. The same dialog resumes a run at a stage, lists the
+stores that have a map but cannot place products, and runs **Verify with live
+labels** on one — the step that settles an aisle correspondence the drawing
+alone cannot, by asking the live catalog which aisle a product's own shelf label
+names. It drives the browser, so that browser must be on the store being
+verified. Or from a terminal:
+
 ```bash
-./pipeline.sh <store>                 # store number in, audited map out
+./pipeline.sh <store>                 # store number in, routable store out
 ./pipeline.sh <store> Cedar Park      # city names are slugged automatically
 ./pipeline.sh <store> --no-agents     # mechanical stages only (smoke test)
+./pipeline.sh <store> --from 6        # resume at a stage; stages 3-4 are ~50 min
 
-./rebuild.sh <store>                  # rebuild + full test suite, one command
+./rebuild.sh <store>                  # rebuild + this store's tests + goldens
+./rebuild.sh                          # 659 and the whole suite
 ```
 
 discover → rebuild → onboarding agent ([`docs/onboarding.md`](docs/onboarding.md))
 → adversarial audit agent ([`docs/audit.md`](docs/audit.md)) → human visual
-verdict. The automated run only reaches the final gate on `AUDIT CLEAN`.
+verdict → Atlas capture and calibration. Both agents fan the page out to
+read-only crop inspectors and stay the only writer of the truth files.
 Convergence means `rebuild.sh` exits 0, `report.json` has zero VERIFY flags and
 empty coverage lists, and the audit role agrees. Final acceptance is still a
 human looking at the walkable and reachable graphs.
+
+`AUDIT CLEAN` describes the artifacts, not the sweep: an audit that finds three
+real defects, repairs them in data and re-verifies is a good audit and ships as
+`AUDIT CLEAN — store <N> (3 findings fixed)`. `AUDIT BLOCKED` means something is
+still wrong. A blocked audit no longer abandons the run — calibration still
+runs, and the store lands in the picker with a named reason instead of
+vanishing, which is how store 811 spent a day looking like a crash.
+
+### Onboarding all of them
+
+```bash
+python3 sweep_stores.py               # probe the CDN for every published guide → stores.txt
+./fleet_all.sh                        # onboard everything in stores.txt, 3 stores at a time
+./fleet_all.sh 8                      # wider, when there is usage headroom
+```
+
+H-E-B publishes a guide for every store at a predictable URL, so the sweep
+finds the whole fleet with HEAD requests, downloads and preflights each guide,
+and orders `stores.txt` fresh-guides-first, stale-risk last. Each store then
+runs in its own throwaway git worktree (`onboard_fleet.sh`), pinned to a
+commit, so runs never tread on each other or on development in the main
+checkout. Placement needs a logged-in browser, so the fleet defers it; it is
+paid down later in batches from the main checkout with
+`python3 capture_atlas.py <N> && python3 calibrate.py <N>`. The driver is
+rerunnable — already-onboarded stores are skipped, so a killed run resumes by
+running it again.
 
 Vector guides use the standard extraction path. The image-only fallback is
 still experimental — it passes the structural precision/recall, exact-aisle,

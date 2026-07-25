@@ -14,12 +14,15 @@ normalized to the CDN's hyphenated slug.
 
 Output: guide-<city>-<store>.pdf in the repo root (the name the rest of
 the pipeline resolves via router.derive.pdf_path), validated to actually
-be a store map (>=2 pages; map page carries drawings and aisle badges).
+be a store map (>=2 pages; map page carries drawings and aisle badges)
+and preflighted for stale-guide tells — recorded in data/<store>/source.json
+and warned about, never fatal.
 Idempotent: an existing local guide for the requested city wins immediately.
 """
 import glob
 import json
 import os
+import re
 import sys
 import urllib.request
 
@@ -71,37 +74,70 @@ def city_slug(city):
     return "-".join(city.lower().split())
 
 
-def validate(path):
+def preflight(doc, page, store):
+    """Cheap tells, readable from the PDF alone, that a guide was drawn
+    before the store was remodelled — store 388's 2011 Quark guide built a
+    clean map and then agreed with live shelf labels 0/11, an hour in.
+    Two or more flags is a warning, never a reject: the guide is still the
+    best map that exists, it just wants a shelf-label spot-check first."""
+    stamp = doc.metadata.get("creationDate") or ""
+    stamp = stamp[2:] if stamp.startswith("D:") else stamp   # Quark omits D:
+    year = int(stamp[:4]) if stamp[:4].isdigit() else None
+    title = doc.metadata.get("title") or ""
+    producer = doc.metadata.get("producer") or ""
+    # A store number in the title that isn't this store: renumbered since.
+    named = [n for n in re.findall(r"\d+", title)
+             if len(n) <= 4 and n != str(store)]
+    flags = []
+    if year is not None and year < 2015:
+        flags.append(f"drawn in {year}")
+    if named:
+        flags.append(f"title names store {'/'.join(named)}, not {store}")
+    if producer.startswith("QuarkXPress"):
+        flags.append(f"produced by {producer}")
+    if 0 < len(page.get_drawings()) < 800:      # 0 = raster scan, not sparse
+        flags.append(f"only {len(page.get_drawings())} drawings on the map")
+    return {"guide_year": year, "flags": flags, "stale_risk": len(flags) >= 2}
+
+
+def validate(path, store):
     """A real store guide: >=2 pages, map page dense with drawings and
-    carrying a run of aisle badges."""
+    carrying a run of aisle badges. Returns (complaint or None, preflight
+    findings) — only the complaint rejects, the findings warn."""
     import fitz
     doc = fitz.open(path)
     if len(doc) < 2:
-        return "fewer than 2 pages (map is page 2)"
+        return "fewer than 2 pages (map is page 2)", {}
     page = doc[1]
+    checks = preflight(doc, page, store)
     if not page.get_drawings() and page.get_images():
         images = page.get_image_info()
         if (len(images) == 1 and images[0]["width"] >= 1000
                 and images[0]["height"] >= 1000
                 and fitz.Rect(images[0]["bbox"]).get_area()
                 >= .8 * page.rect.get_area()):
-            return None
-        return "raster map is not one high-resolution full-page image"
+            return None, checks
+        return "raster map is not one high-resolution full-page image", checks
     if len(page.get_drawings()) < 100:
-        return "map page has <100 drawings — not a store map?"
+        return "map page has <100 drawings — not a store map?", checks
     badges = {int(t) for *_, t, _, _, _ in page.get_text("words")
               if t.isdigit() and 1 <= int(t) <= 60}
     if len(badges) < 15:
-        return f"only {len(badges)} aisle badges on the map page"
-    return None
+        return f"only {len(badges)} aisle badges on the map page", checks
+    return None, checks
 
 
-def select(store, path):
+def select(store, path, checks):
     """Persist the validated guide so later stages never choose by glob."""
     directory = f"data/{store}"
     os.makedirs(directory, exist_ok=True)
     with open(f"{directory}/source.json", "w") as output:
-        json.dump({"pdf": path}, output)
+        json.dump({"pdf": path, **checks}, output)
+    if checks.get("stale_risk"):
+        print(f"WARNING: {path} looks drawn before a remodel "
+              f"({'; '.join(checks['flags'])}). It can build a clean map "
+              f"that still never matches live shelf labels — check a few "
+              f"aisles against the store before spending an onboarding run.")
 
 
 def discover(store, city=None):
@@ -115,10 +151,10 @@ def discover(store, city=None):
             f"multiple local guides found for store {store}: {existing}; "
             "rerun with the store city")
     if len(existing) == 1:
-        err = validate(existing[0])
+        err, checks = validate(existing[0], store)
         if err:
             raise SystemExit(f"local {existing[0]} failed validation: {err}")
-        select(store, existing[0])
+        select(store, existing[0], checks)
         print(f"already local: {existing[0]}")
         return existing[0]
     for slug in ([city] if city else CITIES):
@@ -128,11 +164,11 @@ def discover(store, city=None):
         path = f"guide-{slug}-{store}.pdf"
         print(f"found {url}")
         urllib.request.urlretrieve(url, path)
-        err = validate(path)
+        err, checks = validate(path, store)
         if err:
             raise SystemExit(f"downloaded {path} but it failed validation: "
                              f"{err}")
-        select(store, path)
+        select(store, path, checks)
         print(f"downloaded + validated -> {path}")
         return path
     where = f"city '{city}'" if city else f"{len(CITIES)} known city slugs"
