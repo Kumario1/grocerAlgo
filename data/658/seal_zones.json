@@ -1,0 +1,12 @@
+[
+  {"name": "Deli service counter run, Market (staff work the back of the counter between the Cheese Shop and Cooking Connection kiosks; ~1.4 m pass-throughs) — same as derived",
+   "pt": [884.4, 158.1], "r": 130, "bridge": 12},
+  {"name": "Bakery service island (staff prep inside the Bulk Foods / Scratch Breads / Custom Cakes ring) — same as derived",
+   "pt": [711.0, 412.9], "r": 130, "bridge": 12},
+  {"name": "Blooms floral counter (H-E-B's floral brand; FLORAL family) — same as derived",
+   "pt": [771.1, 591.6], "r": 130, "bridge": 12},
+  {"name": "Pharmacy counter/room (staff behind the Drop Off / Pick Up counter wall) — same as derived",
+   "pt": [142.8, 385.0], "r": 130, "bridge": 12},
+  {"name": "Checkstand lane bank — derived rect [299.8,517.2,673.7,614.0] was pulled 40 pt north by the aisle 14-20 badge ovals (y 502-546) landing in the CHECKSTANDS fixture window, which bridged the front action alley shut across the badge row and ate the west entrance approach. Retightened to the register units themselves (x 307.8-665.7, y 566.1-616.6 padded 8); bridge stays looser than a counter gap so the lanes seal while the action alley stays open",
+   "rect": [299.8, 558.1, 673.7, 624.6], "bridge": 20}
+]

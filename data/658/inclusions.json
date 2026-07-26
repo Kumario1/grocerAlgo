@@ -1,0 +1,8 @@
+[
+  {"name": "Market floor around the 'Deli' label — customer walkway between the deli counter bump-outs (x<=855) and the Seafood case (x>=926), with the round cheese/olive display tables in it. The counter run itself is a drawn fixture; no staff enclosure exists on this side, so the VERIFY here is customer space.",
+   "rect": [858, 118, 922, 250]},
+  {"name": "Aisle 9 corridor at the 'Kitchen Gadgets' shelf label — KITCHEN is a product-category label printed in the aisle between the Frozen Foods block (x<=318) and the Canned Bean shelf (x>=350), not a service counter. Same reason seal_zones.json carries no auto:KITCHEN disk: that derived 130 pt disk sat over aisles 5-11 and bridged aisle 10 shut for 891 cells.",
+   "rect": [320, 112, 350, 302]},
+  {"name": "Back main aisle in front of the Market Deli wall case — the 'Market Deli' label is a department name printed on the shopping floor just below the case (case bottom y~92, aisle 1-9 shelf tops y~118); shoppers work this whole back run.",
+   "rect": [430, 90, 560, 118]}
+]

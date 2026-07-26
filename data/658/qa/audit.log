@@ -1,0 +1,35 @@
+Audit complete. All five passes run; no edits were made to any file.
+
+## Store 658 — adversarial map audit
+
+**Pass 1 · Mechanical** — `./rebuild.sh 658` rerun twice, exit 0.
+
+| check | result |
+|---|---|
+| `verify` | `[]` |
+| `coverage.sealed_floor_patches` / `unreachable_shelf_labels` | `[]` / `[]` |
+| components | 1 (91,899 cells) |
+| walkable / entrance-reachable | 34.8% / 34.8% — every walkable cell reaches ENTRANCE |
+| suite | 658 passed |
+
+Tightest corridor 1.17 m (AISLE 7). Far snaps (BAKERY 8.15 m, PHARMACY 4.72 m, ENTRANCE 3.53 m) are all label-inside-sealed-room or door-sign-outside-wall cases — expected.
+
+**Pass 2 · Visual sweep** — 3×3 crops of `walkable_overlay.png` viewed individually, plus 7 high-zoom department crops (Market/Deli/Seafood/Sushi, Bakery ring, Produce, Blooms+SE lobe, Pharmacy+west wing, Checkstands, Beer & Wine). I calibrated the overlay palette programmatically first — green `(153,212,167)`, white = inside-but-not-walkable, purple `(207,167,230)` = sealed, pink = outside — because at crop zoom the restroom and checkout-lane interiors *read* green and are in fact white. Eyeballing alone would have produced two false findings here.
+
+Backed by measurement rather than eye: every aisle corridor scanned end to end — aisles 1–9, 13–20 ≥93.8% free (residual gaps are single badge ovals ≤1.6 m, passable), aisles 10–12 and 21–29 100% free. Back corridor y=92 free x=110→1010 unbroken; front action alley y=644 unbroken 240→884. Aisle 12's south end exits east through a 2.2 m passage at x 180–196 into the Drop Off walkway — verified by ASCII grid dump, not inference.
+
+Ranked all 2,144 white regions by area; the top 30 are all shelf runs, wall cases, produce tables, walls, enclosed rooms, or the sealed lane bank. No unexplained floor.
+
+All **16** culled pockets classified (not just the printed ten): Bakery prep ring (3,743), Pharmacy room (3,236), east-wall boundary-trace sliver (755), and thirteen checkout-lane interiors at y≈584–599.
+
+**Pass 3 · Label probes** — rather than 10, I extracted all 137 PDF text spans and probed every one of the 124 product/service labels against the shipped grid. **Every product label has reachable floor within 1.68 m.** The 20 labels beyond 2 m are exclusively non-shopping: Oaks Crossing (Dining, Galley Kitchen, Order Counter, Bar & Lounge, Restaurant Entrance), Kids Activity Area, Smoke Pit, Smoke/Pit, restroom signs, Immunization, and door Exit/Entrance signs printed outside the wall.
+
+I also tested every fixture >150 pt² for frontage access — the store-24 failure mode. Nine have no floor within 1 m of any edge, and all nine are inside the restaurant exclusion, below the boundary, or the DRIVE THRU sign in the parking lot. **Zero shelf sections are drawn-sealed.**
+
+**Pass 4 · walk_truth** — 30 `must` / 24 `must_not`, all satisfied against the rebuilt grid. Every wing has `must` coverage (Dairy, Frozen 10–12, north grocery, Beer & Wine, Market Deli, Deli, Seafood, Sushi, Cooking Connection, Tortilleria, all four Bakery frontages, Produce ×2, south grocery, west wing ×3, both Pharmacy queues, front alley, all three entrances, Blooms). Containment verified, not assumed: both purple sealed regions contain a `must_not`; `(836,220)` sits inside deli-counter fixture bbox (830,140.5)-(837,302); `(837,122)` inside the Cheese Shop diamond (819.5,103)-(855.5,139.5); `(960,610)` inside the Order Counter fixture; `(1080,615)` inside the Galley Kitchen room. Four `must` points render non-green only because label text is painted over them — the grid says free.
+
+**Pass 5 · Config** — every name states a WHY the map confirms. The `KITCHEN` anchor is genuinely the "Charcoal / Matches / Appliances / Cookware / **Kitchen Gadgets**" shelf label at (342.7, 212.6), so dropping the derived `auto:KITCHEN` disk is correct, and the recorded drift (6 derived → 5 file) is deliberate and documented. Neither exclusion covers any grocery label's frontage; no inclusion blankets a staff room — the Deli inclusion re-opens only the table floor between the counter run (x≤846) and the Seafood case (x≥927), and fixtures inside it stay white.
+
+**Zero findings.** One optional strengthening, explicitly *not* a finding: the Cooking Connection kiosk diamond has no `must_not`, where the structurally identical Cheese Shop kiosk does. It is a plain fixture — no purple region, no culled pocket, already non-free — so no coverage requirement in the runbook applies to it; adding `[833, 319, "Cooking Connection kiosk interior"]` would just make the pair symmetric.
+
+`AUDIT CLEAN — store 658`

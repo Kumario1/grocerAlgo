@@ -1,0 +1,7 @@
+[
+  {"name": "Oaks Crossing restaurant venue — Order Counter, Galley Kitchen, Dining and Bar & Lounge east of the sales-floor wall at x=900/y=573. Its own street 'Restaurant Entrance' serves it; the only opening from the store is the drawn door at (884-900, 632-650), so nothing here is grocery shopping floor. Left open it forms a 3979-cell island cut off from ENTRANCE.",
+   "poly": [[898, 573], [1158, 573], [1158, 714], [962, 714], [962, 652],
+            [898, 652]]},
+  {"name": "Restaurant vestibule + shared restroom block south of the sales floor (enclosed rooms drawn sealed; no shopping frontage). West edge is the drawn room wall, traced at x=851.7 (PDF stroke [851.69,654.75]-[851.69,711.31]) — NOT 828: the strip x 828-852 is undrawn open floor inside the boundary, the south-east front-lobe corner just east of the Exit/Entrance doors at x 765-815, and must stay walkable.",
+   "rect": [851.7, 653, 962, 714]}
+]

@@ -1,0 +1,45 @@
+Onboarding for store 658 (H-E-B San Antonio, *Oaks Crossing*) is converged. I stopped before the audit as instructed.
+
+## Result
+
+`./rebuild.sh 658` → exit 0, **641 passed**. `data/658/qa/report.json`:
+
+```
+verify: []            coverage: {sealed_floor_patches: [], unreachable_shelf_labels: []}
+components: 1 [89807]  walkable 34.0%  reachable 34.0%
+```
+
+## What the first pass got wrong, and the data fixes
+
+**1. `seal_zones.json` (override) — two derived zones were wrong in shape**
+
+- **Dropped `auto:KITCHEN`.** The `KITCHEN` anchor at (343,158) is the *"Kitchen Gadgets"* product-category label printed in aisle 9 — not a service counter. Its derived 130 pt disk covered aisles 5–11 and bridged **aisle 10 shut for 891 cells** (`data/658/qa` blue band x 238–282, y 136–270): the giant red "Frozen Foods" floor text splits that aisle into two ~11 pt lanes, and a 12 pt bridge closed both. Aisle 10 now runs end-to-end at 1.66 m half-width.
+- **Retightened `auto:CHECKSTANDS`** from `[299.8, 517.2, 673.7, 614.0]` to `[299.8, 558.1, 673.7, 624.6]`. The aisle 14–20 badge ovals (y 502–546) fell inside the `CHECK_WIN_Y` fixture window and dragged the rect 40 pt north, so the bridge closed the front action alley across the badge row and ate the west entrance approach. Bakery / Deli / Pharmacy / Blooms disks carried over verbatim.
+
+**2. `exclusions.json` — the 3979-cell orange island**
+
+The **Oaks Crossing restaurant** (Order Counter, Galley Kitchen, Dining, Bar & Lounge) sits inside the traced boundary but behind the sales-floor wall at x=900/y=573, with its own street *Restaurant Entrance*. It is not grocery floor, and an inclusion can't reopen the drawn door leaf (inclusions only restore cells free in `free_raw`). Excluded, plus the enclosed restroom/vestibule block south of it. Components: 2 → 1.
+
+**3. `inclusions.json` — all three VERIFY flags were customer space, not staff**
+
+- `DELI` (884,158): the label sits on the Market shopping floor east of the counter run, among the cheese/olive display tables — the counter itself is a drawn fixture with no staff pocket behind it.
+- `KITCHEN` (343,158): the aisle 9 corridor, per above.
+- `MARKET DELI` (492,93): a department name printed in the back main aisle just below the wall case (case bottom y≈92, aisle tops y≈118).
+
+## Culled pockets, all classified
+
+| cells | where | verdict |
+|---|---|---|
+| 3743 | Bakery prep interior inside the case ring | staff, label-condemned ✓ |
+| 3236 | Pharmacy + Immunization behind the counter wall | staff, label-condemned ✓ |
+| 755 | x 1024–1054 — slack between the drawn east wall and the 12-vertex boundary's slanted NE edge | not store floor ✓ |
+| 243 + 12× 109–192 | y 568–616 | the 13 checkout lane interiors, sealed by design ✓ |
+| 116 | east end of the checkstand bank | dead crevice between the post stacks and the front kiosk ✓ |
+
+Far snaps are all expected (BAKERY 8.2 m and PHARMACY 4.7 m are labels inside correctly sealed staff areas; ENTRANCE 3.5 m is printed outside the south wall). `corridor_width.png` shows no red; tightest anchor is AISLE 7 at 1.17 m half-width.
+
+## `walk_truth.json`
+
+18 `must` / 18 `must_not`, each verified against the shipped grid and visually checked against the overlay: front action alley, both entrance approaches, Dairy/Market Deli back runs, four distinct aisle corridors (5, 10, 17, 24), Pharmacy pickup queue, Bakery west + south frontage, Beer & Wine, Deli, Seafood, Produce ×2, Blooms; against parking/page corners, both sealed staff interiors, the deli counter fixture, two checkout lanes, the Business Center room, the boundary-slack sliver, and three points in the excluded restaurant.
+
+Only `data/658/` was touched — `git status` shows no other file changed.

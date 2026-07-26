@@ -1,0 +1,193 @@
+{
+ "components": {
+  "n": 1,
+  "sizes": [
+   91899
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 3743,
+   "near": "BAKERY",
+   "x": 712.3,
+   "y": 413.4
+  },
+  {
+   "cells": 3236,
+   "near": "PHARMACY",
+   "x": 138.5,
+   "y": 431.5
+  },
+  {
+   "cells": 755,
+   "near": "DELI",
+   "x": 1034.5,
+   "y": 217.8
+  },
+  {
+   "cells": 243,
+   "near": "AISLE 20",
+   "x": 323.7,
+   "y": 584.4
+  },
+  {
+   "cells": 192,
+   "near": "CHECKSTANDS",
+   "x": 449.6,
+   "y": 590.6
+  },
+  {
+   "cells": 192,
+   "near": "CHECKSTANDS",
+   "x": 499.6,
+   "y": 590.6
+  },
+  {
+   "cells": 185,
+   "near": "AISLE 20",
+   "x": 349.3,
+   "y": 591.8
+  },
+  {
+   "cells": 185,
+   "near": "AISLE 19",
+   "x": 399.3,
+   "y": 591.8
+  },
+  {
+   "cells": 181,
+   "near": "AISLE 15",
+   "x": 573.8,
+   "y": 591.5
+  },
+  {
+   "cells": 180,
+   "near": "CHECKSTANDS",
+   "x": 474.5,
+   "y": 590.9
+  },
+  {
+   "cells": 176,
+   "near": "AISLE 19",
+   "x": 424.2,
+   "y": 591.3
+  },
+  {
+   "cells": 167,
+   "near": "AISLE 15",
+   "x": 548.7,
+   "y": 591.1
+  },
+  {
+   "cells": 164,
+   "near": "AISLE 20",
+   "x": 374.4,
+   "y": 591.6
+  },
+  {
+   "cells": 162,
+   "near": "CHECKSTANDS",
+   "x": 524.3,
+   "y": 591.8
+  },
+  {
+   "cells": 142,
+   "near": "AISLE 15",
+   "x": 597.5,
+   "y": 592.3
+  },
+  {
+   "cells": 116,
+   "near": "AISLE 14",
+   "x": 654.4,
+   "y": 598.8
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 31.0,
+   "meters": 8.15,
+   "name": "BAKERY"
+  },
+  {
+   "cells": 18.0,
+   "meters": 4.72,
+   "name": "PHARMACY"
+  },
+  {
+   "cells": 13.4,
+   "meters": 3.53,
+   "name": "ENTRANCE"
+  }
+ ],
+ "m_per_cell": 0.2627,
+ "narrow": [
+  {
+   "half_width_m": 1.17,
+   "name": "AISLE 7"
+  },
+  {
+   "half_width_m": 1.31,
+   "name": "AISLE 1"
+  },
+  {
+   "half_width_m": 1.31,
+   "name": "AISLE 11"
+  },
+  {
+   "half_width_m": 1.31,
+   "name": "AISLE 12"
+  },
+  {
+   "half_width_m": 1.31,
+   "name": "AISLE 13"
+  },
+  {
+   "half_width_m": 1.31,
+   "name": "AISLE 15"
+  },
+  {
+   "half_width_m": 1.31,
+   "name": "AISLE 16"
+  },
+  {
+   "half_width_m": 1.31,
+   "name": "AISLE 17"
+  }
+ ],
+ "provenance": {
+  "drift": {
+   "seal_zones": {
+    "derived_n": 6,
+    "derived_names": [
+     "auto:BAKERY",
+     "auto:BLOOMS",
+     "auto:DELI",
+     "auto:KITCHEN",
+     "auto:PHARMACY",
+     "auto:CHECKSTANDS"
+    ],
+    "file_n": 5,
+    "file_names": [
+     "Deli service counter run, Market (staff work the back of the counter between the Cheese Shop and Cooking Connection kiosks; ~1.4 m pass-throughs) \u2014 same as derived",
+     "Bakery service island (staff prep inside the Bulk Foods / Scratch Breads / Custom Cakes ring) \u2014 same as derived",
+     "Blooms floral counter (H-E-B's floral brand; FLORAL family) \u2014 same as derived",
+     "Pharmacy counter/room (staff behind the Drop Off / Pick Up counter wall) \u2014 same as derived",
+     "Checkstand lane bank \u2014 derived rect [299.8,517.2,673.7,614.0] was pulled 40 pt north by the aisle 14-20 badge ovals (y 502-546) landing in the CHECKSTANDS fixture window, which bridged the front action alley shut across the badge row and ate the west entrance approach. Retightened to the register units themselves (x 307.8-665.7, y 566.1-616.6 padded 8); bridge stays looser than a counter gap so the lanes seal while the action alley stays open"
+    ]
+   }
+  },
+  "exclusions": "file",
+  "inclusions": "file",
+  "seal_zones": "file",
+  "zones": "derived"
+ },
+ "reachable_pct": 34.8,
+ "store": "658",
+ "verify": [],
+ "walkable_pct": 34.8
+}
