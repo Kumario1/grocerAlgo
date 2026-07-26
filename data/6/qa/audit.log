@@ -1,0 +1,48 @@
+## Store 6 (Stephenville) — adversarial map audit
+
+### Pass 1 — Mechanical (rerun, not trusted from disk)
+`./rebuild.sh 6` → exit 0. `report.json`: `verify: []`, `coverage: {sealed_floor_patches: [], unreachable_shelf_labels: []}`, `components: {n: 1, sizes: [52977]}`, 761 → 764 tests pass.
+
+`walkable_pct` 20.1 is the fleet's lowest (peers 24.2–40.0), so I checked it rather than accepting it: the sales-floor boundary is 374–1111 × 60–715 pt = 45.7 % of the page (the left third of the page is the Curbside Parking drawing). Free floor is **43.9 % of the store footprint**, with 13.6 % sealed as BOH/service. Normal.
+
+### Pass 2 — Systematic visual sweep
+3×3 crops of `walkable_overlay.png` against a 2 px/pt render of PDF p.2, plus targeted zooms. All 7 printed pockets classified, **plus** the 4 sub-60-cell ones the stats do not print:
+
+| cells | pt bbox | verdict |
+|---|---|---|
+| 11 084 | x 406–1108, y 60–700 | north BOH band + east Seafood/Deli/Tortilleria/Bakery prep + back rooms; one connected staff region behind the case face at x=968. Correct |
+| 2 057 | 376–432, 530–670 | Pharmacy room, single door arc at (433–448, 552–567). Correct |
+| 1 266 | 874–1004, 130–178 | walk-in cooler room, staff swing-door symbol at (849–870, 132–155). Correct |
+| 851 | 968–1024, 182–262 | Seafood counter enclosure. Correct |
+| 558 | 562–620, 672–712 | enclosed room off the Curbside bay. Correct |
+| 155 | 852–874, 608–652 | Floral interstitial slot — 6 pt (0.53 m) wide, mouths 0.7 m. Not a shopper corridor. Correct |
+| 125 / 81 / 55 / 53 | y 692–700, y 60–62, y 678–682 | 2–8 pt slivers behind fixture backs. Correct |
+| 56 | 376–394, 476–526 | sawtooth crevice between the Beer & Wine case teeth and the west wall. Correct |
+| 24 | 436–446, 554–564 | Pharmacy door recess. Correct |
+
+Corridor continuity checked numerically, not just by eye: every aisle column runs 30.6–45.4 m unbroken; row scans at y=300/400/500 return **15 corridor runs from x 394 to 966** (one per badge); y=568 and y=660 are unbroken 436→1090; the east perimeter lane is unbroken y 182→478 through the Tortilleria mouth. Worst geodesic/euclidean detour on the whole floor is 1.41 — no swallowed corridor.
+
+Unanchored departments inspected explicitly against `geometry.json`: **Market** (no anchor), **Tortilleria** (no anchor), Beer & Wine, Ice/Tobacco, Carts. `MEAT` and `KITCHEN` are false-positive anchors from the words "Canned Meat"/"Kitchen Gadgets"; `MEAT` is not in `SERVICE_DEPTS` so it spawns nothing, and `KITCHEN` is handled by `inclusions[0]`.
+
+### Pass 3 — Label probes
+Rotated text made per-span probing useless, so I probed per **word** bbox: **261 of 262** printed labels have reachable floor at 0.00 m. The single miss is `Pharmacy` (404,602) — the sealed dispensing room, correct.
+
+### Passes 4–5
+All 22 original `walk_truth` points pass and each lies inside the feature it names. Every config entry was ablation-tested and is load-bearing with an accurate WHY — including `exclusions[0]`, whose "2 pt / 0.18 m" claim I confirmed exactly against the raw grid (a one-cell-wide column at x=376, y 130–198), and which is what moves the RESTROOMS snap off y=160 onto the real door corridor at y=200.
+
+---
+
+## Findings (all fixed)
+
+**1 — Market department frontage had no `walk_truth` coverage.** (600, 205)
+The band y 192–218 along the sawtooth south face of the two Market cases is the department's shopping side. Evidence: row scan y=190 → `(394,438) (490,528) (672,966)`, col x=610 → free `(192,218)`. This is the **only** department on the map with zero printed product labels, so neither the shelf-label net nor any existing point stands over it — precisely the store-24 shape. Fix: `walk_truth` must point.
+
+**2 — The health-and-beauty short-aisle block had no `walk_truth` coverage.** (525, 620)
+Five corridors at y 594–646, x 488–630, open at both ends. They sit **inside** the derived `auto:CHECKSTANDS` rect `[525.4, 586.6, 959.8, 723.5]` with `bridge: 20` — wide enough to bridge these ~19 pt corridors shut. Nothing in `walk_truth` was below y=580 in that block. Fix: `walk_truth` must point at the Vitamins label.
+
+**3 — The north-wall back-of-house room had no `must_not`.** (500, 90)
+The room at x 405–667, y 62–118 (staff double door at x≈567, swing door at x≈480) is blocked only because `extract.py` traced its rectangle as a fixture. `must_not (900,90)` covers the purple band east of it, not the room. Fix: `walk_truth` must_not point.
+
+All three fixes are `walk_truth` points only — no `exclusions`/`inclusions`/`seal_zones` change was warranted, and no code, goldens, tests or other stores were touched. `./rebuild.sh 6` rerun after the edit: exit 0, `verify: []`, coverage empty, single component, 764 passed (+3, one per new point).
+
+`AUDIT CLEAN — store 6 (3 findings fixed)`

@@ -1,0 +1,134 @@
+{
+ "components": {
+  "n": 1,
+  "sizes": [
+   52977
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 11125,
+   "near": "SEAFOOD",
+   "x": 963.6,
+   "y": 230.6
+  },
+  {
+   "cells": 2057,
+   "near": "PHARMACY",
+   "x": 404.0,
+   "y": 600.0
+  },
+  {
+   "cells": 1266,
+   "near": "SEAFOOD",
+   "x": 944.5,
+   "y": 148.8
+  },
+  {
+   "cells": 833,
+   "near": "SEAFOOD",
+   "x": 1002.6,
+   "y": 221.5
+  },
+  {
+   "cells": 558,
+   "near": "AISLE 10",
+   "x": 593.7,
+   "y": 693.7
+  },
+  {
+   "cells": 155,
+   "near": "FLORAL",
+   "x": 859.9,
+   "y": 629.8
+  },
+  {
+   "cells": 125,
+   "near": "FLORAL",
+   "x": 818.3,
+   "y": 698.3
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 25.8,
+   "meters": 4.56,
+   "name": "RESTROOMS"
+  },
+  {
+   "cells": 22.5,
+   "meters": 3.98,
+   "name": "BAKERY"
+  },
+  {
+   "cells": 19.9,
+   "meters": 3.51,
+   "name": "SEAFOOD"
+  },
+  {
+   "cells": 19.2,
+   "meters": 3.4,
+   "name": "DELI"
+  },
+  {
+   "cells": 17.6,
+   "meters": 3.11,
+   "name": "ENTRANCE"
+  },
+  {
+   "cells": 16.3,
+   "meters": 2.87,
+   "name": "PHARMACY"
+  }
+ ],
+ "m_per_cell": 0.1766,
+ "narrow": [
+  {
+   "half_width_m": 0.88,
+   "name": "DELI"
+  },
+  {
+   "half_width_m": 0.88,
+   "name": "ENTRANCE"
+  },
+  {
+   "half_width_m": 0.88,
+   "name": "KITCHEN"
+  },
+  {
+   "half_width_m": 0.88,
+   "name": "MEAT"
+  },
+  {
+   "half_width_m": 0.88,
+   "name": "PHARMACY"
+  },
+  {
+   "half_width_m": 0.88,
+   "name": "RESTROOMS"
+  },
+  {
+   "half_width_m": 0.88,
+   "name": "SEAFOOD"
+  },
+  {
+   "half_width_m": 0.9,
+   "name": "BAKERY"
+  }
+ ],
+ "provenance": {
+  "drift": null,
+  "exclusions": "file",
+  "inclusions": "file",
+  "seal_zones": "derived",
+  "zones": "derived"
+ },
+ "reachable_pct": 20.1,
+ "store": "6",
+ "verify": [],
+ "walkable_pct": 20.1
+}

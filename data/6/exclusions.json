@@ -1,0 +1,6 @@
+[
+ {"name": "west-wall crack north of Beer & Wine (artifact sliver): 2 pt / 0.18 m gap between the store wall at x=374 and the tall column fixture at x=378-392, y=131-198, plus the dead chamber it feeds at y=118-130. No shopper fits; it was the 0.18 m 'narrow' corridor and it was capturing the RESTROOMS snap. The real restroom-door corridor is the open band at y=200-218, left intact.",
+  "rect": [374, 116, 392, 199]},
+ {"name": "Checkstand lane bank body (8 register/belt units at x=634-822 and the ~13 pt queue lanes between them, y=594-649). Checkout lanes are not through-floor: a shopper crosses the front of the store on the action alley at y=568-594 or the south cross-corridor at y=650-665, both left open, and the bank is still reachable from each end (x<632, x>824). The derived auto:CHECKSTANDS zone already bridges these lanes shut, but store 6 prints its aisle badges at y=581, directly above the bank, so the aisle-badge protection rule re-opens every lane pocket as if it were a shopping corridor.",
+  "rect": [632, 594, 824, 650]}
+]

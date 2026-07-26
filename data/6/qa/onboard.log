@@ -1,0 +1,32 @@
+Store 6 (Stephenville) is converged. Only `data/6/` was touched.
+
+## Result
+
+`./rebuild.sh 6` exits 0, **640 tests pass** (598 baseline + 42 new store-6 gates), and `data/6/qa/report.json` has `"verify": []`, both `coverage` lists empty, **1 component**, 20.0% walkable/reachable.
+
+### Files authored (3 of the 5; `zones.json` and `seal_zones.json` derived cleanly)
+
+**`exclusions.json`** — 2 entries:
+
+1. **West-wall crack north of Beer & Wine** `[374,116,392,199]`. A 2 pt (0.18 m) crack between the store wall at x=374 and the column fixture at x=378–392, feeding a dead chamber at y=118–130. It was the `narrow` 0.18 m finding and was capturing the RESTROOMS snap. The real restroom-door corridor (y=200–218, reached through the vestibule door arc at x≈360–372) is untouched; RESTROOMS' corridor capacity went 0.18 m → 0.88 m.
+
+2. **Checkstand lane bank body** `[632,594,824,650]`. The 8 register/belt units plus the ~13 pt queue lanes between them were still walkable. `auto:CHECKSTANDS` bridges those lanes shut, but store 6 prints its aisle badges at **y=581, directly above the bank**, so the aisle-badge protection rule (±16 pt window) re-classified every bridged lane pocket as a shopping corridor and restored it. 659's badges sit at y=135/367, far from its bank, which is why it never hit this. Shoppers still cross on the front action alley (y=568–594) and the south cross-corridor (y=650–665), and the bank is reachable from both ends.
+
+**`inclusions.json`** — 1 entry: the **aisle 4 corridor** `[796,430,816,545]`. The lone VERIFY was `KITCHEN` at (811,487), which is `extract.py` reading the product word in the **"Kitchen Gadgets"** shelf label as a KITCHEN service department. There is no counter there — it is open dry-grocery floor (free strip x=796–816 running y=246–606, badged AISLE 4 at (807,581)).
+
+**`walk_truth.json`** — 18 `must` / 17 `must_not`.
+
+### Culled pockets, all classified against the drawing
+
+| cells | what it is |
+|---|---|
+| 11125 | back-of-house band: north rooms behind the Market/Dairy coolers → east side → Deli/Tortilleria/Bakery prep. Only sealed because the SEAFOOD disk's 20 pt bridge closes the staff double-door at x≈968–1014, y≈182–196 — ablating that disk re-opens 10 162 cells of back-of-house |
+| 2057 | Pharmacy room — enclosed, one door arc at x≈435–449, y≈549–566 |
+| 1266 | walk-in cooler room behind the Dairy cases, door arcs onto the deli side |
+| 833 | Seafood counter enclosure |
+| 558 | enclosed room off the Curbside bay, single door |
+| 155 / 125 / smaller | Floral island interior; front-wall slivers |
+
+The service labels (Seafood/Deli/Tortilleria/Bakery) print *behind* their cases in this guide — the customer frontage is the east perimeter aisle at x≈920–969, which stays green — so the 3.4–4.0 m far-snaps for those three are correct, as are RESTROOMS (4.6 m, label in the outside vestibule) and ENTRANCE (3.1 m, arrow drawn outside the front wall).
+
+Stopping here for the separate audit context.

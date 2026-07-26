@@ -1,0 +1,10 @@
+[
+ {"name": "Aisle 4 shopping corridor at the 'Kitchen Gadgets' shelf label (customer). extract.py read the product word 'Kitchen' as a KITCHEN service department, but the drawing shows no counter or prep enclosure here - it is the open dry-grocery run between the aisle 4 and aisle 5 shelf backs (free strip x=796-816, y=246-606), badged AISLE 4 at (807,581).",
+  "rect": [796, 430, 816, 545]},
+
+ {"name": "East perimeter aisle in front of the Tortilleria opening (customer). Between the Deli case run (ends y=320) and the Bakery case run (starts y=337) the drawing leaves a ~17 pt service mouth at x=969-1027; the derived auto:DELI/auto:BAKERY seal (bridge 12 pt = 24 pt closing) bridges that mouth shut and then condemns the CUSTOMER-side lane at x=948-966, y=332-346 as Deli prep floor. That lane is printed floor WEST of the case face at x=968 and it is the only through-route of the east lane: with it sealed, the Deli/Seafood frontage (960,320) is 34.6 m of walking from the Bakery frontage (960,352) 2.8 m away. Restores the lane only - x stops at 967, so the case face and the prep floor behind it stay sealed.",
+  "rect": [946, 328, 967, 350]},
+
+ {"name": "Open floor between the freestanding display islands in the east perimeter aisle (customer). The map draws six separate island fixtures down x=930-944 (four squares at y=213-225, 244-254, 272-283, 302-312 and two cross-shaped units at y=326-347, 360-380) with 1.06-1.41 m of shopper floor between them. The auto:SEAFOOD seal zone reaches 130 pt from (1007,221) with a 20 pt bridge (1.94 m closing), which spans those gaps and merges the six islands into one continuous 19 m wall - splitting the east perimeter aisle into two lanes that do not communicate between y=213 and y=386. The five orphaned floor patches (48/48/63/49/36 cells) are each below min_sz=100, so they were culled silently and never printed in the QA stats. Only free_raw floor is restored, so the island bodies stay obstacles.",
+  "rect": [928, 206, 946, 388]}
+]
