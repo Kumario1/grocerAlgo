@@ -1,0 +1,42 @@
+## Store 26 map audit — findings
+
+**Pass 1 — Mechanical.** `./rebuild.sh 26` rerun from scratch: exit 0, `verify: []`, both `coverage` lists empty, walkable 28.1% (in the 20–35% band), one component. Green — so the defects below all came from the visual/probe passes, exactly as the store-24 post-mortem predicted.
+
+---
+
+### Finding 1 — `seal_zones` over-reaches east; two real cross passages sealed (WORST)
+- **Coordinates (PDF pt):** x 855–866 and x 883–896, y 562–622 (431 cells ≈ 27 m² of customer floor)
+- **Evidence:** crop `pt 830–960 × 540–640` shows the printed floor between three separate front-end fixtures (`837.6–852.9`, `866.2–883.2`, `896.1–904.5`) with no green tint. Probes: `(859,594)` and `(890,594)` → `free=False`, **no free cell within 2 m**. Both appear in the top-ten mechanical stats as unexplained pockets — `138 cells near FLORAL @ (859,594)` and `293 cells near PRODUCE @ (892,587)` — with no staff label or drawn enclosure to justify them.
+- **Truth:** two ~1.4 m / ~1.6 m north–south passages linking the Produce floor to the front action alley.
+- **Root cause:** the authored rect kept the derived `x1≈908`. `derive_seal_zones`' ±200 pt window around the CHECKSTANDS label swept the produce-front fixtures into the "checkstand cluster", and the 20 pt bridge then closed the gaps between them.
+- **Fix type:** `seal_zones` override — rect `x1: 908 → 834` (the last lane's wing ends at 831.1).
+
+### Finding 2 — `seal_zones` under-reaches west; checkout lane 1 walkable
+- **Coordinates:** x 484.5–497, y 570–616
+- **Evidence:** crop `pt 465–555 × 555–630` shows green inside the westernmost lane while every other lane is white. Probes `(492,592)`, `(496,585)`, `(496,608)` → `free=True`; lane 3 `(526,592)` → `False`.
+- **Root cause:** `CHECK_WIN_X = ±200` around the label at x=709.9 excluded lanes centred at x≈490 and x≈505, so the derived `x0=507.2` was copied verbatim into the file.
+- **Fix type:** `seal_zones` override — rect `x0: 507 → 483`.
+
+### Finding 3 — `walk_truth` must point mislabeled; Apparel had no coverage
+- **Coordinates:** must `[560, 470, "Apparel floor between the garment racks"]`
+- **Evidence:** the Apparel rack glyphs end at x≈535, the aisle 32/33 shelf runs sit at x 540–552, and the Baby rack grid starts at x≈554. `(560,470)` is inside **Baby**, not Apparel — Apparel itself had no `must`.
+- **Fix type:** `walk_truth` — relabel to Baby, add `[503, 478]` for the real Apparel floor.
+
+### Finding 4 — `walk_truth` coverage gaps (this is why 1 and 2 shipped)
+No `must_not` existed for the westernmost checkout lane, the SW back-of-house corridor (`433 cells @ 332,713`), the enclosed room between the front Lease and the Restrooms (`192 @ 637,698`), the room south of the Restrooms (`120 @ 765,701`), the SE Lease (`959–1096 × 682–713`), or the north SW Lease (`395–428 × 600–638`). No `must` for the west perimeter aisle, the Restrooms access corridor, the Business Center bay, or the two passages from Finding 1.
+- **Fix type:** `walk_truth` — 6 new `must`, 6 new `must_not` (`must: 19→25`, `must_not: 15→21`; pytest 756 → 768).
+
+---
+
+### Observations (no artifact change)
+- **`inclusions.json` is a no-op.** The Kitchen rect adds/removes 0 cells — because `seal_zones.json` wins verbatim, the auto `KITCHEN` disk never applies. Harmless belt-and-braces; its stated WHY is accurate. Left alone.
+- **Phantom `MEAT` anchor at (806.9, 181.2).** No "Meat" label exists on this map; the nearest text is the rotated *"…Canned Meat…"* shelf string in aisles 4/5. `MEAT` is not in `engine.SERVICE_DEPTS`, so it seals nothing (verified: no pocket, no walkability delta), but a MEAT-department placement would route to canned goods rather than the Market. That is `extract.py` behaviour — reported, **not** fixed.
+- **Front lease bays (x 501.8–645.6, y 645–681) are green.** They have side walls at 501.8/645.6 and partitions at 561.1/586.6, but the source PDF draws **no north wall** — they are open-fronted onto the action alley, unlike the enclosed Lease rect at 501.9–623.5 × 680.9–712.6, which is correctly white. Left walkable and now documented with `must [612,668]`.
+
+### Passes 2/3/5 residue
+Every remaining non-green region inside the boundary is now classified: Bakery/Deli enclosure (3336), east back room (1622+565), Pharmacy room (952), Admin block (670), SW back-of-house corridor (433), drive-thru structures (195+133), restroom-block rooms (192+120), 38 checkout-lane slivers, plus two drawn-shape artifacts (the "Produce" callout outline at 982,600 and the 4 pt east-wall ghost sliver at 1092,347). 37 product-label frontage probes spanning all wings — Cotton Balls, Dog Food, Bird Seed, Charcoal, Insecticides, Q-Tips, Vitamins, Water, Coffee, Chips, Spices, Canned Fruit, Tortillas, Pastries, Toys, Greeting Cards, School Supplies, Tobacco, Ice and more — all reach free floor within 0.17 m. `exclusions.json` removes exactly the 381-cell ghost sliver (wall at y=64.5, fixture backs at y=69.3) and touches no shelf frontage.
+
+### Post-fix rebuild
+Exit 0 · `verify: []` · both coverage lists empty · 1 component (74 509 cells) · walkable 28.2% · 768 tests pass. Only `data/26/seal_zones.json` and `data/26/walk_truth.json` were edited.
+
+`AUDIT CLEAN — store 26 (4 findings fixed)`

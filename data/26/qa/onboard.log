@@ -1,0 +1,25 @@
+Store 26 is converged. Handing off for the audit.
+
+## What the first pass got wrong
+
+`report.json` was already "green" (`verify: []`, empty coverage, 1 component) — the store-24 failure mode exactly. The culled-pocket list gave it away: **5483 cells at (1015,442) near SEAFOOD**. That pocket was the *entire east wing* — the H-E-B Kitchen prepared-food case aisles, the Market east floor, and the north half of Produce — sealed as a "staff area" because the KITCHEN/SEAFOOD labels happened to sit inside it.
+
+Cause: the auto-derived seal zones put r=130 pt (~15 m) disks on `BAKERY (901,450)`, `DELI (922,388)`, `KITCHEN (999,356)` and `SEAFOOD (1067,439)`. Those four overlapping disks blanketed x≈770–1197, y≈226–580 and bridged every gap between the small display fixtures shut. On this map the disks are the wrong tool: Deli/Bakery here is a single **walled** enclosure (it is culled correctly on its own, with no disk), and Kitchen is open shopping floor, not a counter.
+
+Secondary: the derived checkstand rect `[507,562,912,695]` reached 133 pt south of the lanes because the fixture-window swept in restroom/tobacco furniture; at bridge 20 it sealed the produce→front corridor at x≈908 and the floral display walkway.
+
+## Fixes (five-file data only)
+
+- **`seal_zones.json`** — full override, one zone: the checkstand lane bank tightened to `[507,562,908,622]`, bridge 20. No service disks: every genuine staff area here is drawn walled and gets culled as a service pocket without help (Deli/Bakery enclosure 3336 cells, Pharmacy room 952, Seafood counter corner + east back rooms 1622+565).
+- **`inclusions.json`** — H-E-B Kitchen case aisles `[935,300,1082,402]`, resolving the one VERIFY (label sits on open floor between cases, not in an enclosure).
+- **`exclusions.json`** — the 3-pt ghost strip between the north wall and the backs of the top-wall shelf run (x 298–812); a 0.25 m half-width artifact that `corridor_width.png` flagged red.
+- **`walk_truth.json`** — 19 `must` / 15 `must_not`, every coordinate probed against the grid and checked to sit inside the feature it names (each sealed staff area, each enclosed room, a lane interior between two checkstands, the excluded sliver; aisle corridors in all four banks, both entrance approaches, and every department frontage).
+
+## Verification
+
+- `./rebuild.sh 26` → **exit 0**, `verify: []`, `coverage` both lists empty, 1 component (74157 cells), walkable **28.1%** (was 25.1%), **756 tests pass** including 659's pixel-frozen golden.
+- Far snaps: SEAFOOD dropped 11.1 m → 3.1 m; only PHARMACY DRIVE-THRU (12.2 m, outside the building) remains.
+- Independent probe of all 286 map text labels inside the sales floor: every one has walkable floor within 2 m except the seven department/room labels that intentionally sit inside staff or enclosed areas (Seafood, Bakery, Deli, Pharmacy, Floral, Admin, Lease).
+- All 16 culled pockets classified: Deli/Bakery enclosure, Pharmacy room, Seafood corner, two east back rooms, Admin block, SW back rooms, restroom/lease interiors, three checkout lanes, drive-thru nub.
+
+Not run: `docs/audit.md` — left for the separate audit context per the runbook.

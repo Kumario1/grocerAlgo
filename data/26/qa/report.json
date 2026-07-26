@@ -1,0 +1,179 @@
+{
+ "components": {
+  "n": 1,
+  "sizes": [
+   74509
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 3336,
+   "near": "BAKERY",
+   "x": 887.1,
+   "y": 422.2
+  },
+  {
+   "cells": 1622,
+   "near": "SEAFOOD",
+   "x": 1102.7,
+   "y": 465.5
+  },
+  {
+   "cells": 952,
+   "near": "PHARMACY",
+   "x": 298.1,
+   "y": 547.6
+  },
+  {
+   "cells": 670,
+   "near": "AISLE 49",
+   "x": 354.7,
+   "y": 630.8
+  },
+  {
+   "cells": 565,
+   "near": "SEAFOOD",
+   "x": 1111.0,
+   "y": 541.0
+  },
+  {
+   "cells": 433,
+   "near": "EXIT",
+   "x": 331.6,
+   "y": 712.7
+  },
+  {
+   "cells": 220,
+   "near": "CHECKSTANDS",
+   "x": 609.3,
+   "y": 596.8
+  },
+  {
+   "cells": 195,
+   "near": "PHARMACY DRIVE-THRU",
+   "x": 265.6,
+   "y": 722.4
+  },
+  {
+   "cells": 192,
+   "near": "RESTROOMS",
+   "x": 636.7,
+   "y": 698.0
+  },
+  {
+   "cells": 156,
+   "near": "AISLE 49",
+   "x": 549.2,
+   "y": 586.9
+  },
+  {
+   "cells": 154,
+   "near": "CHECKSTANDS",
+   "x": 792.2,
+   "y": 587.1
+  },
+  {
+   "cells": 151,
+   "near": "AISLE 49",
+   "x": 503.1,
+   "y": 587.2
+  },
+  {
+   "cells": 149,
+   "near": "CHECKSTANDS",
+   "x": 639.5,
+   "y": 586.0
+  },
+  {
+   "cells": 133,
+   "near": "PHARMACY DRIVE-THRU",
+   "x": 288.5,
+   "y": 733.8
+  },
+  {
+   "cells": 120,
+   "near": "RESTROOMS",
+   "x": 765.0,
+   "y": 701.0
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 48.4,
+   "meters": 12.23,
+   "name": "PHARMACY DRIVE-THRU"
+  },
+  {
+   "cells": 12.1,
+   "meters": 3.06,
+   "name": "SEAFOOD"
+  }
+ ],
+ "m_per_cell": 0.2526,
+ "narrow": [
+  {
+   "half_width_m": 0.51,
+   "name": "FLORAL"
+  },
+  {
+   "half_width_m": 0.56,
+   "name": "BAKERY"
+  },
+  {
+   "half_width_m": 0.76,
+   "name": "DELI"
+  },
+  {
+   "half_width_m": 0.76,
+   "name": "MEAT"
+  },
+  {
+   "half_width_m": 0.76,
+   "name": "PRODUCE"
+  },
+  {
+   "half_width_m": 0.76,
+   "name": "RESTROOMS"
+  },
+  {
+   "half_width_m": 1.01,
+   "name": "AISLE 45"
+  },
+  {
+   "half_width_m": 1.01,
+   "name": "ENTRANCE"
+  }
+ ],
+ "provenance": {
+  "drift": {
+   "seal_zones": {
+    "derived_n": 7,
+    "derived_names": [
+     "auto:BAKERY",
+     "auto:DELI",
+     "auto:FLORAL",
+     "auto:KITCHEN",
+     "auto:PHARMACY",
+     "auto:SEAFOOD",
+     "auto:CHECKSTANDS"
+    ],
+    "file_n": 1,
+    "file_names": [
+     "Checkstand lane bank ONLY \u2014 the 23 drawn lanes span x=484.5-831.1, y=569.9-615.7. The derived bbox [507,562,912,695] is wrong at BOTH ends: its +/-200 pt window around the CHECKSTANDS label dropped the westernmost lane (center x~490), leaving lane 1's interior walkable, and its east edge swept in the three front-end fixtures at x=837-905, whose 20 pt bridge then sealed the two real cross passages between them (x=855-866 and x=883-896) that link the Produce floor to the front action alley. y stays 562-622 so each lane slot's mouth is bridged shut."
+    ]
+   }
+  },
+  "exclusions": "file",
+  "inclusions": "file",
+  "seal_zones": "file",
+  "zones": "derived"
+ },
+ "reachable_pct": 28.2,
+ "store": "26",
+ "verify": [],
+ "walkable_pct": 28.2
+}

@@ -1,0 +1,4 @@
+[
+  {"name": "Checkstand lane bank ONLY — the 23 drawn lanes span x=484.5-831.1, y=569.9-615.7. The derived bbox [507,562,912,695] is wrong at BOTH ends: its +/-200 pt window around the CHECKSTANDS label dropped the westernmost lane (center x~490), leaving lane 1's interior walkable, and its east edge swept in the three front-end fixtures at x=837-905, whose 20 pt bridge then sealed the two real cross passages between them (x=855-866 and x=883-896) that link the Produce floor to the front action alley. y stays 562-622 so each lane slot's mouth is bridged shut.",
+   "rect": [483, 562, 834, 622], "bridge": 20}
+]
