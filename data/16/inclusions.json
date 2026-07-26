@@ -1,0 +1,43 @@
+[
+  {"name": "Seafood counter frontage + Cooking Connection floor (customer; the auto SEAFOOD seal disk is centred on the 'Seafood' label printed inside the back-of-house block, so its 20-pt bridge closed the gaps between the produce tables and sealed the whole strip a shopper stands on to order fish)",
+   "rect": [928, 396, 1022, 486]},
+
+  {"name": "Market aisle between the two meat gondolas (customer; same misplaced SEAFOOD disk bridged this 22-pt aisle shut from y=312 south)",
+   "rect": [948, 270, 976, 360]},
+
+  {"name": "Aisle 43-48 west ends, left wing (customer corridors; the auto PHARMACY disk reaches r=130 pt from the pharmacy label out to x=200 and bridged the west halves of aisles 44, 46 and 47 shut - green at their badge mouths, sealed deeper in)",
+   "rect": [130, 498, 240, 640]},
+
+  {"name": "Apparel display floor between the racks (customer; the auto KITCHEN disk is derived from the 'Kitchen Gadgets' shelf label in aisle 19 and its 12-pt bridge sealed the walkways between the apparel tables)",
+   "rect": [576, 464, 624, 518]},
+
+  {"name": "Aisle 19 corridor between the Bakeware and Kitchen Gadgets gondolas (customer aisle - the KITCHEN anchor is the printed 'Kitchen Gadgets'/'Appliances' shelf label, not a service kitchen; badge 19 sits at its north mouth)",
+   "rect": [708, 396, 728, 526]},
+
+  {"name": "Produce floor east of the seafood counter (customer; the misplaced SEAFOOD disk's 20-pt bridge also closed the walk-throughs between the produce tables at (1067,519) and (1133,500))",
+   "rect": [1030, 492, 1180, 534]},
+
+  {"name": "Walkway between the Deli island's east display cases and the Market gondola (customer; open at both ends into the north alley and the Bakery front, but the DELI disk bridged its ~1.2 m mouths shut)",
+   "rect": [866, 200, 892, 258]},
+
+  {"name": "Floral/Blooms browse space enclosed by the display tables (customer; this store's floral is an open table cluster with no drawn service counter, so the auto FLORAL/BLOOMS disk only bridged the ~1.2 m gaps between the tables)",
+   "rect": [782, 552, 822, 592]},
+
+  {"name": "Market cross-aisle through the meat-gondola run at y=260-275 (customer; the run is drawn as two rects x=931.9-950.3 y=179.7-260.3 and x=932.3-950.6 y=275.2-355.8, i.e. a deliberate 14.9-pt / 1.58 m break, and the DELI disk reaches this far - 126 pt of its r=130 - so its 12-pt bridge closed it. Sealing it forces a 21.6 m walk around a 2.5 m step: the whole point of the break)",
+   "rect": [930, 258, 952, 278]},
+
+  {"name": "Cross-aisle between aisle 1 and aisle 2 through the Beer And Wine gondola run (customer; rects x=748.1-759.6 y=214.4-244.6 and x=747.9-759.3 y=258.7-311.7 leave a 14.1-pt / 1.49 m break. The identical break lower in the SAME run at y=311.7-328 is 16.5 pt and stayed green, which is what proves these are drawn shopper cross-overs; only this one fell under the DELI disk's 12-pt bridge)",
+   "rect": [746, 243, 761, 260]},
+
+  {"name": "Produce table-cluster N-S walkway between the two plus-table columns (customer; 13.2-pt / 1.40 m clear between the 12-vertex tables at x=894.4-909.6 and x=922.8-938.0, both spanning y=435-452. The BAKERY disk covers this at 77 pt and its 12-pt bridge walled the corridor mid-length - green above and below, sealed across)",
+   "rect": [908, 433, 924, 453]},
+
+  {"name": "Produce table-cluster E-W walkway south of the west plus table (customer; 15.7-pt / 1.66 m clear between the plus table y=435.1-452.0 and the square table y=467.7-478.3, wider than aisle 27's 1.28 m corridor. Same BAKERY-disk bridge; the 6-pt gap north of the plus table is genuinely unwalkable and stays sealed)",
+   "rect": [893, 452, 911, 469]},
+
+  {"name": "Produce table-cluster E-W walkway between the east plus tables (customer; 13.3-pt / 1.41 m clear between the tables at y=434.7-451.6 and y=464.9-481.8, both x=922.8-938.0. The Seafood-frontage rect above restored this gap from x=928 east but stopped 2 pt short, leaving a single 2-pt bridged column at x=926 that walls the walkway off from the middle corridor - a 0.8 m step became an 8.5 m detour)",
+   "rect": [924, 451, 932, 466]},
+
+  {"name": "Market cross-over between the stacked gondolas west of the meat run (customer; rect x=899.3-908.0 y=298.0-313.3 over poly x=899.0-909.4 y=327.4-353.3 leaves 14.1 pt / 1.49 m clear. The DELI bridge left a 4.5-pt-wide sealed strip straight across the middle of the opening, turning a 1.3 m step into a 7.2 m detour)",
+   "rect": [897, 312, 911, 329]}
+]

@@ -1,0 +1,14 @@
+[
+  {"name": "Market/Seafood back-of-house block, NE corner (staff only; walled off from the sales floor by the x=1022-1034 partition whose only opening is the staff double-door at y=326-339, and from Produce by the y=475-488 wall with a staff door at each end. The block is drawn completely empty - no fixtures, no product labels - and the 'Seafood' department name is printed inside it the same way 'Deli'/'Bakery' are printed inside their sealed service island. The customer-facing seafood counter is the sawtooth case on the WEST face of that partition, x=1017-1023)",
+   "poly": [[988, 94], [1092, 94], [1092, 389.6], [1180, 389.6], [1180, 491],
+            [1033.6, 491], [1033.6, 168], [1002.5, 137], [988, 137]]},
+
+  {"name": "Samuels Fine Jewelry lease shop interior (enclosed tenant space off the front action alley, walls traced from PDF strokes x=561.3, x=626.1, y=686.8; not H-E-B shopping floor)",
+   "rect": [561, 626, 627, 688]},
+
+  {"name": "Curbside pickup bay north of the drawn curbside room (the H-E-B Curbside sign band inside the boundary notch x=74-291, y=50-97; drive-up pickup/staff area, not shopping floor)",
+   "rect": [46, 46, 292, 81]},
+
+  {"name": "Cooking Connection demo-counter interior, Market (staff; the shopper stands outside the horseshoe and the cook works inside it. The 'Cooking Connection' name is printed inside the counter the same way 'Deli'/'Bakery' are printed inside their island, and the identical 17-vertex counter symbol stamped in Produce at x=922.7-954.7 y=617.4-650.0 is drawn with its mouth shut, so its interior seals by drawing alone - this one's mouth is 26 pt wide, too wide for the 20-pt SEAFOOD bridge, so nothing sealed it. The rect stays inside the counter's own footprint x=941.2-973.9 y=380.0-412.1; customer frontage is the market aisle north of the mouth plus the floor west and south of it, all still walkable)",
+   "rect": [944.5, 380.5, 970.5, 408]}
+]

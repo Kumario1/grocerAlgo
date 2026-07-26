@@ -1,0 +1,22 @@
+Store 16 is converged. Stopping here for the separate audit role, as the runbook requires.
+
+## Result
+
+`./rebuild.sh 16` → exit 0, **641 tests pass** (incl. 659's pixel-frozen golden). `data/16/qa/report.json`: `"verify": []`, `"coverage"` both lists empty, **1 component**, walkable **35.0%** (was 38.0%).
+
+Authored three files (zones and seal_zones left auto-derived — provenance `drift: null`):
+
+**`exclusions.json`** (3)
+- **Market/Seafood back-of-house, NE corner** (poly, ~375 m²). Walled off by the x=1022–1034 partition whose only opening is a staff double-door at y=326–339, and from Produce by the y=475–488 wall with a staff door at each end. Drawn completely empty — no fixtures, no product labels. The `Seafood` label is printed *inside* it, exactly as `Deli`/`Bakery` are printed inside their sealed island; the customer-facing counter is the sawtooth case on the partition's **west** face. This also cleared the `SEAFOOD` VERIFY.
+- **Samuels Fine Jewelry** lease shop interior (was green).
+- **Curbside pickup bay** sign band in the boundary notch (was green).
+
+**`inclusions.json`** (8) — all restoring customer floor that misplaced auto seal disks bridged shut:
+- **Aisles 44/46/47 west ends** — the store-24 failure mode. The auto `PHARMACY` disk (r=130 from the label) reaches x=200 and sealed the west halves of three left-wing corridors: green at their badge mouths, white deeper in. Neither mechanical net caught this.
+- **Seafood counter frontage + Cooking Connection**, **Market aisle between the meat gondolas**, **two produce walk-throughs** — the `SEAFOOD` disk is centred on a label inside the back room, so its 20-pt bridge only did damage.
+- **Apparel floor between the racks** and **aisle 19 corridor** — the `KITCHEN` disk is derived from the *"Kitchen Gadgets"* shelf label, not a service kitchen. The aisle-19 entry also suppresses the `KITCHEN` VERIFY.
+- **Deli island east walkway**, **Floral/Blooms browse space**.
+
+**`walk_truth.json`** — 20 `must` / 16 `must_not`, every coordinate probed against the shipped `profile.npz` and confirmed inside the feature it names.
+
+Two things the audit should weigh independently: the `SEAFOOD` far-snap is now 4.05 m (its label sits in the excluded back room, so it snaps out to the counter frontage — same reason `DELI`/`BAKERY` snap 2.8/3.2 m); and every remaining culled pocket is an enclosed room (restrooms, Texas Backyard, jewelry-south strip, Business Center slot), a checkout lane, or the produce horseshoe's inner well.

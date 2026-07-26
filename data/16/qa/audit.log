@@ -1,0 +1,45 @@
+## Findings — store 16 (worst first)
+
+All eight are the same underlying failure mode as store 24, and all eight are fixed in store 16's data files only.
+
+**1 · Market cross-aisle sealed — pt (940, 268)** · zoom `pt(875,230)-(1030,320)`, crop `dg_12`
+The meat-gondola run is drawn as two rects (931.9,179.7,950.3,260.3) and (932.3,275.2,950.6,355.8) — a deliberate **14.9 pt / 1.58 m** break. The auto `DELI` disk reaches it at 126 pt of its r=130 and its 12-pt bridge closed it. Shortest path across: **2.5 m → 21.6 m (×8.5)**. Fix: **inclusion** `[930,258,952,278]`.
+
+**2 · Produce table-cluster E–W walkway severed by a 2-pt strip — pt (926, 457)**
+13.3 pt / 1.41 m clear between the east plus tables (922.8-938.0, y 434.7-451.6 and y 464.9-481.8). The existing Seafood-frontage rect restored it from x=928 east but stopped 2 pt short, leaving one bridged column at x=926. **0.8 m → 8.5 m (×10.0)**. Fix: **inclusion** `[924,451,932,466]`.
+
+**3 · Market cross-over walled mid-opening — pt (904, 320)** · zoom `pt(880,295)-(960,350)`
+rect (899.3,298.0,908.0,313.3) over poly (899.0,327.4,909.4,353.3) leaves 14.1 pt / 1.49 m clear; the bridge left a 4.5-pt sealed column straight across the middle. **1.3 m → 7.2 m (×5.7)**. Fix: **inclusion** `[897,312,911,329]`.
+
+**4 · Produce table-cluster N–S walkway sealed — pt (916, 443)** · zoom `pt(875,415)-(1030,535)`
+13.2 pt / 1.40 m clear between the 12-vertex plus tables at x 894.4-909.6 and x 922.8-938.0. The auto `BAKERY` disk (77 pt away) bridged it — green above and below, walled across. **2.5 m → 13.1 m (×5.2)**. Fix: **inclusion** `[908,433,924,453]`.
+
+**5 · Aisle 1 ↔ aisle 2 cross-aisle sealed — pt (754, 251)** · zoom `pt(715,190)-(800,400)`
+rects (748.1,214.4,759.6,244.6) and (747.9,258.7,759.3,311.7) leave 14.1 pt / 1.49 m. The identical break lower in the **same run** (y 311.7-328, 16.5 pt) stayed green — that is the proof these are drawn shopper cross-overs, not staff gaps. `DELI` disk again. **2.1 m → 10.6 m (×5.0)**. Fix: **inclusion** `[746,243,761,260]`.
+
+**6 · Produce table-cluster E–W walkway sealed — pt (902, 460)**
+15.7 pt / **1.66 m** clear between the plus table (ends y 452.0) and the square table (starts y 467.7) — wider than aisle 27's own 1.28 m corridor. **2.5 m → 6.8 m (×2.7)**. Fix: **inclusion** `[893,452,911,469]`.
+
+**7 · walk_truth: the pharmacy pickup bay was never covered**
+The point that claims it, `[130,570]` "Pharmacy pickup frontage, east of the counter", sits ~3 m away in the left-wing perimeter corridor and inside the already-covered aisle-43-48 inclusion rect. The floor a shopper actually occupies to be served is the triangular bay between the drawn diagonal counter face ((112.7,585)→(79.6,617)) and the counter block at y 628-646. Fix: **walk_truth** must `[100,610]`.
+
+**8 · walk_truth: two enclosed rooms had no `must_not`**
+Cash Control (x 641.6-682.9, y 673-705, its own door onto the service passage) and the drawn Curbside staging room (fixture 48.9,80.8-261.7,148.1 — the existing `[170,65]` is in the sign band *north* of it). Fix: **walk_truth** must_not `[662,690]`, `[150,115]`.
+
+Each fix carries a new `must` point that would have caught it: `[940,268] [926,457] [904,320] [916,443] [754,251] [902,460] [100,610]`.
+
+## Cleared under scrutiny
+
+- **The ~325 m² NE exclusion** — the one that could have hidden a whole wing. At 420–600 dpi: enclosed by the exterior wall (boundary x=1089.7 for y<389.6, jogging to x=1177.8), by the x=1022-1035 partition whose only opening is a **double swing door at y 325-339**, and from Produce by a wall at y 473-493 with a swing door at x 1034-1047 and a double swing door at x 1089-1107. Zero fixtures; the only PDF word inside is `Seafood` itself. The customer case is the sawtooth on the partition's **west** face (y 430-492) and its frontage is green. Legitimate.
+- **Texas Backyard** (1479 cells) — 900-dpi trace shows its north wall (y≈652, x 683-816) unbroken; no door, no fixtures, no labels. Matches 659's blessed `must_not` "Texas Backyard interior (enclosed)".
+- **Pharmacy** (1534) — closed polygon, no door onto the sales floor; pickup bay 68% free, corridor east 92% free.
+- Deli/Bakery island (5160), Samuels, back rooms, restrooms, service room, produce demo-counter well — all drawn-walled, labels inside, frontages green end to end.
+- **Every aisle 1–15, 17–32, 34–48**: per-step corridor profile shows no dead band anywhere along its full length at full width. 16 and 33 verified by area scan. All alleys 100% free across their length; checkout lanes sealed, front action alley clear.
+- **All 312 printed PDF words probed** (not just ten): the only 15 further than 1.5 m from reachable floor are exactly the staff/enclosed/outside-boundary features above.
+- Remaining sealed floor is 13021 cells, all classified; the biggest leftovers are two ≈1 m² staircase slivers hugging the rotated-square produce table at (961,490) and (987,513) — bypassable (detour ×1.4), the same rotated-quad artifact 659 handles by exclusion. Left as drawn.
+
+One judgment call I want visible rather than buried: the **1.55 m Samuels↔Business Center service passage** (183 cells, pt 627-641 × 640-706). Its only three openings are Samuels' back door, the Business Center door and the Cash Control door; no counter is drawn onto the front alley and no product sits in it, so I kept it sealed — but if H-E-B treats that Business Center as customer-facing, this becomes an inclusion.
+
+Mechanical after fixes: `./rebuild.sh 16` exit 0 · `"verify": []` · both coverage lists empty · 1 component (84766) · walkable 35.0% = reachable 35.0% · **776 tests pass**. Files touched: `data/16/inclusions.json` (8→14) and `data/16/walk_truth.json` (24→31 must, 21→23 must_not). No code, no goldens, no other stores.
+
+`AUDIT CLEAN — store 16 (8 findings fixed)`
