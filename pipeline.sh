@@ -39,9 +39,10 @@
 # Agent runner: isolated Opus/xhigh Claude session (override the whole command
 # with PIPE_AGENT='codex exec' etc.). Runs with --dangerously-skip-permissions
 # — the guardrails live in the runbook prompts (data-files-only, no code, no
-# goldens) and the golden + test gates catch violations. The runbooks fan work
-# out to read-only subagents; only the parent session writes. Run from a
-# terminal, not from inside another agent session.
+# goldens) and the golden + test gates catch violations. Subagent spawning is
+# hard-disabled (--disallowedTools): one session per stage does all the work
+# itself — slower, but every token spent is visible in one log and the usage
+# rate stays flat. Run from a terminal, not from inside another agent session.
 set -e
 S=$1
 [ -n "$S" ] || { echo "usage: ./pipeline.sh <store> [city|--no-agents] [--from n]"; exit 2; }
@@ -64,7 +65,7 @@ esac
 # pass every automated gate yet seal real customer space (service-disk rims
 # pinching aisle mouths) — and a medium audit blesses them. High reproduced
 # the shipped xhigh map exactly (60/60 walk-truth points).
-AGENT=${PIPE_AGENT:-"claude --safe-mode --model claude-opus-5 --effort high --dangerously-skip-permissions -p"}
+AGENT=${PIPE_AGENT:-"claude --safe-mode --model claude-opus-5 --effort high --disallowedTools Task,Agent --dangerously-skip-permissions -p"}
 LOG="data/$S/qa"
 mkdir -p "$LOG"
 [ "$FROM" = 1 ] || echo "==> resuming store $S at stage $FROM"

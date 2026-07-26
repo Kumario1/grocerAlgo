@@ -291,20 +291,28 @@ vanishing, which is how store 811 spent a day looking like a crash.
 
 ```bash
 python3 sweep_stores.py               # probe the CDN for every published guide → stores.txt
-./fleet_all.sh                        # onboard everything in stores.txt, 3 stores at a time
-./fleet_all.sh 8                      # wider, when there is usage headroom
+nohup ./fleet_drive.sh &              # drive everything in stores.txt, one store at a time
+./fleet_drive.sh 658 660              # or just these stores
 ```
 
 H-E-B publishes a guide for every store at a predictable URL, so the sweep
 finds the whole fleet with HEAD requests, downloads and preflights each guide,
-and orders `stores.txt` fresh-guides-first, stale-risk last. Each store then
-runs in its own throwaway git worktree (`onboard_fleet.sh`), pinned to a
-commit, so runs never tread on each other or on development in the main
-checkout. Placement needs a logged-in browser, so the fleet defers it; it is
-paid down later in batches from the main checkout with
-`python3 capture_atlas.py <N> && python3 calibrate.py <N>`. The driver is
-rerunnable — already-onboarded stores are skipped, so a killed run resumes by
-running it again.
+and orders `stores.txt` fresh-guides-first, stale-risk last. Each store runs
+in its own git worktree pinned to a commit, so runs never tread on
+development in the main checkout.
+
+The driver is sequential and checkpoint-first: each store resumes at its
+furthest completed stage (the worktree artifacts are the state), a finished
+store is committed to main the moment its audit is clean, and when the Claude
+session limit caps mid-run the driver parks itself until the reset time named
+in the message and then retries the same store — a multi-day fleet run needs
+no babysitting. Progress is in `logs/fleet/drive.log`; a killed run resumes
+by running it again. Pipeline agents cannot spawn subagents
+(`--disallowedTools`), so the usage rate stays flat and predictable.
+
+Placement needs a logged-in browser, so the fleet defers it; it is paid down
+later in batches from the main checkout with
+`python3 capture_atlas.py <N> && python3 calibrate.py <N>`.
 
 Vector guides use the standard extraction path. The image-only fallback is
 still experimental — it passes the structural precision/recall, exact-aisle,
