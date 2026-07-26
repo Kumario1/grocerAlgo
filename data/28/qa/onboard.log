@@ -1,0 +1,27 @@
+Store 28 is converged. I started from the committed first-pass evidence (which already carried an `exclusions.json` and a 6-entry `inclusions.json`), verified every one of those judgments against the PDF rather than trusting them, and found two real defects that all the mechanical nets missed.
+
+## Findings I fixed
+
+**1. The auto-derived checkstand seal rect ate the front alley's east end and both door approaches** — `data/28/seal_zones.json` (new, full override; the five derived disks carried over verbatim).
+
+`auto:CHECKSTANDS` was `rect [492.41, 612.39, 886.33, 709.35] bridge 20`. The south bank's registers only occupy y=614–656; east of the bank (x≈828–880) the front action alley is a 20 pt band between the register-end merchandisers (y=654–663) and the front wall at y=683.4, so a 20 pt bridge closed it outright. Grid probe before/after at x 780–900:
+
+```
+y=670  raw ##############################   final(before) ############.............#####
+y=670  raw ##############################   final(after)  ##############################
+```
+
+That severed the approach to the east Entrance/Exit doors (227-cell pocket at (855,671) + 59-cell vestibule pocket at (826,702)), and also sealed the west vestibule (62 cells at (524,703)). Trimmed y1 to 660 — lanes still seal, alley and both door approaches open.
+
+**2. Café seating floor west of the Deli counter block was sealed** — new `inclusions.json` entry `[506, 458, 555, 498]`. The 275-cell pocket at (535,474) sits 57 pt from the FLORAL disk centre, whose 12 pt bridge plugged the ~13 pt gaps between the drawn table/chair symbols. Stops at x=555 so the counter block's own staff notch stays sealed.
+
+## Verification
+
+- `./rebuild.sh 28` exit 0, **763 passed**, `"verify": []`, `"coverage"` both lists empty, 1 component, walkable 27.6%.
+- All 14 remaining sealed components classified from the drawing: market back prep room behind the x=1013 wall (2821), both checkstand lane banks (886+548), behind the Deli counter (809), the walled office block at the bank's east end (612), Restrooms (220), the two Cooking Connection demo-island interiors (154+107), the Deli block's service notch (70+55), and four ≤90-cell drafting slivers between abutting fixtures.
+- 27 product labels probed across all wings (Cotton Balls, Dog Food, Coconut Water, Goya, Tortillas, Cough & Cold, Tobacco, …): every one lands *on* reachable floor, 0.00 m.
+- Corridor-width map shows no red slivers; the pharmacy wedge exclusion strands no shelf labels (nearest product labels are east of x≈340).
+
+**`data/28/walk_truth.json`**: 23 `must` (front alley incl. the fixed east segment, both entrance approaches, back alley, centre alley, five distinct aisle corridors spanning both wings, the badge alley, Dairy/Frozen/Deli/Floral/Pharmacy-pickup/Produce/Market/Meat Simple frontages, the café seating fix) and 18 `must_not` (outside/parking, two page corners, lease unit, pharmacy room, deli back + notch, both checkstand banks' lane interiors, restrooms, office block, market back room, both demo islands, NW back room, west sliver). Every coordinate was probed against the shipped `profile.npz`, and the lane-interior points were checked against an exclusion-free grid so they test the sealing rule rather than a fixture.
+
+Stopping here for the separate audit context, per the runbook.

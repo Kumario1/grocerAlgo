@@ -1,0 +1,19 @@
+[
+  {"name": "auto:DELI (carried over verbatim) — deli service island, staff work behind the counter run at x=476-604 / y=386-426",
+   "pt": [526.4642333984375, 376.04917907714844], "r": 130, "bridge": 12},
+
+  {"name": "auto:FLORAL (carried over verbatim)",
+   "pt": [565.2716979980469, 524.6419372558594], "r": 130, "bridge": 12},
+
+  {"name": "auto:KITCHEN (carried over verbatim) — the label is the 'Kitchen Gadgets' shelf sign in aisle 10, kept only so the derived set is preserved; inclusions.json reopens that corridor",
+   "pt": [596.2649841308594, 323.20509338378906], "r": 130, "bridge": 12},
+
+  {"name": "auto:PHARMACY (carried over verbatim)",
+   "pt": [277.0212860107422, 617.0291137695312], "r": 130, "bridge": 12},
+
+  {"name": "auto:SEAFOOD (carried over verbatim) — the only thing it legitimately seals here is the two Cooking Connection demo-island interiors (pockets at (963,301) and (955,365)); the market floor it over-plugged is reopened by inclusions.json",
+   "pt": [999.6869201660156, 402.82041931152344], "r": 130, "bridge": 20},
+
+  {"name": "Checkstand lane bank — SHAPE CORRECTION of auto:CHECKSTANDS, whose rect ran to y=709.35. The south bank's registers occupy y=614-656 only, and east of the bank (x=828-880) the front action alley is a 20 pt band between the register-end merchandisers (y=654-663) and the front wall at y=683.4, so a 20 pt bridge closed the alley outright and cut the approach to the east Entrance/Exit doors. Trimmed to y=660: the lanes still seal, the alley and the east door approach stay open. x/y0 are the derived values",
+   "rect": [492.41, 612.38623046875, 886.3333129882812, 660.0], "bridge": 20}
+]

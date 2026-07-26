@@ -1,0 +1,31 @@
+[
+  {"name": "West ends of aisles 26-33 (customer shopping corridors, VERIFY-free): the auto PHARMACY seal disk (pt 277,617 r=130) reaches x<407, and its 12-pt bridge closes gaps up to ~14 pt, so the 13.8-14.0 pt aisle gaps between the west perimeter gondolas were plugged far from the aisle badges at x=434 (badge protection only covers +/-16 pt). Culled pockets 247 cells at (338,537) near AISLE 28 and 210 cells at (372,615) near AISLE 31 are those two corridors. The pharmacy room itself is carved out by exclusions.json",
+   "rect": [284, 486, 412, 674]},
+
+  {"name": "Deli-front action alley (customer): the DELI label at (526,376) is printed on the open alley between the aisle end caps (y<=364.1) and the deli service counter (y>=386.8). The staff side behind that counter stays sealed as the 809-cell pocket at (544,408)",
+   "rect": [482, 366, 660, 385]},
+
+  {"name": "Aisle 10 corridor (customer): the KITCHEN anchor at (596,323) is the shelf product label 'Kitchen Gadgets', not a service kitchen — it lies in the corridor between the aisle-10 gondolas at x=593.6 and x=610.4, which run the full depth of the grocery block",
+   "rect": [594, 145, 610, 336]},
+
+  {"name": "Market floor at Sushiya Seafood / Meat Simple and the Produce nook (customer): no counter enclosure is drawn here at all, only free-standing island cases on open floor, so the auto SEAFOOD disk (pt 1000,403 r=130 bridge=20) had nothing to seal and instead plugged the floor between the cases — the 350-cell pocket at (968,425) under the Meat Simple label and the 117-cell pocket at (952,510) between two produce tables",
+   "rect": [928, 392, 1002, 525]},
+
+  {"name": "North passage between the Beer & Wine end gondola (x<=926.2) and the Cooking Connection demo island (poly starts x=947.5) — a ~21 pt customer passage plugged by the SEAFOOD disk's 20-pt bridge (105-cell pocket at (937,301)). The demo island's own interior stays sealed",
+   "rect": [925, 284, 949, 326]},
+
+  {"name": "South passage below the same gondola and west of the lower Cooking Connection island (poly starts x=934.1) — same 20-pt bridge plug (79-cell pocket at (918,356))",
+   "rect": [905, 346, 935, 366]},
+
+  {"name": "Cafe seating floor west of the Deli counter block (customer): the strip between the fixture band at y=452-460, the counter block wall at x=556 and the drawn tables/chairs is open shopping floor with seating on it, but it sits 57 pt from the FLORAL disk centre so its 12-pt bridge plugged the ~13 pt gaps between the chair symbols and sealed it as the 275-cell pocket at (535,474). Stops at x=555 so the counter block's own staff notch (pockets at (591,503)/(601,508)) stays sealed",
+   "rect": [506, 458, 555, 498]},
+
+  {"name": "Aisle 24 east mouth (customer): the auto DELI disk (pt 526,376 r=130) just reaches this corner — dist((417,442),(526,376)) = 128 pt — and its 12-pt bridge closed the 12.6 pt gap between the aisle-23 gondola end (x=422.1, y=424-434) and the aisle-25 gondola end (x=425.4, y=448-458), sealing the mouth where the aisle-24 corridor (School Supplies / Toys / Greeting Cards) meets the west-wing action alley. The badge at (434,442) is 14 pt east of the plug, outside the +/-16 pt badge protection window's reach into the gap. The aisle stayed entrance-reachable from its west end, so no mechanical net fired, but the walk from the alley into aisle 24 was 186 pt instead of 106 pt (every other west-wing aisle measures 0.86-0.96x straight-line; aisle 24 measured 1.75x)",
+   "rect": [404, 430, 428, 452]},
+
+  {"name": "West-wing action-alley cross-overs at the aisle 25-29 badge lines (customer): a column of endcap display squares stands in the alley at x=444.6-454.8 with 12-15 pt gaps between them, and each gap lines up with an aisle badge — the east-west continuation of aisles 25/26, 26/27, 27/28, 28/29 and 29 across the alley. All five sit 55-100 pt from the FLORAL disk centre (565,525) and its 12-pt bridge plugged them (1.2-1.5 m² each at (449,466), (450,489), (450,513), (450,537), (450,561)). The squares themselves stay solid — an inclusion only restores cells the drawing already paints as floor",
+   "rect": [441, 456, 459, 588]},
+
+  {"name": "Market island passages west of the Sushiya/Meat Simple nook (customer): the same SEAFOOD disk (pt 1000,403 r=130 bridge=20) that over-plugged the nook east of x=928 also bridged the 15-18 pt gaps between the free-standing cases on the open Market floor west of it — the south corner of the Beer & Wine end gondola at (897,325), the Tortilleria diamond island to the case east of it at (887,369), and the two gaps in the Meat Simple case column at (905,429) and (905,470). No counter or wall is drawn anywhere in this block, so there was nothing here to seal",
+   "rect": [872, 306, 918, 506]}
+]

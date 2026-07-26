@@ -1,0 +1,42 @@
+## Findings — store 28 (H-E-B League City), worst first
+
+Rebuild rerun from scratch before and after every edit. All four findings were real defects in the shipped grid; all four are fixed in store 28's data files only.
+
+---
+
+**F1 — Aisle 24's east mouth was sealed shut by the auto DELI disk** (fix: inclusion)
+- Coordinates: plug at x 412–420, y 436–446 (PDF pt); aisle-24 badge at (434, 442)
+- Evidence: crop x 395–470 / y 420–470 of `walkable_overlay.png` shows a white stair-step wedge filling the gap between the aisle-23 gondola end (x=422.1, y 424–434) and the aisle-25 gondola end (x=425.4, y 448–458). `dist((417,442),(526,376)) = 128 pt < r=130`, so the auto:DELI disk reached this corner and its 12-pt bridge closed the 12.6-pt gap. The badge sits 14 pt east of the plug — outside the ±16 pt badge-protection window.
+- Why no net fired: the aisle stayed entrance-reachable from its **west** end, so School Supplies / Toys / Greeting Cards all kept frontage and `unreachable_shelf_labels` stayed empty. Measured detour instead: walking from the action alley into aisle 24 was **186 pt vs 106 pt straight (1.75×)**, while every other west-wing aisle measured 0.86–0.96×.
+- Truth: open customer corridor mouth. Fix: `inclusions.json` rect `[404, 430, 428, 452]` (restores exactly 21 cells). Post-fix ratio **0.90**, in line with its neighbours.
+
+**F2 — Five west-wing action-alley cross-overs sealed by the FLORAL disk** (fix: inclusion)
+- Coordinates: (449,466), (450,489), (450,513), (450,537), (450,561)
+- Evidence: crop x 430–470 / y 450–595. A column of endcap display squares stands in the alley at x 444.6–454.8 with 12–15 pt gaps between them; each gap lines up with an aisle badge (the east-west continuation of aisles 25/26 … 29 across the alley). All five are 55–100 pt from the FLORAL disk centre (565,525) and its 12-pt bridge plugged every one (1.2–1.5 m² each).
+- Truth: customer cross-overs. Fix: `inclusions.json` rect `[441, 456, 459, 588]` (restores 146 cells, in exactly 5 pieces; the squares themselves stay solid).
+
+**F3 — Five Market island passages plugged by the SEAFOOD disk's 20-pt bridge** (fix: inclusion)
+- Coordinates: (897,325), (887,369), (887,417), (905,429), (905,470)
+- Evidence: crop x 865–925 / y 300–510. No counter or wall is drawn anywhere in this block — only free-standing island cases on open floor — so the disk had nothing to seal and instead bridged the 15–18 pt gaps between cases (Beer & Wine gondola south corner, Tortilleria diamond island to the case east of it, and the two gaps in the Meat Simple case column). Same defect class the file already fixes east of x=928.
+- Fix: `inclusions.json` rect `[872, 306, 918, 506]` (restores 217 cells, exactly those 5 pieces).
+
+**F4 — `walk_truth.json` `must_not [810,467]` was mislabeled, and the restrooms had no coverage at all** (fix: walk_truth points)
+- Evidence: crop x 735–890 / y 435–545. The restroom interiors are at x 697–745, y 448–522 (doors on their south walls at y≈515). (810,467) is inside a *different* enclosed room — walls x 799–822 / y 451–486, door on its east wall — the 220-cell pocket the stats print as "near RESTROOMS" (nearest-anchor naming, not containment). So the authored truth claimed restroom coverage it did not have: nothing would have caught the restrooms being opened.
+- Fix: relabeled that point to what it actually is, and added `must_not` at (710,485) and (733,485) — the two restroom interiors — plus (812,512) for the lower enclosed room.
+
+Every fix also got a `must` point that would have failed before it: (417,442), (450,489), (450,537), (887,369), (905,429), (897,325) — each verified to lie in a cell that was blocked in the pre-fix grid. Suite went 763 → **772 passed**.
+
+---
+
+## Checked and cleared (each could have been the store-24 failure)
+
+- **Pharmacy wedge, 46 m² excluded** (x 256–312, y 552–682): the PDF draws it as a solid empty polygon — no counter, bench, or door inside, unlike every customer area on this map, which carries fixtures. Its only customer-facing feature is the First Aid gondola on the east edge (x 295.8–300); the pickup corridor east of it is green and covered by `must [315,610]`. Exclusion's stated WHY matches the drawing. Not a finding.
+- **Market NE room, 122 m² sealed** (x 1002–1070, y 214–448) — the largest culled pocket: walled on all sides (thick wall x 1005–1013, diagonal Market wall case closing the south with its shelving teeth facing the *sales* floor), zero fixtures, zero labels. Back-of-house. Covered by `must_not [1040,300]`.
+- **Every one of the 14 remaining unreachable non-fixture patches ≥2 m²** classified: checkout lanes ×3, behind-deli + its south notch, pharmacy, Market prep room, the two enclosed rooms east of the restrooms, both Cooking Connection demo-island interiors, the Market diagonal staff strip, and the three drafting slivers. No unexplained pocket remains.
+- **Unanchored departments** (Market, Beer & Wine, Healthy Living, Cooking Connection, Sushiya Seafood, Tortilleria, Apparel, Books & Magazines, Tobacco) inspected individually against `geometry.json` — all have green frontage.
+- **Label probes:** ran all **329** printed words, not just 10. Every product word touches walkable floor (0.00 m). The only non-zero distances are the parking-row letters A–J, Carts, the four front lease-unit names, the two Entrance labels in the vestibules, "Pharmacy" (inside the excluded staff room), and "Restrooms" (on the door face).
+- **Remaining graph-distance discontinuities** (deli-alley/cafe divider, deli-block U alcove, Tobacco bar, restroom-alcove north wall, customer-service office) all trace to walls or fixtures drawn in the PDF, not to our seals.
+- **Config sanity:** 5 exclusions and 7 (now 10) inclusions each state a WHY that the drawing confirms; no inclusion blankets a staff room (`build_free` applies inclusions to `free_raw`, which already has exclusions removed, so the pharmacy cannot be reopened); no exclusion covers a shelf label's only frontage. `seal_zones.json` = the derived set plus one documented shape correction.
+- Post-fix report: `verify: []`, both coverage lists empty, **1** component, walkable **27.7 %**, only expected far-snap (PHARMACY 2.47 m). Component size moved 72858 → 73242 = **+384 cells**, exactly the 21 + 146 + 217 intended — no side effects anywhere else on the map.
+
+`AUDIT CLEAN — store 28 (4 findings fixed)`

@@ -1,0 +1,17 @@
+[
+  {"name": "Pharmacy dispensing room (staff): the SW wedge is drawn as a solid colored room with no counter, waiting bench or door inside it — the only customer-facing feature is the First Aid gondola on its east edge (x=295.8-300.0), so the customer frontage is the corridor east of x=300 and everything west of the traced wall is staff. Wall traced from the PDF strokes: diagonal (267,552)->(296,582), First Aid bay down to y=640, stepped wall (291,640)->(299,670)->(306,667)->(312,682) into the front wall",
+   "poly": [[256, 552], [267, 552], [296, 582], [296, 640], [291, 640],
+            [299, 670], [306, 667], [312, 682], [256, 682]]},
+
+  {"name": "North checkstand bank lane interiors (shoppers queue here, the router must not path through it): the store has TWO banks of checkstands, y=564-601 and y=620-657. The derived auto:CHECKSTANDS rect is built from fixtures within +/-45 pt of the CHECKSTANDS label at y=666.6, so it only reaches the south bank and left this one open between every register",
+   "rect": [510, 562, 804, 604]},
+
+  {"name": "Drafting sliver behind the west perimeter gondola: 3.8 pt (~0.4 m) of 'floor' between the west wall at x=256.6 and the back of the fixture at x=260.4 — too tight to walk, and corridor_width.png paints it deep red",
+   "rect": [256, 118, 261, 288]},
+
+  {"name": "Drafting sliver behind the north back-wall gondola: ~4.9 pt (~0.5 m) between the north wall at y=68.0 and the back of the fixture at y=72.9",
+   "rect": [612, 67, 736, 73]},
+
+  {"name": "Drafting sliver behind the south Produce wall case: ~5.1 pt (~0.5 m) between the case back at y=678.3 and the front wall at y=683.4",
+   "rect": [914, 678, 1062, 684]}
+]

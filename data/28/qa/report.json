@@ -1,0 +1,172 @@
+{
+ "components": {
+  "n": 1,
+  "sizes": [
+   73242
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 2821,
+   "near": "SEAFOOD",
+   "x": 1043.5,
+   "y": 312.3
+  },
+  {
+   "cells": 886,
+   "near": "CHECKSTANDS",
+   "x": 759.5,
+   "y": 634.1
+  },
+  {
+   "cells": 809,
+   "near": "DELI",
+   "x": 543.8,
+   "y": 408.5
+  },
+  {
+   "cells": 612,
+   "near": "PRODUCE",
+   "x": 845.7,
+   "y": 621.0
+  },
+  {
+   "cells": 548,
+   "near": "CHECKSTANDS",
+   "x": 591.3,
+   "y": 632.4
+  },
+  {
+   "cells": 350,
+   "near": "MEAT SIMPLE",
+   "x": 968.5,
+   "y": 425.1
+  },
+  {
+   "cells": 275,
+   "near": "FLORAL",
+   "x": 534.6,
+   "y": 474.2
+  },
+  {
+   "cells": 247,
+   "near": "AISLE 28",
+   "x": 338.2,
+   "y": 537.1
+  },
+  {
+   "cells": 220,
+   "near": "RESTROOMS",
+   "x": 810.2,
+   "y": 466.9
+  },
+  {
+   "cells": 210,
+   "near": "AISLE 31",
+   "x": 372.0,
+   "y": 615.0
+  },
+  {
+   "cells": 154,
+   "near": "SEAFOOD",
+   "x": 963.0,
+   "y": 301.2
+  },
+  {
+   "cells": 117,
+   "near": "PRODUCE",
+   "x": 952.0,
+   "y": 510.0
+  },
+  {
+   "cells": 107,
+   "near": "SEAFOOD",
+   "x": 954.6,
+   "y": 364.9
+  },
+  {
+   "cells": 105,
+   "near": "SEAFOOD",
+   "x": 936.7,
+   "y": 301.4
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 12.0,
+   "meters": 2.47,
+   "name": "PHARMACY"
+  }
+ ],
+ "m_per_cell": 0.2053,
+ "narrow": [
+  {
+   "half_width_m": 0.82,
+   "name": "ENTRANCE"
+  },
+  {
+   "half_width_m": 0.82,
+   "name": "KITCHEN"
+  },
+  {
+   "half_width_m": 0.82,
+   "name": "MEAT"
+  },
+  {
+   "half_width_m": 1.03,
+   "name": "PHARMACY"
+  },
+  {
+   "half_width_m": 1.03,
+   "name": "RESTROOMS"
+  },
+  {
+   "half_width_m": 1.05,
+   "name": "PRODUCE"
+  },
+  {
+   "half_width_m": 1.16,
+   "name": "AISLE 28"
+  },
+  {
+   "half_width_m": 1.2,
+   "name": "AISLE 21"
+  }
+ ],
+ "provenance": {
+  "drift": {
+   "seal_zones": {
+    "derived_n": 6,
+    "derived_names": [
+     "auto:DELI",
+     "auto:FLORAL",
+     "auto:KITCHEN",
+     "auto:PHARMACY",
+     "auto:SEAFOOD",
+     "auto:CHECKSTANDS"
+    ],
+    "file_n": 6,
+    "file_names": [
+     "auto:DELI (carried over verbatim) \u2014 deli service island, staff work behind the counter run at x=476-604 / y=386-426",
+     "auto:FLORAL (carried over verbatim)",
+     "auto:KITCHEN (carried over verbatim) \u2014 the label is the 'Kitchen Gadgets' shelf sign in aisle 10, kept only so the derived set is preserved; inclusions.json reopens that corridor",
+     "auto:PHARMACY (carried over verbatim)",
+     "auto:SEAFOOD (carried over verbatim) \u2014 the only thing it legitimately seals here is the two Cooking Connection demo-island interiors (pockets at (963,301) and (955,365)); the market floor it over-plugged is reopened by inclusions.json",
+     "Checkstand lane bank \u2014 SHAPE CORRECTION of auto:CHECKSTANDS, whose rect ran to y=709.35. The south bank's registers occupy y=614-656 only, and east of the bank (x=828-880) the front action alley is a 20 pt band between the register-end merchandisers (y=654-663) and the front wall at y=683.4, so a 20 pt bridge closed the alley outright and cut the approach to the east Entrance/Exit doors. Trimmed to y=660: the lanes still seal, the alley and the east door approach stay open. x/y0 are the derived values"
+    ]
+   }
+  },
+  "exclusions": "file",
+  "inclusions": "file",
+  "seal_zones": "file",
+  "zones": "derived"
+ },
+ "reachable_pct": 27.7,
+ "store": "28",
+ "verify": [],
+ "walkable_pct": 27.7
+}
