@@ -1,0 +1,22 @@
+[
+  {"name": "Deli staff alley behind the deli counter (the 'Deli' label prints on the staff side, as at 659; alley is walled west by the prep-room block x=885.8/850.7-880.4 and closed south by the y=379.4 wall, with the 9.5pt service case at x=919.3-928.8 to its east — customers are served from the east aisle)",
+   "rect": [885.0, 254.0, 919.5, 380.0]},
+
+  {"name": "Deli back lobby between the two prep-room doors (both drawn door swings, (872,254)->(881,264) and (863,315)->(872,305), open into this pocket; it only leads to the deli alley and the two back rooms)",
+   "rect": [870.0, 254.0, 886.0, 316.0]},
+
+  {"name": "Specialty Cheese counter interior (inside the curved counter band; its only floor connection is south into the deli staff alley, so no shopper can enter it)",
+   "rect": [894.0, 204.0, 936.0, 256.0]},
+
+  {"name": "Cooking Connection demo-counter interior (staff inside the horseshoe). The pipeline cannot condemn this pocket itself, but NOT because the name is artwork: 'Cooking' (981.5,310.8) and 'Connection' (978.6,314.7) are ordinary text spans that page.get_text('words') returns. engine.SERVICE_DEPTS carries a 'COOKING' token, yet extract.py's anchor whitelist has no COOKING entry, so no anchor is ever named COOKING and the substring cull never fires — the token is dead on the vector path (raster.py's MAJOR_LABELS omits it too)",
+   "rect": [975.0, 303.0, 1012.0, 338.0]},
+
+  {"name": "Meal Simple prep interior (staff inside the horseshoe; its only floor links are two ~2 pt slivers past the block at x=985-1005 — cf. 659's 'Meal Simple seating/prep block' exclusion). Same dead-token cause as the Cooking Connection entry: 'Meal' (986.8,466.7) and 'Simple' (983.9,473.6) are ordinary text spans, but extract.py's whitelist has no MEAL entry, so SERVICE_DEPTS' 'MEAL SIMPLE' token never matches an anchor. Note the two words also land in different line buckets (round(y0/4) = 116 vs 118), so the phrase 'MEAL SIMPLE' never forms — a whitelist fix would have to match 'MEAL'",
+   "rect": [978.0, 461.0, 1013.0, 496.0]},
+
+  {"name": "Back-wall sliver behind the north wall-shelving run (the shelves stand ~5 pt off the y=69 wall; corridor_width.png paints the whole strip red at ~0.2 m half-width, and the only thing it reaches is the staff double door at x=572-586 in the back wall)",
+   "rect": [368.0, 66.0, 1048.0, 74.0]},
+
+  {"name": "Bakery staff alley behind the bakery counter (prep room x=844.8-881.2 has two door swings opening east into it; ringed by the bakery cases x=917.3-929 east, the y=379.4 wall north and the counter row y=509-521 south, leaving only ~0.9-1.4 m staff pass-throughs)",
+   "rect": [841.0, 379.0, 919.5, 521.0]}
+]

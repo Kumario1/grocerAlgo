@@ -1,0 +1,46 @@
+Audit complete. All five passes run; store 660's map itself holds up, but one finding needs a code change.
+
+## Findings — worst first
+
+### F1 · `COOKING` and `MEAL SIMPLE` are dead tokens in the service-department net — **needs a code change, not fixed**
+
+`engine.SERVICE_DEPTS` (router/engine.py:73) lists `"COOKING"` and `"MEAL SIMPLE"`, but **no anchor containing either token can ever be produced**, so the substring pocket-cull *and* the QA VERIFY attention pass are silently dead for those two departments on every store.
+
+Evidence:
+- `Cooking` (981.5, 310.8), `Connection` (978.6, 314.7), `Meal` (986.8, 466.7), `Simple` (983.9, 473.6) are ordinary text spans (Gotham-Black, red `#ee3124`) that `page.get_text("words")` returns — I dumped them directly from page 2.
+- `extract.py:137-139` filters phrases against a whitelist of 15 labels; neither `COOKING` nor `MEAL` is in it. `router/raster.py:139-143` `MAJOR_LABELS` omits them too (it has `SUSHIYA`, so `SUSHI` survives on the raster path only).
+- Result for 660: `geometry.json` has no COOKING/MEAL anchor → the two horseshoe staff interiors were never condemned and raised **zero** VERIFY flags. A human had to write them by hand.
+- This has now happened four times: 659, 24, 265 and 660 all carry hand-written exclusions for exactly these counters. It is a repeating fleet-wide hole, not a one-store quirk.
+- Subtlety for whoever fixes it: adding the literal `"MEAL SIMPLE"` to the whitelist would still not fire — `extract.py` buckets words by line via `round(y0/4)`, and `Meal` (116) / `Simple` (118) land in different buckets, so that phrase never forms. The whitelist needs `MEAL`.
+
+Existing walk_truth points `(993,320)` and `(995,480)` already fail if the hand exclusions are ever dropped, so store 660 is guarded; the next store with this fixture is not.
+
+### F2 · Two `exclusions.json` WHYs stated a false mechanism — **fixed**
+`(975,303)-(1012,338)` and `(978,461)-(1013,496)` both claimed the department name is "vector artwork … absent from anchors". Both names are selectable text (F1 evidence). Rewrote both `name` fields to state the real cause. Guarded by the existing must_nots at `(993,320)` / `(995,480)`.
+
+### F3 · Stockroom bump-out had only a vacuous must_not — **fixed**
+72.1 m² of structurally-open floor at `x[1112,1204] y[356,492]` (the 1910-cell pocket at `(1151,400)`). Its only must_not, `(1150,430)`, sits on a drawn fixture *inside* the room — `build_grid` blocks that cell regardless of sealing, so the assertion can never fail on a sealing regression. Added `[1145, 389]`, on open floor with 3.2 m clearance.
+
+### F4 · East staff room had no must_not at all — **fixed**
+`x[1070,1108] y[272,300]`, 9.7 m² — the "270 cells at (1091,287) near SEAFOOD" pocket in the top-ten stats. Nearest existing point `(1090,220)` is in the corridor outside it. Added `[1095, 287]`.
+
+### F5 · East entry vestibule must_not was vacuous — **fixed**
+`(886,665)` sits on vestibule ink/fixture. Added `[863, 665]` on the 18.8 m² of open sealed floor by the Exit arrow.
+
+Post-fix: `./rebuild.sh 660` exit 0, **653 passed** (was 650 — the three new points), `verify: []`, both coverage lists empty, 1 component, 77344 cells unchanged, walkable 29.3%.
+
+## What the passes actually showed
+
+**Mechanical** — clean on the first rerun; 29.3% sits mid-band, single dominant component, all 20 culled pockets classified (east BOH corridor 124 m², pharmacy back offices 110 m², stockroom 72 m², deli/bakery staff alleys, restrooms, vestibule, 9 checkout lanes, 3 floral-display interstices).
+
+**Visual sweep** — 3×3 crops plus targeted zooms, then made quantitative: I computed every cell that is printed paper, inside the boundary, not covered by an extracted fixture, and not walkable, ranked by area, bypassing the blessed-exemption logic entirely. Eight regions ≥8 m²; every one resolves to a staff alley, enclosed room, checkout lane or drawn-sealed vestibule. No shopping floor is sealed. Corridor scan across all 38 aisles: 100% free, longest interior blocked run 0.0 pt.
+
+**Label probes** — rather than 10 samples I probed all 144 text lines on page 2. Every product label is ≤0.13 m from reachable floor (Cotton Balls, Dog Food, Baby Wipes, Kitchen Gadgets, Frozen Foods, Beer & Wine, Tortillas, Eye Care, Incontinence, Bath Tissue, Seasonal Items, Jam/Jelly…). The only labels >1.5 m out are department names printed on staff sides and outdoor features — the store-24 failure mode is absent.
+
+**Config** — verified the seal_zones claims rather than trusting them: all seven "carried over unchanged" disks are byte-identical to `derive_seal_zones`, and the checkstand WHY's cited pre-fix rect reproduces exactly as `[506.67, 501.39, 922.08, 619.88]`. The big inclusion poly restores 142.6 m²; I confirmed zero restored cells reach the BOH corridor (walkable cells east of x=1048 exist only at y 388-488, the Seafood→Produce walk) and that exclusions still beat inclusions (0 excluded cells walkable).
+
+Two notes I did **not** raise as findings: the four enclosed rooms whose must_nots are also vacuous (Dairy cooler, pharmacy dispensary, NE back room, deli prep room) have *no* open floor inside them at all — their interiors are solid extracted fixtures, so no better point exists. And the Blooms interstices are 1.0–1.5 m slots between four display tables with green on all sides and no labels — consistent with how 659 treats its floral front.
+
+I touched only `data/660/exclusions.json` and `data/660/walk_truth.json`. The pre-existing staged edits to `extract.py` and `docs/audit.md` were in the tree before I started and I left them alone.
+
+`AUDIT BLOCKED — store 660: the shipped map is correct and all four data-fixable findings are repaired and green, but engine.SERVICE_DEPTS' "COOKING" and "MEAL SIMPLE" tokens can never match an anchor (extract.py:137-139 whitelist and raster.py MAJOR_LABELS both omit them), leaving the auto-cull and VERIFY nets dead for those departments fleet-wide — 660, 659, 24 and 265 each needed a hand-written exclusion to cover the gap. Fixing it requires a code change, which is outside my remit.`

@@ -1,0 +1,239 @@
+{
+ "components": {
+  "n": 1,
+  "sizes": [
+   77344
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 5725,
+   "near": "SEAFOOD",
+   "x": 1058.0,
+   "y": 339.4
+  },
+  {
+   "cells": 2989,
+   "near": "PHARMACY",
+   "x": 276.2,
+   "y": 699.9
+  },
+  {
+   "cells": 1910,
+   "near": "SEAFOOD",
+   "x": 1151.5,
+   "y": 400.4
+  },
+  {
+   "cells": 1292,
+   "near": "RESTROOMS",
+   "x": 603.0,
+   "y": 703.4
+  },
+  {
+   "cells": 594,
+   "near": "ENTRANCE",
+   "x": 885.6,
+   "y": 665.5
+  },
+  {
+   "cells": 326,
+   "near": "EXIT",
+   "x": 816.7,
+   "y": 594.2
+  },
+  {
+   "cells": 270,
+   "near": "SEAFOOD",
+   "x": 1090.6,
+   "y": 287.0
+  },
+  {
+   "cells": 246,
+   "near": "DELI",
+   "x": 859.7,
+   "y": 282.5
+  },
+  {
+   "cells": 242,
+   "near": "CHECKSTANDS",
+   "x": 616.1,
+   "y": 594.1
+  },
+  {
+   "cells": 162,
+   "near": "BLOOMS",
+   "x": 500.0,
+   "y": 600.4
+  },
+  {
+   "cells": 135,
+   "near": "BLOOMS",
+   "x": 586.0,
+   "y": 596.5
+  },
+  {
+   "cells": 126,
+   "near": "BLOOMS",
+   "x": 565.0,
+   "y": 594.7
+  },
+  {
+   "cells": 123,
+   "near": "CHECKSTANDS",
+   "x": 664.3,
+   "y": 594.7
+  },
+  {
+   "cells": 123,
+   "near": "CHECKSTANDS",
+   "x": 742.3,
+   "y": 594.7
+  },
+  {
+   "cells": 122,
+   "near": "CHECKSTANDS",
+   "x": 644.7,
+   "y": 595.3
+  },
+  {
+   "cells": 122,
+   "near": "CHECKSTANDS",
+   "x": 723.0,
+   "y": 593.8
+  },
+  {
+   "cells": 121,
+   "near": "CHECKSTANDS",
+   "x": 762.4,
+   "y": 594.8
+  },
+  {
+   "cells": 120,
+   "near": "CHECKSTANDS",
+   "x": 703.1,
+   "y": 593.8
+  },
+  {
+   "cells": 105,
+   "near": "CHECKSTANDS",
+   "x": 683.5,
+   "y": 594.1
+  },
+  {
+   "cells": 105,
+   "near": "CHECKSTANDS",
+   "x": 781.5,
+   "y": 594.1
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 75.3,
+   "meters": 15.11,
+   "name": "PHARMACY DRIVE-THRU"
+  },
+  {
+   "cells": 18.2,
+   "meters": 3.64,
+   "name": "PHARMACY"
+  },
+  {
+   "cells": 15.0,
+   "meters": 3.0,
+   "name": "BAKERY"
+  },
+  {
+   "cells": 13.4,
+   "meters": 2.68,
+   "name": "DELI"
+  }
+ ],
+ "m_per_cell": 0.2006,
+ "narrow": [
+  {
+   "half_width_m": 0.72,
+   "name": "AISLE 1"
+  },
+  {
+   "half_width_m": 0.72,
+   "name": "AISLE 10"
+  },
+  {
+   "half_width_m": 0.72,
+   "name": "AISLE 11"
+  },
+  {
+   "half_width_m": 0.72,
+   "name": "AISLE 12"
+  },
+  {
+   "half_width_m": 0.72,
+   "name": "AISLE 14"
+  },
+  {
+   "half_width_m": 0.72,
+   "name": "AISLE 2"
+  },
+  {
+   "half_width_m": 0.72,
+   "name": "AISLE 4"
+  },
+  {
+   "half_width_m": 0.72,
+   "name": "AISLE 5"
+  }
+ ],
+ "provenance": {
+  "drift": {
+   "seal_zones": {
+    "derived_n": 8,
+    "derived_names": [
+     "auto:BAKERY",
+     "auto:BLOOMS",
+     "auto:DELI",
+     "auto:FLORAL",
+     "auto:KITCHEN",
+     "auto:PHARMACY",
+     "auto:SEAFOOD",
+     "auto:CHECKSTANDS"
+    ],
+    "file_n": 8,
+    "file_names": [
+     "Bakery service island (staff) \u2014 derived disk, carried over unchanged",
+     "Blooms floral counter (staff) \u2014 derived disk, carried over unchanged",
+     "Deli service island (staff) \u2014 derived disk, carried over unchanged",
+     "Floral counter by the west entrance (staff) \u2014 derived disk, carried over unchanged",
+     "Kitchen disk \u2014 derived from the 'Kitchen Gadgets' shelf label; kept verbatim so this file stays a pure shape fix of the checkstand rect (the label is customer space, restored by inclusions.json)",
+     "Pharmacy counter (staff) \u2014 derived disk, carried over unchanged",
+     "Seafood counter (staff; wider staff entrances) \u2014 derived disk, carried over unchanged",
+     "Checkstand lane bank \u2014 SHAPE FIX. The derived rect was [506.7, 501.4, 922.1, 619.9]: the +/-45 pt window around the CHECKSTANDS label swept in the bakery counter row and cafe tables (y-centres 515-540, x up to 914), dragging the rect's top up to y=501 and its right edge to x=922. At bridge=20 that closed the 16 pt aisle mouths and cut the south 3 m off aisles 13-23 (culled pockets at (518,519),(547,519),(602,518),(631,518)). Rect retightened to the actual lane fixtures only (y-centres 578-598, x 514.7-888.9, same +/-8 pt pad); bridge unchanged so the lanes still seal while the front action alley stays open"
+    ]
+   },
+   "zones": {
+    "ENTRANCE": {
+     "derived": [
+      923.4602661132812,
+      663.2326354980469
+     ],
+     "file": [
+      886.0,
+      634.0
+     ]
+    }
+   }
+  },
+  "exclusions": "file",
+  "inclusions": "file",
+  "seal_zones": "file",
+  "zones": "file"
+ },
+ "reachable_pct": 29.3,
+ "store": "660",
+ "verify": [],
+ "walkable_pct": 29.3
+}

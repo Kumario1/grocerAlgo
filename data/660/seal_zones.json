@@ -1,0 +1,18 @@
+[
+  {"name": "Bakery service island (staff) — derived disk, carried over unchanged",
+   "pt": [891.09130859375, 477.53594970703125], "r": 130, "bridge": 12},
+  {"name": "Blooms floral counter (staff) — derived disk, carried over unchanged",
+   "pt": [500.9907531738281, 600.1932983398438], "r": 130, "bridge": 12},
+  {"name": "Deli service island (staff) — derived disk, carried over unchanged",
+   "pt": [904.7441101074219, 327.7002716064453], "r": 130, "bridge": 12},
+  {"name": "Floral counter by the west entrance (staff) — derived disk, carried over unchanged",
+   "pt": [534.2725524902344, 667.6487426757812], "r": 130, "bridge": 12},
+  {"name": "Kitchen disk — derived from the 'Kitchen Gadgets' shelf label; kept verbatim so this file stays a pure shape fix of the checkstand rect (the label is customer space, restored by inclusions.json)",
+   "pt": [597.7190856933594, 485.3126983642578], "r": 130, "bridge": 12},
+  {"name": "Pharmacy counter (staff) — derived disk, carried over unchanged",
+   "pt": [253.7970428466797, 577.3480224609375], "r": 130, "bridge": 12},
+  {"name": "Seafood counter (staff; wider staff entrances) — derived disk, carried over unchanged",
+   "pt": [1084.0613403320312, 393.8500061035156], "r": 130, "bridge": 20},
+  {"name": "Checkstand lane bank — SHAPE FIX. The derived rect was [506.7, 501.4, 922.1, 619.9]: the +/-45 pt window around the CHECKSTANDS label swept in the bakery counter row and cafe tables (y-centres 515-540, x up to 914), dragging the rect's top up to y=501 and its right edge to x=922. At bridge=20 that closed the 16 pt aisle mouths and cut the south 3 m off aisles 13-23 (culled pockets at (518,519),(547,519),(602,518),(631,518)). Rect retightened to the actual lane fixtures only (y-centres 578-598, x 514.7-888.9, same +/-8 pt pad); bridge unchanged so the lanes still seal while the front action alley stays open",
+   "rect": [506.7, 562.7, 896.9, 619.9], "bridge": 20}
+]

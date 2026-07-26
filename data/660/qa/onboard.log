@@ -1,0 +1,28 @@
+Converged. Final state for store 660:
+
+**`./rebuild.sh 660` exits 0 · `verify: []` · `coverage` both lists empty · 1 component (77 344 cells, 29.3 % walkable) · 644 tests pass** (including 659's pixel-frozen golden).
+
+## What was wrong and how data fixed it
+
+**1. First pass died: `no walkable cell near [834.3, 137.5]`.** The derived `ENTRANCE` was the "Entrance" arrow label at (923.5, 663.2), which the PDF draws *inside* the entry-vestibule trapezoid. That trapezoid is a closed 594-cell pocket in the extracted geometry, so the seed was trapped, the entire sales floor became one 92 489-cell "pocket", and the KITCHEN/DELI labels inside it condemned the whole store as staff. → **`zones.json`** moves ENTRANCE to (886, 634), the front alley just inside the doors; CHECKOUT carried over from the deriver unchanged.
+
+**2. The derived checkstand rect ate the aisle mouths.** `[506.7, 501.4, 922.1, 619.9]` — the ±45 pt window around the CHECKSTANDS label swept in the bakery counter row and café tables (y-centres 515–540), dragging the top to y=501. At bridge=20 that closed the 16 pt aisle gaps and cut the south 3 m off aisles 13–23. → **`seal_zones.json`** retightens the rect to the actual lane fixtures `[506.7, 562.7, 896.9, 619.9]`; all seven derived service disks carried over verbatim.
+
+**3. Three VERIFY flags, resolved from the drawing:**
+- **KITCHEN** is not a counter — it's the printed shelf label *"Kitchen Gadgets"* in aisle 18 → **inclusion**.
+- **DELI / BAKERY** labels print on the *staff* side (as at 659, where `[851, 280]` is "Deli island interior"). Both alleys are walled by prep rooms whose door swings open into them, with the 9.5 pt service cases to the east; customers are served from the east aisle → **exclusions**.
+
+**4. The coverage nets were blind to a half-real seal.** The 5 810-cell pocket the SEAFOOD label condemned is *two* things: east of the case-and-wall line at x≈1049 is genuine back-of-house (NE back room, staff rooms, double swing doors at (1048, 291–307) and (1049, 364–370), two more into the stockroom bump-out at x=1110) — correctly sealed; west of it is shopping floor (Market frontage, Cooking Connection, Seafood frontage) that got swallowed with it. → **inclusion poly** restores only the sales-floor half, its slanted edge following the seafood case.
+
+**5. Unanchored departments** (runbook's Sushiya/Meal Simple warning): *Cooking Connection* and *Meal Simple* are vector artwork, so "COOKING"/"MEAL SIMPLE" never reached anchors and the pipeline could not condemn them. Both horseshoe interiors are staff → **exclusions**. Same for the *Specialty Cheese* counter interior, whose only floor link is south into the deli staff alley. Plus the 0.4 m sliver behind the north wall-shelving that `corridor_width.png` painted red end to end.
+
+## Culled pockets, classified
+5810 east back-of-house band · 2989 back offices behind the pharmacy (enclosed) · 1910 stockroom bump-out behind the x=1110 partition · 1292 restroom-pictogram vestibule (artwork blocks the floor; the restroom rooms east of it stay reachable) · 594 entry vestibule (drawn closed — the reason ENTRANCE moved) · 326 + 242 + all the ~105–135-cell entries at y≈594 checkout lanes · 270 staff room off the back corridor · 246 remainder of the deli back lobby · 162 Blooms display island interior.
+
+`far_snaps` are all explained: PHARMACY DRIVE-THRU (15.1 m) is drawn outside the building; PHARMACY (3.6 m), BAKERY (3.0 m) and DELI (2.7 m) sit inside sealed staff space and snap out to their customer frontage — the same pattern 659 has for SEAFOOD.
+
+`walk_truth.json` locks it in with 19 `must` (entrance approach, both front alleys, each department's customer frontage, six distinct aisle corridors, the pharmacy pickup corridor) and 20 `must_not` (four page corners, parking/drive-thru/curbside, every sealed staff interior, both enclosed back rooms, the dispensary, a checkout-lane interior).
+
+Files created — all under `data/660/`, nothing else touched: `zones.json`, `seal_zones.json`, `exclusions.json`, `inclusions.json`, `walk_truth.json`.
+
+Stopping here for the separate audit role, as the runbook directs.

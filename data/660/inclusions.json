@@ -1,0 +1,8 @@
+[
+  {"name": "Market/Cooking Connection/Meal Simple/Seafood customer frontage — the sales-floor half of the pocket the SEAFOOD label condemned. The staff band is only the strip EAST of the case-and-wall line (x~1049 above y=424, x~1076 below it): that band holds the NE back room, the x=1068-1110 staff rooms, double swing doors at (1048,291-307) and (1049,364-370), and two more into the stockroom bump-out at x=1110. Everything west of that line is shopping floor and was swallowed with it; the poly's slanted east edge follows the seafood case's west face",
+   "poly": [[970, 280], [1046, 280], [1046, 380], [1066, 424], [1066, 494],
+            [970, 494]]},
+
+  {"name": "Aisle 18 corridor at the 'Kitchen Gadgets' shelf label (customer) — the KITCHEN anchor is that printed product label between the shelves at x=594.3 and x=610.4, not a service counter, so its VERIFY is a false positive",
+   "rect": [594.0, 400.0, 611.0, 540.0]}
+]
