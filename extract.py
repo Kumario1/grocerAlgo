@@ -117,9 +117,12 @@ def extract():
         anchors[f"AISLE {n}"] = [(x0 + x1) / 2, (y0 + y1) / 2]
     # aisle badges must be a clean 1..N run, each number exactly once
     # (store #659: 45, store #24: 43); duplicates or holes mean the map
-    # page carries stray digits and needs a smarter filter.
+    # page carries stray digits and needs a smarter filter. Floor is 15,
+    # matching discover.py's validation gate: store #6 (Stephenville) is a
+    # real 15-aisle store, and a stray-digit page fails the clean-run
+    # check long before it fails the count.
     aisles = sorted(seen)
-    assert len(aisles) >= 20 and aisles == list(range(1, len(aisles) + 1)), \
+    assert len(aisles) >= 15 and aisles == list(range(1, len(aisles) + 1)), \
         f"aisle badges not a clean 1..N run: {aisles}"
 
     # Multi-word labels (Entrance, Check Stands, department names): join words
@@ -254,39 +257,55 @@ def extract():
                 # kitchen counter walls drawn as 2-line white-ish fills)
                 walls(ch)
 
-    # self-check: a real supermarket has >100 store-sized fixtures; catching
-    # the "kept only decorative confetti" failure mode (2026-07-21 bug).
+    # self-check against the "kept only decorative confetti" failure mode
+    # (2026-07-21 bug). Floor scales with store size: a 45-aisle superstore
+    # has hundreds of store-sized fixtures, a real 15-aisle store (#6
+    # Stephenville) has 97 — confetti yields near zero either way.
     big = sum((x1 - x0) * (y1 - y0) > 200 for x0, y0, x1, y1 in fixtures)
     big += sum(1 for ch in fixture_polys
                if (max(p[0] for p in ch) - min(p[0] for p in ch))
                * (max(p[1] for p in ch) - min(p[1] for p in ch)) > 200)
-    assert big >= 100, f"only {big} store-sized fixtures — wrong fill/stroke filter?"
+    assert big >= max(50, 2 * len(aisles)), \
+        f"only {big} store-sized fixtures — wrong fill/stroke filter?"
 
     # Sales-floor boundary: the map draws the interior outline as one CLOSED
     # thick-stroke polyline (store #659: 18 segments, stroke width ~1.85).
     # Everything outside it (parking, drive-thru, curbside) is not walkable.
-    boundary = []
-    for dr in page.get_drawings():
-        if dr["type"] != "s" or not dr.get("width") or dr["width"] < 1.5:
-            continue
-        pts = []
-        for item in dr["items"]:
-            if item[0] == "l":
-                if not pts:
-                    pts.append([item[1].x, item[1].y])
-                pts.append([item[2].x, item[2].y])
-        if len(pts) > 4 and pts[0] == pts[-1]:            # closed chain
-            r = dr["rect"]
-            if ((r.x1 - r.x0) > 0.6 * page.rect.width
-                    and (r.y1 - r.y0) > 0.6 * page.rect.height
-                    and len(pts) > len(boundary)):
-                boundary = pts
-    if not boundary:
-        thick_chains = []
+    def find_boundary(min_width):
+        best = []
         for dr in page.get_drawings():
-            if dr["type"] == "s" and (dr.get("width") or 0) >= 1.5:
-                thick_chains.extend(chains(dr))
-        boundary = stitch_open_boundary(thick_chains, W, H)
+            if dr["type"] != "s" or not dr.get("width") or dr["width"] < min_width:
+                continue
+            pts = []
+            for item in dr["items"]:
+                if item[0] == "l":
+                    if not pts:
+                        pts.append([item[1].x, item[1].y])
+                    pts.append([item[2].x, item[2].y])
+            if len(pts) > 4 and pts[0] == pts[-1]:        # closed chain
+                r = dr["rect"]
+                # span floor is 0.45, not 0.6: store #6's real floor fills
+                # only 58% of its sheet. That lets the page frame compete,
+                # so a ~full-page bbox is rejected outright — the frame is
+                # never the floor.
+                spans = ((r.x1 - r.x0) > 0.45 * page.rect.width
+                         and (r.y1 - r.y0) > 0.45 * page.rect.height)
+                frame = ((r.x1 - r.x0) > 0.95 * page.rect.width
+                         and (r.y1 - r.y0) > 0.95 * page.rect.height)
+                if spans and not frame and len(pts) > len(best):
+                    best = pts
+        if not best:
+            thick_chains = []
+            for dr in page.get_drawings():
+                if dr["type"] == "s" and (dr.get("width") or 0) >= min_width:
+                    thick_chains.extend(chains(dr))
+            best = stitch_open_boundary(thick_chains, W, H)
+        return best
+
+    # A ladder, not a lower constant: 1.5 first (the classic template, and
+    # exactly the old behavior — every shipped store resolves here), then
+    # 0.9 for newer guides that outline the floor at 0.96 pt (store #14).
+    boundary = find_boundary(1.5) or find_boundary(0.9)
     assert boundary, "no closed thick-stroke boundary polygon found"
 
     geom = {"page": {"w": page.rect.width, "h": page.rect.height},

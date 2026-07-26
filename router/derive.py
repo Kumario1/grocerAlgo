@@ -39,18 +39,25 @@ def pdf_path(store):
 
 
 def derive_aisle_pitch(anchors):
-    """Median adjacent aisle-label spacing, tolerating larger-scale guides."""
-    rows = {}
-    for name, (x, y) in anchors.items():
-        if name.startswith("AISLE"):
-            rows.setdefault(round(y / 25), []).append(x)
-    gaps = [b - a for xs in rows.values()
-            for a, b in zip(sorted(xs), sorted(xs)[1:])]
-    pitches = [d for d in gaps if 10 < d < 35]
-    if not pitches:
-        pitches = [d for d in gaps if 35 <= d < 50]
-    assert pitches, "cannot derive aisle pitch from aisle-label rows"
-    return float(median(pitches))
+    """Median adjacent aisle-label spacing, tolerating larger-scale guides.
+    Classic guides badge aisles along rows (pitch = X gaps); rotated guides
+    (store #25 Floresville) stack them in columns, so the row-wise pass sees
+    only the column-to-column chasm and the pitch lives in the Y gaps.
+    Row-wise first — every store that derived before still derives the same."""
+    def adjacent_gaps(bucket_axis, gap_axis):
+        groups = {}
+        for name, pt in anchors.items():
+            if name.startswith("AISLE"):
+                groups.setdefault(round(pt[bucket_axis] / 25), []).append(
+                    pt[gap_axis])
+        return [b - a for xs in groups.values()
+                for a, b in zip(sorted(xs), sorted(xs)[1:])]
+    for gaps in (adjacent_gaps(1, 0), adjacent_gaps(0, 1)):
+        pitches = ([d for d in gaps if 10 < d < 35]
+                   or [d for d in gaps if 35 <= d < 50])
+        if pitches:
+            return float(median(pitches))
+    raise AssertionError("cannot derive aisle pitch from aisle-label rows")
 
 # --- auto-derivation constants (universal — never tuned per store; a store
 # that needs different values authors its own seal_zones.json override) ---
