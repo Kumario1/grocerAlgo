@@ -2,7 +2,7 @@
 """One-shot: H-E-B directory PDF (page 1 = map) -> geometry JSON.
 
 Usage: python3 extract.py [store]   (default 659)
-Reads guide-<city>-<store>.pdf (resolved via router.derive.pdf_path),
+Reads guides/guide-<city>-<store>.pdf (resolved via router.derive.pdf_path),
 writes data/<store>/geometry.json.
 """
 import json, os, sys, fitz

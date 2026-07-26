@@ -31,6 +31,7 @@ import numpy as np
 from scipy import ndimage
 
 from router import engine
+from router.derive import GUIDES_DIR
 
 TOL_PT = 3.0          # an inlier's residual, in page points (#659 truth: 2.2)
 MIN_INLIERS = 8       # per axis
@@ -550,7 +551,8 @@ def guide_aisle_name(config, number):
 
 def guide_city(store):
     """The city slug discover.py downloaded this store's guide under."""
-    for path in sorted(glob.glob(f"guide-*-{store}.pdf")):
-        if path.endswith(f"-{store}.pdf"):
-            return path[len("guide-"):-len(f"-{store}.pdf")]
+    for path in sorted(glob.glob(f"{GUIDES_DIR}/guide-*-{store}.pdf")):
+        name = os.path.basename(path)
+        if name.endswith(f"-{store}.pdf"):
+            return name[len("guide-"):-len(f"-{store}.pdf")]
     return None

@@ -5,8 +5,8 @@ This document is your complete instruction set. Follow it exactly.
 
 ## Mission
 
-Input: `guide-<city>-<N>.pdf` in the repo root (page 2 of the file is the
-store map). Output: a converged walkable map for `data/<N>/` — meaning
+Input: `guides/guide-<city>-<N>.pdf` (page 2 of the file is the store map).
+Output: a converged walkable map for `data/<N>/` — meaning
 `./rebuild.sh <N>` exits 0 AND `data/<N>/qa/report.json` has
 `"verify": []` AND `"coverage"` empty (both lists) — plus an authored
 `data/<N>/walk_truth.json` locking the result in as regression tests.

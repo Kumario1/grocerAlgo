@@ -115,7 +115,7 @@ right will happily route you through a freezer.
 ![Map ingestion pipeline for store 659](docs/img/pipeline.png)
 
 ```
-guide-<city>-<store>.pdf        discover.py finds and downloads this
+guides/guide-<city>-<store>.pdf discover.py finds and downloads this
   → extract.py                  geometry.json — fixtures, walls, boundary, labels
   → router/derive.py            per-store zones + seal zones, auto-derived
   → build_profile.py            profile.npz — walkable grid, anchors, all-pairs D
@@ -365,7 +365,7 @@ online ordering, multi-store trip splitting. Full reasoning in
 | `router/` | engine (TSP, BFS), map derivation, H-E-B client, QA checks |
 | `static/index.html` | the whole front end |
 | `data/<store>/` | per-store truth: geometry, profile, zones, QA artifacts |
-| `guide-*.pdf` | source store guides; `discover.py` downloads them to this name |
+| `guides/` | source store guides (`guide-<city>-<store>.pdf`); `discover.py` downloads here |
 | `plan.md` | living master plan — PRD, architecture, provider findings |
 | `CONTEXT.md` | canonical domain vocabulary used in code, tests and UI |
 | `docs/` | onboarding and audit runbooks for the agent loop |

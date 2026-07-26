@@ -148,7 +148,7 @@ def test_tesseract_timeout_becomes_actionable_raster_error(monkeypatch):
 
 
 def test_failed_extraction_writes_available_diagnostics(tmp_path, monkeypatch):
-    page = fitz.open("guide-cedar-park-265.pdf")[1]
+    page = fitz.open("guides/guide-cedar-park-265.pdf")[1]
     monkeypatch.setattr(
         raster, "_ocr",
         lambda *_args, **_kwargs: (_ for _ in ()).throw(
@@ -214,7 +214,7 @@ def test_store_265_ocr_backend_mechanical_contract(tmp_path, backend):
         pytest.skip("Apple Vision is macOS-only")
     if backend == "tesseract" and not shutil.which("tesseract"):
         pytest.skip("Tesseract CLI is not installed")
-    page = fitz.open("guide-cedar-park-265.pdf")[1]
+    page = fitz.open("guides/guide-cedar-park-265.pdf")[1]
     config = json.load(open("data/265/raster.json"))
 
     geom = raster.extract_page(page, config, backend=backend,
@@ -274,7 +274,7 @@ def test_store_265_auto_backend_retries_with_tesseract(
         tmp_path, monkeypatch):
     if not shutil.which("tesseract"):
         pytest.skip("Tesseract CLI is not installed")
-    page = fitz.open("guide-cedar-park-265.pdf")[1]
+    page = fitz.open("guides/guide-cedar-park-265.pdf")[1]
     config = json.load(open("data/265/raster.json"))
     monkeypatch.setattr(
         raster, "_vision_words",

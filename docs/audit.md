@@ -14,7 +14,7 @@ screenshot. Your job is to be that human, systematically.
 - `./rebuild.sh <N>` (rerun it yourself; do not trust committed artifacts)
 - `data/<N>/qa/report.json`, `walkable_overlay.png`, `reachable.png`,
   `corridor_width.png`, `extract_overlay.png`
-- `guide-<city>-<N>.pdf` (page 2 = the map; the ground truth)
+- `guides/guide-<city>-<N>.pdf` (page 2 = the map; the ground truth)
 - `data/<N>/*.json` (the truth files under audit)
 - Reference for "what converged looks like": `data/659/qa/*.png`
 

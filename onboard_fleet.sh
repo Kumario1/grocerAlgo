@@ -35,8 +35,10 @@ git worktree add "$WT" "$REF"
 # Seed any guide this checkout already holds, so the worktree's discover stage
 # validates it locally instead of asking the CDN again — 380 re-downloads
 # saved, and the fleet keeps running when the CDN throttles us (it has).
-for pdf in "$ROOT"/guide-*-"$S".pdf; do
-    [ -f "$pdf" ] && cp "$pdf" "$WT/"
+for pdf in "$ROOT"/guides/guide-*-"$S".pdf; do
+    [ -f "$pdf" ] || continue
+    mkdir -p "$WT/guides"
+    cp "$pdf" "$WT/guides/"
 done
 
 STATUS=0
@@ -71,16 +73,17 @@ mkdir -p "$ROOT/data/$S"
 cp -R "$WT/data/$S/." "$ROOT/data/$S/"
 echo "    data/$S/"
 
-# discover.py treats any guide-*-<store>.pdf as "already have it", so this does
-# too — a guide this checkout already holds is never clobbered by a fresh
-# download that only differs in the city slug.
-if ls "$ROOT"/guide-*-"$S".pdf >/dev/null 2>&1; then
+# discover.py treats any guides/guide-*-<store>.pdf as "already have it", so
+# this does too — a guide this checkout already holds is never clobbered by a
+# fresh download that only differs in the city slug.
+if ls "$ROOT"/guides/guide-*-"$S".pdf >/dev/null 2>&1; then
     echo "    guide PDF already here, left alone"
 else
-    for pdf in "$WT"/guide-*-"$S".pdf; do
+    mkdir -p "$ROOT/guides"
+    for pdf in "$WT"/guides/guide-*-"$S".pdf; do
         [ -f "$pdf" ] || continue
-        cp -R "$pdf" "$ROOT/"
-        echo "    $(basename "$pdf")"
+        cp "$pdf" "$ROOT/guides/"
+        echo "    guides/$(basename "$pdf")"
     done
 fi
 

@@ -6,8 +6,8 @@ from router.raster import is_raster_page
 
 
 def test_raster_fallback_only_claims_image_only_maps():
-    assert is_raster_page(fitz.open("guide-cedar-park-265.pdf")[1])
-    assert not is_raster_page(fitz.open("guide-austin-659.pdf")[1])
+    assert is_raster_page(fitz.open("guides/guide-cedar-park-265.pdf")[1])
+    assert not is_raster_page(fitz.open("guides/guide-austin-659.pdf")[1])
 
 
 def test_raster_fallback_rejects_small_page_decoration(tmp_path):

@@ -12,11 +12,11 @@ city is found by probing the slug list below (austin first, then the
 H-E-B footprint). Pass an explicit city to skip probing; spaces are
 normalized to the CDN's hyphenated slug.
 
-Output: guide-<city>-<store>.pdf in the repo root (the name the rest of
-the pipeline resolves via router.derive.pdf_path), validated to actually
-be a store map (>=2 pages; map page carries drawings and aisle badges)
-and preflighted for stale-guide tells — recorded in data/<store>/source.json
-and warned about, never fatal.
+Output: guides/guide-<city>-<store>.pdf (the path the rest of the pipeline
+resolves via router.derive.pdf_path; source.json stores the basename),
+validated to actually be a store map (>=2 pages; map page carries drawings
+and aisle badges) and preflighted for stale-guide tells — recorded in
+data/<store>/source.json and warned about, never fatal.
 Idempotent: an existing local guide for the requested city wins immediately.
 """
 import glob
@@ -28,6 +28,9 @@ import urllib.request
 
 BASE = ("https://images.heb.com/is/content/HEBGrocery/"
         "Store%20Finder%20Layouts")
+
+# All store-guide PDFs live here. source.json stores the basename only.
+GUIDES_DIR = "guides"
 
 # H-E-B footprint city slugs (single lowercase word or hyphenated), austin
 # first. Confirmed live examples: austin, houston, plano, lubbock, odessa,
@@ -128,11 +131,15 @@ def validate(path, store):
 
 
 def select(store, path, checks):
-    """Persist the validated guide so later stages never choose by glob."""
+    """Persist the validated guide so later stages never choose by glob.
+
+    source.json stores the basename only; pdf_path resolves it under guides/.
+    """
     directory = f"data/{store}"
     os.makedirs(directory, exist_ok=True)
+    name = os.path.basename(path)
     with open(f"{directory}/source.json", "w") as output:
-        json.dump({"pdf": path, **checks}, output)
+        json.dump({"pdf": name, **checks}, output)
     if checks.get("stale_risk"):
         print(f"WARNING: {path} looks drawn before a remodel "
               f"({'; '.join(checks['flags'])}). It can build a clean map "
@@ -142,9 +149,10 @@ def select(store, path, checks):
 
 def discover(store, city=None):
     city = city_slug(city) if city else None
-    existing = sorted(glob.glob(f"guide-*-{store}.pdf"))
+    os.makedirs(GUIDES_DIR, exist_ok=True)
+    existing = sorted(glob.glob(f"{GUIDES_DIR}/guide-*-{store}.pdf"))
     if city:
-        exact = f"guide-{city}-{store}.pdf"
+        exact = f"{GUIDES_DIR}/guide-{city}-{store}.pdf"
         existing = [exact] if exact in existing else []
     if len(existing) > 1:
         raise SystemExit(
@@ -161,7 +169,7 @@ def discover(store, city=None):
         url = f"{BASE}/guide-{slug}-{store}.pdf"
         if not probe(url):
             continue
-        path = f"guide-{slug}-{store}.pdf"
+        path = f"{GUIDES_DIR}/guide-{slug}-{store}.pdf"
         print(f"found {url}")
         urllib.request.urlretrieve(url, path)
         err, checks = validate(path, store)

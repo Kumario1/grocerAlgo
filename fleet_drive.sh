@@ -60,12 +60,16 @@ heal_ref() {
     s=$1; wt="$ROOT/.wt/$s"; keep="$LOG/.heal-$s"
     rm -rf "$keep"; mkdir -p "$keep"
     [ -d "$wt/data/$s" ] && cp -R "$wt/data/$s" "$keep/data"
-    for pdf in "$wt"/guide-*-"$s".pdf; do [ -f "$pdf" ] && cp "$pdf" "$keep/"; done
+    for pdf in "$wt"/guides/guide-*-"$s".pdf; do [ -f "$pdf" ] && cp "$pdf" "$keep/"; done
     git -C "$ROOT" worktree remove --force "$wt" 2>/dev/null \
         || { rm -rf "$wt"; git -C "$ROOT" worktree prune; }
     git -C "$ROOT" worktree add "$wt" "$REF" >/dev/null 2>&1 || return 1
     [ -d "$keep/data" ] && { mkdir -p "$wt/data"; cp -R "$keep/data" "$wt/data/$s"; }
-    for pdf in "$keep"/guide-*.pdf; do [ -f "$pdf" ] && cp "$pdf" "$wt/"; done
+    for pdf in "$keep"/guide-*.pdf; do
+        [ -f "$pdf" ] || continue
+        mkdir -p "$wt/guides"
+        cp "$pdf" "$wt/guides/"
+    done
     rm -rf "$keep"
 }
 
@@ -75,18 +79,22 @@ promote() {
     s=$1; wt="$ROOT/.wt/$s"
     mkdir -p "$ROOT/data/$s"
     cp -R "$wt/data/$s/." "$ROOT/data/$s/"
-    if ! ls "$ROOT"/guide-*-"$s".pdf >/dev/null 2>&1; then
-        for pdf in "$wt"/guide-*-"$s".pdf; do [ -f "$pdf" ] && cp "$pdf" "$ROOT/"; done
+    if ! ls "$ROOT"/guides/guide-*-"$s".pdf >/dev/null 2>&1; then
+        mkdir -p "$ROOT/guides"
+        for pdf in "$wt"/guides/guide-*-"$s".pdf; do
+            [ -f "$pdf" ] && cp "$pdf" "$ROOT/guides/"
+        done
     fi
     git -C "$ROOT" add -- "data/$s"
     paths="data/$s"
-    for pdf in "$ROOT"/guide-*-"$s".pdf; do
+    for pdf in "$ROOT"/guides/guide-*-"$s".pdf; do
         [ -f "$pdf" ] || continue
-        git -C "$ROOT" add -- "$(basename "$pdf")"
-        paths="$paths $(basename "$pdf")"
+        rel="guides/$(basename "$pdf")"
+        git -C "$ROOT" add -- "$rel"
+        paths="$paths $rel"
     done
     # shellcheck disable=SC2086 — $paths is intentionally word-split; guide
-    # filenames never contain spaces (guide-<city-slug>-<store>.pdf)
+    # filenames never contain spaces (guides/guide-<city-slug>-<store>.pdf)
     git -C "$ROOT" commit -q -m "feat(data): store $s onboarded by fleet (audit clean)" \
         -- $paths 2>/dev/null \
         || say "store $s: nothing new to commit (already promoted?)"
@@ -138,7 +146,11 @@ echo "$LIST" | while read -r S CITY; do
         if [ ! -d "$WT" ]; then
             git -C "$ROOT" worktree add "$WT" "$REF" >/dev/null 2>&1 \
                 || { say "FAIL   $S — worktree add failed"; break; }
-            for pdf in "$ROOT"/guide-*-"$S".pdf; do [ -f "$pdf" ] && cp "$pdf" "$WT/"; done
+            for pdf in "$ROOT"/guides/guide-*-"$S".pdf; do
+                [ -f "$pdf" ] || continue
+                mkdir -p "$WT/guides"
+                cp "$pdf" "$WT/guides/"
+            done
         elif [ "$(git -C "$WT" rev-parse HEAD 2>/dev/null)" != "$(git -C "$ROOT" rev-parse "$REF")" ]; then
             say "heal   $S — worktree ref behind, rebuilding on $REF (data kept)"
             heal_ref "$S" || { say "FAIL   $S — worktree heal failed"; break; }

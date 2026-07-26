@@ -52,7 +52,7 @@ def probe(url, tries=3):
 def find(store):
     """Blind fallback: (store, city) on a hit, (store, None) on a clean
     miss, (store, "?") when throttling left the answer unknown."""
-    local = glob.glob(f"guide-*-{store}.pdf")
+    local = glob.glob(f"{discover.GUIDES_DIR}/guide-*-{store}.pdf")
     if local:
         name = os.path.basename(local[0])
         return store, name[len("guide-"):-len(f"-{store}.pdf")]

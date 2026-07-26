@@ -15,23 +15,33 @@ from statistics import median
 
 from router import engine
 
+# All store-guide PDFs live here. source.json stores the basename only;
+# pdf_path resolves that to guides/<basename>.
+GUIDES_DIR = "guides"
+
 
 def pdf_path(store):
-    """The store's guide PDF in the repo root: guide-<city>-<store>.pdf,
+    """The store's guide PDF under guides/: guide-<city>-<store>.pdf,
     any city (discover.py downloads it). Exact-suffix check so store 24
-    never matches a store-124 file."""
-    hits = sorted(p for p in glob.glob(f"guide-*-{store}.pdf")
-                  if p.endswith(f"-{store}.pdf"))
+    never matches a store-124 file. source.json names the basename only."""
+    hits = sorted(
+        p for p in glob.glob(f"{GUIDES_DIR}/guide-*-{store}.pdf")
+        if os.path.basename(p).endswith(f"-{store}.pdf"))
     selected = _load_json(f"data/{store}/source.json")
     if selected is not None:
         chosen = selected.get("pdf")
-        if chosen not in hits or os.path.dirname(chosen):
+        if not chosen or os.path.dirname(chosen):
             raise SystemExit(
                 f"selected guide for store {store} is unavailable or unsafe: "
                 f"{chosen!r}; rerun discover.py")
-        return chosen
+        match = [p for p in hits if os.path.basename(p) == chosen]
+        if len(match) != 1:
+            raise SystemExit(
+                f"selected guide for store {store} is unavailable or unsafe: "
+                f"{chosen!r}; rerun discover.py")
+        return match[0]
     if not hits:
-        raise SystemExit(f"no guide-*-{store}.pdf in the repo root — run: "
+        raise SystemExit(f"no guide-*-{store}.pdf in {GUIDES_DIR}/ — run: "
                          f"python3 discover.py {store}")
     if len(hits) > 1:
         raise SystemExit(f"ambiguous guide PDFs for store {store}: {hits}")
