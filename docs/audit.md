@@ -81,7 +81,13 @@ walk_truth point that would have caught it.
 Verdict line, exactly one of:
 - `AUDIT CLEAN — store <N>` (zero findings on a full sweep after the
   latest rebuild)
-- `AUDIT FAILED — store <N>: <n> findings` (with the list)
+- `AUDIT CLEAN — store <N> (<k> findings fixed)` (you found real defects,
+  repaired every one in this store's data files, reran the rebuild, and
+  everything is green — that is a GOOD audit and it ships; CLEAN describes
+  the artifacts, not the sweep)
+- `AUDIT BLOCKED — store <N>: <reason>` (something is still wrong that a
+  data edit cannot fix — include the findings; a finding that needs a code
+  change is reported this way with evidence, never fixed by you)
 
 Never edit `router/`, `extract.py`, `tests/`, goldens, or another store's
 data. If a finding seems to require a code change, report it as a blocker
