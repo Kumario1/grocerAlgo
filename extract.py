@@ -220,6 +220,7 @@ def extract():
         if dr["type"] == "f" and dr.get("fill") in (None, WHITE):
             continue                            # body/background: stroke twin has it
         sw = dr.get("width") or 0
+        dashed = (dr.get("dashes") or "[] 0") != "[] 0"
         for ch in chains(dr):
             xs, ys = [p[0] for p in ch], [p[1] for p in ch]
             x0, y0, x1, y1 = min(xs), min(ys), max(xs), max(ys)
@@ -238,6 +239,11 @@ def extract():
             closed = (len(ch) >= 4 and abs(ch[0][0] - ch[-1][0]) < .5
                       and abs(ch[0][1] - ch[-1][1]) < .5)
             if dr["type"] == "s":
+                if dashed and closed:
+                    continue    # a dashed closed ring is a zone marking the
+                                # shopper walks across (store #658's Blooms
+                                # brand ellipse sealed 89 m² of browse floor);
+                                # open dashed ticks still wall their line
                 walls(ch)                       # all drawn strokes block their line
                 if closed:
                     fixture(ch)                 # ...and closed ones their interior
