@@ -1,0 +1,24 @@
+Store 14 (Kyle) is converged. `./rebuild.sh 14` exits 0, `verify: []`, both `coverage` lists empty, 644 tests green including 659's pixel-frozen golden.
+
+## What was wrong and what I changed (5 data files only)
+
+**`zones.json`** — the first pass crashed (`no walkable cell near AISLE 1`). Cause: the extracted `ENTRANCE` label (775, 685) sits in the right-hand cart corral, which the PDF walls off from the sales floor — the storefront line `(741,665.6)→(955,665.6)` plus the door-threshold rect `[751,663.2,798.5,665.8]` are drawn straight across the doorway, and the Exit/Entrance arrow circles are extracted as fixture polys. So the seed landed in a 1464-cell pocket, the entire 89 045-cell sales floor became "unreachable", and the DELI label inside it condemned the whole store as a staff area. Moved `ENTRANCE` to (775, 652), the sales-floor side of the same doors. The left entrance is genuinely open (50-pt wall gap at x 294–344) and is a `must` point.
+
+**`seal_zones.json`** — full override, one zone. The derived checkstand rect ran y 492–605, eating the front action alley and the south ends of aisles 44–54; clipped it to the drawn lane bodies `[394,552,794,600]`, bridge 20. The derived `KITCHEN` disk was a phantom — "Kitchen" here is gondola shelving in aisles 44–47, and its r=130 disk sealed the Grilling floor plus ten aisle corridors (3 761 cells condemned as "staff"). The DELI/BAKERY/SEAFOOD disks sealed the right blocks but their rims also cut the aisle 41/42 Frozen corridors, two Beer & Wine cross-gaps and a Produce sliver; those blocks are drawn as closed rooms, so exclusions/the PDF's own walls seal them exactly.
+
+**`exclusions.json`** — three staff areas: the 46-pt back-of-house band behind the north-wall case run (≈500 m² of phantom floor); the walled Deli/Bakery/Sushiya production room (traced from its west/north/south wall strokes, east side = the scalloped cases); the Curbside staging room and the empty strip behind the east-wall shelving that feeds it.
+
+**`inclusions.json`** — aisle 44–47 corridors, recording the judgement that the `KITCHEN` anchor is a shelf-category label on customer floor (this suppresses its VERIFY).
+
+**`walk_truth.json`** — 18 `must` (both entrances, action alley, front walkway, six named aisle corridors across all three blocks, Market/Dairy/Deli-case/Seafood/Produce frontages, Grilling floor, Pharmacy pickup alcove, east perimeter corridor) and 21 `must_not` (page corners, outside-boundary, each sealed staff area, the dispensary, restroom, Wellness Center, stock room, Connections kiosk, BBQ/Lease tenant boxes, Texas Backyard, and a checkout-lane interior).
+
+## Final numbers
+- walkable 26.2 % (25.7 % reachable), m/cell 0.258
+- components 2: 67 716 + the 1 464-cell right cart corral
+- 15 culled pockets, all classified: tenant boxes (BBQ 2893, Lease strips 780/660, Texas Backyard 669), pharmacy dispensary 2037, Wellness Center 1562, Seafood counter 891, restrooms 411/225, ICE alcove 379/240/165/150, self-checkout cluster interiors 250/202
+- far_snaps only BAKERY/DELI/DAIRY/SEAFOOD (labels printed inside sealed blocks or on cooler faces — same pattern as 659); narrowest corridor 0.77 m half-width
+- 18 product labels probed across every wing: all have reachable floor at 0 m
+
+**One caveat for the audit:** the right-hand cart corral (742–954, 666–694) stays a disconnected orange pocket. Its doorway is drawn shut in the source PDF (continuous storefront stroke + a filled threshold rect), and inclusions are ANDed with the pre-seal grid, so no data edit can open it. It is outside the storefront line, so I did not add a `must_not` there — asserting it un-walkable would be wrong if a future extractor change opened the door.
+
+Stopping here for the separate audit role, as instructed.

@@ -1,0 +1,194 @@
+{
+ "components": {
+  "n": 2,
+  "sizes": [
+   67115,
+   1464
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 2893,
+   "near": "CHECKSTANDS",
+   "x": 423.7,
+   "y": 688.2
+  },
+  {
+   "cells": 2037,
+   "near": "AISLE 35",
+   "x": 1060.1,
+   "y": 568.5
+  },
+  {
+   "cells": 1562,
+   "near": "AISLE 39",
+   "x": 1044.0,
+   "y": 641.0
+  },
+  {
+   "cells": 891,
+   "near": "SEAFOOD",
+   "x": 167.8,
+   "y": 350.7
+  },
+  {
+   "cells": 780,
+   "near": "CHECKSTANDS",
+   "x": 539.0,
+   "y": 680.0
+  },
+  {
+   "cells": 669,
+   "near": "PRODUCE",
+   "x": 202.0,
+   "y": 729.3
+  },
+  {
+   "cells": 660,
+   "near": "CHECKOUT",
+   "x": 637.0,
+   "y": 680.0
+  },
+  {
+   "cells": 379,
+   "near": "ENTRANCE",
+   "x": 710.4,
+   "y": 648.4
+  },
+  {
+   "cells": 250,
+   "near": "KITCHEN",
+   "x": 428.4,
+   "y": 574.3
+  },
+  {
+   "cells": 240,
+   "near": "EXIT",
+   "x": 727.0,
+   "y": 671.0
+  },
+  {
+   "cells": 225,
+   "near": "AISLE 37",
+   "x": 996.0,
+   "y": 608.0
+  },
+  {
+   "cells": 202,
+   "near": "KITCHEN",
+   "x": 465.8,
+   "y": 574.0
+  },
+  {
+   "cells": 165,
+   "near": "EXIT",
+   "x": 694.0,
+   "y": 680.0
+  },
+  {
+   "cells": 150,
+   "near": "CHECKOUT",
+   "x": 647.0,
+   "y": 648.0
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 15.2,
+   "meters": 3.92,
+   "name": "DAIRY"
+  },
+  {
+   "cells": 12.1,
+   "meters": 3.13,
+   "name": "SEAFOOD"
+  }
+ ],
+ "m_per_cell": 0.2576,
+ "narrow": [
+  {
+   "half_width_m": 0.77,
+   "name": "AISLE 36"
+  },
+  {
+   "half_width_m": 0.77,
+   "name": "FROZEN"
+  },
+  {
+   "half_width_m": 0.77,
+   "name": "KITCHEN"
+  },
+  {
+   "half_width_m": 0.81,
+   "name": "AISLE 18"
+  },
+  {
+   "half_width_m": 0.81,
+   "name": "AISLE 24"
+  },
+  {
+   "half_width_m": 0.93,
+   "name": "AISLE 21"
+  },
+  {
+   "half_width_m": 0.93,
+   "name": "AISLE 29"
+  },
+  {
+   "half_width_m": 0.93,
+   "name": "AISLE 47"
+  }
+ ],
+ "provenance": {
+  "drift": {
+   "seal_zones": {
+    "derived_n": 5,
+    "derived_names": [
+     "auto:BAKERY",
+     "auto:DELI",
+     "auto:KITCHEN",
+     "auto:SEAFOOD",
+     "auto:CHECKSTANDS"
+    ],
+    "file_n": 1,
+    "file_names": [
+     "Checkstand lane bank \u2014 the only seal zone this store needs. Clipped to the drawn lane bodies (measured x 398.1-790.1, y 554.4-597.6, padded ~4 pt): the aisle-block shelves north of it stop at y=547 and the next fixtures south of it start at y=619.6, so the front action alley (y 533-552) and the front walkway toward Blooms/ICE/the entrances both stay open. Lanes are wider than a service-counter pass-through, hence bridge 20 as at 659. The derived zones are NOT carried over on purpose: (a) the derived CHECKSTANDS rect ran y 492-605, which swallowed the action alley and the south ends of aisles 44-54; (b) the derived DELI/BAKERY/SEAFOOD disks (r=130) sealed their blocks correctly but their rims also guillotined the aisle 41/42 Frozen corridors, two Beer & Wine cross-gaps and a strip of Produce floor \u2014 those three blocks are drawn as closed rooms, so exclusions.json (Deli/Bakery) and the PDF's own walls (Seafood) seal them exactly, with no rim; (c) the derived KITCHEN disk was a phantom \u2014 see inclusions.json"
+    ]
+   },
+   "zones": {
+    "CHECKOUT": {
+     "derived": [
+      600.7915649414062,
+      545.4962158203125
+     ],
+     "file": [
+      600.8,
+      545.5
+     ]
+    },
+    "ENTRANCE": {
+     "derived": [
+      775.1535339355469,
+      684.6205139160156
+     ],
+     "file": [
+      775.0,
+      652.0
+     ]
+    }
+   }
+  },
+  "exclusions": "file",
+  "inclusions": "file",
+  "seal_zones": "file",
+  "zones": "file"
+ },
+ "reachable_pct": 25.4,
+ "store": "14",
+ "verify": [],
+ "walkable_pct": 26.0
+}

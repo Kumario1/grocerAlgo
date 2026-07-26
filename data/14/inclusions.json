@@ -1,0 +1,7 @@
+[
+  {"name": "aisle 44-47 corridors, where the vertical 'Kitchen'/'Gadgets'/'Appliances' shelf-category labels are printed (customer). This store has no service kitchen — the extracted KITCHEN anchor (552.9,490.6) is one of those gondola labels sitting on open corridor floor between badges 44 and 47, so it is shopping floor and not a staff counter. Recorded here as the human judgement for the VERIFY it raises",
+   "rect": [500, 436, 582, 538]},
+
+  {"name": "Deli/Bakery/Sushiya service-case frontage lane (customer): the 10-pt aisle at x=380-390 that runs the full height of the production room, east of the scalloped case run at x=370-384 and west of the aisle-1/40-43 gondola ends. It is the ONLY side customers shop those counters from — the room's west wall (x=281-288.6) carries staff doors only — so zones.json pins the DELI and BAKERY anchors into this lane instead of letting them snap west into the Market department. Recorded here as the human judgement for the VERIFY those two pinned service anchors now raise",
+   "rect": [385, 145, 394, 460]}
+]

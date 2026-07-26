@@ -1,0 +1,48 @@
+All passes complete. Final state verified: `./rebuild.sh 14` exits 0, `verify: []`, both coverage lists empty, 770 tests pass.
+
+## Findings — store 14, worst first
+
+### 1. `DELI` and `BAKERY` route to the staff side of the production room
+**Coords (PDF pt):** `DELI` anchor (310.4, 197.2) snapped to **(277, 163)**; `BAKERY` anchor (328.2, 312.9) snapped to **(277, 261)**.
+
+**Evidence:** `reachable.png` crop x 250–420 / y 130–470 — both far-snap tie-lines run **west**, out through the production room's back wall into the Market department. `report.json.far_snaps`: BAKERY 26 cells (6.7 m), DELI 17 cells (4.4 m). BFS on the shipped grid from the snapped cell to the service-case frontage: **23.7 m (Deli), 51.3 m (Bakery)**.
+
+**What the truth should be:** this store's own `exclusions.json` states it — the west wall x=281–288.6 carries staff doors only; customers shop the counters from the scalloped case run at x=370–384, standing in the 10-pt lane at x=380–390. The snap was picking the nearest *euclidean* reachable cell, which is the Market aisle behind the wall.
+
+**Fix applied:** `zones.json` pins `DELI [386,197]`, `BAKERY [386,313]` (same mechanism 659 uses for KITCHEN/FROZEN); `inclusions.json` records the frontage lane `[385,145,394,460]` as the human judgement for the VERIFY the two pinned service anchors now raise. Post-fix snaps: (387,197) and (387,313); far_snaps list is down to DAIRY/SEAFOOD only.
+
+### 2. North restroom interior shipped as walkable shopping floor — 36.2 m²
+**Coords:** room x≈1007–1116, y≈459–485. Probe `(1050,470)` → `reach=1`.
+
+**Evidence:** crop x 955–1135 / y 440–690 of `walkable_overlay.png` — green fills the north restroom to the pictogram; row transects y=460…485 are reachable from x=972 straight through to x=1116. The **south** restroom was already culled (411-cell pocket at 1073,500) — the two stalls were treated asymmetrically. The drawing leaves the north room open to the lobby at the x=1023–1035 step, so it stayed inside the entrance component; `qa_checks` net 2 only hunts *sealed* paint, so reachable-but-wrong floor is structurally invisible to it. Only the visual sweep catches this class.
+
+**Fix applied:** `exclusions.json` rect `[1006, 458, 1118, 515]`, sealing both stalls alike. Verified after rebuild: restroom interiors 0/1540 cells; lobby strip x 972–1006 (30.5 m²) and the y 517–527 access corridor (28.7 m²) still green; pharmacy waiting alcove untouched.
+
+### 3. `walk_truth.json` coverage gaps
+Three enclosed rooms and the isolated vestibule had no `must_not`; two wings had no `must`. Points added (all probed against the shipped grid):
+
+| kind | point | feature |
+|---|---|---|
+| must | (386,197) / (386,313) | Deli / Bakery case frontage — guards finding 1 |
+| must | (985,490) | restroom lobby — guards finding 2 from over-sealing |
+| must | (880,244) / (880,590) | aisle 21 NE block, aisle 36 SE health & beauty |
+| must_not | (1050,470) | north restroom interior — would have caught finding 2 |
+| must_not | (996,608) | walled room south of the pharmacy alcove |
+| must_not | (637,680) | New Lease room, south tenant row |
+| must_not | (866,678) | right-entrance vestibule cart corral |
+
+`walk_truth` is now 23 must / 25 must_not; suite went 761 → 770 tests.
+
+## Classified, not defects
+- **Second component (1464 cells, x 742–952 / y 666–694):** right-entrance vestibule cart corral. The drawn storefront wall has no door gap at the Exit/Entrance arrows, so it isolates; the left vestibule *does* have a gap and is green. No products, no departments, and `ENTRANCE` was already overridden to (775,652) on the sales-floor side (derived value 684.6 sat inside this pocket). Left sealed, now pinned by `must_not (866,678)`.
+- **SEAFOOD snap (193,393):** 8.0–11.3 m of walking from the service cases but on the correct customer side (the counter's SE chamfer). **DAIRY snap (849,121):** correct frontage, shifted 30 pt west by a scallop. Both below the defect bar; not touched.
+- **Sushiya:** no own frontage — inside the Deli/Bakery exclusion, nearest floor 3.35 m away in the x=380–390 case lane, consistent with the exclusion's stated design.
+- **All 14 culled pockets** classified (BBQ 192 m², pharmacy dispensary 135 m², Wellness Center 104 m², Seafood counter, lease rooms, patio, checkout lanes, vestibule structures). None unexplained.
+- **Narrow corridors** (FROZEN / aisles 40–43 / 36 / KITCHEN at 0.77 m half-width) are real in the drawing — freezer-door swings.
+- **Config sanity:** all 4 exclusions, 2 inclusions, 1 seal zone and both zone points state a WHY that matches the map; no inclusion blankets a staff room, no exclusion covers a shelf label's only frontage (all east-wall labels probe 0.00 m). 30 product labels + 9 logo departments spot-probed across every wing: all reachable within 0.00 m except the two logos noted above.
+
+**Scope:** only `data/14/` was touched — `exclusions.json`, `inclusions.json`, `zones.json`, `walk_truth.json`. No code, no goldens, no other store. Both inclusion rects restore **0** cells (verified), so they are annotations only, not grid changes.
+
+Final: exit 0 · `verify: []` · coverage `[]`/`[]` · walkable 26.0% (25.4% reachable) · dominant component 67115 cells · 770 passed.
+
+`AUDIT CLEAN — store 14 (3 findings fixed)`

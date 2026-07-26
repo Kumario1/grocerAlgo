@@ -1,0 +1,13 @@
+[
+  {"name": "back-of-house band behind the north-wall case run (staff): the boundary's north wall is y=63.2 and the Market/Dairy wall cases are the thin fixture run at y=112-119, so the 46-pt strip between them is cooler/prep access. No aisle badge, no product label and no floor paint is printed anywhere in it; it only reaches the sales floor through the four staff gaps in the case run at x=236, 388, 724 and 956. Left open it contributed ~500 m^2 of phantom walkable floor",
+   "rect": [143, 63, 1014, 111]},
+
+  {"name": "Deli/Bakery/Sushiya production room (staff): a walled box traced from the PDF strokes — west wall x=281-288.6 (y 145-454, with staff-door gaps at y 236-246, 370-378 and 421-445), north wall y=145.4-153.4 (x 290-370), south wall y=444.7-454.1 (x 291-361), and on the east the scalloped service-case run at x=370-384 that customers shop from. The DELI (310,197) and BAKERY (328,313) labels and the Sushiya logo (295-342, 422-440) are all printed inside it; the customer aisle is the 10-pt lane at x=380-390 east of the cases",
+   "rect": [279, 145, 370, 455]},
+
+  {"name": "H-E-B Curbside staging room plus its access strip (staff): the room is the walled box x=1013-1117 / y=157-371 holding the Curbside logo, and the empty 40-pt strip x=971-1012 behind the east-wall shelving (Air Filters/Insecticides/Automotive/Lighting/Hardware face WEST into the customer corridor at x=950-962) is its only floor connection, through the shelf gap at y=288-304. Curbside orders are staged by staff and handed out at the parking lot, so none of this is shopping floor; no product label or badge is printed in either part",
+   "rect": [971, 152, 1117, 372]},
+
+  {"name": "restroom interiors, both stalls (enclosed rooms): the restroom block is the walled box x=972-1116 / y=459-514.5, split by the thick common wall drawn at y=485-489 (x 1035-1117) into the north room (pictogram at 1056-1085, 462-482) and the south room (pictogram at 1056-1085, 492-512) with its baby-change alcove at x=1007-1022. Only the west strip x=972-1006 is the lobby customers stand in, reached from the y=517-527 access corridor. The drawing leaves the NORTH room open to that lobby at the x=1023-1035 step, so 36.2 m^2 of restroom interior rendered green while the south room was already culled as a pocket — the two must be sealed alike. No product label, no badge and no floor paint inside either room",
+   "rect": [1006, 458, 1118, 515]}
+]
