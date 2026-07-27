@@ -1,0 +1,35 @@
+Converged. Store 189 (San Antonio) is onboarded.
+
+## Result
+
+`./rebuild.sh 189` → exit 0, **752 tests pass** (659's pixel-frozen golden included).
+
+```
+components: 1  sizes: [59905]        (was 2: [63156, 14751])
+verify:     []                       (was BAKERY, DELI, KITCHEN, SEAFOOD)
+coverage:   {sealed_floor_patches: [], unreachable_shelf_labels: []}
+walkable:   24.7% of page, 24.7% entrance-reachable
+provenance: zones/seal_zones derived; exclusions/inclusions/walk_truth authored
+```
+
+Files created — only the permitted five, only under `data/189/`: `exclusions.json`, `inclusions.json`, `walk_truth.json`. `zones.json` and `seal_zones.json` were not needed (auto-derivation was correct in kind; see the aisle note below).
+
+## What the evidence showed
+
+**The 14751-cell orange island** was the entire back-of-house band — receiving, Market/Dairy prep rooms and coolers running x 126→1064 north of y≈176, plus the west staff corridor behind Deli/Bakery. It carries no product label anywhere, and the guide connects it only through drawn staff doors. Excluded (3 entries; the deepest lobe between Market and Dairy needed its own rect).
+
+**DELI / BAKERY VERIFY** — both labels are printed on the *staff* side of their drawn service counters (deli counter x 206–218 / y 242–332, bakery counter x 204–212 / y 404–478). The blank floor west of them holds the prep rooms with door arcs and is fed by doors punched into the x=130 staff-corridor wall. Excluded as one polygon; shoppers keep the frontage aisles east of both counters. This matches 659, where the same block is the purple staff blob.
+
+**SEAFOOD / KITCHEN VERIFY** — the opposite call. `SEAFOOD` sits on the open Market action alley *south* of the diagonal case, and `KITCHEN` is a vertical shelf label ("Kitchen Gadgets/Cookware") on aisle 5, not a counter. Both got inclusions.
+
+**Swallowed corridors** (found via the culled-pocket sweep, not flagged by any net): the auto-derived `SEAFOOD` seal disk is 130 pt ≈ 12 m with a 20 pt bridge, so it pinched the *mouths* of aisles 4, 5 and 7 shut — their north ends (up to 5.7 m of corridor each) were unreachable from the Market alley. Three inclusions reopen them. I fixed this with inclusions rather than a `seal_zones.json` override, per the runbook's preference, since the derived zones are otherwise correct.
+
+**One judgment call worth flagging:** `National Jewelry` is a leased tenant unit in the east vestibule. Its neighbours (Medical Information Center, Cricket, Browz, First Convenience Bank) are all sealed as enclosed rooms; this one stayed walkable only because its shopfront has no drawn wall. I excluded it for consistency. If the intent is that in-store tenants count as walkable, that entry is the one to drop.
+
+Remaining pockets are all benign and classified: dairy walk-in cooler behind the reach-in cases (2736), Market back prep rooms (1629 + 1071), the four lease units, the SE restroom/Services block, checkout-lane interiors between checkstands, and wall-thickness slivers along the SW perimeter. The three `far_snaps` (BAKERY 3.3 m, DAIRY 2.5 m, ENTRANCE 2.5 m) are all labels printed inside sealed staff space or in the doorway, snapping correctly to their customer frontage.
+
+**Not actionable, for the record:** the `Rx` room sits outside the extracted sales-floor boundary, so it is not walkable. Inclusions can't restore it (they only re-open cells that survived the boundary cut), and reaching it would require a code/boundary change — out of scope per the guardrails.
+
+`walk_truth.json` locks in 30 points (16 `must`, 14 `must_not`). It runs slightly above the ~12–18 guideline because the spec asks for the interior of *each* sealed staff area and this store has five, plus lease units, a restroom and a lane interior. All 30 are enforced and green.
+
+Stopping here for the separate audit context.

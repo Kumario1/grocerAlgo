@@ -1,0 +1,13 @@
+[
+  {"name": "front-of-Market action alley in front of the Seafood counter (customer): the SEAFOOD label is printed on the open floor SOUTH of the diagonal seafood case and WEST of the meat case at y 225-238, not inside either counter",
+   "rect": [478, 238, 620, 272]},
+
+  {"name": "aisle 4 north end (Canned Fruit/Canned Vegetables) — customer corridor swallowed by the 20-pt bridge of the auto SEAFOOD seal disk, which reaches 12 m and pinches this aisle mouth shut",
+   "rect": [424, 270, 444, 340]},
+
+  {"name": "aisle 5 north end + its Kitchen Gadgets / Kitchen Cookware shelf frontage — same SEAFOOD-disk bridge closed the aisle mouth; the KITCHEN anchor here is a vertical shelf label on aisle 5, not a service counter, so this whole corridor is customer space",
+   "rect": [458, 270, 484, 506]},
+
+  {"name": "aisle 7 north end (Popcorn/Crackers/Cookies) — third aisle mouth closed by the auto SEAFOOD seal disk's bridge",
+   "rect": [530, 270, 556, 392]}
+]

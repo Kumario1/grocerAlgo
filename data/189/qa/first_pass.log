@@ -1,0 +1,62 @@
+32 anchors, 134 rect fixtures + 47 poly fixtures, 3858 wall segments, boundary 21 vertices -> data/189/geometry.json
+overlay -> data/189/extract_overlay.png
+service pockets culled: 48 (largest 2736 cells)
+33 anchors, grid 612x396, m/cell=0.191 -> data/189/profile.npz
+walkable: 32.1% of page (26.1% entrance-reachable)
+components: 2  sizes: [63156, 14751]
+anchors: 33  |  exclusions: 0
+service pockets sealed (service + dead crevices): 48
+   2736 cells at (949,211) near DAIRY
+   1949 cells at (576,194) near SEAFOOD
+   1789 cells at (118,427) near BAKERY
+   1771 cells at (426,672) near FLORAL
+   1560 cells at (765,683) near CHECKSTANDS
+   1330 cells at (697,194) near SEAFOOD
+   1246 cells at (169,607) near PRODUCE
+   1086 cells at (996,675) near AISLE 19
+   1080 cells at (627,683) near ENTRANCE
+   1068 cells at (1020,609) near AISLE 19
+VERIFY: BAKERY area still 100% walkable at (174,393) — staff area? add an exclusion rect if so
+VERIFY: DELI area still 100% walkable at (183,242) — staff area? add an exclusion rect if so
+VERIFY: KITCHEN area still 62% walkable at (465,491) — staff area? add an exclusion rect if so
+VERIFY: SEAFOOD area still 99% walkable at (543,254) — staff area? add an exclusion rect if so
+snaps moved >12 cells (check reachable.png):
+  ENTRANCE: 13 cells (~2.5 m)
+  DAIRY: 13 cells (~2.5 m)
+tightest corridors at anchors (half-width capacity):
+  DAIRY: 0.69 m
+  AISLE 18: 0.95 m
+  CHILI/MEAT/FISH: 0.95 m
+  KITCHEN: 0.95 m
+  AISLE 14: 1.08 m
+  AISLE 15: 1.08 m
+  AISLE 17: 1.08 m
+  ENTRANCE: 1.08 m
+........................................................................ [ 12%]
+........................................................................ [ 24%]
+........................................................................ [ 36%]
+........................................................................ [ 48%]
+........................................................................ [ 60%]
+........................................................................ [ 72%]
+........................................................................ [ 84%]
+........................................................................ [ 96%]
+......................                                                   [100%]
+=============================== warnings summary ===============================
+../../../../../../opt/anaconda3/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /opt/anaconda3/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+<frozen importlib._bootstrap>:488
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type swigvarlink has no __module__ attribute
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+598 passed, 6 warnings in 46.27s
+sys:1: DeprecationWarning: builtin type swigvarlink has no __module__ attribute

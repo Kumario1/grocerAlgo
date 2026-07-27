@@ -1,0 +1,17 @@
+[
+  {"name": "back-of-house band north of the sales-floor back wall (receiving + Market/Dairy prep and coolers): drawn blank, carries no product label, and the guide reaches it only through the staff door symbols at x~212/y174, x~630/y82 and x~780/y224 — it shipped as a 14751-cell orange island cut off from the entrance",
+   "rect": [126, 46, 1066, 176]},
+
+  {"name": "Market-to-Dairy staff room (deep back-of-house pocket between the market case wall and the dairy cooler; two door arcs at (770,205) and (830,205), no customer frontage) — the southern lobe of the same orange island",
+   "rect": [742, 118, 834, 226]},
+
+  {"name": "west staff corridor behind the Deli/Bakery block (runs the west wall from the back-of-house band down to the bakery production rooms; three doors punched into the x=130 wall, no fixtures, no labels)",
+   "rect": [80, 120, 132, 368]},
+
+  {"name": "Deli + Bakery service block (staff side): blank floor holding the prep/cooler rooms with door arcs at (140,232), (150,272) and (155,325), fed by the staff corridor doors at x=130; the drawn service counters at x 206-218 (deli, y 242-332) and x 204-212 (bakery, y 404-478) are its customer face, so shoppers stay east of them. The DELI and BAKERY labels are printed on the staff side of those counters",
+   "poly": [[126, 176], [198, 176], [198, 228], [218, 228], [218, 336],
+            [204, 336], [204, 482], [84, 482], [84, 366], [126, 366]]},
+
+  {"name": "National Jewelry lease unit (tenant storefront in the east vestibule, not H-E-B sales floor; its neighbours Medical Information Center / Cricket / Browz / First Convenience Bank are already sealed as enclosed rooms — this one only stayed open because its shopfront has no drawn wall)",
+   "rect": [474, 654, 538, 714]}
+]

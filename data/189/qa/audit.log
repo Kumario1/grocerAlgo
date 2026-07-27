@@ -1,0 +1,36 @@
+Only `data/189/` touched (the store is new/untracked); no code, goldens, or other stores.
+
+## Audit findings — store 189 (H-E-B San Antonio), worst first
+
+**Pass 1 — Mechanical: PASS.** `./rebuild.sh 189` exit 0; `verify: []`; both coverage lists empty; walkable 24.7% (in the normal 20–35% band); single component (59905 cells); 752 tests green.
+
+---
+
+### Finding 1 — Pharmacy (`Rx`) wing had zero coverage from every net in the pipeline `[FIXED]`
+
+- **Coordinates:** room ≈ PDF pt `(1065, 397)–(1156, 562)`; `Rx` label at `(1111.7, 474.8)`; frontage corridor `x 1047–1064, y 413–575`.
+- **Evidence:** crop `r1c2` of the 3×3 sweep — the entire Rx footprint renders pink (reclaimed-outside). `geometry.json` holds 32 anchors, **none** for RX/PHARMACY, while every sibling store (24, 265, 388, 659, 660, 790) extracts a `PHARMACY` anchor. `engine.SERVICE_DEPTS` is `(DELI, BAKERY, SEAFOOD, SUSHI, KITCHEN, PHARMACY, MEAL SIMPLE, COOKING)` — this guide prints **"Rx"**, which matches nothing. So the Rule-2 service-label VERIFY pass, the auto seal-disk, and the snap/narrow diagnostics all skip the store's pharmacy silently. Separately, `boundary` has a straight east edge at `x = 1064.93` that clips the bump-out, so the room is `free_old=1, free_raw=0` — sealed as "outside", not by any store data file.
+- **What the truth should be:** the 600-dpi render of the source PDF shows the room drawn as a **fully closed box** — no door arc, no counter, no fixtures, no product labels — matching every sibling store, where the pharmacy dispensary is staff (`659`, `265`, `388`, `660`, `24` all `must_not` it). So the sealed interior is *correct*, and the frontage is *correct* (probed `x=1055`, `y 413–575` all reachable; above 413 is the aisle-20 gondola end). The defect was that **nothing in the shipped truth asserted either fact** — the store-24 blind spot, one stage earlier in the pipeline.
+- **Fix type:** walk_truth points — `must_not [1110, 480]` (room interior) + `must [1053, 470]` (frontage), plus `must [1036, 300]` for the aisle-20/east-wing corridor, which had no `must` anywhere east of aisle 17 north of the front alley.
+
+### Finding 2 — Services counter room sealed with no `must_not` `[FIXED]`
+
+- **Coordinates:** culled pocket `x 982–1064, y 580–634` (1068 cells); `Services` label at `(1015.5, 592.7)`.
+- **Evidence:** pocket-classification pass; crop `B_seblock`. No `SERVICES` anchor exists. walk_truth pinned only the approach corridor at `(970, 588)` — nothing held the office interior closed.
+- **Truth:** staff office behind the counter; frontage green on its north and west faces (verified in crop).
+- **Fix type:** walk_truth point — `must_not [1020, 610]`, verified to lie *inside* the pocket, not in adjacent frontage.
+
+---
+
+### Passes that came back clean
+
+- **Pass 2 (visual sweep):** all 9 crops plus 7 targeted zooms. All 20 aisle corridors probe **100% green end-to-end** (y 268→badge, no gaps). Market action alley continuous `x 220→1050` at y 245–265; front action alley continuous `x 150→860`; south cross-aisle continuous to `x 1050`. Dairy, Deli, Bakery, Produce, Floral, Seafood/Market frontages all green; staff blocks, lease units (National Jewelry, Cricket, Browz, First Convenience Bank, Medical Information Center), restrooms and back-of-house all sealed; checkout lanes sealed with the front alley green both sides. **All 40 culled pockets classified** — dairy cooler, market prep, lease units, Services office, SE service rooms, checkout-lane interiors, U-display-case interiors, and a wall-thickness crevice at `(84,494)-(330,632)` whose bbox merely *contains* the Produce label without covering it. No unexplained pocket.
+- **Pass 3 (label probes):** ran exhaustively over all **275** PDF words rather than 10. Every product label has reachable floor within ~1 m. The only words beyond 2 m are outdoor text (Outdoor Sales/Seating, Red Box), the correctly-sealed lease-unit names, staff-side department titles (Bakery 3.2 m, Deli 2.4 m, Dairy 2.5 m — all printed behind their counters, as `exclusions.json` states), and `Rx` (Finding 1).
+- **Pass 4 (walk_truth adequacy):** all 16 original assertions passed; now 18 `must` / 16 `must_not`, 0 failures against the fresh grid.
+- **Pass 5 (config sanity):** all 5 exclusions and 4 inclusions carry a WHY consistent with the map. No exclusion swallows a product label (only the staff-side `Deli`/`Bakery` titles and `National Jewelry`). The Seafood inclusion opens only the customer alley south of the diagonal case — the case and meat-case interiors stay sealed (verified visually). The aisle-5 inclusion covers a single 26-pt corridor, not a staff room.
+
+### Flagged risk (not a blocker for 189)
+
+`engine.SERVICE_DEPTS` has no `RX` synonym for `PHARMACY`. Store 189's artifacts are correct and its pharmacy is now permanently pinned by walk_truth, so this needs no code change to ship. But any future guide that prints "Rx" will likewise get no anchor, no seal-disk and no VERIFY flag over its pharmacy — worth a one-word vocabulary addition by whoever owns `router/engine.py`. I did not touch it.
+
+`AUDIT CLEAN — store 189 (2 findings fixed)`

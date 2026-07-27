@@ -1,0 +1,317 @@
+{
+ "components": {
+  "n": 1,
+  "sizes": [
+   59905
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 2736,
+   "near": "DAIRY",
+   "x": 949.0,
+   "y": 211.0
+  },
+  {
+   "cells": 1771,
+   "near": "FLORAL",
+   "x": 425.5,
+   "y": 671.7
+  },
+  {
+   "cells": 1629,
+   "near": "SEAFOOD",
+   "x": 576.1,
+   "y": 198.6
+  },
+  {
+   "cells": 1560,
+   "near": "CHECKSTANDS",
+   "x": 765.0,
+   "y": 683.0
+  },
+  {
+   "cells": 1246,
+   "near": "PRODUCE",
+   "x": 168.9,
+   "y": 607.4
+  },
+  {
+   "cells": 1086,
+   "near": "AISLE 19",
+   "x": 995.8,
+   "y": 675.4
+  },
+  {
+   "cells": 1080,
+   "near": "ENTRANCE",
+   "x": 627.0,
+   "y": 683.0
+  },
+  {
+   "cells": 1071,
+   "near": "SEAFOOD",
+   "x": 696.3,
+   "y": 199.3
+  },
+  {
+   "cells": 1068,
+   "near": "AISLE 19",
+   "x": 1019.6,
+   "y": 609.1
+  },
+  {
+   "cells": 690,
+   "near": "ENTRANCE",
+   "x": 688.0,
+   "y": 683.0
+  },
+  {
+   "cells": 595,
+   "near": "AISLE 17",
+   "x": 930.1,
+   "y": 629.4
+  },
+  {
+   "cells": 558,
+   "near": "SEAFOOD",
+   "x": 543.0,
+   "y": 328.8
+  },
+  {
+   "cells": 447,
+   "near": "CHILI/MEAT/FISH",
+   "x": 471.2,
+   "y": 317.8
+  },
+  {
+   "cells": 417,
+   "near": "BAKERY",
+   "x": 252.9,
+   "y": 369.9
+  },
+  {
+   "cells": 378,
+   "near": "AISLE 15",
+   "x": 874.0,
+   "y": 629.0
+  },
+  {
+   "cells": 364,
+   "near": "AISLE 17",
+   "x": 939.0,
+   "y": 699.0
+  },
+  {
+   "cells": 314,
+   "near": "AISLE 15",
+   "x": 876.5,
+   "y": 699.5
+  },
+  {
+   "cells": 304,
+   "near": "AISLE 20",
+   "x": 1045.9,
+   "y": 695.9
+  },
+  {
+   "cells": 301,
+   "near": "AISLE 20",
+   "x": 1046.0,
+   "y": 656.0
+  },
+  {
+   "cells": 285,
+   "near": "AISLE 17",
+   "x": 946.0,
+   "y": 666.3
+  },
+  {
+   "cells": 272,
+   "near": "AISLE 16",
+   "x": 901.1,
+   "y": 668.0
+  },
+  {
+   "cells": 248,
+   "near": "AISLE 12",
+   "x": 789.8,
+   "y": 574.6
+  },
+  {
+   "cells": 233,
+   "near": "CHILI/MEAT/FISH",
+   "x": 434.8,
+   "y": 299.5
+  },
+  {
+   "cells": 158,
+   "near": "AISLE 15",
+   "x": 874.0,
+   "y": 574.5
+  },
+  {
+   "cells": 143,
+   "near": "CHECKSTANDS",
+   "x": 689.2,
+   "y": 574.9
+  },
+  {
+   "cells": 139,
+   "near": "AISLE 7",
+   "x": 551.9,
+   "y": 571.8
+  },
+  {
+   "cells": 139,
+   "near": "AISLE 8",
+   "x": 598.1,
+   "y": 571.8
+  },
+  {
+   "cells": 118,
+   "near": "AISLE 10",
+   "x": 665.0,
+   "y": 572.1
+  },
+  {
+   "cells": 112,
+   "near": "AISLE 15",
+   "x": 861.8,
+   "y": 667.4
+  },
+  {
+   "cells": 110,
+   "near": "DELI",
+   "x": 247.8,
+   "y": 291.6
+  },
+  {
+   "cells": 110,
+   "near": "CHECKSTANDS",
+   "x": 754.2,
+   "y": 573.3
+  },
+  {
+   "cells": 109,
+   "near": "AISLE 8",
+   "x": 574.8,
+   "y": 574.0
+  },
+  {
+   "cells": 109,
+   "near": "AISLE 9",
+   "x": 620.8,
+   "y": 574.0
+  },
+  {
+   "cells": 109,
+   "near": "CHECKSTANDS",
+   "x": 732.2,
+   "y": 573.1
+  },
+  {
+   "cells": 108,
+   "near": "DAIRY",
+   "x": 887.0,
+   "y": 183.0
+  },
+  {
+   "cells": 106,
+   "near": "DAIRY",
+   "x": 1012.8,
+   "y": 181.4
+  },
+  {
+   "cells": 105,
+   "near": "AISLE 9",
+   "x": 643.1,
+   "y": 573.3
+  },
+  {
+   "cells": 105,
+   "near": "AISLE 13",
+   "x": 826.0,
+   "y": 668.0
+  },
+  {
+   "cells": 104,
+   "near": "AISLE 1",
+   "x": 281.9,
+   "y": 447.4
+  },
+  {
+   "cells": 102,
+   "near": "CHECKSTANDS",
+   "x": 712.4,
+   "y": 570.9
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 17.2,
+   "meters": 3.27,
+   "name": "BAKERY"
+  },
+  {
+   "cells": 13.4,
+   "meters": 2.55,
+   "name": "ENTRANCE"
+  },
+  {
+   "cells": 13.3,
+   "meters": 2.54,
+   "name": "DAIRY"
+  }
+ ],
+ "m_per_cell": 0.1907,
+ "narrow": [
+  {
+   "half_width_m": 0.69,
+   "name": "DAIRY"
+  },
+  {
+   "half_width_m": 0.95,
+   "name": "AISLE 18"
+  },
+  {
+   "half_width_m": 0.95,
+   "name": "BAKERY"
+  },
+  {
+   "half_width_m": 0.95,
+   "name": "CHILI/MEAT/FISH"
+  },
+  {
+   "half_width_m": 0.95,
+   "name": "DELI"
+  },
+  {
+   "half_width_m": 0.95,
+   "name": "ENTRANCE"
+  },
+  {
+   "half_width_m": 0.95,
+   "name": "KITCHEN"
+  },
+  {
+   "half_width_m": 1.08,
+   "name": "AISLE 14"
+  }
+ ],
+ "provenance": {
+  "drift": null,
+  "exclusions": "file",
+  "inclusions": "file",
+  "seal_zones": "derived",
+  "zones": "derived"
+ },
+ "reachable_pct": 24.7,
+ "store": "189",
+ "verify": [],
+ "walkable_pct": 24.7
+}
