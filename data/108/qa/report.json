@@ -1,0 +1,106 @@
+{
+ "components": {
+  "n": 1,
+  "sizes": [
+   54128
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 3028,
+   "near": "CHECKSTANDS",
+   "x": 780.8,
+   "y": 556.3
+  },
+  {
+   "cells": 1598,
+   "near": "PHARMACY",
+   "x": 1036.7,
+   "y": 608.3
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 91.1,
+   "meters": 25.9,
+   "name": "PHARMACY DRIVE-THRU"
+  },
+  {
+   "cells": 15.9,
+   "meters": 4.52,
+   "name": "SEAFOOD"
+  },
+  {
+   "cells": 13.5,
+   "meters": 3.83,
+   "name": "BAKERY"
+  }
+ ],
+ "m_per_cell": 0.2845,
+ "narrow": [
+  {
+   "half_width_m": 0.64,
+   "name": "KITCHEN"
+  },
+  {
+   "half_width_m": 0.8,
+   "name": "AISLE 55"
+  },
+  {
+   "half_width_m": 0.8,
+   "name": "SEAFOOD"
+  },
+  {
+   "half_width_m": 0.85,
+   "name": "BAKERY"
+  },
+  {
+   "half_width_m": 0.85,
+   "name": "MEAT"
+  },
+  {
+   "half_width_m": 0.9,
+   "name": "AISLE 25"
+  },
+  {
+   "half_width_m": 0.9,
+   "name": "AISLE 47"
+  },
+  {
+   "half_width_m": 0.9,
+   "name": "AISLE 53"
+  }
+ ],
+ "provenance": {
+  "drift": {
+   "seal_zones": {
+    "derived_n": 7,
+    "derived_names": [
+     "auto:BAKERY",
+     "auto:BLOOMS",
+     "auto:DELI",
+     "auto:KITCHEN",
+     "auto:PHARMACY",
+     "auto:SEAFOOD",
+     "auto:CHECKSTANDS"
+    ],
+    "file_n": 1,
+    "file_names": [
+     "Checkstand lane bank, and the ONLY zone: SHAPE FIX of the derived rect [577.5,550.3,992.7,658.9]. The +/-200 x +/-45 pt window around the CHECKSTANDS label (773,605) swept in fixtures that are not registers \u2014 the Business Center counters (x 553-647), the Tobacco kiosk, the pharmacy-end shelf runs x 956-1029 and the solid front-end block x 597-889 y 612-649 \u2014 stretching the rect over the whole store front. At bridge=20 that closed both the 14 pt front action alley at y 596-610 and the y 503-517 queueing alley, cutting every route from the two entrances into the sales floor: the entire 64216-cell floor came back as one 'service pocket' and build_profile died on 'no walkable cell near AISLE 1'. Retightened to the register units themselves (north bank x 648.4-894.9 y 517.6-553.0, south bank x 667.2-894.4 y 562.2-592.4), bridge unchanged so the ~10 pt lanes still seal while both alleys stay open. The seven derived auto: service disks are dropped for the same shape reason, not as a policy change: this guide is drawn at ~22 pt aisle pitch, so a shopping aisle here is only ~11 pt wide \u2014 narrower than DISK_BRIDGE (12 pt) and SEAFOOD_BRIDGE (20 pt) \u2014 and a 130 pt disk therefore closes the aisles it covers instead of a staff pass-through. auto:SEAFOOD alone (x 241-501, y 283-543) bridged the whole west sales floor shut, and re-adding the six disks on top of this rect still culls a 7692-cell pocket of Market/cookware floor at (475,358), 410 cells of Business Center frontage and 123 cells at aisle 38. The staff interiors those disks were meant to catch are traced exactly from the drawn casework in exclusions.json (Deli prep, Bakery/Tortilleria prep, Seafood back-of-house, Pharmacy room), which is the mechanism the runbook prefers."
+    ]
+   }
+  },
+  "exclusions": "file",
+  "inclusions": "file",
+  "seal_zones": "file",
+  "zones": "derived"
+ },
+ "reachable_pct": 20.5,
+ "store": "108",
+ "verify": [],
+ "walkable_pct": 20.5
+}

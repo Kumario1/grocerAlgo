@@ -1,0 +1,133 @@
+# Store 108 — adversarial map audit
+
+Rebuilt from scratch (`./rebuild.sh 108`, exit 0) before and after the fix.
+Committed artifacts were not trusted; every number below is from my own rerun.
+
+## Pass 1 — mechanical: PASS
+
+exit 0 | `verify: []` | `coverage.sealed_floor_patches: []`,
+`coverage.unreachable_shelf_labels: []` | `walkable_pct` 20.5 =
+`reachable_pct` 20.5 (in the normal 20-35 band) | `components` n=1,
+sizes [54128] | 762 -> 774 tests pass (659's golden gate included).
+
+Both culled pockets located and classified:
+  - 3028 cells @ (781,556) "near CHECKSTANDS" = the interior of the
+    checkstand lane bank, sealed by the single `seal_zones` rect
+    [644,515,899,596]. Painted floor sealed BY DESIGN (lanes).
+  - 1598 cells @ (1037,608) "near PHARMACY" = the **Lease + Admin rooms**
+    in the SE corner (x 955-1086, y 574-638, 159 m^2). Drawn closed in the
+    source PDF; the only opening is the door swing at (1031,576) off the
+    aisle-56 end. Not shopping floor. NOT the pharmacy wing.
+
+## Pass 2 — systematic visual sweep
+
+3x3 crops of `walkable_overlay.png` plus 12 targeted overlay-vs-raw-PDF
+zoom pairs (north band, front end, deli, deli mouth, deli casework,
+bakery/Tortilleria, seafood casework, Mia's Mirror, NE slot, pharmacy/
+cosmetics, business center, blooms, restrooms, west wall, meal simple,
+apparel/seasonal, NW back rooms).
+
+Corroborated mechanically rather than by eye alone:
+  - **Fixture frontage net (mine, independent):** of 493 rect fixtures,
+    exactly ONE unblessed fixture has no reachable floor within 1.0 m of
+    any perimeter sample: [840,100,909,109] at 1.14 m — a stacked
+    north-wall case back with no printed labels. No shelf run is stranded,
+    so the store-24 sealed-wing mode is absent.
+  - **Floor-paint sweep (mine, the uncorroborated form of qa_checks net 2):**
+    our-rules-sealed unblessed paint >= 4 m^2 = a single 7.9 m^2 patch at
+    (798,596) which is one 2-pt raster row along the bottom edge of the
+    seal rect (y=596). The front action alley below it stays 12 pt (1.7 m)
+    and green end to end. Rect-edge artifact, not a blockage.
+  - Drawn-sealed paint (exempt from the nets by design) enumerated: west
+    back rooms 183 m^2, Lease/Admin 159 m^2, front-end block 153 m^2,
+    Dairy walk-in 133 m^2, restroom block 14 m^2 — all genuinely enclosed
+    rooms in the PDF; the remaining 80 patches are gondola interiors.
+
+Judgment calls the onboarding log asked me to scrutinize — all UPHELD:
+  1. **Deli plaza = staff.** Confirmed. There is a continuous partition at
+     x~559-566 running y 289 -> 483 (it is also the west wall of the
+     restroom block); the deli pocket and bakery pocket both back onto it,
+     so the pocket is back-of-house depth, not a plaza. Aisle 22's
+     x 559-565 run is single-faced east ("Bath Tissue"/"Paper Towels"
+     print at x 568-576). This guide's convention is uniform: every
+     service label (Bakery, Seafood, Business Center, Pharmacy) prints on
+     the staff side, and every non-service label (Market, Produce,
+     Kitchen, Apparel, Baby) prints on the shopping floor. 114 m^2 with
+     zero fixtures inside. The 30 pt south mouth is the staff way in.
+  2. **NE slot left walkable** (x 1073-1089, y 64-118, 2.3 x 7.7 m).
+     Accepted, not a finding: no drawn casework, no door, aisle-width,
+     open to the aisle-21 end of the top action alley, and it holds no
+     product either way. Leaving it green is the direction that cannot
+     hide shopping floor.
+  3. **far_snaps** re-derived: PHARMACY DRIVE-THRU 25.9 m is forced (the
+     label prints at (1158,757), outside the boundary); SEAFOOD 4.5 m and
+     BAKERY 3.8 m are the expected consequence of correctly sealing those
+     two prep interiors (659 shows BAKERY 4.46 m).
+
+## Pass 3 — label spot-probes
+
+Probed **all 184 printed text spans**, not 10. Every product/shelf label
+sits on entrance-reachable floor at 0.00 m, spread across every wing:
+Juice (1048,151), Sports Drinks (1028,213), Pasta (Dry) (655,220),
+Bath Tissue (569,303), Dog Food (702,336), Charcoal (809,321),
+Baby Formula (1020,342), Facial Tissue (585,381), Greeting Cards (677,403),
+Hair Accessories (1047,453), Cotton Balls (1040,471), Laxatives (969,566).
+The only non-zero distances are department names printing inside blessed
+staff/enclosed/outside features (Pharmacy 4.02, Business Center 4.55,
+Seafood 4.55, Bakery 3.98, Deli 1.99, Admin 5.69, Lease Space 7.97/13.30,
+Drive-Thru 29.54). No miss.
+
+## Pass 5 — config sanity
+
+`exclusions.json` (8): every WHY is traced to drawn casework and each one
+checks out against the printed map at 8-16x zoom. None covers a shelf
+label's only frontage (all labels probe 0.00 m). Sizes: north band 430 m^2
+(cf. 659's rect [608,58,1030,112], same class), Lease Space 326 m^2,
+Bakery prep 138 m^2, Business Center 128 m^2, Deli prep 114 m^2, Seafood
+BOH 90 m^2, Pharmacy room 67 m^2, Cooking Connection 14 m^2.
+`inclusions.json` (1): rect [352,300,442,348] covers only the Market
+cookware corridors; it does NOT reach the Cooking Connection horseshoe
+(y 224-255), so it blankets no staff room.
+`seal_zones.json` (1): the retightened checkstand rect; lanes seal, both
+the front action alley (y 596-610) and the queueing alley (y 503-517)
+stay open — verified by probe and by crop.
+
+## Findings — all four are walk_truth coverage holes, all fixed
+
+F1  west back-of-house rooms, x 344-500 / y 63-103 (183 m^2), probe (420,82)
+    -> blocked, drawn-closed room, inner wall x=500 with the staff door
+    swing at (501,83). Evidence: crop z_nw, drawn-sealed patch list.
+    Truth: must never be walkable. Fix: walk_truth `must_not` [420,82].
+    Was the largest sealed staff area in the store with no guard point.
+
+F2  front-end block, x 597-889 / y 612-649 (153 m^2), probe (740,630)
+    -> blocked, enclosed room behind the checkstands with one door swing
+    at (850,609). Evidence: crop z_frontend. Truth: must never be
+    walkable. Fix: walk_truth `must_not` [740,630].
+
+F3  Lease tenant unit, x 955-985 / y 578-640, probe (968,605) -> blocked.
+    walk_truth guarded only the adjacent Admin office at (1040,610), so
+    the western half of the 1598-cell SE culled pocket was unguarded.
+    Evidence: crop ov_22 / z_pharm. Fix: walk_truth `must_not` [968,605].
+
+F4  `must` coverage: nine wings/sections had no must point at all —
+    Market NW, Beer/Wine, Frozen Foods, Apparel, the Seasonal column,
+    Baby/aisle 46, the **Cosmetics east frontage strip**, Meal Simple and
+    the Business Center customer frontage. The Cosmetics case is the
+    store-24 geometry exactly: a wing whose only frontage is the 8-18 pt
+    strip x 1078-1086 between the aisle 47-51 shelf ends and the east
+    wall (verified continuous, y 434-486). Fix: walk_truth `must`
+    [425,190], [510,192], [875,200], [895,300], [872,460], [1010,360],
+    [1080,465], [511,583], [600,600].
+
+All original 21 must / 19 must_not points re-probed: every one passes AND
+lands inside the feature it names (checked against the exclusion, staff,
+seal-rect, fixture and boundary masks — not merely in an adjacent
+frontage). Fix type for every finding above: walk_truth point. No
+inclusion, exclusion or seal_zones override was needed; no code, golden
+or other store was touched.
+
+After the fix: `./rebuild.sh 108` exit 0, `verify: []`, both coverage
+lists empty, components n=1 [54128], walkable_pct 20.5, 774 passed.
+
+AUDIT CLEAN — store 108 (4 findings fixed)

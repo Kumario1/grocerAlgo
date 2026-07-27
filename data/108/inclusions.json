@@ -1,0 +1,4 @@
+[
+  {"name": "Market cookware corridors around the KITCHEN label (customer). KITCHEN (390,325) is a product-department name printed on the shopping floor between the Market gondola rows (x=360-420 at y=277-287, 293-303, 309-320, 328-338, 345-355, 364-374), with the 'Cooking Connectioin' demo horseshoe two rows north at (400-445, 220-250) — it is cookware, not a service counter, so its VERIFY is a false positive. Same call 658 and 660 record for their 'Kitchen Gadgets' shelf labels.",
+   "rect": [352, 300, 442, 348]}
+]
