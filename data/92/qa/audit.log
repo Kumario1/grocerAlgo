@@ -1,0 +1,40 @@
+All passes complete. Final state: `./rebuild.sh 92` exit 0, `verify: []`, both coverage lists empty, single component, 770 tests pass.
+
+## Findings — worst first
+
+### 1. Checkout lanes not sealed — both checkstand banks shipped fully walkable
+**Where:** west bank x 384–552, east bank x 626–750, y 583–623 (PDF pt).
+**Evidence:** the overlay rendered the whole bank green; reference `data/659/qa/walkable_overlay.png` renders the identical feature solid white. 20 columns crossed the bank end to end, and the shortest path from the front action alley to the post-checkout strip ran straight down a 0.43 m lane at x≈665 — geodesic/euclidean **1.04**, against **1.95–6.60 on all nine other onboarded stores**.
+**Why nothing caught it:** `seal_staff_gaps` culls only *enclosed* pockets. Store 92 draws its lanes open at both ends, so the derived `auto:CHECKSTANDS` zone had nothing to cull; and no product label sits in a lane, so neither coverage net could fire.
+**Truth:** lane interiors are not corridors the router may thread mid-trip; the bank is crossed at its ends.
+**Fix:** two exclusion rects, leaving the 1.7 m Ice-box/Tobacco walkway (x 552–626) and both bank-end approaches open. Post-fix: through-lanes 20 → 4 (the deliberate walkway), per-bank crossing ratio 2.30–4.03.
+
+### 2. Seafood counter customer aisle sealed — 12.0 m²
+**Where:** the 2.8 m diagonal aisle between the counter's outer wall (x=1102 → the 45° face ending (1133,441)) and the two angled seafood cases. Culled as 165 cells at (1103,435), 73 at (1106,469), 25 at (1067,422).
+**Evidence:** crop `z_seafood.png` + grid dump — nearest standable cell mid-aisle **12 pt (1.28 m)** away, both cases had 0.86 m to floor on their display faces, and `SEAFOOD` far-snapped 13 cells. The store's own exclusion text asserted this aisle "stays walkable"; it wasn't.
+**Cause:** `auto:SEAFOOD` disk (r=130) with `SEAFOOD_BRIDGE`=20 pt closing the aisle's 15–20 pt mouths.
+**Fix:** inclusion poly tracking the counter wall (a rect large enough swallows the staff-side counter band — it came back as a 34-cell island and split the grid, which is why it's a poly).
+
+### 3. Produce east wall-case frontage sealed — 6.2 m²
+**Where:** x 1146–1175, y 455–494, in front of the L-shaped wall case whose six angled shelf fronts at x 1173–1176 face west into it. Culled as 135 cells at (1163,468).
+**Evidence:** `p_eastcase.png` / `raw_eastcase.png` — frontage distance **2.36 m** at y=460; only the bottom ~10 pt had any floor at all. No printed label in the pocket, so both nets were blind to it.
+**Fix:** inclusion rect `[1144, 452, 1176, 496]`.
+
+### 4. Bakery display-bin alley sealed — 6.1 m²
+**Where:** x 1014–1036, y 436–470; culled as 138 cells at (1021,453). A 12 pt alley between the Tortilleria back-room wall and two bakery display bins, open at its south end into the existing bakery inclusion; bins' west faces were 1.71 m from floor.
+**Fix:** extended the existing Bakery inclusion rect north from y=470 to y=434.
+
+Each fix has a new `walk_truth` point that would have caught it: must (1098,432), (1108,468), (1160,470), (1020,452), (558,600), (660,618); must_not (466,600), (694,600), (1119,433).
+
+## Cleared, with the reasoning stated
+- **All remaining sealed floor classified:** perimeter slivers behind the Market/Kitchen/Produce department outlines (14.3 + 22.0 + 19.3 m²), four Lease Space rooms (96.3 + 88.0 + 39.9 + 10.5 m²), restroom block plus the walled alcove west of it, Tortilleria and Deli island interiors, a 0.7 m C-fixture slot, and a 2–4 pt fringe in the Baby block whose corridor stays fully traversable. Every one is either drawn-sealed in the source PDF or physically unusable.
+- **Label probes done exhaustively, not sampled:** all 464 printed words; every in-boundary product label has reachable floor within 8 pt. The only words beyond that are Lease/Space, Seafood, Tortilleria, Sushiya, Tobacco, Specialty — service interiors and enclosed rooms. Plus 22 named spot-probes against the shipped `profile.npz` across every wing, all ≤2 m.
+- **Texas Backyard** sits outside the extracted store boundary (x<285) because the guide draws it outside the sales-floor outline; left as `must_not`.
+- **walkable 36.2%** is above the 20–35% band and inside the ≤40% sparse-schematic allowance: this guide is a line schematic that draws no back-of-house at all, the label probe is complete, and the sweep found no remaining staff-only floor.
+- Config sanity: all 7 inclusions and 3 exclusions state a WHY consistent with the printed map; no inclusion blankets a staff room (0 walkable cells inside any exclusion) and no exclusion covers a shelf label's only frontage.
+
+Scope: only `data/92/exclusions.json`, `inclusions.json`, `walk_truth.json` were edited — no code, tests, goldens, or other stores.
+
+One cosmetic residue worth naming: the checkstand exclusions leave four ~1 m² untinted fringes at y≈576 above the assemblies, the same class as the pre-existing crevice at (593,577).
+
+`AUDIT CLEAN — store 92 (4 findings fixed)`

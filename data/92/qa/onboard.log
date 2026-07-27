@@ -1,0 +1,25 @@
+Converged. Final state for store 92:
+
+**`./rebuild.sh 92` → exit 0, 756 tests pass**, `report.json`: `"verify": []`, `"coverage": {"sealed_floor_patches": [], "unreachable_shelf_labels": []}`, `components: 1`, walkable/reachable 36.6%.
+
+## What I found and did (data only — 3 new files under `data/92/`)
+
+**`exclusions.json` (1 entry)**
+- **SEAFOOD VERIFY (100% walkable at 1127,399) → staff.** The drawing wraps that block in a ~9 pt counter band from (1102,372) along the north wall and down to the angled front ending at (1133,441); the interior is empty prep space (no fixture, no product label) whose only floor link is the ~12 pt staff gap to the produce wall case at (1145,445). Excluded as a poly; the customer aisle west of the counter and the corridor south of it (x 1116‑1142) stay open.
+
+**`inclusions.json` (5 entries)**
+- **Kitchen housewares department (2206 cells, the big purple block).** "Kitchen" here labels a *shelf* department (Appliances, Cookware, Bake Ware, Dinnerware, Tabletop, Kitchen Gadgets/Cutlery wall run). The derived `auto:SEAFOOD` disk (r=130, bridge 20) reaches back to x=997, closed the 14‑18 pt gaps between shelf rows, and the pocket then held the KITCHEN label so the SERVICE_DEPTS substring cull condemned it as staff — the same false positive 658 and 660 hit.
+- **DELI VERIFY (47%) → customer.** The island itself (x 944‑994) is already a blocked drawn polygon; the label prints in the 2.4 m corridor east of it.
+- **BAKERY VERIFY (100%) → customer.** Label prints on the sales floor east of the drawn Tortilleria/bakery back-room wall (x≈1010).
+- **Baby cross-corridor west end (449-cell pocket at 337,423)** — swallowed by the `auto:PHARMACY` disk; the same 16 pt aisle stays open east of x=400 and carries the Baby Food / Baby Water shelf labels.
+- **Produce display floor** — the BAKERY and SEAFOOD disks bridged the gaps around the Produce Station and display tables, culling the walkway as six small pockets (206/118/48/48/40/40 cells).
+
+**`walk_truth.json`** — 18 `must` (front alley, entrance approach, north cross-aisle, six distinct aisle corridors, and each department's customer frontage incl. the restored Kitchen/Produce/Baby ones), 16 `must_not` (four page corners, parking, Texas Backyard, drive-thru lane, seafood staff area, deli island, tortilleria back room, both kiosks, a sealed checkout-lane cell, restroom block, two enclosed Lease Space rooms).
+
+## Culled pockets I inspected and deliberately left sealed
+2100 / 1920 / 870 / 228 cells = Lease Space rooms, restroom block, exit-side lease room (all raw-disconnected enclosed rooms); 480 + 313 + 421 = 4‑6 pt perimeter slivers behind the east wall shelving, the north Market gondolas and the produce wall cases; 165 = the seafood counter band itself; 138 = the 14 pt crevice between the Tortilleria wall and two display bins (no labels, leads nowhere).
+
+## One thing I could not fix from data, reported rather than worked around
+The derived `auto:CHECKSTANDS` rect leaves the checkout-lane slivers walkable: its bridging disconnects the whole SW quadrant in the sealed grid, which aisle-badge protection then keeps wholesale, lanes included. Every tighter seal rect I tried (left bank only, right bank only, both, bridges 14‑26) sealed the lanes but also killed the ~1800-cell post-checkout strip in front of the Business Center — real customer floor. I left the derived zone alone (`seal_zones: derived`); the one lane cell that *is* sealed, at (649,580), is in `must_not`. `far_snaps` for ENTRANCE/EXIT and PHARMACY DRIVE-THRU are the exterior door/lane labels printed outside the sales-floor boundary; SEAFOOD's new 2.8 m snap is the label moving to the customer side of its counter.
+
+Stopping here for the separate audit context as instructed — I have not run `docs/audit.md`.

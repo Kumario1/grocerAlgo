@@ -1,0 +1,161 @@
+{
+ "components": {
+  "n": 1,
+  "sizes": [
+   87824
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 2206,
+   "near": "KITCHEN",
+   "x": 1110.1,
+   "y": 323.0
+  },
+  {
+   "cells": 2100,
+   "near": "PRODUCE",
+   "x": 1106.0,
+   "y": 655.0
+  },
+  {
+   "cells": 1920,
+   "near": "RESTROOMS",
+   "x": 365.3,
+   "y": 655.5
+  },
+  {
+   "cells": 870,
+   "near": "EXIT",
+   "x": 631.0,
+   "y": 668.0
+  },
+  {
+   "cells": 480,
+   "near": "KITCHEN",
+   "x": 1153.0,
+   "y": 337.5
+  },
+  {
+   "cells": 449,
+   "near": "PHARMACY",
+   "x": 337.5,
+   "y": 423.4
+  },
+  {
+   "cells": 421,
+   "near": "PRODUCE",
+   "x": 1104.9,
+   "y": 606.3
+  },
+  {
+   "cells": 313,
+   "near": "AISLE 1",
+   "x": 1107.6,
+   "y": 114.7
+  },
+  {
+   "cells": 228,
+   "near": "ENTRANCE",
+   "x": 837.0,
+   "y": 679.0
+  },
+  {
+   "cells": 206,
+   "near": "PRODUCE",
+   "x": 1094.0,
+   "y": 565.0
+  },
+  {
+   "cells": 165,
+   "near": "SEAFOOD",
+   "x": 1102.8,
+   "y": 435.4
+  },
+  {
+   "cells": 138,
+   "near": "BAKERY",
+   "x": 1021.4,
+   "y": 453.0
+  },
+  {
+   "cells": 135,
+   "near": "SEAFOOD",
+   "x": 1163.3,
+   "y": 468.0
+  },
+  {
+   "cells": 118,
+   "near": "PRODUCE",
+   "x": 1078.0,
+   "y": 541.1
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 78.3,
+   "meters": 16.77,
+   "name": "ENTRANCE/EXIT"
+  },
+  {
+   "cells": 34.3,
+   "meters": 7.35,
+   "name": "PHARMACY DRIVE-THRU"
+  },
+  {
+   "cells": 12.0,
+   "meters": 2.57,
+   "name": "SEAFOOD"
+  }
+ ],
+ "m_per_cell": 0.2141,
+ "narrow": [
+  {
+   "half_width_m": 0.64,
+   "name": "FLORAL"
+  },
+  {
+   "half_width_m": 0.86,
+   "name": "AISLE 52"
+  },
+  {
+   "half_width_m": 0.86,
+   "name": "AISLE 55"
+  },
+  {
+   "half_width_m": 0.86,
+   "name": "AISLE 57"
+  },
+  {
+   "half_width_m": 0.91,
+   "name": "SEAFOOD"
+  },
+  {
+   "half_width_m": 0.96,
+   "name": "AISLE 54"
+  },
+  {
+   "half_width_m": 1.07,
+   "name": "AISLE 56"
+  },
+  {
+   "half_width_m": 1.07,
+   "name": "CHECKOUT"
+  }
+ ],
+ "provenance": {
+  "drift": null,
+  "exclusions": "file",
+  "inclusions": "file",
+  "seal_zones": "derived",
+  "zones": "derived"
+ },
+ "reachable_pct": 36.2,
+ "store": "92",
+ "verify": [],
+ "walkable_pct": 36.2
+}
