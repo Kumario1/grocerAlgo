@@ -1,0 +1,33 @@
+Onboarding for store 95 (H-E-B Laredo) is converged. Stopping here for the separate audit context.
+
+## Root cause of the first-pass failure
+
+`build_profile.py` crashed on `no walkable cell near [749.7, 164.5]` (AISLE 11). The auto-derived config sealed the store in half:
+
+- The derived `auto:CHECKSTANDS` rect was `[550.5, 555.1, 934.8, 684.2]` — the ±45 pt fixture window around the CHECKSTANDS label swept in the impulse-rack row (y 595–604) and the frozen/seasonal shelf ends (y 555–577). At `bridge=20` that closed both the 16 pt strip north of the lanes and the 20 pt front action alley south of them.
+- The `auto:BAKERY` (r=130) and `auto:SEAFOOD` (r=130, bridge 20) disks overlapped that band on the east, so the entrance kept only an 11 083-cell pocket in the south-east.
+- The KITCHEN label then sat inside the orphaned remainder, so the service rule culled **78 009 cells — the entire sales floor** — as one staff pocket.
+
+## What I authored (`data/95/`, four files; `zones.json` not needed — ENTRANCE/CHECKSTANDS both derive)
+
+**`seal_zones.json`** — one zone: the checkstand rect retightened to the drawn register bodies (`x 564.5–898.5, y 619.7–657.2`) → `[558, 612, 901, 660]`, bridge 20. Lanes seal; queueing strip and front alley stay open. All six derived service disks dropped (no staff enclosure exists behind those counter runs; the disks only over-sealed customer corridors).
+
+**`exclusions.json`** — 5 entries: the 41 pt walk-in-cooler/service band behind the north-wall cases (no fixture, label, or badge anywhere above y=153; cooler door swings face *south* into the back alley; every other perimeter fixture hugs the boundary); the enclosed back-of-house block (Administration, break room, restroom vestibule); and the traced interiors of the three horseshoe service counters (Deli arc, Seafood C, Cooking Connection — the last has no extracted anchor, so no rule would ever have sealed it).
+
+**`inclusions.json`** — 4 entries answering the DELI / BAKERY / SEAFOOD / KITCHEN VERIFY flags as customer space, each citing the fixtures that bound the frontage.
+
+**`walk_truth.json`** — 21 `must` (front + back action alleys, five distinct aisle corridors across both blocks, frozen, toys, cross-aisle, floral, four department frontages, market walkway, produce, entrance approach) and 15 `must_not` (page corners, parking, Texas Backyard, both ends of the cooler band, pharmacy room, three counter wells, a lane interior, admin, restroom vestibule, break room, lease unit). Every point verified to sit on drawing floor inside the feature it names, not an adjacent frontage.
+
+## Final state
+
+`./rebuild.sh 95` exits 0, **758 tests pass**.
+
+```
+walkable 27.9%   reachable 27.9%   components: 1 [77881]
+verify: []       coverage: {sealed_floor_patches: [], unreachable_shelf_labels: []}
+far_snaps: []
+culled: 1087 cells @ (408,583) PHARMACY dispensary room (label-condemned, purple)
+         326 cells @ (875,637) checkstand lane bank
+```
+
+One judgment call I left open for the audit: the 83 m² empty walled alcove in the east boundary bump-out (x 1223–1279, y 470–633) is left walkable. It has no fixtures, labels, or directory destination, but it sits inside the extracted sales-floor boundary and opens onto the floor through a 3.1 m gap with no door drawn — so I had no positive evidence to bless it as staff.

@@ -1,0 +1,47 @@
+All passes complete. Rebuild is green.
+
+## Findings — store 95 (H-E-B Laredo), worst first
+
+### 1. East bump-out back-of-house suite shipped as customer sales floor — FIXED
+**Where:** x 1222.7–1278.7, y 470.2–633.4 pt. 2117 grid cells / **114 m²** marked walkable *and* entrance-reachable.
+
+**Evidence:**
+- Crop `r1c2` of the 3×3 sweep, then a 12 px/pt zoom of x 1150–1290, y 430–670: the whole bump-out rendered solid green, flush to the boundary.
+- The printed map at 9× shows **zero fixtures, zero product words, zero department labels**; PDF text extraction returns no word anywhere in x > 1200, y 400–720; no directory destination on page 1. It is the only such space on the map — every other square metre of sales floor carries fixtures or is a named open area (Apparel / Floral / Seasonal).
+- `geometry.json` wall segments show a **continuous west face** — `[1220.2,450.3→485.1]`, `[1221.0,495.6→503.4]`, `[1223.1,497.4→557.3]`, `[1221.6,512.9→554.2]`, `[1222.7,569.2→580.7]`, `[1219.8,580.7→710.7]` — leaving exactly two door-width gaps: y 485.1–495.6 (**1.22 m**) and y 557.3–569.2 (1.38 m). The south third is partitioned into two rooms by `[1246.5,581.1→634.2]` with matching 1.2 m door gaps at x 1231.7–1242.2 and 1258.8–1269.3.
+
+**Why it survived onboarding:** the handoff note left it open on the reading that a *"3.1 m gap with no door drawn"* opened it to the floor. That measured 470.2→497.4 and missed the `[1220.2,450.3→485.1]` wall segment. The real opening is one 1.22 m door.
+
+**Truth:** walled rooms reached through single doors, with nothing to sell in them, are back-of-house — not walkable.
+**Fix type:** exclusion, `rect [1222.0, 469.0, 1280.0, 635.0]`.
+**Catching points added:** `must_not [1250,550]` (north hall) and `[1262,610]` (south-east room).
+
+### 2. walk_truth coverage gaps — FIXED
+- **(a)** No `must_not` anywhere in the bump-out — exactly why Finding 1 passed its own suite. This is the store-24 pattern: the author's blind spot is invisible to the author's tests.
+- **(b)** **Market** (label at 1130.6, 190.9) has no `must` *and* no extracted anchor (`MARKET` isn't in extract.py's label list), so nothing in the truth files guards that department's frontage. Added `must [1150,202]` — the corridor between Market display runs `[1109.6,176.3,1188.5,190.0]` and `[1109.6,214.0,1188.5,227.6]`.
+- **(c)** The **restrooms approach** (x 547–564.5) had no `must`, yet `exclusions.json` entry #2's own rationale hand-picks its east edge at x=547 *"so the walkway from aisle 34 down to the front action alley stays customer floor."* A 20 pt drift east would seal the only route to the RESTROOMS anchor and nothing would fail. Added `must [556,650]`.
+
+## Cleared on inspection (not findings)
+- **North-wall cooler band exclusion** (500.8 m² — the largest sealed area, and the shape most like the store-24 failure): sound. 41 pt strip with no fixture, no product word above y=150, no badge; cooler door sawteeth drawn on the **south** face (verified at 7×, x 700–1000), so shoppers work the cases from the back action alley; west/east perimeter fixtures hug the boundary while only the north wall has the gap; same call as 659's blessed top-wall band.
+- **Both culled pockets classified:** 1087 cells @ (408,583) = pharmacy dispensary room (purple, walled with door arcs); 326 cells @ (875,637) = checkstand lane interior at the east end of the register bank (18× zoom).
+- **Checkout:** lane interiors sealed, impulse row + queueing strip + front action alley green, the ~2.8 m mid-bank crossover correctly left open.
+- **All 34 aisle corridors green end to end.** Aisles 14, 23 and 33 ray-march short only because their badge is printed off the corridor centreline; the true corridor column/row is free for its full 160–162 pt.
+- **Label probes:** all **161** map labels sit within 2.1 m of walkable floor. Representative spread across every wing (a21, a19, a24, a26, a34, a15, a12, a1/2, a27, centre-south ×2, both left-wall runs, north wall, front alley, Beer & Wine) — all **0.00 m**. The only five over 2.0 m are non-product: Administration, the Pharmacy room, two "Seasonal" gondola-top labels, Lease Space.
+- **Config sanity:** all 6 exclusions / 4 inclusions / 1 seal zone read against the printed map. The Deli inclusion rect overlaps the Deli well exclusion, but that is harmless — `build_free` restores from `free_raw` (post-exclusion), so an inclusion can only undo *sealing*, never an exclusion.
+- **Unanchored departments individually inspected:** Market, Beer & Wine, Cooking Connection, Apparel, Baby, Tobacco, Bus. Center, Ice, Coffee Bar, Lease Space, Cosmetics.
+
+**Reported, not fixed:** the `MEAT` anchor at (872.4, 201.9) is a false positive from the product line *"…Canned Meat…"* and lands mid-aisle-6; this map has no Meat department label (fresh meat is under "Market"). I did **not** repair it — store 659, the blessed golden reference, carries the identical `MEAT`-from-"Canned Meat" anchor at [672,188], as do 660 and 24. It is fleet-wide `extract.py` substring behaviour, would need a code change, and fixing store 95 alone would diverge from the reference.
+
+## Post-fix state
+`./rebuild.sh 95` → exit 0, **762 passed** (was 758; +4 for the new walk_truth points).
+
+```
+walkable 27.1%   reachable 27.1%   components: 1 [75641]
+verify: []       coverage: {sealed_floor_patches: [], unreachable_shelf_labels: []}
+far_snaps: []    exclusions: 6
+culled: 1087 @ (408,583) pharmacy dispensary | 326 @ (875,637) checkstand lanes
+bump-out free cells: 0        walk_truth: 23 must / 17 must_not, 0 violations
+```
+Only `data/95/exclusions.json` and `data/95/walk_truth.json` were edited; `git status` confirms no code, goldens, or other stores touched.
+
+`AUDIT CLEAN — store 95 (2 findings fixed)`
