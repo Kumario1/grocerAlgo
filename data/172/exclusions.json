@@ -1,0 +1,8 @@
+[
+ {"name": "back-room vestibule behind the north swinging double doors, above the Dairy walk-in cooler (staff only: the sales floor stops at the x=423 wall, the only link is the door pair at x 412-432 / y 79-99)",
+  "rect": [424, 0, 474, 112]},
+ {"name": "back-of-house receiving + prep rooms north of the Market back wall (that wall runs y~241 from x=500 to x=820; the band holds only doored rooms and coolers, no aisle badge and no product label)",
+  "rect": [474, 0, 822, 240]},
+ {"name": "north-east cooler / meat-prep block plus the loading-dock bay (dock bump is the boundary notch north of y=60 between x=742 and x=980); its south edge follows the slanted wall from (822,240) up to (896,216) and then the straight y~216 wall east to the x=1064 outside wall",
+  "poly": [[822, 0], [1066, 0], [1066, 216], [896, 216], [822, 240]]}
+]

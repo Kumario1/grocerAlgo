@@ -1,0 +1,40 @@
+{
+  "must": [
+    [650, 690, "front action alley between the checkstand bank and the front wall"],
+    [560, 690, "front action alley where it crosses the vestibule door approach — the one span the checkstand seal severed"],
+    [650, 608, "wide action alley along the north side of the checkstands"],
+    [455, 698, "entrance approach just inside the west entrance doors"],
+    [218, 220, "Frozen Food aisle 14 corridor"],
+    [274, 220, "Frozen Food aisle 13 corridor"],
+    [391, 180, "Dairy case frontage, west of the walk-in cooler"],
+    [390, 420, "north-south corridor at the aisle 16-25 badge column"],
+    [633, 264, "Market cross-aisle under the aisle 3-10 badge row"],
+    [582, 562, "grocery aisle at the Kitchen Gadgets / Pancake Mix shelf tags"],
+    [700, 300, "aisle 3 mouth just south of the badge, beside the Tortillas run"],
+    [818, 378, "Floral display frontage"],
+    [753, 395, "aisle 2 corridor at the Wine / Mixers shelf tags"],
+    [903, 330, "Sushi case west frontage (vector-only label, no extracted anchor)"],
+    [900, 480, "Produce shopping floor west of the island bins"],
+    [954, 541, "Produce cross-aisle between the island display tables"],
+    [1000, 520, "Bakery counter frontage, west of the bakery wall"],
+    [890, 640, "Deli counter frontage"],
+    [270, 615, "aisle 25 corridor along the Pharmacy frontage"],
+    [202, 450, "west perimeter aisle at the Facial Tissue wall run"]
+  ],
+  "must_not": [
+    [120, 120, "parking lot north-west of the building"],
+    [20, 20, "page corner NW, off-map"],
+    [1240, 810, "page corner SE, off-map"],
+    [450, 90, "back-room vestibule behind the north swinging doors (staff)"],
+    [445, 160, "Dairy walk-in cooler interior (staff)"],
+    [650, 200, "back-of-house receiving/prep room north of the Market wall (staff)"],
+    [860, 20, "loading-dock bay at the north-east boundary notch (staff)"],
+    [1020, 170, "north-east cooler / meat-prep block interior (staff)"],
+    [270, 665, "Pharmacy room interior (enclosed)"],
+    [930, 685, "Deli service counter interior (staff behind the counter)"],
+    [1030, 560, "Bakery service counter interior (staff behind the counter)"],
+    [594, 650, "checkout lane interior between two checkstands (open floor in the lane void, not on a checkstand fixture)"],
+    [633, 727, "Business Center room off the front vestibule (enclosed)"],
+    [503, 717, "restroom room off the front vestibule (enclosed)"]
+  ]
+}

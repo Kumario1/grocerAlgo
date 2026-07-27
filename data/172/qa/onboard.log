@@ -1,0 +1,23 @@
+Converged. `./rebuild.sh 172` exits 0 with 753 tests green.
+
+## Final state — `data/172/qa/report.json`
+
+```
+verify: []            coverage: {sealed_floor_patches: [], unreachable_shelf_labels: []}
+components: 1 (63935) walkable 24.2% / reachable 24.2%
+provenance: zones=derived, seal_zones=derived, exclusions=file, inclusions=file
+```
+
+## What the first pass got wrong, and what I changed
+
+**Three walkable components (63473 / 8012 / 3658).** The two orange components were the entire back-of-house: a receiving/prep band north of the Market back wall, the dairy walk-in cooler and its door vestibule, the NE cooler block, and the loading-dock bay in the boundary notch (x 742–980, y < 60). Page 2 shows only doored rooms and coolers there — no aisle badge, no product label, and the only link to the sales floor is a swinging double-door pair at x 412–432 / y 79–99. Blessed as three shapes in `exclusions.json`, traced to the drawn walls (west edge x=423; the y≈241 Market wall; the slanted wall (822,240)→(896,216) and the y≈216 wall east to the x=1064 outside wall). Verified programmatically: **0 previously-reachable cells fall inside them.**
+
+**`VERIFY: KITCHEN` at (582, 562)** — not a service kitchen. The anchor is the *shelf tag* "Kitchen Gadgets" / "Kitchen Appliances" printed in the aisle 4–6 corridors, on open sales floor. Resolved with an `inclusions.json` rect, which also suppresses the flag.
+
+**190-cell pocket at (954, 541) near BAKERY** — the auto Bakery seal disk (r=130, universal default) reaches 80 pt west into Produce and its 12 pt bridge closed the ~0.9 m cross-aisles between the produce island tables. Real customer floor; restored by a second inclusion (+462 cells, nothing else re-opened — checked against `staff_mask`).
+
+Every remaining culled pocket is a checkout-lane interior in the checkstand bank (302/292/254/144/141/132/123/120/117 cells, all y 616–700; the `near RESTROOMS`/`EXIT`/`KITCHEN` labels are just nearest-anchor noise). The three `far_snaps` are all label-inside-a-solid-room snaps to the correct frontage: PHARMACY → aisle 25, ENTRANCE → inside the front doors, BAKERY → its Produce-side frontage. The `narrow` entries (0.56–0.75 m) are the freezer door-swing sawteeth pinching the anchor cell; `corridor_width.png` shows the frozen aisles themselves bright green end to end, no red.
+
+**`walk_truth.json`**: 17 `must` (front alley both sides of the checkstands, entrance approach, frozen aisles 13/14, Dairy/Floral/Produce/Bakery/Deli/Pharmacy frontages, the produce cross-aisle, the badge-column and Market cross-aisles, west perimeter) and 14 `must_not` (parking, two page corners, the interior of each of the four sealed staff areas, Pharmacy/Business Center/restroom rooms, the Deli and Bakery counter interiors, a checkout-lane interior). Each point was rendered onto the overlay and eyeballed to confirm it sits inside the feature its name claims.
+
+No code, no other store's data, and no `zones.json`/`seal_zones.json` override was needed. Stopping here for the separate audit role.

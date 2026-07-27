@@ -1,0 +1,8 @@
+[
+ {"name": "aisle 4-6 south corridors where the 'Kitchen Gadgets' / 'Kitchen Appliances' shelf tags are printed — product labels on the open grocery floor, not a service kitchen (customer)",
+  "rect": [560, 520, 640, 606]},
+ {"name": "Produce cross-aisles between the island display tables (~0.9 m gaps the Bakery seal disk bridged shut 80 pt away; shoppers walk right through them)",
+  "rect": [888, 448, 986, 624]},
+ {"name": "front action alley where it crosses the vestibule door approach (open floor south of the checkstand bank, in front of the door pair at x 550-569 in the y=703 front wall; the CHECKSTANDS seal zone ran this lane gap straight through the alley and severed it left from right — customer floor, stops at y=676 so the lane interiors above stay sealed and at y=697 so the door-swing threshold slivers stay out)",
+  "rect": [548, 676, 571, 697]}
+]

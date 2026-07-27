@@ -1,0 +1,45 @@
+## Store 172 (Edinburg) — adversarial map audit
+
+### Pass 1 — Mechanical
+`./rebuild.sh 172` rerun from scratch three times (baseline + after each fix). Final: **exit 0**, `verify: []`, `coverage.sealed_floor_patches: []`, `coverage.unreachable_shelf_labels: []`, `components {n: 1, sizes: [64040]}`, `walkable_pct 24.3` (= `reachable_pct`, inside the 20–35% band), **756 tests pass**. `provenance.drift: null`; zones/seal_zones derived, exclusions/inclusions from file.
+
+### Pass 2 — Systematic visual sweep
+3×3 crops of `walkable_overlay.png` viewed individually, each compared against the printed page 2 underneath, plus paired printed/overlay zooms of Dairy, Frozen, Market band, Floral, Sushi, Produce, Bakery NW, Deli, Pharmacy, back-room vestibule, west wall and the checkout front. To catch what page-zoom hides I also enumerated **every** connected region of `free_raw & ~free` (open floor after boundary+exclusions that ends up non-green) — 21 components ≥20 cells — and classified all of them, and re-ran that enumeration after the fix.
+
+### Pass 3 — Label probes
+Rather than 10 labels, I probed **all 261 text items** on page 2 against the shipped grid (`profile.npz`, cell 2.0 pt, `m_per_cell` 0.1763). Every product label's nearest reachable floor is ≤ **0.12 m** (Cotton 0.09, Dog Food 0.07, Napkins 0.09, Diapers 0.04, Toys 0.00, Vitamins 0.09, Sodas 0.06, Coffee 0.07, Cereal 0.09, Batteries 0.06, Bakeware 0.08, Tortillas 0.07, Bread 0.03, Wine 0.05, Water 0.07, Charcoal 0.03, Pickles 0.05, Tobacco 0.11, Party 0.02). The only items >2 m are the four red department words printed inside drawn-sealed rooms (Pharmacy, Bakery, Deli, Business Center) and the vestibule "Entrance" words — all expected.
+
+---
+
+## Findings (worst first — all fixed)
+
+**1 · Front action alley severed at the vestibule door approach — `data/172/inclusions.json`**
+- Coordinates: open floor **x 550–568, y 676–700 pt** (PDF pt), in front of the door pair at x 550–569 in the y≈703 front wall.
+- Evidence: crop `c21` showed a white column below the checkstand bank; the sealed-floor enumeration isolated it as part of the 254-cell `CHECKSTANDS` pocket (bbox x544–568, **y616–698** — note it reached 24 pt past the bank's y≈676 bottom edge); line probes at y=682/690/696 read `#…#.....#…#` with a 20 pt (~1.8 m) sealed run; the 20 px/pt render of the raw art shows that column is plain open floor with no fixture in it, ending at a double door swing.
+- Truth: this is customer floor — the front action alley runs unbroken across the full checkstand bank, and it is the approach to the interior door pair. The `auto:CHECKSTANDS` seal zone ran one lane gap straight through the alley and cut the alley's west half from its east half.
+- Fix (**inclusion**): rect `[548, 676, 571, 697]`. Deliberately starts at y=676 so the lane interiors above stay sealed, and stops at y=697 so the door-swing threshold slivers stay out (a first attempt at y1=703 restored two 4/5-cell islands and pushed `components` to 3 — caught and trimmed).
+- New walk_truth point that would have caught it: `must [560, 690, "front action alley where it crosses the vestibule door approach — the one span the checkstand seal severed"]` (that cell was sealed before the fix).
+- After: y=682/690 fully green x 460→760; the pocket at that x shrank from 254 cells to **148**, now confined to y616–674 (lane interior only).
+
+**2 · `must_not` for the checkout lanes sat on a drawn fixture, so it was vacuously true — `data/172/walk_truth.json`**
+- `[605, 643, "checkout lane interior between two checkstands"]` probes as **SOLID wall/fixture**, not sealed open floor. It is the centroid of the 302-cell pocket, and the centroid lands on a checkstand. The point would still pass if the checkstand sealing were removed entirely, so it could not detect the exact regression it names.
+- Fix (**walk_truth point**): replaced with `[594, 650, …]`, which probes as `SEALED-openfloor` — a genuine lane void that flips green if the seal regresses.
+
+**3 · `must` coverage missed two sections — `data/172/walk_truth.json`**
+- The aisle 1–2 wing (Wine / Mixers / Water / Matches / Charcoal / Beer / Bread runs, x≈707–763, y≈340–560) had no `must` point; the nearest were the aisle-3 mouth and the Floral frontage.
+- **Sushi** is an unanchored department — the red label at (914, 329.5) is vector artwork with no entry in `geometry.json`'s 38 anchors, so no mechanical net covers it. It had no `must` point.
+- Fix (**walk_truth points**): `must [753, 395, "aisle 2 corridor at the Wine / Mixers shelf tags"]` and `must [903, 330, "Sushi case west frontage (vector-only label, no extracted anchor)"]`.
+
+---
+
+## Inspected and cleared (not findings)
+
+- **Drawn-sealed blocks.** Pharmacy (x 186–356, y 628–702), Deli (x 834–989, y 657–703) and Bakery (x 990–1063, y 472–703) probe as solid in the *no-boundary* grid too — they are closed rooms in the source PDF, not sealing artifacts. None contains a product label or fixture; each has green frontage (aisle-25 corridor at y≈615; Deli counter line at y≈657; Bakery sawtooth case diagonal). This is the store-24 failure mode's shape, so I checked it hardest: the guide simply draws no interior for them. `PHARMACY`/`BAKERY` far-snaps (4.55 m / 2.51 m) are consequences of this, not defects.
+- **All 10 printed culled pockets classified.** Nine are checkout-lane interiors and restroom/exit-corridor crevices between checkstands (y 616–674). The tenth, `190 cells near BAKERY at (953.6, 541.0)`, is the Produce cross-aisle that inclusion #2 restores — it probes GREEN today. Note `culled_pockets` is captured *before* inclusions are restored, which is why (555.4, 659.7) still prints at 254 cells; the surviving sealed region there is now 148 cells.
+- Remaining sealed slivers (≤1.4 m²): Bakery case-front strip, Floral diagonal-display crevices, produce inter-rack gap at (1012, 462), staff swinging-door mouths on the north wall, west-wall crevice at (188, 600), Greeting Cards sliver at (362, 691) — all dead crevices with green immediately adjacent; no access lost.
+- **Front vestibule** (Business Center, both restroom pairs, Entrance/Exit doors) is outside the extracted boundary polygon, consistent with the two enclosed-room `must_not` points; the sales floor's own entrance approach `[455, 698]` is green.
+- **Config sanity.** Both inclusions state a WHY that matches the map (Kitchen Gadgets/Appliances are shelf tags on the open grocery floor, not a service kitchen; the Produce rect stops at x=986, short of the Bakery block at x≥990 — it does not blanket a staff area). All three exclusions match the drawn back-of-house: the vestibule rect stops at x=474 and the green sales floor correctly stops at the x=423 wall as the WHY claims; the Market back band and the NE cooler/dock poly cover only doored rooms and coolers. No exclusion removes any shelf label's only frontage — the 261-label sweep confirms this.
+
+Files changed (this store only): `data/172/inclusions.json`, `data/172/walk_truth.json`. No code, goldens, tests, or other stores touched.
+
+`AUDIT CLEAN — store 172 (3 findings fixed)`
