@@ -1,0 +1,25 @@
+[
+  {"name": "north wall service band behind the perimeter shelving (blank 3.5 m strip between the exterior wall y=69 and the wall-case run that starts at y=104; receiving doors are drawn in the exterior wall at x~700, x~845 and a side door at x~940 - back-of-house, no fixtures and no product labels anywhere in it)",
+   "rect": [166, 62, 1089, 103]},
+
+  {"name": "Market/Seafood back-of-house west of the market wall (wall traced from PDF strokes: chamfer (270,100)->(232,132), wall x=232 down to the double door at y=305-322, then the Seafood counter's outer face to (273,379), the bent back wall (289,398)->(289,447) and its west run to the exterior wall; contains the 'Seafood' dept label but no fixtures - staff prep rooms, reached only through that door and the exterior receiving doors on x=167)",
+   "poly": [[166, 100], [270, 100], [232, 132], [232, 320], [273, 379],
+            [289, 398], [289, 450], [166, 450]]},
+
+  {"name": "Deli service/prep enclosure behind the deli counter (74 m2 of empty floor walled by the deli counter y=138-147 on the north, the case at x=369-377 on the west, the long case y=211-218 on the south and the Beer & Wine wall x=461 on the east; one 1.4 m staff pass-through at its NW corner - customers are served from the north cross-aisle)",
+   "rect": [374, 137, 462, 219]},
+
+  {"name": "Bakery/Tortilleria production room (heavy-stroke walls: north y=340 x=405-493, east x=492, west x=374, south y=451 x=468-493 plus the slanted case (374,433)->(398,451)->(463,459); single ~1.2 m staff door at the NW corner (395-405,337))",
+   "poly": [[371, 335], [494, 335], [494, 454], [465, 454], [465, 461],
+            [397, 461], [371, 436]]},
+
+  {"name": "Pharmacy dispensing room behind the drawn counter (counter traced from the heavy PDF stroke: (1052,456)->(1028,489) straight down to (1028,517)->(1055,544)->(1055,568), staff door at (1046-1055,558); east side is the exterior wall x=1089)",
+   "poly": [[1052, 455], [1089, 455], [1089, 569], [1056, 569], [1056, 545],
+            [1029, 518], [1029, 490]]},
+
+  {"name": "Administration offices + pharmacy back rooms along the south-east wall (partitioned rooms with swing doors drawn between y=567 and the boundary y=640; staff only)",
+   "rect": [931, 567, 1089, 641]},
+
+  {"name": "Checkstand lane bank interior - the two self-checkout kiosk columns at x=561-601 plus the 22 belted register units at x=609-830, all between y=484 and y=578: a lane is where you queue at a register, not a corridor to route through. The seal zone does bridge the ~13 pt belted lanes shut, but the resulting pocket is 224 m2 - above the engine's 180 m2 dead-crevice cap - so it is kept; stated here instead, together with the self-checkout queue lane the bridging leaves half-open. Shoppers reach the front action alley around the bank's west end (past the pizza counter, x<556) and its east end (x>836)",
+   "rect": [556, 481, 834, 581]}
+]

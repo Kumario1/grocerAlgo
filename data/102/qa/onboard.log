@@ -1,0 +1,23 @@
+Store 102 is converged. Stopping here for the separate audit role.
+
+## Result
+
+`./rebuild.sh 102` → **exit 0**, `750 passed` (includes 659's pixel-frozen golden gate).
+
+`data/102/qa/report.json`: `"verify": []`, `"coverage": {"sealed_floor_patches": [], "unreachable_shelf_labels": []}`, `components: 1`, `walkable_pct 24.3` (= reachable_pct).
+
+## What the map needed
+
+**The derived seal zones were wrong in shape**, so I authored `seal_zones.json` (1 zone):
+- The r=130 pt (~15 m) service disks are centered on labels that in this guide don't sit on counters — `SEAFOOD` is printed *inside* the back-of-house room, `KITCHEN` on a prepared-foods case row, `DELI` in the middle of the prep enclosure. This store draws its real shopping aisles at 10–14 pt, exactly the disks' bridge width, so they swallowed the Beer & Wine gondola slot (x 500-512) and the Kitchen case-row aisles — the "Wine"/"Kitchen" labels are printed *in* those slots, so they're aisles.
+- The derived checkstand rect stopped at y=537, leaving the south register row's lanes open; the bridged region came out as one 7834-cell badge-protected pocket instead of per-lane pockets. Replaced with a tight box over both rows (bridge 20).
+
+**`exclusions.json` (7)** — every staff area traced from printed walls instead: north wall service band behind the perimeter shelving (receiving doors drawn in the exterior wall); Market/Seafood back-of-house west of the market wall (door at y 305-322); Deli prep enclosure (74 m² of empty floor behind the counter, one 1.4 m staff throat at its NW corner); Bakery/Tortilleria production room (heavy-stroke walls, ~1.2 m staff door); Pharmacy dispensing room (counter polyline); Administration offices; checkstand lane bank interior — the bridged lane pocket is 224 m², above the engine's 180 m² dead-crevice cap, so it's stated as data rather than left walkable.
+
+**`inclusions.json` (1)** — the Kitchen east–west cross aisle at the Bakery's north wall: 3 m wide and open to the Market floor, but the extractor promoted a black case-row label to a `KITCHEN` service anchor, condemning it. This also suppressed that VERIFY.
+
+The two original VERIFY flags resolved as exclusions (Deli enclosure, Seafood back room); the unreachable `Aid/First/Foot Care` cluster and the 92 m² sealed patch were the pharmacy disk swallowing the aisle 27–32 east ends — both cleared once the disk went away.
+
+**`walk_truth.json`** — 14 `must` / 14 `must_not`, covering each department's frontage, four distinct aisle corridors, both entrance approaches, and the interior of every sealed staff area plus a lane interior, two lease/restroom rooms, parking, drive-thru and page corners.
+
+The 7 remaining culled pockets are all drawing-enclosed lease suites and restrooms (Post Net, Haircutters, DaVi Nails, RediClinic, Diamonds's Angel). The far snaps (Deli 4.0 m, Seafood 4.4 m, Bakery 5.7 m, Pharmacy 3.0 m) are labels inside excluded staff areas snapping to their customer frontage; `ENTRANCE` 4.3 m is the vestibule arrow drawn outside the sales-floor boundary; `POST NET RESTROOMS` 8.7 m is a merged noise anchor in the lease strip.

@@ -1,0 +1,151 @@
+{
+ "components": {
+  "n": 1,
+  "sizes": [
+   64148
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 951,
+   "near": "EXIT",
+   "x": 817.6,
+   "y": 634.8
+  },
+  {
+   "cells": 754,
+   "near": "POST NET RESTROOMS",
+   "x": 630.0,
+   "y": 635.0
+  },
+  {
+   "cells": 658,
+   "near": "POST NET RESTROOMS",
+   "x": 529.6,
+   "y": 635.6
+  },
+  {
+   "cells": 546,
+   "near": "POST NET RESTROOMS",
+   "x": 578.0,
+   "y": 635.0
+  },
+  {
+   "cells": 520,
+   "near": "EXIT",
+   "x": 759.0,
+   "y": 635.0
+  },
+  {
+   "cells": 229,
+   "near": "POST NET RESTROOMS",
+   "x": 641.0,
+   "y": 689.9
+  },
+  {
+   "cells": 212,
+   "near": "POST NET RESTROOMS",
+   "x": 711.8,
+   "y": 700.3
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 36.8,
+   "meters": 8.67,
+   "name": "POST NET RESTROOMS"
+  },
+  {
+   "cells": 24.3,
+   "meters": 5.74,
+   "name": "BAKERY"
+  },
+  {
+   "cells": 18.8,
+   "meters": 4.42,
+   "name": "SEAFOOD"
+  },
+  {
+   "cells": 18.3,
+   "meters": 4.32,
+   "name": "ENTRANCE"
+  },
+  {
+   "cells": 16.9,
+   "meters": 3.98,
+   "name": "DELI"
+  },
+  {
+   "cells": 12.9,
+   "meters": 3.04,
+   "name": "PHARMACY"
+  }
+ ],
+ "m_per_cell": 0.2357,
+ "narrow": [
+  {
+   "half_width_m": 0.71,
+   "name": "ENTRANCE"
+  },
+  {
+   "half_width_m": 0.75,
+   "name": "FROZEN FOOD"
+  },
+  {
+   "half_width_m": 0.94,
+   "name": "PRODUCE"
+  },
+  {
+   "half_width_m": 0.97,
+   "name": "MEAT"
+  },
+  {
+   "half_width_m": 1.05,
+   "name": "AISLE 23"
+  },
+  {
+   "half_width_m": 1.05,
+   "name": "AISLE 24"
+  },
+  {
+   "half_width_m": 1.18,
+   "name": "AISLE 5"
+  },
+  {
+   "half_width_m": 1.18,
+   "name": "DELI"
+  }
+ ],
+ "provenance": {
+  "drift": {
+   "seal_zones": {
+    "derived_n": 7,
+    "derived_names": [
+     "auto:BAKERY",
+     "auto:DELI",
+     "auto:FLORAL",
+     "auto:KITCHEN",
+     "auto:PHARMACY",
+     "auto:SEAFOOD",
+     "auto:CHECKSTANDS"
+    ],
+    "file_n": 1,
+    "file_names": [
+     "Checkstand lane bank, both rows. Full override of the derived zones, for two reasons. (1) The derived checkstand rect [528,426,888,537] stopped at y=537, so the south row's lanes stayed open and the bridged area came out as a single 7834-cell badge-protected pocket instead of per-lane pockets - the lanes rendered walkable. This box hugs the 11+11 register units (x=609-830, y=484-578) on their 21 pt pitch and bridges looser than a counter gap, so the ~13 pt lanes seal while the wide front action alley south of y=583 stays open. (2) The derived r=130 pt (~15 m) service disks are dropped: in this guide the DELI/SEAFOOD/KITCHEN labels do not sit on their counters (SEAFOOD is printed inside the back-of-house room, KITCHEN on a prepared-foods case row, DELI in the middle of the prep enclosure), so their disks bridged shut this store's real 10-14 pt shopping aisles - the Beer & Wine slot at x=500-512 and the Kitchen case-row aisles at y=241-253 and y=263-275. Every staff area those disks were covering is now an exclusion polygon traced from the printed walls instead"
+    ]
+   }
+  },
+  "exclusions": "file",
+  "inclusions": "file",
+  "seal_zones": "file",
+  "zones": "derived"
+ },
+ "reachable_pct": 24.3,
+ "store": "102",
+ "verify": [],
+ "walkable_pct": 24.3
+}

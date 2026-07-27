@@ -1,0 +1,42 @@
+## Store 102 map audit — findings
+
+**Pass 1 — Mechanical.** `./rebuild.sh 102` rerun from scratch: exit 0, `verify: []`, `coverage.sealed_floor_patches: []`, `coverage.unreachable_shelf_labels: []`, `components: 1 (64148)`, `walkable_pct 24.3` = `reachable_pct 24.3` (in the normal 20–35% band), 750 tests green. No mechanical failure.
+
+All 7 culled pockets located and classified — every one is a front-lease-strip enclosed room, none is a swallowed corridor:
+
+| cells | centroid (pt) | bbox (pt) | what it is |
+|---|---|---|---|
+| 951 | (818,635) | 782,610–856,662 | RediClinic suite interior |
+| 754 | (630,635) | 602,610–660,662 | Post Net suite interior |
+| 658 | (530,636) | 506,608–554,662 | west lease suite interior |
+| 546 | (578,635) | 558,610–598,662 | The Haircutters suite interior |
+| 520 | (759,635) | 742,610–780,662 | DaVi Nails suite interior |
+| 229 | (641,690) | 630,664–662,716 | women's restroom room |
+| 212 | (712,700) | 686,682–738,716 | east restroom room (arrow-sign room) |
+
+**Pass 2 — Visual sweep.** 3×3 crops of `walkable_overlay.png` at native resolution, each compared against the same crop of PDF page 2, plus 12 targeted zooms (Deli, Bakery, Beer & Wine, Kitchen case rows, Seafood, Sushi, pizza island, Floral, north band, NE dairy cooler, pharmacy, checkstands, lease strip, restrooms, admin). To catch drawn-sealed sections that the mechanical nets exempt by design, I also ran an independent detector: cells inside the boundary that are blank floor in the source render but not walkable and not covered by a fixture or an exclusion. Result: **only the 7 lease/restroom pockets above, plus two 1-cell-tall slivers.** No unexplained sealed floor anywhere on the sales floor.
+
+Corridor continuity checked numerically rather than by eye — every aisle marched end to end: aisles 1–16 free their full 175 pt depth, 17–27 free to the east wall shelving, 28–32 free to the pharmacy chevron, 33–43 free except for mid-aisle island fixtures (Floral buckets, aisle-41 endcap) that shoppers walk around. North cross aisle continuous x 246→1082; the y≈326 and y≈474 cross aisles continuous; front action alley continuous x 182→926.
+
+Every unanchored department inspected: Sushi (open C-case, green inside and around), Meal Simple (green), Market, Tortilleria (inside the sealed bakery room, correct), Hallmark Dept, Healthy Living, Tobacco kiosk, Cosmetics bay, South Flo Pizza (closed staff island, sealed as a fixture). Staff areas purple/untinted, lease suites and restrooms not green, outside-boundary not green, checkout lanes sealed with the front alley open (verified numerically: y 481–583 blocked, y≥585 free).
+
+**Pass 3 — Label probes.** Rather than 10 samples I probed **all 348 printed words** on page 2 against the shipped grid. Every one is 0.00 m from reachable floor except 21, and all 21 are lease-suite callout names printed outside the boundary, `Cart`/`Exit`/`Entrance` outside the boundary, or department names printed inside sealed rooms (Bakery 6.83 m, Seafood 6.28 m, Tortilleria 4.95 m, Deli 4.01 m, Pharmacy 4.17 m, Administration 4.95 m). Zero product labels unreachable. Named spread-check (Mixers, Jug Water, Bulk Coffee, Chips, Hot Cocoa, Bread, Cereal, Spices, Plates/Cups, Bleach, A/C Filters, Cat Litter, Birdseed, Cotton, Hosiery, Laxatives, Cough/Cold, Seasonal, Diapers, Charcoal, Batteries, Toys, Gift Wrap, Vitamins, Tortillas, Napkins, Insecticides, Matches, Brooms/Mops): all 0.00 m.
+
+**Pass 5 — Config sanity.** All 7 exclusion polygons re-traced against the printed strokes and each matched (chamfer (270,100)→(232,132); seafood back wall (273,379)→(289,398)→(289,450); bakery walls with the single 1.2 m NW staff door at x 395–405; pharmacy counter (1052,455)→(1029,490)→(1029,518)→(1056,545) with the staff door at (1046,558); three receiving doors in the north exterior wall at x≈700/845/940 opening into the service band). No exclusion covers a shelf label's only frontage (0 words with y<104; every product label reachable). The single inclusion does not leak into any staff room — **0 free cells inside any exclusion polygon**. The `seal_zones.json` full override is justified: every auto-derived service disk it drops (BAKERY/DELI/SEAFOOD/KITCHEN/PHARMACY/FLORAL) has its staff area replaced by a traced exclusion, or has none to seal (Kitchen case rows and Floral buckets are self-serve). No config findings.
+
+**Pass 4 — walk_truth adequacy. This is where the defects were.** All 28 existing points probe correctly and lie inside the features they name, but the coverage had eight holes — 8 findings, all fixed, `./rebuild.sh 102` rerun after the edit:
+
+1. **No `must` point anywhere in the depth of aisles 1–16** — the store's largest wing (x 476–900, y 139–314, ~150 product labels). The only nearby point, (700,125), is the north cross aisle at the aisle *mouths* — the exact store-24 signature. Evidence: crops `r0c1`/`r0c2`, aisle march. Truth: those corridors are green their full length. Fix (walk_truth): `(700,250)` aisle 9 mid-depth, `(860,230)` aisle 15 mid-depth.
+2. **No `must` point in the aisles 33–43 block or its feeder cross aisle** — second whole wing (Healthy Living, Party Supplies, Gift Wrap, Hallmark, Toys, Baby, Seasonal; x 500–840, y 330–465). Evidence: crop `r1c1`, y=474 sweep. Fix: `(717,420)` aisle 39 mid-depth, `(700,474)` south cross aisle.
+3. **No `must_not` for the South Flo Pizza service island interior** (x 434–548, y 482–579, 154 m² — the largest staff island on the open sales floor). It is sealed only because the extractor captured its closed outline as a fixture poly; nothing in this store's truth pinned it, unlike 659's "Deli island interior (staff)". Evidence: zoom `z_pizza`, suspect-floor detector hit before fixture subtraction. Fix: `must_not (490,530)`.
+4. **No `must` point at the Floral frontage** (600,420). `seal_zones.json` deliberately drops the auto-derived r=130 pt FLORAL disk; removing that override would seal ~15 m radius of open Floral/Hallmark floor and no test would notice. Fix: `must (600,420)`.
+5. **No `must` point in Frozen Food** (x 940–1080, y 150–390) — nearest points were Dairy (1000,128) and Cosmetics (1050,430), both outside it. Fix: `must (1000,300)`.
+6. **No `must` point at the Seafood counter frontage.** The SEAFOOD anchor sits *inside* the sealed back-of-house room, so the customer side of the counter was entirely unpinned; widening that polygon would erase it silently. Evidence: zoom `z_seafood`. Fix: `must (262,352)`.
+7. **No `must` point in either boundary-jog customer area** — the Dining room (x 438–504, y 613–680) and the restroom access corridor (x 628–740, y 663–718). These are walkable only because of two jogs in the extracted boundary. Fix: `must (470,640)`, `(700,665)`.
+8. **Only 2 of the 7 front-strip pockets had a `must_not`.** The east suites sit past a different boundary jog (y≤663.5 vs y≤680) than the pinned Post Net point, and the actual restroom rooms were unpinned — (712,700) is the adjacent arrow-sign room. Fix: `must_not (800,635)` RediClinic, `(645,690)` women's restroom.
+
+No finding required a code change; no `router/`, `extract.py`, `tests/`, golden, or other store's data was touched — only `data/102/walk_truth.json`.
+
+**Post-fix rebuild:** exit 0, `verify: []`, both `coverage` lists empty, `components: 1 (64148)`, `walkable_pct 24.3`, **762 tests passed** (750 + the 12 new points, each of which would have caught its finding).
+
+`AUDIT CLEAN — store 102 (8 findings fixed)`
