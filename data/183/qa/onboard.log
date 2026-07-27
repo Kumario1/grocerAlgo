@@ -1,0 +1,33 @@
+Converged. Store 183 is onboarded.
+
+## Result
+
+`./rebuild.sh 183` exits 0, **744 tests pass** (includes 659's pixel-frozen golden gate), and `data/183/qa/report.json` reads:
+
+```
+verify:     []
+coverage:   {"sealed_floor_patches": [], "unreachable_shelf_labels": []}
+components: {"n": 1, "sizes": [62191]}
+walkable_pct: 23.6
+provenance: zones=derived, seal_zones=derived, exclusions=file, inclusions=file
+```
+
+## Findings and what I changed
+
+The first mechanical pass was already close: coverage nets clean, one VERIFY, two components. Two data edits closed both.
+
+**`data/183/inclusions.json` — aisle 8 corridor** (`rect [657, 262, 675, 500]`)
+The lone `VERIFY: KITCHEN` at (661, 387) is not a service kitchen. Rendering the raw PDF at that spot shows the anchor is the shelf label **"Kitchen Gadgets"**, printed in the aisle 8 run between the aisle-8 and aisle-9 gondolas (badges 8@666.7, 9@697.2; free run at that y is 658–674). That's ordinary customer aisle, so it takes an inclusion, per the runbook's "dept name printed on the shopping floor" case. Grid-wise it's a no-op (nothing there was sealed) — it only records the judgment and suppresses the flag.
+
+**`data/183/exclusions.json` — NE corner enclosed room** (`rect [1190, 228, 1206, 282]`)
+The second component (150 cells, orange in the overlay) is a small chamber behind aisle 24, walled on all four sides in the PDF strokes with no drawn opening. It survived pocket-culling only because it grazes the AISLE 24 badge-protection window. Excluding it collapses the map to one component.
+
+**Not changed: `seal_zones.json`.** The deriver emits a spurious `auto:KITCHEN` disk from that same bogus anchor, but I measured its effect — it seals 31 cells total, three slivers at the aisle 8/9 gondola tops (y 258–266) that are genuine dead crevices. Since a `seal_zones.json` override replaces all derived zones wholesale, authoring one to remove a harmless disk was the riskier trade. Left derived.
+
+**Culled pockets, all 29 classified.** The 4289-cell staff pocket holds both the DELI and BAKERY labels (correctly purple). The next tier (2540/1736/1104/499/312/171/171/113 and the 500-ish DELI entries) are the enclosed back-room block in the NW quadrant — white rooms with traced walls, no customer door. 1422/618/524/108 are the restroom block and the east-entrance vestibule. 684/675/260/248/148 are wall-thickness bands between the doubled north-wall strokes. 685 and 460 are the west-wall room and the south-wall band. None are swallowed corridors.
+
+**Far snaps all explained**: RESTROOMS (5.2 m) and BAKERY/DELI (4.3/2.5 m) sit inside correctly-sealed rooms; ENTRANCE (2.6 m) is drawn on the door line outside the boundary. **Narrow** (0.82–0.89 m half-width) is uniform across every aisle — this guide draws 16–18 pt aisles throughout, not a per-aisle artifact, and `corridor_width.png` shows no dark-red slivers.
+
+**`data/183/walk_truth.json`** — 22 points (13 must / 9 must_not), each verified against the grid and against the PDF drawing. `must` covers the entrance doorway, front action alley, Market alley, and the customer frontage of Produce, Bakery, Deli, Beer & Wine, Dairy and Frozen Foods, plus aisles 1/8/16/24. `must_not` covers a page corner, the parking lot, the Bakery and Deli staff interiors, the NW back-room block, the west-wall room, a restroom interior, the NE closet, and a checkout lane interior at (610, 540) — a point the drawing shows open (`free_raw` true) that the checkstand zone correctly seals.
+
+Only `data/183/` was touched. Stopping here for the separate audit context.

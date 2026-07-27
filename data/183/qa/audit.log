@@ -1,0 +1,35 @@
+## Store 183 map audit — findings
+
+**Pass 1 — Mechanical: clean.** `./rebuild.sh 183` exit 0. `verify: []`, both coverage lists empty, `components n=1 sizes=[62191]`, `walkable_pct 23.6 == reachable_pct 23.6`, 744 tests green (751 after my fixes).
+
+**Pass 2 — Visual sweep.** 12 crops of `walkable_overlay.png` (3 rows × 4 cols over the store bbox, 2× upscale) plus 8 targeted free-grid-tinted-over-PDF renders at 400–1200 dpi (NW deli/bakery block, north wall band W and E, restroom block, east lobby, SE frozen corner, checkstand bank, SW produce/west entrance). All 24 aisle corridors verified free end to end by column scan (y=264→506/516; the only interior gaps are 10–18 pt fixtures the corridor passes around). All 29 culled pockets classified.
+
+**Pass 3 — Label probes.** Went past the ≥10 requirement: probed **all 255 text words** on page 2 against `profile.npz`. Worst product/badge label distance to free floor **0.78 m** ("Salsa", aisle-8 badges). Zero misses. The only far labels were red wayfinding text (`Restrooms` 5.22 m, `Bakery` 4.32 m, `Entrance`-east 3.72 m, `Deli` 3.55 m) — department centroids, expected, except the east Entrance/Exit pair, which led to F1.
+
+---
+
+### F1 — East Entrance/Exit vestibule: 618-cell sealed pocket, mis-attributed and undocumented (worst)
+
+- **Coords:** interior x 992.6–1046.7, y 515.6–566.7 (pt). Printed in the top-ten mechanical stats as `618 cells at (1019,539) near RESTROOMS` — it is not the restrooms.
+- **Evidence:** crop r2c3 / `free_se.png`; probe `(1020,540) free=False, nearest free 2.79 m at (1020,512)`. PDF strokes: unbroken 1.017-wide partitions north `y=515.6 x=992.6..1046.7`, west `x=992.6 y=509.1..566.7`, east `x=1046.7 y=515.6..565.3`, **no door symbol on any of them**. Its only opening is the exterior door bank — white doorway rect `x=994.2..1044.9, y=565.7..568.4`, the same symbol as the west doors at `x=345.6..396.2, y=611.9..614.6`.
+- **Truth:** the guide draws this as a sealed enclosure, so the grid is faithful — but nothing in the store's data said so, and it sat in the top-ten stats under the wrong department name.
+- **Fix applied:** `exclusions.json` entry with the traced stroke coordinates + `walk_truth` `must_not [1019,540]`.
+
+### F2 — North-wall service band had zero walk_truth coverage
+
+- **Coords:** `(459,183)` 684 cells, `(822,222)` 675, `(1021,221)` 248, `(1137,222)` 260 — the band between the building wall and the case line behind Market and Dairy.
+- **Evidence:** `free_nband_w.png` / `free_nband_e.png`; all four probe `free=False` with free floor 0.8–1.2 m south. Store 659 covers the analogous band explicitly ("behind Dairy cases", "top-left wall service gap"); 183 had nothing, so a regression that opened it would ship silently.
+- **Fix applied:** `must_not` at `[459,185]`, `[822,221]`, `[1137,222]`.
+
+### F3 — No `must` anywhere in the east front-end
+
+- **Coords:** the region x 860–1205, y 470–565 — front alley north of the restroom/office block, SE floor by the frozen banks, SE corner by the curved island — had no `must` point at all. Over-sealing the restroom block or the island would not have failed anything.
+- **Fix applied:** `must` at `[880,497]`, `[1100,500]`, `[1150,520]` (all probe free on the shipped grid).
+
+**Pass 5 — Config sanity: clean.** The NE-room exclusion's stated WHY matches the strokes exactly (`y=228 x 1190.3..1205.3`, `x=1190.3 y 228..281.8`, `y=281.8 x 1190.3..1206`, boundary `x=1205.3`; no door symbol). The aisle-8 inclusion is correct and tight: `KITCHEN` is the shelf label "Kitchen Gadgets" at x≈657, and the rect frees exactly the corridor (x 659–673 free full length; the gondola faces at 657/675 stay blocked).
+
+**Post-fix rebuild:** exit 0, `verify: []`, coverage empty, 1 component, 23.6% walkable, **751 tests pass**, all 16 `must` + 13 `must_not` hold, all 255 label probes still ≤0.78 m. The vestibule pocket is gone from the stats; every remaining top-ten pocket is now named by an exclusion or a `must_not`. Only `data/183/{exclusions,walk_truth}.json` changed — no code, no goldens, no other store.
+
+**One thing I did not fix, deliberately:** the 2021 schematic draws no inner doors at the east entrance, so a shopper arriving there is on unwalkable floor and cannot be routed. I did not invent that opening — the PDF is the declared ground truth and the grid matches it, and no per-store JSON could do it anyway (`inclusions` only restore cells already free in `free_raw`, then `free &= reach>=0` drops any disconnected pocket — `router/derive.py:274-299`). Punching a doorway would need a mechanism in `router/`. I recorded that in the exclusion's name for whoever picks it up. Say the word if you'd rather I escalate it as a blocker instead.
+
+`AUDIT CLEAN — store 183 (3 findings fixed)`

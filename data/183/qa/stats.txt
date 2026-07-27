@@ -1,0 +1,28 @@
+walkable: 23.6% of page (23.6% entrance-reachable)
+components: 1  sizes: [62191]
+anchors: 36  |  exclusions: 2
+service pockets sealed (service + dead crevices): 28
+   4289 cells at (208,329) near BAKERY
+   2540 cells at (131,257) near BAKERY
+   1736 cells at (92,217) near DELI
+   1422 cells at (925,558) near RESTROOMS
+   1104 cells at (84,373) near BAKERY
+    685 cells at (74,514) near PRODUCE
+    684 cells at (459,183) near AISLE 1
+    675 cells at (822,222) near AISLE 13
+    524 cells at (952,522) near RESTROOMS
+    504 cells at (201,179) near DELI
+snaps moved >12 cells (check reachable.png):
+  RESTROOMS: 26 cells (~5.2 m)
+  BAKERY: 22 cells (~4.3 m)
+  ENTRANCE: 13 cells (~2.6 m)
+  DELI: 13 cells (~2.5 m)
+tightest corridors at anchors (half-width capacity):
+  RESTROOMS: 0.56 m
+  KITCHEN: 0.80 m
+  AISLE 1: 0.82 m
+  AISLE 3: 0.82 m
+  AISLE 2: 0.89 m
+  AISLE 4: 0.89 m
+  AISLE 5: 0.89 m
+  AISLE 8: 0.89 m

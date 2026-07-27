@@ -1,0 +1,250 @@
+{
+ "components": {
+  "n": 1,
+  "sizes": [
+   62191
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 4289,
+   "near": "BAKERY",
+   "x": 207.9,
+   "y": 328.6
+  },
+  {
+   "cells": 2540,
+   "near": "BAKERY",
+   "x": 131.0,
+   "y": 256.6
+  },
+  {
+   "cells": 1736,
+   "near": "DELI",
+   "x": 92.0,
+   "y": 217.0
+  },
+  {
+   "cells": 1422,
+   "near": "RESTROOMS",
+   "x": 925.2,
+   "y": 558.5
+  },
+  {
+   "cells": 1104,
+   "near": "BAKERY",
+   "x": 84.0,
+   "y": 373.0
+  },
+  {
+   "cells": 685,
+   "near": "PRODUCE",
+   "x": 74.5,
+   "y": 513.7
+  },
+  {
+   "cells": 684,
+   "near": "AISLE 1",
+   "x": 459.0,
+   "y": 183.0
+  },
+  {
+   "cells": 675,
+   "near": "AISLE 13",
+   "x": 822.0,
+   "y": 222.0
+  },
+  {
+   "cells": 524,
+   "near": "RESTROOMS",
+   "x": 952.2,
+   "y": 521.8
+  },
+  {
+   "cells": 504,
+   "near": "DELI",
+   "x": 201.0,
+   "y": 179.0
+  },
+  {
+   "cells": 499,
+   "near": "BAKERY",
+   "x": 178.4,
+   "y": 302.8
+  },
+  {
+   "cells": 475,
+   "near": "DELI",
+   "x": 198.0,
+   "y": 218.0
+  },
+  {
+   "cells": 460,
+   "near": "PRODUCE",
+   "x": 202.0,
+   "y": 607.0
+  },
+  {
+   "cells": 331,
+   "near": "DELI",
+   "x": 267.9,
+   "y": 225.3
+  },
+  {
+   "cells": 312,
+   "near": "BAKERY",
+   "x": 121.0,
+   "y": 351.0
+  },
+  {
+   "cells": 260,
+   "near": "FROZEN",
+   "x": 1095.9,
+   "y": 533.8
+  },
+  {
+   "cells": 260,
+   "near": "DAIRY",
+   "x": 1137.0,
+   "y": 222.0
+  },
+  {
+   "cells": 248,
+   "near": "AISLE 20",
+   "x": 1021.0,
+   "y": 221.0
+  },
+  {
+   "cells": 245,
+   "near": "FROZEN",
+   "x": 1168.0,
+   "y": 558.0
+  },
+  {
+   "cells": 171,
+   "near": "BAKERY",
+   "x": 182.0,
+   "y": 342.0
+  },
+  {
+   "cells": 171,
+   "near": "BAKERY",
+   "x": 202.0,
+   "y": 342.0
+  },
+  {
+   "cells": 170,
+   "near": "EXIT",
+   "x": 483.5,
+   "y": 544.4
+  },
+  {
+   "cells": 156,
+   "near": "DELI",
+   "x": 185.0,
+   "y": 252.0
+  },
+  {
+   "cells": 156,
+   "near": "DELI",
+   "x": 211.0,
+   "y": 252.0
+  },
+  {
+   "cells": 148,
+   "near": "AISLE 6",
+   "x": 605.8,
+   "y": 203.4
+  },
+  {
+   "cells": 133,
+   "near": "FROZEN",
+   "x": 1117.4,
+   "y": 556.2
+  },
+  {
+   "cells": 113,
+   "near": "BAKERY",
+   "x": 147.0,
+   "y": 431.7
+  },
+  {
+   "cells": 108,
+   "near": "RESTROOMS",
+   "x": 893.0,
+   "y": 528.0
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 26.2,
+   "meters": 5.22,
+   "name": "RESTROOMS"
+  },
+  {
+   "cells": 21.6,
+   "meters": 4.32,
+   "name": "BAKERY"
+  },
+  {
+   "cells": 13.1,
+   "meters": 2.62,
+   "name": "ENTRANCE"
+  },
+  {
+   "cells": 12.6,
+   "meters": 2.52,
+   "name": "DELI"
+  }
+ ],
+ "m_per_cell": 0.1994,
+ "narrow": [
+  {
+   "half_width_m": 0.56,
+   "name": "RESTROOMS"
+  },
+  {
+   "half_width_m": 0.8,
+   "name": "KITCHEN"
+  },
+  {
+   "half_width_m": 0.82,
+   "name": "AISLE 1"
+  },
+  {
+   "half_width_m": 0.82,
+   "name": "AISLE 3"
+  },
+  {
+   "half_width_m": 0.89,
+   "name": "AISLE 2"
+  },
+  {
+   "half_width_m": 0.89,
+   "name": "AISLE 4"
+  },
+  {
+   "half_width_m": 0.89,
+   "name": "AISLE 5"
+  },
+  {
+   "half_width_m": 0.89,
+   "name": "AISLE 8"
+  }
+ ],
+ "provenance": {
+  "drift": null,
+  "exclusions": "file",
+  "inclusions": "file",
+  "seal_zones": "derived",
+  "zones": "derived"
+ },
+ "reachable_pct": 23.6,
+ "store": "183",
+ "verify": [],
+ "walkable_pct": 23.6
+}

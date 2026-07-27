@@ -1,0 +1,7 @@
+[
+  {"name": "NE corner enclosed room behind aisle 24 (walled on all four sides in the PDF strokes — x=1190 wall, y=230 top wall, y=280 bottom wall, store boundary at x=1204; no drawn opening, so no shopper can enter. It survived pocket-culling only because it grazes the AISLE 24 badge window and rendered as the second, orange component)",
+   "rect": [1190, 228, 1206, 282]},
+
+  {"name": "east Entrance/Exit vestibule, drawn sealed from the sales floor. Its only opening is the exterior door bank in the south building wall (white doorway rect x=994.2-1044.9 at y=565.7-568.4, the same symbol as the west doors at x=345.6-396.2 / y=611.9-614.6). The other three sides are unbroken 1.017-wide partition strokes — north y=515.6 x=992.6-1046.7, west x=992.6 y=509.1-566.7, east x=1046.7 y=515.6-565.3 — with no door symbol anywhere, so the guide draws no inner opening onto the front alley (which is walkable right up to y=512 above it). Left open it is a 618-cell island cut off from ENTRANCE, and it printed in the top-ten culled pockets mis-labelled 'near RESTROOMS'; excluding it states the enclosure instead of leaving it unexplained. NOTE for humans: the real store's inner doors are simply absent from this 2021 schematic — if east-door routing is ever wanted, that needs a door-punch mechanism in router/, not a data edit",
+   "rect": [994, 517, 1046, 566]}
+]
