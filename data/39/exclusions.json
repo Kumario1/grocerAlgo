@@ -1,0 +1,10 @@
+[
+  {"name": "Dairy walk-in cooler band along the top wall (staff only): the strip between the north exterior wall and the back of the dairy cases at y~75-95. Its neighbours at x<481.6 and x>825.2 already extract as solid fixture blocks ([372.8,34.1,481.6,95.4] and [825.2,34.8,899.7,85.1]); only this middle span was left open, and it rendered as the whole 3655-cell orange island (no shopper route reaches it).",
+   "rect": [481, 33, 825, 86]},
+
+  {"name": "Centre Restrooms room (front-end, between the two Lease bays and the Tobacco kiosk). An enclosed room, not sales floor: the drawing walls it on all four sides — west x=507.8-508.6, east x=570.9-571.7, south y=699.6-701.8, north y=627.0-627.8 — and the north wall breaks for exactly ONE 12.8-pt doorway at x=532.5-545.3. Nothing in it seals: no seal_zone covers the front-end west of the checkstand rect and the doorway is wider than any bridge, so 38.6 m^2 of restroom interior (men's west of the x=539.6-540.4 divider, women's east of it) shipped entrance-reachable and route-legal. Only the pictogram artwork was blocking cells. Excluded from the doorway line inward; the approach north of y=627 stays walkable.",
+   "rect": [508, 627, 572, 701]},
+
+  {"name": "East Restrooms room (off the Cafe, right of the Produce wing). Same case as the centre pair: walls drawn north y=644.5-646.7, east x=1133.2-1135.4, south y=699.6-701.8 and west x=1057.0-1058.0, with the west wall breaking for exactly ONE 11.9-pt doorway at y=666.3-678.2. 36.2 m^2 of interior (upper room north of the y=672.5 divider, lower room south of it) shipped walkable. Excluded at the doorway line; the Cafe-side approach west of x=1057 stays walkable, so the RESTROOMS anchor (1063.7,672.4) snaps only ~9 pt to the door mouth.",
+   "rect": [1057, 645, 1135, 701]}
+]

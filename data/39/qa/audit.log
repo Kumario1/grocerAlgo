@@ -1,0 +1,33 @@
+## Store 39 (Belton) — adversarial map audit
+
+**Pass 1 — mechanical (before any edit).** `./rebuild.sh 39` → exit 0; `verify: []`; `coverage.sealed_floor_patches: []`, `unreachable_shelf_labels: []`; walkable 29.1% (in band); components 1 (76736); 756 tests pass. No mechanical failure — so every finding below comes from passes 2–5.
+
+**Pass 2 — visual sweep.** 3×3 crops of `walkable_overlay.png` at 2× (`/tmp/a39/w_r*c*.png`) plus ~14 targeted zooms at 6–24× against the printed page. Every aisle corridor also checked mechanically end-to-end from its badge (all 42 continuous; the only interior breaks are printed artwork — the H‑E‑B baby mark at (312–323, 372) in aisle 33 and the HOME logo in aisle 20's island zone — with green on both sides). All 30 culled pockets classified; three that had no note (1720 @ (1069,317), 166 @ (1006,117), 147 @ (902,249)) resolved as back-of-house rooms, a dead wall-crevice behind the Market corner gondola, and the Connections logo raster respectively.
+
+**Pass 3 — label probes.** Probed all 340 printed words against `profile.npz`, not just 10. Every product label sits on reachable floor at 0.00 m: Cotton Balls (248,425), Diapers (240,402), Cat Litter (252,350), Vitamins (334,571) west wing; Water (409,237), Tortillas (670,197), Cookies (681,241), Peanut Butter (651,276) centre; Wine Accessories (757,232) aisle 2; Toys (490,446), Batteries (477,496), Gift Cards (506,498), Grilling (557,448), Charcoal (622,474), Fluid (622,431) south block. Non-zero distances are only staff-side/exterior labels (Bakery 4.59, Dairy 3.44, Deli 2.98, Seafood 2.75, Admin, Carts, Pharmacy Drive-Thru). No misses.
+
+**Pass 5 — config sanity.** The dairy-band exclusion `[481,33,825,86]` contains **zero** printed words, and the two neighbour fixture blocks its name cites do exist in `geometry.json` — it buries no label's frontage. All four inclusions cover exactly the labels that need frontage (Kitchen/Appliances/Canning/Kitchen Gadgets; Mixers/Wine Accessories) and none reaches into a staff block (Kitchen rect ends y=348, Seafood staff starts y=357; aisle-2 rect ends x=770, Deli island starts x=792). The dropped `auto:KITCHEN` seal disk is explained in the Kitchen inclusion's name. Pass.
+
+### Findings (worst first) — all fixed
+
+**1 · Both enclosed Restroom rooms shipped as customer-walkable sales floor (74.8 m²).** Centre `[508.6,627.4,571,699.6]` was 49.2% walkable (38.6 m²), east `[1057.5,645.5,1134.3,700.7]` 63.6% (36.2 m²) — only the pictogram artwork was blocking cells. Ink scan at 24× shows each is a four-walled room with exactly **one** drawn doorway (centre: 12.8 pt gap at x=532.5–545.3 in the y=627.4 wall; east: 11.9 pt gap at y=666.3–678.2 in the x=1057.5 wall) — wider than any bridge in play, and no seal zone covers the front end, so nothing sealed them. Truth: interiors are not sales floor (runbook criterion; matches 658 "west Restrooms — women's room interior", 24 "Restrooms interior", 660 restroom vestibule). Crops `/tmp/a39/ovl_ctr_rr.png`, `/tmp/a39/ovl_east_rr.png`. **Fix: 2 exclusions**, cut at the doorway line so both approaches stay reachable (RESTROOMS anchor now snaps 0.92 m, no far-snap).
+
+**2 · `must` (1060,680) "Cafe seating area" is inside the east Restroom room, not the Cafe.** The Cafe label is at (943–965, 654–668) and its tables run x 961–1050; x=1060 is past the restroom's west wall at x=1057.5. It would have flipped to failing under finding 1's fix. **Fix: walk_truth point** → (1000,680), plus 4 restroom-interior `must_not`s at (516,695), (556,695), (1128,660), (1128,690) — all four were walkable before the fix, so they would have caught it.
+
+**3 · `must_not` (760,670) mislabeled, and the real Lease room unpinned.** (760,670) lies in the Texas Backyard band (x 690–846, y 651.7–699.6), not "the lease space". The actual Lease room is x 709–793, y 604–651.7 — walled, with **two drawn door swings opening north onto the sales floor** at x 726–736 and x 761–772 (zoom `/tmp/a39/src_txbackyard.png`). A looser bridge would open it and nothing would notice. **Fix: walk_truth** — relabel (760,670), add `must_not` (750,628).
+
+**4 · The store's largest culled pocket had no truth point at all.** 1720 cells (~91 m²) at (1069,317): heavy-walled back-of-house rooms NE of Seafood, two interior door swings, zero product labels, zero department names (zoom `/tmp/a39/src_seafoodNE.png`). Correctly sealed by the SEAFOOD disk (d=106 < r=130) — but only incidentally. **Fix: walk_truth** `must_not` (1069,317) and (1105,370).
+
+**5 · `must` (950,660) "Open Space alley" is ~135 pt east of the Open Space bay** (label 804–835 × 621–646; bay x 793–846, y 604–651). It was actually pinning the Meal Simple alley. **Fix: walk_truth** → (815,632) for Open Space, plus (905,645) for the Meal Simple frontage it had been covering.
+
+**6 · Section coverage gaps.** No `must` for: the Pharmacy customer frontage (the exact wing that shipped sealed at store 24 — the whole room x 186–253, y 482–605 is culled, so the strip east of the counter chamfer is the only floor a shopper can be served from); the Seafood/Sushiya frontage (Sushiya is unanchored vector artwork and the whole 81×79 pt block is sealed); aisles 33–38 (bracketed by the a30/a40 points, nothing inside — store 24's exact band); Frozen aisles 16–19; Blooms; the front-left open "Lease" bay. No `must_not` for the front-left Carts vestibule. **Fix: walk_truth** — (262,560), (1000,445), (300,423), (694,430), (833,545), (465,628), (539,615), (1052,672); `must_not` (360,640).
+
+On the front-left "Lease" bay (x 423–508, y 605–651, 52 m², 100% walkable): I verified at 24× that the drawing puts **no ink** across its north mouth — only the side walls at x≈422.5/508 and the divider at y≈651.7. Left walkable per the repo's drawing-is-truth rule (store 265 blessed an undrawn "Lease Space" strip as a `must`; store 24's 2026‑07‑23 audit reversed a `must_not` that had blessed an undrawn seal), now recorded as a `must` with that evidence rather than left silent.
+
+### Post-fix rebuild
+
+`./rebuild.sh 39` → exit 0 · `verify: []` · `coverage` both lists empty · walkable **28.6%** · components **1** (75406) · culled pockets unchanged (30, same top ten) · no new far-snaps · **773 passed**. Re-probed all 340 labels: every product label still 0.00 m; the only new non-zero is the RESTROOMS facility anchor at 0.92 m (just outside its door). All 27 `must` + 24 `must_not` points pass.
+
+Files touched: `data/39/exclusions.json`, `data/39/walk_truth.json`. No code, no goldens, no other store.
+
+`AUDIT CLEAN — store 39 (6 findings fixed)`

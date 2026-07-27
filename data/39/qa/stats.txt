@@ -1,0 +1,28 @@
+walkable: 28.6% of page (28.6% entrance-reachable)
+components: 1  sizes: [75406]
+anchors: 57  |  exclusions: 3
+service pockets sealed (service + dead crevices): 30
+   1720 cells at (1069,317) near SEAFOOD
+   1633 cells at (831,406) near BAKERY
+   1249 cells at (1001,390) near SEAFOOD
+   1207 cells at (212,534) near AISLE 40
+   1176 cells at (949,59) near DELI
+   1037 cells at (976,297) near KITCHEN
+   1032 cells at (464,675) near AISLE 42
+   1010 cells at (814,242) near DELI
+    764 cells at (250,651) near AISLE 42
+    405 cells at (750,225) near DELI
+snaps moved >12 cells (check reachable.png):
+  PHARMACY DRIVE-THRU: 79 cells (~18.1 m)
+  BAKERY: 18 cells (~4.2 m)
+  DAIRY: 15 cells (~3.5 m)
+  DELI: 13 cells (~3.1 m)
+tightest corridors at anchors (half-width capacity):
+  KITCHEN: 0.69 m
+  PHARMACY DRIVE-THRU: 0.83 m
+  DELI: 0.92 m
+  MEAT: 0.92 m
+  AISLE 30: 1.03 m
+  AISLE 25: 1.15 m
+  AISLE 27: 1.15 m
+  CHILI/MEAT/FISH: 1.15 m

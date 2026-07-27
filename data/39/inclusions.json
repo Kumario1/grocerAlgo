@@ -1,0 +1,10 @@
+[
+  {"name": "Kitchen housewares block — customer aisles, not a service counter. The red 'Kitchen' dept name is printed on the shopping floor between five open-ended gondolas (x 937-992, y 239-356) stocked Appliances / Kitchen Gadgets / Canning; the PDF shows no counter or enclosure here. KITCHEN is a SERVICE_DEPTS substring, so the aisle corridors were condemned as a 1037-cell staff pocket; restoring them also suppresses the VERIFY the substring rule raises on the label.",
+   "rect": [934, 234, 1007, 348]},
+  {"name": "Aisle 2 (Wine Accessories / Mixers) — a whole numbered aisle swallowed by the Deli disk's 12 pt bridge. The wine-bin scallops drawn on the east face of the Beer and Wine gondola pinch the corridor to ~11 pt at every arc, so the closing sealed its full length and left a 405-cell pocket between the free stubs at y<178 and y>278. The AISLE 2 badge at (746,336) sits at the foot of this same corridor.",
+   "rect": [742, 168, 770, 284]},
+  {"name": "Bakery customer frontage (east of the counter). The bakery island is walled on its west side by the Wine gondolas, so this ~13 pt strip between the counter rect (x 858-865) and the row of four-way display racks (x 878-890) is the ONLY floor a shopper can stand on to be served; the Bakery disk's bridge pinched it shut at each rack and culled 368 cells.",
+   "rect": [866, 366, 892, 462]},
+  {"name": "Open sales floor south of the Bakery (island displays). A 6.4 m x 2.4 m band of shopping floor carrying two four-way racks and a table between the bakery's south case line (y 480) and the front alley (y>504); the Bakery disk bridged the ~12 pt gaps around those islands and culled the whole band as a 201-cell pocket.",
+   "rect": [790, 481, 858, 506]}
+]

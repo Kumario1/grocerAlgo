@@ -1,0 +1,24 @@
+Store 39 (Belton) is converged. Final state:
+
+**`./rebuild.sh 39` exits 0 — 756 tests pass** (including 659's pixel-frozen golden gate). `report.json`: `"verify": []`, `"coverage": {"sealed_floor_patches": [], "unreachable_shelf_labels": []}`, `components: 1 (76736)`, walkable 29.1% = 100% entrance-reachable.
+
+## What the first pass got wrong, and the data fixes
+
+**1. Checkstand rect was wrong in shape → `seal_zones.json`** (the only reason a full override was authored). The derived rect was `[398.3, 448.9, 820.8, 571.3]`: `CHECK_WIN_Y=45` swept in the Charcoal/Grilling displays (y 440–487) and the Seasonal end shelves (x 406–459), dragging the north edge ~70 pt above the lanes. Its 20 pt bridge then sealed **the entire south half of aisles 16–24** and the gaps between the Seasonal shelves — visible as a large untinted band at y 450–495. Retightened to the real lane cluster: `[432, 516, 806, 580]`. Deli/Bakery/Seafood disks carried over verbatim; the `auto:KITCHEN` disk was dropped (see 3).
+
+**2. Orange island → `exclusions.json`.** The whole 3655-cell second component was the strip `[482,34,824,84]` between the north exterior wall and the back of the dairy cases — the walk-in cooler band. Its neighbours at x<481.6 and x>825.2 already extract as solid fixture blocks; only this span was left open. Excluded.
+
+**3. Four over-culled customer areas → `inclusions.json`.**
+- *Kitchen housewares block* (x 937–992): "Kitchen" is a dept name printed on the shopping floor over five gondolas stocked Appliances/Kitchen Gadgets/Canning — no counter in the PDF. `KITCHEN` is a `SERVICE_DEPTS` substring, so the aisles were condemned as a 1037-cell staff pocket.
+- *Aisle 2 (Wine Accessories/Mixers)* — a whole numbered aisle, 405 cells. The wine-bin scallops drawn on the gondola's east face pinch it to ~11 pt at every arc, so the Deli disk's 12 pt bridge closed its full length; badge protection missed it because the pocket didn't reach the badge.
+- *Bakery east frontage* — the island is walled by the Wine gondolas on its west, so the 13 pt strip between the counter and the four-way racks is the **only** floor a shopper can be served from; 368 cells culled.
+- *Open floor south of the Bakery* — a 6.4 × 2.4 m band of sales floor with island displays, 201 cells.
+
+**4. `walk_truth.json`** — 18 `must` (entrance approach, both front alleys, north dairy cross-aisle, six distinct aisle corridors incl. the recovered aisle 2, Deli/Bakery frontages, Kitchen/Market/Produce/Cafe/Open-Space floors) and 16 `must_not` (parking, both page corners, drive-thru lane, cooler band, Deli/Bakery/Seafood island interiors, Connections counter interior, Market back-of-house, pharmacy room, admin suite, two lease enclosures, a checkout-lane interior).
+
+## Remaining diagnostics, classified (all benign)
+- **`far_snaps`**: `PHARMACY DRIVE-THRU` 18.1 m is an exterior label in the parking lot (the lane is correctly non-walkable); `BAKERY`/`DAIRY`/`DELI` 3–4 m are labels printed inside their own sealed island/case block snapping to frontage.
+- **`narrow`**: `KITCHEN` 0.69 m half-width is the real drawn 1.5 m housewares aisle; nothing below the ~0.5 m artifact threshold, and `corridor_width.png` shows no dark-red slivers.
+- **`culled_pockets`** (30): back-of-house rooms behind Market (1720/1176/166), Deli/Bakery/Seafood-Sushiya island interiors (1633/1249/1010/…), pharmacy room (1207), admin suite (764/341/257/216/206), front-left lease room (1032), Connections counter interior and its queue enclosure (159/147), checkout-lane interiors (all the ~100–341 cell entries at y 518–572), and one-cell slivers between abutting fixtures (78 at x 792–794, 70 near Produce, 81/61 between produce display islands). The 1037 "near KITCHEN" and 405 "near DELI" entries are pre-inclusion figures — both are restored by `inclusions.json`.
+
+Only `data/39/{seal_zones,exclusions,inclusions,walk_truth}.json` were authored; `zones` stayed derived and no other file in the repo was touched. Stopping here for the separate audit context.

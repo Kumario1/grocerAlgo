@@ -1,0 +1,10 @@
+[
+  {"name": "Deli service island (staff behind the counter wall; ~1.4 m pass-throughs) — carried over from the derived zone unchanged",
+   "pt": [809.8203735351562, 264.30108642578125], "r": 130, "bridge": 12},
+  {"name": "Bakery service island (staff side of the bakery counter) — carried over from the derived zone unchanged",
+   "pt": [825.7441101074219, 442.811767578125], "r": 130, "bridge": 12},
+  {"name": "Seafood / Sushiya prep room (walled enclosure with the staff door by Canning; wider staff entrances, hence the looser bridge) — carried over from the derived zone unchanged",
+   "pt": [982.2850036621094, 377.708984375], "r": 130, "bridge": 20},
+  {"name": "Checkstand lane bank — the derived rect [398.3,448.9,820.8,571.3] was wrong in shape: CHECK_WIN_Y=45 pulled in the Charcoal/Grilling displays (y 440-487) and the Seasonal end shelves (x 406-459), dragging its north edge 70 pt above the lanes so the 20 pt bridge sealed the south ends of aisles 16-24 and the gaps between the Seasonal shelves. Retightened to the actual lane cluster (fixtures x 430-802, y 519-573) so only the lane interiors seal and the front action alley at y 499-516 stays open.",
+   "rect": [432, 516, 806, 580], "bridge": 20}
+]
