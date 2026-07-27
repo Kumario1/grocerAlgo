@@ -1,0 +1,13 @@
+[
+  {"name": "Deli/Bakery service enclosure interior (staff only; the guide draws it walled — west case fixture x=945-951, north Deli Meats case poly y=337-348, east double wall stroke x=1029 and x=1038, angled SE corner down to the Artisan Bread case. Shoppers buy at the cases on the outside faces)",
+   "poly": [[951, 347], [1029, 347], [1029, 428], [1038, 428], [1038, 543],
+            [1016, 564], [951, 564]]},
+
+  {"name": "Seafood counter + the prep area behind it against the east wall (staff; counter walls traced from PDF strokes (1124.6,405.1)-(1203.8,405.1), (1124.6,451.5)-(1160.5,487.3), (1195.7,487.4)-(1196.0,520.6). The SW frontage below the diagonal stays customer space)",
+   "poly": [[1124, 404], [1205, 404], [1205, 521], [1195, 521], [1195, 487],
+            [1160, 487], [1124, 451]]},
+
+  {"name": "Pharmacy room behind the drawn counter (staff; counter poly traced from PDF strokes (350.1,514.8)-(357.1,507.7)-(370.0,520.6)-(370.0,543.8)-(358.9,554.1)-(359.0,599.3), boxed by the west store wall x=326.9 and the back-office wall y=599. The PHARMACY label sits in the alcove behind the counter head, so it is inside this shape)",
+   "poly": [[327, 498], [366, 498], [366, 521], [371, 527], [371, 544],
+            [360, 556], [360, 599], [327, 599]]}
+]

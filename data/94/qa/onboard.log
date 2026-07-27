@@ -1,0 +1,35 @@
+Store 94 is converged.
+
+## Result
+
+`./rebuild.sh 94` → **exit 0**, **748 tests pass** (including store 659's pixel-frozen golden gate).
+
+```
+verify   : []
+coverage : {"sealed_floor_patches": [], "unreachable_shelf_labels": []}
+walkable : 34.5% of page (33.0% entrance-reachable)
+components: 2  sizes: [87227, 3804]
+```
+
+## The core finding
+
+This guide is drawn at **0.088 m/pt** (store 659: 0.118), so its shopping aisles are only ~12.9 pt (~1.1 m) wide. The auto-derived service disks (r=130 pt, bridge=12 pt) therefore **bridged real shopping aisles shut** — the Toys/Seasonal runs, the whole Kitchen housewares block (that was the `unreachable_shelf_labels` cluster at (1156,365): Calderos/Cookware/Dinnerware/Flatware/Beverage/Foil), and the Card & Party aisles. Two of the derived disks had no counter to seal at all: `KITCHEN` here is a **housewares department** (Calphalon, Appliances, Cookware), and `FLORAL` is an **open display island**. The derived checkstand rect also ran 60 pt too far north, eating the Seasonal bin floor.
+
+The three counters that genuinely are staff-only are all drawn as **walled rooms**, so I traced them verbatim instead of relying on bridging.
+
+## Files authored (`data/94/`)
+
+- **`exclusions.json`** — 3 polys traced from the PDF strokes: the deli/bakery service enclosure, the seafood counter + prep area behind it, the pharmacy room behind the counter. Each swallows its own department label, which is what retires the `BAKERY`/`SEAFOOD`/`PHARMACY` VERIFYs.
+- **`seal_zones.json`** — full override, one zone: the checkstand lane bank `[516,596,832,678]` bridge 14 (lanes are 6–9 pt gaps). All derived disks dropped, with the reasoning recorded in the entry's `name`.
+- **`inclusions.json`** — the four VERIFY judgment calls, all **legitimate customer space**: the Kitchen housewares floor + its gondola aisles, the Deli east walkway (the red `DELI` label is printed on the open floor, not behind a counter), the north cross-aisle in front of the Deli Meats case, and the 18 pt band in front of the Market Deli wall case.
+- **`walk_truth.json`** — 15 `must` / 11 `must_not`; all 26 verified against the built grid.
+- `zones.json` not needed — ENTRANCE and CHECKSTANDS labels both extract, so zones derive correctly.
+
+## Remaining diagnostics, classified
+
+- **6 culled pockets**: the checkstand lane interiors (843/369/382/188 cells) and the dead cavities between the store's double-drawn outer walls along the east and south (620/608).
+- **2nd component (3804 cells)**: the `Administrative` office block south of aisle 30 — walled on all four sides in the guide with no drawn opening, so no shopper route reaches it. Logged as a `must_not`.
+- **far_snaps**: `ENTRANCE/EXIT` (16.5 m), `PHARMACY DRIVE-THRU` (10.6 m), `EXIT` (3.6 m) — all three labels are printed *outside* the extracted sales-floor boundary (Texas Backyard garden centre, the drive-thru lane, and below the front wall's diagonal), so they snap inward; `RESTROOMS` (3.2 m) snaps out of the sealed Administrative block to the corridor a shopper would actually stand in. None indicates a wrongly-sealed region.
+- **narrow**: tightest is `BAKERY` at 0.73 m half-width — the real 14 pt walkway between the enclosure's east wall and the display bins. Nothing under 0.5 m; `corridor_width.png` shows no red slivers.
+
+Stopping here for the separate audit context, as the runbook directs.

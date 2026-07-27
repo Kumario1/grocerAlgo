@@ -1,0 +1,130 @@
+{
+ "components": {
+  "n": 2,
+  "sizes": [
+   87868,
+   3804
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 620,
+   "near": "PRODUCE",
+   "x": 1153.5,
+   "y": 648.5
+  },
+  {
+   "cells": 608,
+   "near": "KITCHEN",
+   "x": 1185.2,
+   "y": 209.9
+  },
+  {
+   "cells": 382,
+   "near": "CHECKSTANDS",
+   "x": 783.2,
+   "y": 672.0
+  },
+  {
+   "cells": 188,
+   "near": "CHECKSTANDS",
+   "x": 674.6,
+   "y": 657.7
+  },
+  {
+   "cells": 100,
+   "near": "CHECKSTANDS",
+   "x": 591.9,
+   "y": 615.4
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 93.6,
+   "meters": 16.47,
+   "name": "ENTRANCE/EXIT"
+  },
+  {
+   "cells": 60.5,
+   "meters": 10.64,
+   "name": "PHARMACY DRIVE-THRU"
+  },
+  {
+   "cells": 20.7,
+   "meters": 3.64,
+   "name": "EXIT"
+  },
+  {
+   "cells": 18.4,
+   "meters": 3.24,
+   "name": "RESTROOMS"
+  }
+ ],
+ "m_per_cell": 0.176,
+ "narrow": [
+  {
+   "half_width_m": 0.73,
+   "name": "BAKERY"
+  },
+  {
+   "half_width_m": 0.88,
+   "name": "ENTRANCE/EXIT"
+  },
+  {
+   "half_width_m": 0.88,
+   "name": "EXIT"
+  },
+  {
+   "half_width_m": 0.88,
+   "name": "FLORAL"
+  },
+  {
+   "half_width_m": 0.88,
+   "name": "PHARMACY"
+  },
+  {
+   "half_width_m": 0.88,
+   "name": "PHARMACY DRIVE-THRU"
+  },
+  {
+   "half_width_m": 0.9,
+   "name": "RESTROOMS"
+  },
+  {
+   "half_width_m": 1.03,
+   "name": "SEAFOOD"
+  }
+ ],
+ "provenance": {
+  "drift": {
+   "seal_zones": {
+    "derived_n": 7,
+    "derived_names": [
+     "auto:BAKERY",
+     "auto:DELI",
+     "auto:FLORAL",
+     "auto:KITCHEN",
+     "auto:PHARMACY",
+     "auto:SEAFOOD",
+     "auto:CHECKSTANDS"
+    ],
+    "file_n": 1,
+    "file_names": [
+     "Checkstand lane bank \u2014 the only zone this guide needs bridged: the register lanes are 6-9 pt (~0.6-0.8 m) gaps between checkstand fixtures. Rect is the lane band ONLY: the checkstand fixtures are drawn y=599.7-631.6, so the zone stops at y=632. It must not reach further south \u2014 y 632-710 is the front lobby (Business Center counter, the lease bays, the Ice machines, the Exit doors), and the walkway that links them to the U-Scan gap runs along the back of the checkstands at just 13.4 pt (~1.2 m), narrower than this zone's own 14 pt bridge. The earlier y1=678 closed that walkway and sealed the whole Business Center bay off from the store (and, being a rect seal zone, exempted itself from the sealed-floor-paint net, so nothing flagged it). The front action alley north of the bank stays open. NOTE the derived zones are dropped on purpose: this guide is drawn at 0.088 m/pt (vs 0.118 at store 659), so its shopping aisles are only ~12.9 pt (~1.1 m) wide and the auto 130 pt / 12 pt service disks bridge real aisles shut (Toys/Seasonal, Kitchen housewares, Card & Party). The four counters that genuinely need sealing (deli/bakery block, seafood, pharmacy) are drawn as walled rooms and are handled verbatim in exclusions.json instead; KITCHEN here is a housewares department and FLORAL an open display island, neither has a counter to seal"
+    ]
+   }
+  },
+  "exclusions": "file",
+  "inclusions": "file",
+  "seal_zones": "file",
+  "zones": "derived"
+ },
+ "reachable_pct": 33.3,
+ "store": "94",
+ "verify": [],
+ "walkable_pct": 34.7
+}

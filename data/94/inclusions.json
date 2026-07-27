@@ -1,0 +1,13 @@
+[
+  {"name": "Kitchen department floor + its gondola aisles (housewares: Appliances/Coffee-Tea/Calphalon/Calderos/Cookware/Dinnerware/Flatware — a shelf department, not a service kitchen; the red KITCHEN label is printed on the shopping floor west of the gondolas)",
+   "rect": [1090, 286, 1195, 404]},
+
+  {"name": "Deli east walkway (customer) — the red DELI label is printed on the open floor between the deli enclosure's east wall and the Kitchen gondolas, not behind a counter",
+   "rect": [1040, 350, 1090, 470]},
+
+  {"name": "North cross-aisle in front of the Deli Meats case (customer) — 'Deli Meats' is printed north of the case, on the shopper side, between the case and the Toys gondola ends",
+   "rect": [944, 316, 1042, 338]},
+
+  {"name": "North cross-aisle in front of the Market Deli wall case (customer) — 'Market Deli' is printed in the 18 pt band between the case (y 82-89) and the Grocery aisle ends (y 107)",
+   "rect": [787, 89, 941, 107]}
+]

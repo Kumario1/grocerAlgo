@@ -1,0 +1,47 @@
+## Audit report — store 94 (H-E-B Mission, `guide-mission-94.pdf`, 2014 guide)
+
+### Pass 1 — Mechanical
+Reran `./rebuild.sh 94` three times (baseline, after each fix). Baseline was already "converged": exit 0, 748 passed, `verify: []`, both coverage lists empty, walkable 34.5%, components `[87227, 3804]`. That is exactly the state store 24 shipped in, so I treated it as unproven and went to the visual sweep.
+
+---
+
+### Findings, worst first
+
+#### 1. The entire front lobby east of the U-Scan walkway — including the whole Business Center bay — was sealed off from the store. `[FIXED]`
+*The store-24 failure mode, at department scale.*
+
+- **Coordinates (PDF pt):** the severed corridor is the back-of-checkstand walkway `x 632→830, y 632→645`; the Business Center bay is `x 730.9–817.8, y 645–672.1` (counter strokes at `y=652.8` and `y=660.5`).
+- **Evidence:**
+  - Crop `r2c1` of `walkable_overlay.png` (pt 422–844 × 556–834): no green anywhere adjacent to the Business Center; the lobby east of the Tobacco kiosk is untinted.
+  - Culled-pocket diagnostic (`diag_front.png`, culled cells painted blue): the blue swathe covers the register lanes **and** the whole lobby strip south of them.
+  - Probe on `profile.npz`: the words `Business` and `Center` at `(774.6, 650.0)` / `(774.6, 661.1)` were **4.05 m** from the nearest entrance-reachable cell (limit ~2 m). Every other product word in the guide passed, so this was the only sealed department.
+  - The pre-fix report's own stats named it without diagnosing it: `843 cells at (778.7, 629.4) near FLORAL` and `382 cells at (783.2, 672.0) near CHECKSTANDS`.
+- **Root cause:** `seal_zones.json` rect was `[516, 596, 832, 678]`. The checkstand fixtures are drawn `y=599.7–631.6`; `y 632–678` is front lobby, not lanes. The only link from the U-Scan gap to the east lobby is a **13.4 pt (~1.2 m)** walkway behind the checkstands — narrower than the zone's own **14 pt** bridge — so the morphological closing welded it shut. And because rect-type seal zones are exempt from `qa_checks` net 2 (`lane_zones`) by design, the over-large rect *also suppressed the net that would have caught it*. Nothing could flag this except a human sweep.
+- **Truth:** lobby corridor + Business Center customer side = sales floor; lane interiors + the counter's back side = not.
+- **Fix type:** `seal_zones` override — south edge `678 → 632`. Result: **+641 reachable cells (~20 m²), 0 cells lost**, and all 17 lanes verified still sealed (free runs across `y=605/616/628` are only `x 510–525` west of the bank, `628–643` U-Scan, `824–839` east end).
+- **New walk_truth points that would have caught it:** `must [775, 640]`, `[660, 640]`, `[560, 640]`.
+
+#### 2. `walk_truth.json` did not cover the wings where the defect lived, and its one lease point was mislabeled. `[FIXED]`
+- `must_not [640, 700] "front Lease Space unit south of the checkstands"` **is not inside any lease unit**. The east bay's west wall is `x=650.9`, so `(640, 700)` sits in the Exit doorway span (`x 584.3–642.8` at `y=710`). It read `False` only because the guide's floor outline clips it — the test passed for the wrong reason and no lease interior was ever covered.
+- No `must` point existed for Frozen Foods, Card & Party, Sporting Goods, School & Office, Outdoor Grilling, aisles 22–26 (Baby/Beauty), Grab 'N Go, Flaming Birds, Selling Station — **or anywhere in the front lobby**, which is precisely where finding 1 hid.
+- No `must_not` for the Business Center staff side, the walled east lease bay, the west Restrooms block, or the Flaming Birds service enclosure.
+- **Fix type:** walk_truth points. `must` 15 → 28, `must_not` 11 → 15; `[640, 700]` replaced with `[675, 657]` (probed to lie inside the walled east lease bay). Suite 748 → **765 passed**.
+
+#### 3. `seal_zones.json`'s stated WHY was false, which is what let #1 survive review. `[FIXED]`
+It asserted *"Rect is the lane band only (y 596-678, x 516-832)"*. The lane band is `y 599.7–631.6`. Rewritten to state the fixture extents, the 13.4 pt corridor the zone must not cross, and why the net stayed silent.
+
+---
+
+### Inspected and cleared
+Every corridor green end to end in all 9 crops; all 30 aisle badges' corridors green full length; Dairy/Produce/Deli/Bakery/Seafood/Floral/Pharmacy/Market/Kitchen frontages green; Deli-Bakery block, Seafood prep and the Pharmacy back room correctly excluded with frontage on the outside faces; all four inclusions verified true against the printed map (Kitchen really is housewares gondolas, not a service kitchen); Texas Backyard, Administrative and the west Restrooms correctly outside/enclosed; checkout lanes sealed, front action alley open. **All five remaining culled pockets classified:** Produce wall-case crevice, Kitchen Gadgets wall crevice, Business Center staff side, walled east lease bay, checkout lanes.
+
+### Two things I inspected, judged not to be defects, and did not fix
+- **Mia's Mirror boutique** (fixture poly bbox `530.2, 320.2 – 619.6, 439.0`) is a solid island although the guide draws door gaps. No product label, no anchor, green on all four sides — no routing target or corridor is lost, and this matches how the deli enclosure is modeled. It is also unreachable from the five per-store JSONs (inclusions intersect `free_raw`; a fixture removes cells from `free_raw`). I deliberately did **not** add a walk_truth point, since freezing an uncertain call into the truth file is the blind spot this role exists to catch.
+- **The guide's own floor outline** closes with a diagonal from `(1026.7, 728.8)` to `(548.2, 645.6)` instead of following the drawn south wall, putting most of the Dining Area `(911.6, 685.3)` and the south Restrooms `(840.2, 731.6)` outside the boundary. No product label, anchor or corridor is affected (`ENTRANCE (997.2, 700.7)` is inside). I am flagging rather than blocking because nothing routable is lost — but it is the one place where I made a judgment call that a reviewer might reverse.
+
+Also informational: the two >10 m far snaps (`ENTRANCE/EXIT`, `PHARMACY DRIVE-THRU`) are both labels printed outside the sales-floor boundary; the second component (3804 cells) is the Administrative + west Restrooms block, now covered by `must_not`.
+
+### Final state
+`exit 0` · **765 passed** · `verify: []` · `coverage: {sealed_floor_patches: [], unreachable_shelf_labels: []}` · walkable **34.7%**, reachable **33.3%** · dominant component 87,868 of 91,672 · every walk_truth point probed green. Changes confined to `data/94/seal_zones.json` and `data/94/walk_truth.json`; no code, goldens, tests, or other stores touched.
+
+`AUDIT CLEAN — store 94 (3 findings fixed)`
