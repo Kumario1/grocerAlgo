@@ -1,0 +1,27 @@
+Store 57 is converged. Stopping here for the separate audit role, as the runbook requires.
+
+## Result
+
+`./rebuild.sh 57` → exit 0, **757 passed** (was 598; +42 walk_truth assertions, 659's golden gate green).
+
+`data/57/qa/report.json`:
+- `"verify": []`
+- `"coverage": {"sealed_floor_patches": [], "unreachable_shelf_labels": []}`
+- `components: {"n": 1, "sizes": [79320]}` (was 3)
+- `walkable_pct: 30.0` / `reachable_pct: 30.0` (was 29.4/29.2)
+
+## What the first pass got wrong
+
+The auto-derived seal zones were wrong in shape on both counts:
+
+1. **Service disks (r=130) reached far past the drawn counter walls.** Store 57's guide draws Deli+Bakery, Seafood and Pharmacy as fully walled enclosures — each is already an unreachable pocket with no disk at all. The disks instead bridged real shopping corridors shut: DELI's sealed the Toys/School/Fishing gondola aisles (x 804-834), BAKERY's sealed the Apparel floor and the Fishing/Bakery-west corridor (the 1183-cell "near BAKERY" pocket), FLORAL's sealed the Greeting-Cards aisle ends.
+2. **The checkstand rect ran y 608.6-730.0** — `CHECK_WIN_Y` swept in the vestibule/lease-room boxes, so the rect swallowed the corridor north of the bank *and* the whole front action alley. That band then survived as one badge-protected 5990-cell pocket, i.e. **no lane was actually sealed**; a route could cut straight between any two registers.
+
+## The five files
+
+- **`seal_zones.json`** — one zone: the checkstand bank tight to the drawn registers (`[446, 613, 822, 665]`, bridge 20). Lanes seal; front alley, north corridor and both end-of-bank walkways stay open. The omitted disks are justified in the entry's `name`.
+- **`exclusions.json`** (4) — Pharmacy room traced from its PDF wall strokes (staff; the pickup corridor east of x=320 stays open); the Diapers/Baby-Food gondola interior and the Market back-wall service band (both were bare outlines whose insides rendered as orange islands — the 386- and 320-cell components); checkout lanes 1-2, which the AISLE 34/35 badges re-opened via badge protection 12 pt away.
+- **`inclusions.json`** (1) — the Sushi-kiosk/Seafood-counter walkway. The `SUSHI SEAFOOD` label is one merged text run, so its anchor lands in the 12-pt pinch between the kiosk's east tip (x=1058.7) and the counter's drawn west wall (x=1070.6): open floor on the Market walkway, not staff space. That was the single VERIFY.
+- **`walk_truth.json`** — 18 `must` / 17 `must_not`, each verified against the grid and visually confirmed to sit inside the feature it names.
+
+Two report entries I judged not actionable in data: `PHARMACY DRIVE-THRU` far-snap (13.1 m) and narrow (0.46 m) — that label is printed in the parking lot outside the boundary, so it necessarily snaps to the nearest in-store cell. The remaining `narrow` entries are 0.68 m half-width (1.4 m aisles), above the ~0.5 m artifact threshold.

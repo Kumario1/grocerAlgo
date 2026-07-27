@@ -1,0 +1,46 @@
+Full runbook executed. Here are the results.
+
+## Pass 1 — Mechanical: PASS
+
+`./rebuild.sh 57` rerun twice, exit 0 both times. `report.json`: `"verify": []`, `coverage` lists both empty, `components: {n: 1, sizes: [79320]}`, `walkable_pct = reachable_pct = 30.0%` (in the 20–35% band; peers 658/660/24 sit at 34.8/29.3/24.3). 767 tests pass.
+
+## Pass 2 — Systematic visual sweep: no map defects
+
+3×3 crops of `walkable_overlay.png` at 2× plus 4× regional zooms. Because the overlay leaves non-staff sealed pockets *untinted* (indistinguishable from fixtures), I rendered a supplementary diagnostic that tints every `free_raw & ~reachable` cell blue — that is the **complete** set of interior floor that isn't green, so nothing can hide. 76 sealed components, all classified:
+
+| cells | location | verdict |
+|---|---|---|
+| 5811 | Deli+Bakery walled block (882–1006, 322–570) | staff enclosure, drawn closed |
+| 901 | Seafood counter interior, E of wall x=1070.6 | staff, drawn closed |
+| ~7900 | front lease/vestibule/restroom warren, y 674–756 | enclosed rooms, doors drawn shut |
+| ~2400 | back-of-house N of the Market wall, y 64–114 | staff |
+| ~2100 | checkout lane interiors | sealed by design |
+| 676 | Produce perimeter crevice | dead crevice between dept outline and store wall |
+| 386+350+150 | left-wing gondola-outline interiors + 6-pt west-wall sliver | shelf interiors, not floor |
+| 202 | L-shaped end-cap fixture interior at Floral (636–654, 474–564) | fixture interior |
+| ~640 | east-wall slivers behind the Gadgets run | behind shelves |
+| 205 | 33 comps <25 cells | insides of aisle-badge ovals and register gaps |
+
+Every corridor is green end to end (contiguous-run trace from all 40 badges: left wing 152–164 pt, aisles 31–35 correctly truncated at the drawn Pharmacy wall x=320, grocery run 190–430 pt). Every department frontage is green, including the unanchored ones — Kitchen/Dining, Gadgets, Cooking Connection, Meal Simple, Sushi, Apparel, Seasonal, Pet, Outdoor Seasonal. The Sushi↔Seafood pinch is genuinely 12 pt wide at y=455 (x 1062–1074) and is green, matching the inclusion's stated geometry.
+
+## Pass 3 — Label probes: PASS
+
+Rather than 10 labels I probed **all 167 text runs**, sampled every 4 pt along each run's full length. Exactly three exceed 2 m from reachable floor, all correctly: `Pharmacy` (inside the excluded room), `Restroom` (enclosed), `Pharmacy Drive-Thru` (printed outside the building).
+
+## Pass 4 — walk_truth adequacy: 3 findings, all fixed
+
+**F1 — `must_not [400, 655] "restroom interior"` was a vacuous assertion.** `data/57/walk_truth.json:33` (old). Probe classification shows the cell is **drawn ink**, not room interior: the whole block x 384–422, y 638–672 is solid ink — it is the printed black Restroom sign panel. The assertion "a printed sign is not walkable" would pass unchanged even if the entire restroom/service enclosure were opened up as shopping floor, so it protected nothing. Truth should be a genuine free-but-unreachable cell inside the enclosure (768-cell component, bbox x 260–372, y 640–728). **Fix type: walk_truth point** → replaced with `[345, 665]`, the enclosed service corridor the Restroom arrows point into, behind the sales-floor wall at y=637.
+
+**F2 — five sections of the store had no `must` point.** Kitchen/Dining + Gadgets housewares wing (x 1035–1130, y 328–440) — an entire east department, and the guide misspells the heading `Kithchen/Dining` so no anchor is extracted there either, leaving it completely unguarded; the Seasonal block interior; the Greeting Cards/Gift Wrap/Party/Tech block; Pet + Outdoor Seasonal Selling in the left wing (a 240-pt gap between the aisle-20 and aisle-27 points); Cosmetics/HBA aisles 29–32; and the west Exit/Entrance approach. **Fix type: walk_truth points** → added `[350,292]`, `[350,365]`, `[350,520]`, `[690,400]`, `[748,520]`, `[1075,365]`, `[1112,400]`, `[600,714]`. The Kitchen/Dining and Toys/Fishing points also now pin down exactly the floor that `derive.py`'s auto DELI/BAKERY seal disks would have swallowed had `seal_zones.json` not overridden them.
+
+**F3 — the front enclosed-room warren is several disconnected pockets, only one guarded.** `[700,700]` covered one room; the 603-cell room west of the restroom corridor and the 445-cell room east of the checkstands (walled off from the green café-seating floor by a single drawn wall) had none. **Fix type: walk_truth points** → added `[285,695]` and `[830,700]`.
+
+`walk_truth.json` goes 18→26 `must`, 17→19 `must_not`. Rebuild rerun after the edit: exit 0, `verify: []`, coverage empty, 1 component, 30.0%, 767 passed.
+
+## Pass 5 — Config sanity: PASS
+
+All four exclusion names, the one inclusion, and the one seal zone state a WHY that matches what the map shows, and I verified each claim independently: the Pharmacy poly's east wall leaves the pickup corridor open (probe `(327,590)` walkable) and no shelf label in rows 31–35 lies west of x=320 (westernmost is `Pain Relievers` at x=331.8); the Diapers exclusion's 8-pt band at y 461.6–469.4 sits between the aisle-27 (y=458) and aisle-28 (y=476) corridors, i.e. on the shelf, not a corridor; the checkout-lane exclusion leaves the west end-of-bank walkway open (probe `(442,640)` walkable) and does not reach the aisle 34/35 badges at x 431–434; the checkstand seal rect leaves the front action alley (row scan at y=680 continuous x 430→810) and the north corridor open. No inclusion blankets a staff room — the inclusion's east edge stops at x=1070 and the counter interior stays sealed.
+
+No code, goldens, or other stores touched; only `data/57/walk_truth.json`.
+
+`AUDIT CLEAN — store 57 (3 findings fixed)`
