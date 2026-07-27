@@ -1,0 +1,13 @@
+[
+  {"name": "Bakery service counter (staff work behind the L-shaped counter at x 912-953, y 519-644; ~1.4 m staff pass-throughs) — carried over unchanged from the derived zone",
+   "pt": [931.0392456054688, 509.7559356689453], "r": 130, "bridge": 12},
+
+  {"name": "Deli service corner behind the Grab-and-Go case at x 993.8-1014.5 (~1.4 m staff pass-throughs) — carried over unchanged from the derived zone",
+   "pt": [1004.4247436523438, 468.3479461669922], "r": 130, "bridge": 12},
+
+  {"name": "Pharmacy counter and consultation room at the SW front (staff behind the drawn counter wall; ~1.4 m pass-throughs) — carried over unchanged from the derived zone",
+   "pt": [197.0064926147461, 638.4083862304688], "r": 130, "bridge": 12},
+
+  {"name": "Checkstand lane bank — CORRECTED SHAPE. The derived rect [365.7,519.1,603.1,561.5] only reached y=561 because CHECK_WIN_Y (+/-45 pt of the label at y=505) admitted the register halves but not the bagging halves, and it stopped at x=603 so the express podium (x 602.4-615.5) fell outside. The south half of all eight lanes therefore stayed open and a route could thread straight through a checkout lane. Widened to the full drawn bank: eight checkstands span x 365.9-595.1, y 527.1-596.8 and the podium x 602.4-615.5, y 531.7-600.7, padded ~8 pt. Stops at y=602 so the front action alley (y 602-640, between the bank and the Ice/Tobacco fixtures) stays walkable. bridge 20 because checkout lanes (12-13 pt) are wider than service-counter gaps.",
+   "rect": [358.0, 519.0, 623.0, 602.0], "bridge": 20}
+]

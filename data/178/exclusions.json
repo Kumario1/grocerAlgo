@@ -1,0 +1,4 @@
+[
+  {"name": "Bakery/Deli back-of-house room behind the bakery counter (drawn open, staff only): walled west by the counter wall x=926.6 running y=519->666 to the front wall, north by y=532.7 from x=971.5 to the east wall x=1014.4, and split by the partition x=971.5 (y 533-606). Its ONLY opening is the ~19 pt (1.2 m) staff doorway at x 952.7-971.5, y~533 — too wide for the 12 pt service bridge, so the auto seal never closed it and 48 m^2 of prep floor read as shopping aisle. Contents confirm back-of-house: the 4-door walk-in cooler bank at x 998.5-1013.9 (y 554-598), the double swing doors to receiving at x 966-986 (y 641-651), and zero product labels anywhere inside.",
+   "rect": [926.6, 532.0, 1015.0, 667.0]}
+]

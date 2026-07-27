@@ -1,0 +1,45 @@
+## Audit report — H‑E‑B store 178 (San Antonio, 2017 guide)
+
+### Pass 1 — Mechanical ✅
+`./rebuild.sh 178` exit 0. `verify: []`, both coverage lists empty, `components: {n:1, sizes:[64172]}`, walkable 26.5% = reachable 26.5% (mid‑band). Far snaps (RESTROOMS 7.8 m, PHARMACY 2.0 m, ENTRANCE 1.9 m) all resolve to anchors whose labels legitimately sit inside sealed rooms/doorways.
+
+**All 10 culled pockets classified** (runbook requires this explicitly):
+- 837 + 558 cells at (66,471) / (63,535) → the two chambers of the **Business Center / Steam Cleaner Rental lease suite** (x 42‑90, y 438‑560), drawn sealed with door arcs only, zero product labels.
+- 298/264/252/246/231/216/205/132 cells, x 376‑600, y 524‑602 → the **eight checkstand lanes**. Verified against geometry: the 67 checkstand fixtures bbox to exactly x 365.9‑595.1, y 527.1‑596.8, matching the authored `seal_zones` claim.
+
+No unexplained pockets.
+
+### Pass 2 — Systematic visual sweep ✅ (no map defects)
+3×3 crops of `walkable_overlay.png` against the printed page, plus targeted 6–7× crops of the Business Center, SE bakery corner, east lobby, back‑of‑house strips and Produce island.
+
+Backing the eyeball with mechanics, I re‑ran the shelf‑label net **with the `raw_reachable` exemption removed** — the exemption is precisely the hole that hides drawn‑sealed shelf sections (the store‑24 failure mode). All 322 in‑boundary printed words: only `Pharmacy` (37.7 pt) and `Business Center` (26 pt) exceed the 16 pt frontage bar, both correctly enclosed rooms. Aisle corridor scan: aisles 1‑17 green with **zero gaps > 2 pt** from y=222 to y=515; aisles 18‑20 gap only on the badge hexagon glyph. Top alley continuous x 144→994 at y=220; front action alley continuous x 286→912 at y=620; mid alley continuous x 124→992 at y=500.
+
+Unanchored departments individually inspected (Meal Simple, Bakery tables, Tobacco, Ice, Carts, Steam Cleaner Rental, Vitamins, Frozen Desserts/Ice Cream/Novelties): all have green frontage. Back‑of‑house strip (y 83‑163), east tenant suites (x > 1014), restrooms, lease suite, bakery prep room: all correctly untinted. Checkout lanes sealed, front alley green.
+
+### Pass 3 — Label spot‑probes ✅
+28 labels across every wing probed against `data/178/profile.npz` (cell 2.0 pt, 0.12795 m/cell). Worst distance to reachable floor **1.02 m**; most 0.00 m. Sample: Cotton Balls 0.00, Dog Food 0.00, Band‑Aids 0.00, Vitamins 0.00, Sports Drinks 0.00, Asian Foods 0.00, Warm Beer 0.00, Tortillas 0.00, Slice Cheese 0.51, Novelties 0.78, Deli Grab and Go 0.90, Produce 1.02, Frozen Vegetables 0.00.
+
+### Pass 5 — Config sanity ✅
+Every WHY checks out against the drawing and `geometry.json`:
+- **exclusions[0]** (bakery BOH): the cited 4‑door walk‑in bank (x 998.5‑1013.9, y 554‑598), receiving swing doors (x 966‑986, y 641‑651) and 1.2 m staff doorway are all present in the PDF; zero labels inside — confirmed by the word probe.
+- **inclusions[1]** (`KITCHEN` = "Kitchen Gadgets" shelf label, not a service kitchen) is a genuine catch of the `SERVICE_DEPTS` substring trap, and `seal_zones` consistently omits `auto:KITCHEN`.
+- **seal_zones**: BAKERY/DELI/PHARMACY disks are byte‑identical to the derived zones. The CHECKSTANDS "corrected shape" quotes the derived rect `[365.71, 519.09, 603.06, 561.46]` — I recomputed it, exact match — and the podium `x 602.4‑615.5, y 531.7‑600.7` matches a real 6‑vertex poly fixture. Honest.
+
+---
+
+## Findings — all in `walk_truth.json` (pass 4), worst first
+
+| # | Finding | Evidence | Fix |
+|---|---|---|---|
+| 1 | **`must_not [1140,200]` labelled "Restrooms" is mislabeled.** The restroom pair occupies x 1096‑1183, **y 84‑134**; (1140,200) is 66 pt (4.2 m) south, inside the northernmost east tenant suite. The restrooms had **no** guard point. | `/tmp/a178/east1.png` 6× crop; column scan x=1120 | Retitled (1140,200) → east tenant suite; added `must_not [1120,110]` inside the women's room |
+| 2 | **The back‑of‑house/receiving strip has no `must_not` at all** — x 121‑1014, y 83‑163, ≈300 m², the largest staff area in the store and the one held out by the boundary polygon alone. Reference 659 guards exactly this (`[800,80,"behind Dairy cases"]`). | `backroomW.png` / `backroomE.png`; column scans x=400, x=860 blocked y 80→186 | Added `must_not [400,120]` and `[860,120]` |
+| 3 | **Dairy wall‑case frontage unprobed.** `[660,228]` is captioned "Dairy / Frozen" but x=660 is in front of the Frozen sawtooth run (x 590‑950); the Dairy cases run x 176‑560 — 24 m of top alley with no point. | row scan y=220 | Split the caption; added `must [370,220]` |
+| 4 | **East beverage wing (aisles 1‑3) unprobed.** Easternmost `must` was (983,460), which is *below* the gondola runs (they end y≈412), in open Deli frontage. Aisle 1 is walled east by the Frozen Desserts case — exactly the geometry that gets sealed. | row scan y=330 shows the corridor as x 968‑996 | Added `must [975,330]` |
+| 5 | **Steam Cleaner Rental alcove unprobed** — x 42‑121, y 560‑618, an isolated finger of customer floor reachable only around the lease suite's SE corner; a slightly larger exclusion on the suite would swallow it silently. | `BC_ov.png`; row scan y=590 | Added `must [80,590]` |
+| 6 | **Business Center lower chamber unguarded.** The suite is *two* separately culled pockets (837 and 558 cells); `[70,460]` sits in the upper one, the chamber carrying the printed label (63.7,531) had none. | culled‑pocket bboxes `[42,438,90,506]` and `[42,510,84,560]` | Added `must_not [63,531]` |
+
+Every point was validated against the shipped grid before writing (proposed `must` cells free with a clean 7×7 neighbourhood; proposed `must_not` cells blocked, 1.7–7.7 m from free floor). Only `data/178/walk_truth.json` was edited — no code, no goldens, no other store, and no `exclusions`/`inclusions`/`seal_zones` change was warranted.
+
+**Post‑fix rebuild:** exit 0, `verify: []`, coverage lists empty, 1 component, walkable 26.5%, **749 tests pass** (up from 742 — the 7 new assertions are live).
+
+`AUDIT CLEAN — store 178 (6 findings fixed)`

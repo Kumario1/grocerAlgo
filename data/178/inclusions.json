@@ -1,0 +1,10 @@
+[
+  {"name": "Aisle 17 corridor (customer): the red 'Frozen Market/Seafood' text at (217,302) is the DEPARTMENT NAME printed down the aisle floor, not a service counter — it runs between the market case (east face x=201.2) and the aisle-17 gondola (west face x=235.4), a 34 pt / 2.2 m shopping corridor with badge 17 at its head (218,212). Shoppers walk the whole length. West edge held at x=210 rather than the case face: the case is drawn with sawtooth open-front teeth out to x=208.3, and their notches are enclosed 3-cell slivers, not floor.",
+   "rect": [210.0, 221.0, 235.4, 468.0]},
+
+  {"name": "Aisle 8 corridor (customer): 'KITCHEN' is not a service kitchen here — it is the shelf-category label 'Kitchen Gadgets' printed in the aisle between the gondolas ending at x=625.0 and starting at x=652.6, with badge 8 at its head (641,212). Same reason seal_zones.json authors NO service disk at this label: a 130 pt seal disk centred in the middle of the grocery run would be sealing shopping aisles.",
+   "rect": [625.0, 234.0, 652.6, 483.0]},
+
+  {"name": "Bakery / Deli Grab-and-Go customer frontage (customer): the red 'Bakery' name at (931,510) is printed on the shopping floor among the four self-serve bakery tables (x 889-973, y 439-497) and in front of the Deli Grab-and-Go reach-in case (x 993.8-1014.5). This is the queue side; the staff side is the walled room excluded south/east of the counter, whose wall starts at y=519.2.",
+   "rect": [880.0, 430.0, 993.0, 519.0]}
+]

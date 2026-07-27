@@ -1,0 +1,20 @@
+Store 178 (H-E-B San Antonio) is converged. `./rebuild.sh 178` exits 0, `report.json` has `"verify": []` and both coverage lists empty, one component, 742 tests green.
+
+## What I found and how I resolved it
+
+**The real defect — 48 m² of back-of-house floor reading as shopping aisle.** In the SE corner behind the bakery counter there's a room walled by `x=926.6` (y 519→666), `y=532.7` (x 971.5→1014.4) and the partition `x=971.5`. Its only opening is a **19 pt (1.2 m) staff doorway** at x 952.7–971.5 — just wide enough to survive the 12 pt service bridge, so the auto seal never closed it. Contents confirm back-of-house: the 4-door walk-in cooler bank (x 998.5–1013.9), the double swing doors to receiving (x 966–986), and **zero product labels inside**. → `exclusions.json`.
+
+**Checkstand rect was half-height.** The derived rect `[365.7, 519.1, 603.1, 561.5]` stopped at y=561 because `CHECK_WIN_Y` (±45 pt of the label at y=505) admitted the register halves but not the bagging halves, and stopped at x=603 so the express podium (x 602.4–615.5) fell outside. The south half of all eight lanes stayed open — a route could thread straight through a checkout lane. → `seal_zones.json` with the rect widened to the full drawn bank `[358, 519, 623, 602]`, stopping at y=602 so the front action alley stays open. Carried the BAKERY/DELI/PHARMACY disks over verbatim.
+
+**Three VERIFY flags, all false positives from label extraction** → `inclusions.json`:
+- `KITCHEN (629,316)` is the shelf-category text **"Kitchen Gadgets"** printed in aisle 8 (gondolas end x=625, resume x=652.6; badge 8 at its head). This is also why I dropped the derived `auto:KITCHEN` seal disk — a 130 pt disk centred in the grocery run would be sealing shopping aisles.
+- `MARKET/SEAFOOD (217,302)` is the **department name printed down aisle 17**. Held the inclusion's west edge at x=210 rather than the case face: the case's sawtooth open-front teeth run to x=208.3 and their notches are enclosed 3-cell slivers, not floor (an earlier pass split the map into 19 components before I caught this).
+- `BAKERY (931,510)` is printed on the shopping floor among the four self-serve bakery tables, in front of the Deli Grab-and-Go case — customer queue side; the staff side is the room I excluded.
+
+**All 10 culled pockets classified:** 837 + 558 cells at x≈65 are the two rooms of the enclosed **Business Center lease suite** (doors only — correctly culled); the remaining eight are the **checkout lane interiors** now sealed by the corrected rect.
+
+**Remaining diagnostics, all benign:** `RESTROOMS` far-snaps 7.8 m because the restrooms sit in the east entry lobby *outside* the traced sales-floor boundary — unreachable by construction, and inclusions can't restore outside-boundary cells, so this is inherent, not a workaround. `PHARMACY` (2.0 m) and `ENTRANCE` (1.8 m) snap out of the closed pharmacy room and off the boundary line respectively. Narrow-corridor entries are department names snapped onto wall-case frontage.
+
+`walk_truth.json`: 12 `must` (front alley, both entrance approaches, aisles 4/8/17/18, Dairy/Frozen top alley, Produce/Bakery/Deli/Market frontages) and 8 `must_not` (two page corners, the parking apron, the back-of-house room, the lease suite, the pharmacy room, the restrooms, a checkout lane interior). walkable 26.5%.
+
+Only `data/178/` was touched. Stopping here for the audit.
