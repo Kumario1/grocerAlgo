@@ -1,0 +1,25 @@
+[
+  {"name": "Aisle 6 corridor at the 'Kitchen Gadgets' shelf label (customer) — the KITCHEN anchor is a printed product category, not a service counter: it sits between the gondolas at x=780.0 and x=804.8, under aisle badge 6 at (793.0,240.4). Its VERIFY is a false positive and the derived auto:KITCHEN disk was closing the corridor. Same call as 658/660.",
+   "rect": [780.0, 248.0, 804.8, 505.0]},
+
+  {"name": "Seafood counter south frontage, on the walk from the Market back run down to Produce (customer) — the 'Seafood' label prints on the shopping floor south of the angled service case (poly 879.9,129.6-938.7,169.2); the staff side of that counter is the back-of-house band north of it, which exclusions.json seals. Cf. 659's 'Seafood/Sushi south frontage toward Produce'.",
+   "rect": [880.0, 169.5, 990.0, 200.0]},
+
+  {"name": "Aisle 1 north mouth, between the last grocery gondola (ends x=965.1) and the Produce table at x=987.0 (customer) — a 21 pt aisle entrance off the Market/Produce back run that the derived auto:SEAFOOD disk (130 pt around (927.4,174.4), bridge 20) bridged shut, leaving aisle 1 enterable only from its south end. Aisle badge 1 prints at (976.7,240.0), directly above the closed mouth.",
+   "rect": [965.1, 236.0, 987.0, 264.0]},
+
+  {"name": "Produce walkway between the north wall case (997-1103.5, y 156.7-181.8) and the produce table at (989.8-1017.1, y 200.1-218) (customer) — the same auto:SEAFOOD bridge closed the westmost 20 pt of this 18 pt gap while the identical floor east of x=1017 stayed open; shoppers cross here between the Seafood frontage and Produce.",
+   "rect": [995.0, 180.0, 1018.0, 202.0]},
+
+  {"name": "Nutritional Aids/Bars aisle between the gondolas at x=300.3 and x=315.6 (customer) — a 15 pt shopping aisle open at both ends that the derived auto:PHARMACY disk (130 pt around the label at (232.9,631.2), bridge 12) closed shut, showing up as the '228 cells at (305,577) near PHARMACY' culled pocket.",
+   "rect": [299.0, 538.0, 317.0, 606.5]},
+
+  {"name": "Walk-throughs between the four free-standing display units of the front power alley — rects (344.0-360.4, 543.9-576.4), (373.3-389.0, 543.9-568.0), (401.9-418.3, 543.9-552.3) and (430.8-443.1, 542.4-555.9) (customer). The three gaps between them are 12.9, 12.9 and 12.5 pt (~1.2 m) of open floor with green on both sides; the derived auto:FLORAL disk (130 pt around (401.0,606.1), bridge 12) bridged all three shut. The rect restores only those three gaps — the display footprints stay unwalkable because inclusions can only re-open cells that were free before sealing.",
+   "rect": [342.0, 540.0, 445.0, 578.0]},
+
+  {"name": "Walk-throughs between the floral display cluster — the octagonal display (368.9-381.4) and the two round displays (394.4-404.8, 413.1-423.5), all y 585-597 (customer). The 13.0 pt gap octagon->round and the 8.3 pt gap round->round are open floor on the Floral frontage; the same auto:FLORAL bridge closed them, isolating the '30 cells at (387,590)' crevice from the walk. Same restore-only-what-was-free property as above.",
+   "rect": [365.0, 583.0, 427.0, 600.0]},
+
+  {"name": "Walk-through between the two Bakery north display tables at (1033.4-1060.3) and (1075.9-1103.1), y 286.5-304.3 (customer) — 15.6 pt (~1.5 m) of open floor in the middle of the Bakery's north display frontage, green on all four sides, closed by the derived auto:BAKERY disk (130 pt around (1068.9,415.6), bridge 12) whose north edge reaches y=285.6. Nothing staff lies inside this rect: the Bakery production room is the walled block south of the case run at y=333, which exclusions leaves to the seal disk.",
+   "rect": [1055.0, 283.0, 1082.0, 308.0]}
+]

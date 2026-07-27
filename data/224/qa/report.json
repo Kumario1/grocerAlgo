@@ -1,0 +1,132 @@
+{
+ "components": {
+  "n": 1,
+  "sizes": [
+   70154
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 3382,
+   "near": "BAKERY",
+   "x": 1095.0,
+   "y": 414.5
+  },
+  {
+   "cells": 748,
+   "near": "DELI",
+   "x": 1112.5,
+   "y": 603.1
+  },
+  {
+   "cells": 729,
+   "near": "RESTROOMS",
+   "x": 806.4,
+   "y": 558.0
+  },
+  {
+   "cells": 641,
+   "near": "DELI",
+   "x": 1019.3,
+   "y": 615.6
+  },
+  {
+   "cells": 395,
+   "near": "RESTROOMS",
+   "x": 681.2,
+   "y": 653.5
+  },
+  {
+   "cells": 363,
+   "near": "CHECKSTANDS",
+   "x": 602.0,
+   "y": 557.0
+  },
+  {
+   "cells": 333,
+   "near": "CHECKSTANDS",
+   "x": 648.3,
+   "y": 558.5
+  },
+  {
+   "cells": 258,
+   "near": "PHARMACY",
+   "x": 306.6,
+   "y": 579.7
+  },
+  {
+   "cells": 177,
+   "near": "FLORAL",
+   "x": 336.2,
+   "y": 637.5
+  },
+  {
+   "cells": 105,
+   "near": "FLORAL",
+   "x": 370.5,
+   "y": 645.7
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 18.3,
+   "meters": 3.44,
+   "name": "BAKERY"
+  },
+  {
+   "cells": 13.1,
+   "meters": 2.46,
+   "name": "PHARMACY"
+  }
+ ],
+ "m_per_cell": 0.1878,
+ "narrow": [
+  {
+   "half_width_m": 0.94,
+   "name": "BAKERY"
+  },
+  {
+   "half_width_m": 0.94,
+   "name": "DELI"
+  },
+  {
+   "half_width_m": 0.94,
+   "name": "ENTRANCE"
+  },
+  {
+   "half_width_m": 0.94,
+   "name": "PHARMACY"
+  },
+  {
+   "half_width_m": 1.13,
+   "name": "FISH/MEAT/CHILI"
+  },
+  {
+   "half_width_m": 1.13,
+   "name": "KITCHEN"
+  },
+  {
+   "half_width_m": 1.13,
+   "name": "PRODUCE"
+  },
+  {
+   "half_width_m": 1.31,
+   "name": "DAIRY"
+  }
+ ],
+ "provenance": {
+  "drift": null,
+  "exclusions": "file",
+  "inclusions": "file",
+  "seal_zones": "derived",
+  "zones": "derived"
+ },
+ "reachable_pct": 28.9,
+ "store": "224",
+ "verify": [],
+ "walkable_pct": 28.9
+}

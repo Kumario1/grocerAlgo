@@ -1,0 +1,10 @@
+[
+  {"name": "Back-of-house band behind the Dairy/Market wall cases and behind the Seafood counter (staff only; ~11 m deep, spans the whole building width and holds no fixture, no aisle badge and no product label). The sales floor's north edge is the drawn wall run traced from PDF strokes: y=153.7 from x=463.7 to x=874.7, the thick diagonal (932.7,129.6)->(879.9,160.7) beside the Seafood case, then y=103.5 from x=947.4 to the east wall x=1141.2. Two staff double-swing door symbols sit in that run — (466-486, ~154) behind Dairy and (924-948, 98-122) behind Seafood — which is what the band is for. West of x=463.7 the same edge is the Dairy case row (204.6-317.1, y 161.7-174.2), the sawtooth cooler graphic (x 317-426) and the case at (424.5-461.9, y 162.5-173.2), so the boundary steps down to y=174.5 there. Cf. 659's 'behind Dairy cases / top wall service band'.",
+   "poly": [[172.8, 43.2], [1141.2, 43.2], [1141.2, 103.5], [947.4, 103.5],
+            [932.7, 129.6], [880.0, 161.0], [463.7, 161.0], [463.7, 174.5],
+            [204.6, 174.5], [204.6, 161.7], [172.8, 161.7]]},
+
+  {"name": "Pharmacy dispensary + the back room behind it, south-west corner (staff). The 'Pharmacy' label prints inside a walled bay: west and south are the building walls (x=172.8, y=665.3), east is the drawn partition x=323.5 with two door swings at (313-323, 610-620) and (315-324, 651-660), north is the counter/shelf run at y=606.8-610.8 carrying the 'First Aid' shelf on its CUSTOMER face. The bay holds no fixture and no product label — the shopping frontage is the corridor north of y=606.8, which stays open. The 36x23 pt room at (172.8-209.3, 552.3-575.3) behind it is drawn with two door swings and is the same staff pocket, reached only through this bay. Cf. 659 'Pharmacy room behind the drawn counter wall' / 660 'Pharmacy dispensary interior'.",
+   "poly": [[172.8, 552.3], [209.3, 552.3], [209.3, 607.0], [323.5, 607.0],
+            [323.5, 665.3], [172.8, 665.3]]}
+]

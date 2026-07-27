@@ -1,0 +1,29 @@
+## Store 224 — adversarial map audit
+
+**Rebuilt from source twice** (`./rebuild.sh 224`, exit 0 both times). Final: `verify: []`, both coverage lists empty, **1** component (70 154 cells), walkable **28.9 %**, **782 passed**.
+
+### Findings (worst first) — all five fixed in this store's data
+
+**F1 — Bakery north display section had zero truth coverage and no mechanical net over it.**
+Region x ≈ 1030–1126, y ≈ 261–333 (between the north table ending y = 260.9, the two bakery display tables at y = 286.5–304.3, the east wall cases at x = 1125.8, and the bakery room's case run at y = 333). Crop `walkable_overlay` @ (1010,260)–(1140,350). It is real customer floor (probes at (1067,272) and (1115,318) walkable) but **prints no product label**, so coverage net 1 cannot see it; net 2 is inert on this guide (floor paint is pure white, identical to fixture interiors — `np.median(arr[reachable]) == [255,255,255]`), and `walk_truth` had no point within 90 pt. It also sits inside the derived `auto:BAKERY` disk (r = 130 pt around (1068.9,415.6), reaching y ≈ 285.6), which had already bitten into it. Sealing the whole section would have shipped green. **Truth:** customer display frontage. **Fix:** `walk_truth` must `[1067,272]`, `[1115,318]`.
+
+**F2 — 15.6 pt (1.5 m) walk-through between the two Bakery north display tables sealed.** (1067,295); tables (1033.4–1060.3) and (1075.9–1103.1), y 286.5–304.3. Probe: `walkable=False, nearest free 1.33 m`; 60-cell white gap in open floor green on all four sides — closed by the `auto:BAKERY` 12 pt bridge. **Fix:** inclusion `[1055,283,1082,308]` (restores exactly those 60 cells, nothing else) + must `[1067,295]`.
+
+**F3 — three 12.5–12.9 pt walk-throughs in the front power-alley display row sealed.** Gaps at (366,556), (395,548), (424,548), between rects (344.0–360.4), (373.3–389.0), (401.9–418.3), (430.8–443.1). Crop `map_full` @ (330,525)–(460,585) shows four free-standing display units in otherwise empty floor; the overlay showed all three gaps white. Closed by the `auto:FLORAL` disk (130 pt around (401.0,606.1), bridge 12). **Fix:** inclusion `[342,540,445,578]` (restores 125 cells in exactly 3 pieces) + three must points.
+
+**F4 — 13.0 pt walk-through in the floral display cluster sealed.** (387,591), between the octagonal display (ends x = 381.4) and the round display at x = 394.4; same `auto:FLORAL` bridge. **Fix:** inclusion `[365,583,427,600]` + must `[387,591]`.
+
+**F5 — restroom interiors had no `must_not`.** Enclosed rooms (743.1–788.0 and 804.2–849.1) × (630.9–664.1) — the only enclosed rooms in the store with no guard. **Fix:** must_not `[765,647]`, `[826,647]`.
+
+### What came back clean
+
+- **Every one of the 253 printed words** is 0.0 pt from entrance-reachable floor except the six that print inside blessed sealed space (Bakery 36 pt, Pharmacy 26 pt, Deli 19.7 pt, Business Center 16 pt, both Entrance/ICE glyphs) — an independent net-1 run with no blessed exemption and no near-fixture filter.
+- **All 22 aisle corridors green end to end** (y 258→528, zero blocked cells in the best column of each); back main aisle, action alley and front alley continuous across the building.
+- **100 % of removed floor accounted for.** All 10 top-ten culled pockets classified and each carries a `must_not`: bakery production room (119 m²), deli back corner room, right/left checkstand banks, deli staff strip, Business Center, pharmacy dead-end approach slot, enclosed front room W of Floral. The `258 cells at (307,580) near PHARMACY` entry is pre-inclusion bookkeeping — the Nutritional Aids aisle is open (probe (307,570) walkable). Post-fix, the 21 remaining regions ≥ 30 cells are all either blessed rooms/lanes or crevices narrower than 1.13 m.
+- **Exclusions verified against drawn strokes**, not asserted: `y=153.7 x 463.7–874.7`, diagonal `(932.7,129.6)–(879.9,160.7)`, `y=103.5 x 947.4–1141.4`, Dairy case row `y=174.2 x 204.6–317.1` all exist in `obstacle_paths` exactly as the WHY text claims. Pharmacy bay holds no fixture and no product label; its First Aid counter face and waiting corridor stay green.
+- **Inclusions sane** — all eight are narrow, customer-side, and structurally incapable of opening staff space (`free |= free_raw & incl_mask` can only undo sealing, never open a fixture or wall).
+- Unanchored departments (Market, Meal Simple, Sushi, Tobacco, Business Center, First Aid, Batteries, Books/Magazines, Lotion/Cream) each individually inspected against `geometry.json`; all have green frontage. No orange (kept-but-unreachable) cells; no walkable cells outside the boundary.
+
+Sub-1.13 m crevices left sealed by design and named in the report: the two 0.85–1.0 m gaps in the stacked column at x 490.9–515.4, the 0.8–0.9 m gaps between the angled Meal Simple cases, the 8.3 pt round-to-round floral gap, and the NE/seafood wall crevices.
+
+`AUDIT CLEAN — store 224 (5 findings fixed)`
