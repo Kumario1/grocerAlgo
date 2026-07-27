@@ -1,0 +1,15 @@
+[
+ {"name": "Restrooms block south of the front alley (enclosed rooms, not sales floor): a bay walled west at x=601.7 and east at x=670.7, entered through the single 29-pt mouth at (620.8-650.1, y=674) and split by the drawn T-partition (bar y=683.7-685.9 across x=620.8-650.9, stem x=636.2-638.4 down to the front wall) into the women's and men's rooms, each carrying only its pictogram graphic. No fixture, no product label, no department frontage inside. The RESTROOMS anchor prints at (637.3,665.4), north of the mouth in the action alley, so it still snaps to alley floor",
+  "rect": [601, 675, 671, 721]},
+
+ {"name": "Tobacco kiosk back room (staff side of the counter): the 46x44 pt bay walled west at x=551 and roofed by the counter wall x=551-588 at y=675-676, with the sawtooth-faced Tobacco fixture [551.4,667,593.4,676] standing on that wall facing NORTH into the front alley. Its only floor link to the sales floor is the 4-pt slit at x=594-598, y=674 between the counter's east end and the restroom bay's west wall - 0.4 m, not a customer corridor. Nothing drawn or labelled inside; cf. 265/269/811 'floor with no fixture and no product label walled off from the sales floor'",
+  "rect": [550, 674, 600, 721]},
+
+ {"name": "Cooking Connection demo-counter interior (staff work inside the horseshoe, same fixture family excluded at 24 and 660). Vertices are the drawn counter's own INNER vertex chain from geometry.json fixture_polys[174], closed across the counter's 41-pt north-west mouth; the pipeline cannot condemn it itself because the mouth is far wider than any seal bridge and 'Cooking Connection' is not in extract.py's anchor vocabulary, so no seal disk or VERIFY ever forms here",
+  "poly": [[258.4, 321.1], [276.8, 337.8], [277.2, 348.3], [265.0, 361.7],
+           [254.1, 362.5], [236.4, 346.5]]},
+
+ {"name": "Sushiya sushi-bar counter interior (staff inside the U; excluded at 24 and 265, frontage-only inclusions at 790/811). Vertices are the drawn counter's INNER vertex chain from geometry.json fixture_polys[173], closed across its north-west mouth. Customer frontage is the open Market floor west and south of the bar and stays walkable",
+  "poly": [[333.6, 406.9], [352.0, 423.6], [352.4, 434.1], [340.2, 447.5],
+           [329.4, 448.3], [311.7, 432.3]]}
+]

@@ -1,0 +1,8 @@
+[
+ {"name": "Card & Party aisles — the 4 customer corridors between the Catering / Supplies / Party / Greeting Cards gondolas (rects at x=549.6-560.3, 571.9-580.7, 593.0-601.8, 614.2-622.9, 635.3-644.0, y=364-417). Their 11.6-12.4 pt gaps are shopping aisles: each vertical product label is printed INSIDE a gap. The auto:BLOOMS seal disk (pt 622,485 r130 bridge 12) closed all four, which stranded the Catering/Supplies/Party labels with no reachable frontage",
+  "rect": [546, 358, 650, 424]},
+ {"name": "Aisle 2 corridor at the 'Kitchen Gadgets' shelf label (customer aisle between the dry-grocery gondolas x=484.3-492.9 and x=520.3-528.8, AISLE 2 badge directly below at 509,334). Extract turned the printed product-category label into a KITCHEN anchor, but this store has no kitchen service counter — the surroundings are walkable because they really are a shopping aisle",
+  "rect": [493, 106, 520, 331]},
+ {"name": "Meal Simple frontage corridor between the upper case [446,559,532,581] and the middle case [474,605,524,611] (customer): a 22-pt / 2.1 m shopping aisle whose west 32 pt stayed open while x=474-536 was bridged shut, so the corridor was green at its mouth and white deeper in. The department's own printed name 'Meal Simple' (450-524, 583-596) sits on the sealed half. Cause: the derived auto:CHECKSTANDS rect [439.5,501.5,861.2,605.1] carries the looser 20-pt lane bridge, which closes a 22-pt corridor everywhere it overlaps. The parallel corridor south of the middle case (y=612-622) survived and shows what this one should look like",
+  "rect": [472, 582, 540, 606]}
+]

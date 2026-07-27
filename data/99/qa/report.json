@@ -1,0 +1,230 @@
+{
+ "components": {
+  "n": 1,
+  "sizes": [
+   95169
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 3740,
+   "near": "SEAFOOD",
+   "x": 162.9,
+   "y": 302.2
+  },
+  {
+   "cells": 2044,
+   "near": "SEAFOOD",
+   "x": 192.2,
+   "y": 283.6
+  },
+  {
+   "cells": 1973,
+   "near": "PHARMACY",
+   "x": 1083.4,
+   "y": 606.2
+  },
+  {
+   "cells": 1827,
+   "near": "PHARMACY",
+   "x": 1024.0,
+   "y": 706.0
+  },
+  {
+   "cells": 901,
+   "near": "PRODUCE",
+   "x": 233.9,
+   "y": 655.4
+  },
+  {
+   "cells": 525,
+   "near": "KITCHEN",
+   "x": 429.3,
+   "y": 224.5
+  },
+  {
+   "cells": 456,
+   "near": "LEASE SPACE ENTRANCE",
+   "x": 709.0,
+   "y": 701.0
+  },
+  {
+   "cells": 440,
+   "near": "EXIT",
+   "x": 829.0,
+   "y": 697.0
+  },
+  {
+   "cells": 330,
+   "near": "LEASE SPACE ENTRANCE",
+   "x": 764.0,
+   "y": 697.0
+  },
+  {
+   "cells": 327,
+   "near": "AISLE 15",
+   "x": 508.4,
+   "y": 589.0
+  },
+  {
+   "cells": 286,
+   "near": "LEASE SPACE ENTRANCE",
+   "x": 794.0,
+   "y": 697.0
+  },
+  {
+   "cells": 214,
+   "near": "CHECKSTANDS",
+   "x": 619.8,
+   "y": 583.9
+  },
+  {
+   "cells": 187,
+   "near": "AISLE 19",
+   "x": 739.0,
+   "y": 586.0
+  },
+  {
+   "cells": 185,
+   "near": "CHECKSTANDS",
+   "x": 649.4,
+   "y": 587.5
+  },
+  {
+   "cells": 184,
+   "near": "AISLE 34",
+   "x": 852.8,
+   "y": 580.1
+  },
+  {
+   "cells": 183,
+   "near": "AISLE 18",
+   "x": 708.7,
+   "y": 586.1
+  },
+  {
+   "cells": 178,
+   "near": "AISLE 17",
+   "x": 679.1,
+   "y": 587.0
+  },
+  {
+   "cells": 162,
+   "near": "AISLE 5",
+   "x": 607.0,
+   "y": 390.0
+  },
+  {
+   "cells": 158,
+   "near": "AISLE 16",
+   "x": 558.9,
+   "y": 582.2
+  },
+  {
+   "cells": 144,
+   "near": "PRODUCE",
+   "x": 279.3,
+   "y": 484.8
+  },
+  {
+   "cells": 135,
+   "near": "AISLE 4",
+   "x": 586.0,
+   "y": 390.0
+  },
+  {
+   "cells": 135,
+   "near": "AISLE 6",
+   "x": 628.0,
+   "y": 390.0
+  },
+  {
+   "cells": 101,
+   "near": "PHARMACY",
+   "x": 1098.2,
+   "y": 521.2
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 35.2,
+   "meters": 6.72,
+   "name": "LEASE SPACE ENTRANCE"
+  },
+  {
+   "cells": 18.3,
+   "meters": 3.5,
+   "name": "SEAFOOD"
+  },
+  {
+   "cells": 14.9,
+   "meters": 2.84,
+   "name": "BAKERY"
+  },
+  {
+   "cells": 14.3,
+   "meters": 2.73,
+   "name": "DELI"
+  },
+  {
+   "cells": 13.3,
+   "meters": 2.54,
+   "name": "ENTRANCE"
+  },
+  {
+   "cells": 12.2,
+   "meters": 2.34,
+   "name": "PHARMACY"
+  }
+ ],
+ "m_per_cell": 0.1908,
+ "narrow": [
+  {
+   "half_width_m": 0.57,
+   "name": "AISLE 16"
+  },
+  {
+   "half_width_m": 0.69,
+   "name": "AISLE 24"
+  },
+  {
+   "half_width_m": 0.69,
+   "name": "AISLE 27"
+  },
+  {
+   "half_width_m": 0.76,
+   "name": "AISLE 15"
+  },
+  {
+   "half_width_m": 0.76,
+   "name": "AISLE 17"
+  },
+  {
+   "half_width_m": 0.76,
+   "name": "AISLE 20"
+  },
+  {
+   "half_width_m": 0.76,
+   "name": "AISLE 21"
+  },
+  {
+   "half_width_m": 0.76,
+   "name": "AISLE 23"
+  }
+ ],
+ "provenance": {
+  "drift": null,
+  "exclusions": "file",
+  "inclusions": "file",
+  "seal_zones": "derived",
+  "zones": "derived"
+ },
+ "reachable_pct": 36.1,
+ "store": "99",
+ "verify": [],
+ "walkable_pct": 36.1
+}

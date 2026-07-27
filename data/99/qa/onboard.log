@@ -1,0 +1,28 @@
+Store 99 is converged. Stopping here for the separate audit role as the runbook requires.
+
+## Result
+
+`./rebuild.sh 99` → **exit 0**, **742 passed**. `data/99/qa/report.json`:
+- `"verify": []`
+- `"coverage": {"sealed_floor_patches": [], "unreachable_shelf_labels": []}`
+- `components: {n: 1, sizes: [96221]}`, `walkable_pct: 36.5`
+
+## Files authored (data only, store 99 only)
+
+**`data/99/inclusions.json`** — two entries, both from evidence in the first pass:
+
+1. **Card & Party aisles** `rect [546, 358, 650, 424]` — the coverage net flagged `Catering / Party / Supplies` with no reachable frontage at (587, 391). Cause: five gondolas at x=549.6–560.3, 571.9–580.7, 593.0–601.8, 614.2–622.9, 635.3–644.0 (y 364–417) separated by **11.6–12.4 pt** gaps, and the auto-derived `auto:BLOOMS` disk (pt 622,485 · r130 · bridge 12) closed all four. The gaps are real shopping aisles — each vertical product label is printed *inside* a gap, same as the dry-grocery run. Reopening them restored 530 cells and cleared the coverage flag.
+
+2. **Aisle 2 corridor at "Kitchen Gadgets"** `rect [493, 106, 520, 331]` — the lone VERIFY. `extract.py` turned the printed product-category label *Kitchen Gadgets* into a `KITCHEN` anchor (which is in `SERVICE_DEPTS`), but this store has no kitchen service counter: the label sits in the open corridor between gondolas x=484.3–492.9 and x=520.3–528.8, with the AISLE 2 badge directly below at (509, 334). Legitimate customer space → inclusion.
+
+No `exclusions.json`, `zones.json` or `seal_zones.json` needed — zones and seal zones derived correctly.
+
+**`data/99/walk_truth.json`** — 12 `must` / 8 `must_not`, all read off the overlay and `geometry.json` and each verified to sit inside the feature it names: front action alley, SW entrance approach, Produce/Seafood/Bakery/Dairy/Pharmacy/Meat frontages, aisles 2/8/25, the reopened Card & Party aisle; against page corner, the Texas Backyard lot and SE cart corral (both outside the boundary), the two label-identified staff areas (Seafood wedge interior 176,418 and Pharmacy room 1080,580), Lease Space, Admin office, and a checkout-lane interior.
+
+## Culled pockets — classification
+
+All 23 accounted for. Staff/enclosed and correctly sealed: Seafood service wedge (3740, `staff_mask`), Pharmacy room (1973, `staff_mask`), Admin office (1827), the four leased tenant units at y≈697–701 (456/440/330/286), checkout-lane interiors (327/214/187/185/184/183/178/158). Dead crevices correctly sealed: the west+south wall cavity in Produce (901 — an 11 pt ring between the double wall strokes, not floor), the 0.76 m walled dead-end sliver between the Beer/Wine department line and the aisle-1 gondola (525, x 436–444 y 168–322), the interior of the produce U-fixture (180), and the sliver between the curved Cosmetics enclosure and the exterior wall (101). The only misclassified ones were the four Card & Party corridors (162/135/135/98) — fixed above.
+
+`far_snaps` are all labels printed inside sealed enclosures snapping out to their customer side (LEASE SPACE ENTRANCE 6.7 m sits in the leased corridor; SEAFOOD/BAKERY/DELI/PHARMACY inside their counters; ENTRANCE in the vestibule outside the boundary). `narrow` entries are 0.57–0.76 m half-width, i.e. real 1.1–1.5 m aisles in this schematic, not slivers.
+
+`pipeline.sh` should now start the fresh audit context — I have not run `docs/audit.md`.
