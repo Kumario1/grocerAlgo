@@ -1,0 +1,20 @@
+Store 182 is converged. No `zones.json` was needed (ENTRANCE/CHECKSTANDS both derived cleanly).
+
+## What was wrong
+
+The first mechanical pass shipped with **the entire east wing sealed** — Produce, Meal Simple, Bakery front, Sushiya, Floral and the east front vestibule, one 18,623-cell staff pocket. The auto-derived seal disks (r=130 pt each for BAKERY, DELI, FLORAL, KITCHEN, PHARMACY, SEAFOOD) overlapped into a wall across the wing. Store 182 has no service *islands* at all: every service department is drawn as a solid block (Deli), a walled room (Bakery production, Pharmacy) or a wall-line counter (Market/Seafood). The coverage nets missed it because that wing's departments are vector artwork with no extracted shelf labels.
+
+Two more shape errors in the derived zones: the checkstand rect ran east to x=917, bridging the Floral-side customer walkway shut, and `CHECK_WIN_Y=45` around the label at y=551.8 meant it never reached the **second checkstand row** (y=631-685) — all six south lanes were walkable.
+
+## What I authored
+
+- **`seal_zones.json`** (full override): two rects, one per checkstand row, stopping at x=772 and bridging 22 pt. One rect spanning both rows merges into a ~3.6k-cell pocket that trips `seal_staff_gaps`' dead-crevice size cap and seals nothing.
+- **`exclusions.json`** (10): the top-wall band behind Dairy and the Market counter, the Market/Seafood counter back aisle and its NE corner wedge, behind the Seafood sawtooth counter, the east back-of-house stockroom, the Bakery production room (west edge pulled to x=972 so the staff door threshold is blocked too), the Sushiya kiosk interior, the men's restroom interior, and a poly tracing the Pharmacy room's curved counter wall.
+- **`inclusions.json`** (2): the aisle-12 corridor at the *"Kitchen Gadgets"* shelf label (not a Kitchen service counter — this store has none), and the Seafood frontage on the Market floor.
+- **`walk_truth.json`**: 20 `must` (both action alleys, Dairy/Seafood/Produce/Bakery/Meal Simple/Floral/Deli frontages, four aisle corridors across both blocks and both wings, pharmacy approach, both entrance approaches) / 21 `must_not` (page corners, parking, drive-thru, carts apron, both checkout lanes, each excluded staff area, both restrooms, the vending room).
+
+## Final state
+
+`./rebuild.sh 182` exits 0, **763 passed**. `report.json`: `"verify": []`, both `coverage` lists empty, 1 component (80,564 cells), walkable 30.5% == reachable 30.5%. Five culled pockets remain, all classified: the two checkstand banks and three enclosed restroom-block rooms. Three far-snaps (BAKERY/DELI/PHARMACY, 2.5-2.6 m) are labels printed inside blocked staff areas snapping to their customer frontage. Tightest corridor is 0.74 m half-width — real aisles, no slivers.
+
+Stopping here for the separate audit context.

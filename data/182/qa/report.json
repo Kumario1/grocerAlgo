@@ -1,0 +1,125 @@
+{
+ "components": {
+  "n": 1,
+  "sizes": [
+   80788
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 1780,
+   "near": "CHECKSTANDS",
+   "x": 687.1,
+   "y": 655.9
+  },
+  {
+   "cells": 1395,
+   "near": "CHECKSTANDS",
+   "x": 684.2,
+   "y": 592.6
+  },
+  {
+   "cells": 399,
+   "near": "RESTROOMS",
+   "x": 409.7,
+   "y": 713.8
+  },
+  {
+   "cells": 234,
+   "near": "RESTROOMS",
+   "x": 486.0,
+   "y": 749.0
+  },
+  {
+   "cells": 222,
+   "near": "RESTROOMS",
+   "x": 431.1,
+   "y": 739.0
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 14.3,
+   "meters": 2.64,
+   "name": "BAKERY"
+  },
+  {
+   "cells": 14.0,
+   "meters": 2.59,
+   "name": "DELI"
+  },
+  {
+   "cells": 13.3,
+   "meters": 2.46,
+   "name": "PHARMACY"
+  }
+ ],
+ "m_per_cell": 0.185,
+ "narrow": [
+  {
+   "half_width_m": 0.74,
+   "name": "AISLE 18"
+  },
+  {
+   "half_width_m": 0.74,
+   "name": "ENTRANCE"
+  },
+  {
+   "half_width_m": 0.76,
+   "name": "AISLE 31"
+  },
+  {
+   "half_width_m": 0.83,
+   "name": "AISLE 26"
+  },
+  {
+   "half_width_m": 0.93,
+   "name": "AISLE 10"
+  },
+  {
+   "half_width_m": 0.93,
+   "name": "AISLE 11"
+  },
+  {
+   "half_width_m": 0.93,
+   "name": "AISLE 12"
+  },
+  {
+   "half_width_m": 0.93,
+   "name": "AISLE 13"
+  }
+ ],
+ "provenance": {
+  "drift": {
+   "seal_zones": {
+    "derived_n": 7,
+    "derived_names": [
+     "auto:BAKERY",
+     "auto:DELI",
+     "auto:FLORAL",
+     "auto:KITCHEN",
+     "auto:PHARMACY",
+     "auto:SEAFOOD",
+     "auto:CHECKSTANDS"
+    ],
+    "file_n": 2,
+    "file_names": [
+     "Checkstand lane bank, NORTH row (six lanes, fixtures y=564-616). Full override: the derived rect was wrong in shape twice over \u2014 its east edge ran to x=917, which bridged the customer walkway between the last lane and Floral shut, and CHECK_WIN_Y=45 around the CHECKSTANDS label at y=551.8 kept it from ever reaching the south row. Stops at x=772, just east of the last lane fixture (x=759), and at y=540 so the frozen-aisle mouths at y=528-536 stay open. bridge 22 pt: checkout lanes are wider than service-counter gaps, and 22 pt still leaves the 26 pt front action alley (y=538-562) fully open.",
+     "Checkstand lane bank, SOUTH row (six more lanes, fixtures y=631-685) \u2014 the row the derived zone missed entirely, so every south lane was walkable. Same x=772 east edge and 22 pt bridge. Kept as a separate rect from the north row because one rect spanning both merges the whole block into a single ~3.6k-cell pocket, which trips seal_staff_gaps' dead-crevice size cap and then seals nothing at all. AND WHY THE SIX DERIVED SERVICE DISKS ARE NOT CARRIED OVER (this file replaces ALL derived zones verbatim, so their absence is a decision, not an oversight): derivation produced auto:BAKERY, auto:DELI, auto:FLORAL, auto:KITCHEN, auto:PHARMACY and auto:SEAFOOD as r=130 pt disks on each label. In store 182 every one of those areas is already closed by drawn geometry plus a traced exclusion \u2014 Bakery by its walled production room, Deli by the solid drawn service block, Pharmacy by the curved counter wall traced in exclusions.json, Seafood by the counter's staff prep side. Floral and Kitchen have no service counter here at all: Floral is open display tables on the shopping floor, and 'Kitchen Gadgets' is a shelf-category label in aisle 12, not an H-E-B Kitchen counter. Reinstating the six disks re-seals 1109 cells of shopping floor and buys nothing. Their interiors stay locked by walk_truth must_not (Bakery room, Deli block, Pharmacy room, Sushiya kiosk, Seafood prep side) and by the must points at Floral front, aisle 12 and the Seafood counter frontage."
+    ]
+   }
+  },
+  "exclusions": "file",
+  "inclusions": "file",
+  "seal_zones": "file",
+  "zones": "derived"
+ },
+ "reachable_pct": 30.6,
+ "store": "182",
+ "verify": [],
+ "walkable_pct": 30.6
+}

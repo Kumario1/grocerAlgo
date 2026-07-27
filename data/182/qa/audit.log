@@ -1,0 +1,24 @@
+## Audit — H-E-B store 182 (Temple)
+
+**Pass 1 — Mechanical.** `./rebuild.sh 182` exit 0; `verify: []`; both `coverage` lists empty; 1 component (80,564 cells); walkable 30.5% (in band). Passed on the first rerun — so every finding below came from the sweep, not the nets.
+
+**Pass 2 — Visual sweep.** 3×3 crops of `walkable_overlay.png` plus ~15 targeted zooms against raw PDF renders. All 5 culled pockets classified: 2 checkstand lane banks, women's restroom (399), the enclosed strip under the Curbside bay (234), the walled room west of it (229) — the last three verified against the raw drawing as fully enclosed rooms/chases. I also enumerated **every** cell the pipeline seals (42 clusters vs. an unconfigured grid) and classified the top 25; only one was customer floor.
+
+**Pass 3 — Label probes.** Extracted all 205 printed labels from page 2 with per-character bboxes and probed every one (not just 10). Max distance to reachable floor for any product/category label: **0.13 m**. No sealed wing.
+
+**Pass 4/5** below.
+
+### Findings (worst first) — all 3 fixed
+
+**1. Seafood counter frontage over-sealed — 224 cells (7.7 m²) of shopper standing space.** `exclusions[4]` was an axis-aligned rect `[974,322,1066,384]` over a counter drawn as a **45° parallelogram**, `(1014.8,325.2)→(988.6,352.7)`, with the case teeth on its north-west (customer) face. Shown by crop `r1c2` and the raw render at `x 940–1060, y 300–400`: green stopped dead on a vertical line at x=972 while the case face is at x=988–1015. Measured by rebuilding with the entry dropped — **all 224 recovered cells lie north-west of the serving face; zero staff cells**, because the staff side was already closed by the drawn walls at x=1027/y=358 and the market back-aisle exclusion. Truth: floor runs to the case teeth. Fix type: **exclusion** → replaced the rect with a poly tracing the serving face. New walk_truth point that catches it: `must [996,338]` (was blocked before, free after).
+
+**2. `walk_truth` coverage gaps and one mislabeled point.** The Market wing — a whole service department with **no extracted anchor** (`MARKET` is in the PDF text but not in `geometry.json`) — had no `must` point at all; so did Frozen Foods' aisle interiors, the east half of the south block, Healthy Living, and the Curbside bay. `must_not [990,100]` "behind the angled return" probes **inside the counter fixture body**, not the staff wedge, so it regression-tests nothing (dropping `exclusions[2]` changes 0 cells). `exclusions[1]`'s service band had no `must_not` at all. Fix type: **walk_truth points** — 6 `must` added, `[990,100]`→`[998,101]` corrected, 2 `must_not` added (26 must / 23 must_not; suite 763 → 771 tests).
+
+**3. `seal_zones.json` silently drops six derived service disks.** The file replaces all derived zones verbatim: 7 derived → 2 authored, dropping `auto:{BAKERY,DELI,FLORAL,KITCHEN,PHARMACY,SEAFOOD}` with no recorded reason. I verified the drop is **correct** (each area is closed by drawn geometry + a traced exclusion; Floral and Kitchen have no counter here — reinstating the disks re-seals 1109 cells of shopping floor), so this is a documentation defect, not a map defect — but it's the highest-risk undocumented decision in the config. Fix type: **seal_zones** name, recording the rationale. Regression cover already exists via the must_not set for those interiors plus `must [852,650]`, `[440,250]`, `[996,338]`.
+
+### Checked and found sound
+Pharmacy poly traced exactly to the drawn curve (the store-24 archetype — pickup frontage green, room sealed); bakery production room (92 m², real work); Sushiya U-counter; men's/women's restrooms; the Market NE wedge where free floor staircases along the counter diagonal; checkout lanes sealed with both the front alley and the Floral walkway open; west wall drawn double-thickness with floor starting at the inner face (no lost frontage); `inclusions.json` — both entries' WHY match the drawing and neither can reopen staff floor (inclusions mask against the post-exclusion grid).
+
+Final state: exit 0, `verify: []`, coverage empty, 1 component (80,788), walkable 30.6%, 771 passed. Only the five per-store JSONs were touched.
+
+`AUDIT CLEAN — store 182 (3 findings fixed)`
