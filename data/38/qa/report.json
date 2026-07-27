@@ -1,0 +1,297 @@
+{
+ "components": {
+  "n": 1,
+  "sizes": [
+   79144
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 1064,
+   "near": "CHECKSTANDS",
+   "x": 543.0,
+   "y": 698.0
+  },
+  {
+   "cells": 988,
+   "near": "BAKERY",
+   "x": 856.4,
+   "y": 327.9
+  },
+  {
+   "cells": 741,
+   "near": "EXIT",
+   "x": 778.0,
+   "y": 698.0
+  },
+  {
+   "cells": 618,
+   "near": "RESTROOMS",
+   "x": 799.3,
+   "y": 463.4
+  },
+  {
+   "cells": 608,
+   "near": "CHECKSTANDS",
+   "x": 677.0,
+   "y": 698.0
+  },
+  {
+   "cells": 481,
+   "near": "FLORAL",
+   "x": 703.0,
+   "y": 449.0
+  },
+  {
+   "cells": 445,
+   "near": "FLORAL",
+   "x": 670.7,
+   "y": 494.1
+  },
+  {
+   "cells": 437,
+   "near": "AISLE 33",
+   "x": 462.0,
+   "y": 698.0
+  },
+  {
+   "cells": 399,
+   "near": "CHECKSTANDS",
+   "x": 622.0,
+   "y": 698.0
+  },
+  {
+   "cells": 310,
+   "near": "FLORAL",
+   "x": 581.7,
+   "y": 483.3
+  },
+  {
+   "cells": 276,
+   "near": "EXIT",
+   "x": 833.9,
+   "y": 699.4
+  },
+  {
+   "cells": 273,
+   "near": "FLORAL",
+   "x": 664.0,
+   "y": 450.0
+  },
+  {
+   "cells": 266,
+   "near": "CHECKSTANDS",
+   "x": 665.4,
+   "y": 607.7
+  },
+  {
+   "cells": 265,
+   "near": "CHECKSTANDS",
+   "x": 739.7,
+   "y": 605.9
+  },
+  {
+   "cells": 264,
+   "near": "AISLE 33",
+   "x": 422.4,
+   "y": 700.0
+  },
+  {
+   "cells": 256,
+   "near": "CHECKSTANDS",
+   "x": 589.8,
+   "y": 606.3
+  },
+  {
+   "cells": 255,
+   "near": "CHECKSTANDS",
+   "x": 626.5,
+   "y": 606.9
+  },
+  {
+   "cells": 252,
+   "near": "RESTROOMS",
+   "x": 766.1,
+   "y": 461.6
+  },
+  {
+   "cells": 240,
+   "near": "RESTROOMS",
+   "x": 741.5,
+   "y": 461.9
+  },
+  {
+   "cells": 225,
+   "near": "SEAFOOD",
+   "x": 889.7,
+   "y": 266.7
+  },
+  {
+   "cells": 154,
+   "near": "EXIT",
+   "x": 845.6,
+   "y": 608.2
+  },
+  {
+   "cells": 151,
+   "near": "CHECKSTANDS",
+   "x": 557.5,
+   "y": 604.9
+  },
+  {
+   "cells": 130,
+   "near": "EXIT",
+   "x": 806.7,
+   "y": 607.4
+  },
+  {
+   "cells": 126,
+   "near": "CHECKSTANDS",
+   "x": 768.6,
+   "y": 607.1
+  },
+  {
+   "cells": 120,
+   "near": "CHECKSTANDS",
+   "x": 787.5,
+   "y": 606.6
+  },
+  {
+   "cells": 120,
+   "near": "EXIT",
+   "x": 825.5,
+   "y": 606.6
+  },
+  {
+   "cells": 115,
+   "near": "CHECKSTANDS",
+   "x": 711.2,
+   "y": 607.5
+  },
+  {
+   "cells": 109,
+   "near": "CHECKSTANDS",
+   "x": 693.1,
+   "y": 608.2
+  },
+  {
+   "cells": 101,
+   "near": "FLORAL",
+   "x": 638.2,
+   "y": 460.2
+  },
+  {
+   "cells": 100,
+   "near": "SEAFOOD",
+   "x": 961.0,
+   "y": 283.0
+  },
+  {
+   "cells": 100,
+   "near": "SEAFOOD",
+   "x": 961.0,
+   "y": 353.0
+  },
+  {
+   "cells": 100,
+   "near": "SEAFOOD",
+   "x": 991.0,
+   "y": 445.0
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 18.4,
+   "meters": 3.63,
+   "name": "DELI"
+  },
+  {
+   "cells": 13.5,
+   "meters": 2.66,
+   "name": "DAIRY"
+  },
+  {
+   "cells": 13.0,
+   "meters": 2.56,
+   "name": "PHARMACY"
+  },
+  {
+   "cells": 12.1,
+   "meters": 2.38,
+   "name": "BAKERY"
+  }
+ ],
+ "m_per_cell": 0.1967,
+ "narrow": [
+  {
+   "half_width_m": 0.56,
+   "name": "DAIRY"
+  },
+  {
+   "half_width_m": 0.71,
+   "name": "EXIT"
+  },
+  {
+   "half_width_m": 0.83,
+   "name": "FLORAL"
+  },
+  {
+   "half_width_m": 0.98,
+   "name": "AISLE 35"
+  },
+  {
+   "half_width_m": 0.98,
+   "name": "AISLE 36"
+  },
+  {
+   "half_width_m": 0.98,
+   "name": "DELI"
+  },
+  {
+   "half_width_m": 0.98,
+   "name": "ENTRANCE"
+  },
+  {
+   "half_width_m": 0.98,
+   "name": "FISH/MEAT/CHILI"
+  }
+ ],
+ "provenance": {
+  "drift": {
+   "seal_zones": {
+    "derived_n": 7,
+    "derived_names": [
+     "auto:BAKERY",
+     "auto:DELI",
+     "auto:FLORAL",
+     "auto:KITCHEN",
+     "auto:PHARMACY",
+     "auto:SEAFOOD",
+     "auto:CHECKSTANDS"
+    ],
+    "file_n": 7,
+    "file_names": [
+     "Bakery service disk \u2014 derived disk carried over verbatim. The real bakery staff block is drawn, so it is sealed explicitly in exclusions.json; this rim only closes crevices between the promo bins. The customer floor it over-bridged around the bins at x 852-904, y 324-368 is restored by inclusions.json rather than by shrinking the disk",
+     "Deli service disk \u2014 derived disk carried over verbatim (the deli staff block itself is sealed by exclusions.json)",
+     "Floral disk \u2014 derived disk carried over verbatim. This store's floral is an open display floor (rotated display tables, a south-facing cooler [618,471,646,492]) with no back-of-counter area, so the disk has no staff pocket to find and instead bridged the 13-16 pt browsing gaps between the display tables shut; that floor is restored by inclusions.json",
+     "Kitchen disk \u2014 derived from the 'Kitchen Gadgets' shelf label at (508,274), which is a product category printed in badged aisle 13, not a service counter. Carried over verbatim so this file stays a pure shape fix of the checkstand rect; the aisle is restored by inclusions.json",
+     "Pharmacy disk \u2014 derived disk carried over verbatim. The pharmacy is drawn as a closed room [125,408,166,551] against the west wall, so the disk changes nothing here (dropping it moves zero cells)",
+     "Seafood disk \u2014 derived disk carried over verbatim. Seafood/Sushi/Market here are open island cases with no drawn back-of-counter area, so the wider SEAFOOD bridge (20 pt) had nothing staff-side to seal and instead closed the 20-23 pt customer crossovers between the island runs; those are restored by inclusions.json",
+     "Checkstand lane bank \u2014 SHAPE FIX. The derived rect was [503.5,520.9,896.1,646.0]: the +/-200 x +/-45 pt window around the CHECKSTANDS label (693.5,569.7) swept in the front-right service block east of the lanes ([847,529,858,569], [858,529,869,638], [894,529,903,558] and their neighbours, y-centres 549-610), which dragged the rect's top up to y=521 and its right edge out to x=896. At bridge=20 that sealed 460 cells of real floor at x 846-898, y 522-608 \u2014 the corridor from the right entrance north past the service block into Produce. Retightened to the drawn lane bodies themselves (x 512-842, y 587-626, same +/-8 pt pad); bridge unchanged so all 17 lanes still seal while the front action alley and the entrance corridor stay open"
+    ]
+   }
+  },
+  "exclusions": "file",
+  "inclusions": "file",
+  "seal_zones": "file",
+  "zones": "derived"
+ },
+ "reachable_pct": 32.7,
+ "store": "38",
+ "verify": [],
+ "walkable_pct": 32.7
+}

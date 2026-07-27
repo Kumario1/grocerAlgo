@@ -1,0 +1,22 @@
+[
+  {"name": "Bakery service disk — derived disk carried over verbatim. The real bakery staff block is drawn, so it is sealed explicitly in exclusions.json; this rim only closes crevices between the promo bins. The customer floor it over-bridged around the bins at x 852-904, y 324-368 is restored by inclusions.json rather than by shrinking the disk",
+   "pt": [799.2298583984375, 389.2437286376953], "r": 130, "bridge": 12},
+
+  {"name": "Deli service disk — derived disk carried over verbatim (the deli staff block itself is sealed by exclusions.json)",
+   "pt": [635.863525390625, 384.73707580566406], "r": 130, "bridge": 12},
+
+  {"name": "Floral disk — derived disk carried over verbatim. This store's floral is an open display floor (rotated display tables, a south-facing cooler [618,471,646,492]) with no back-of-counter area, so the disk has no staff pocket to find and instead bridged the 13-16 pt browsing gaps between the display tables shut; that floor is restored by inclusions.json",
+   "pt": [670.4687194824219, 511.9713134765625], "r": 130, "bridge": 12},
+
+  {"name": "Kitchen disk — derived from the 'Kitchen Gadgets' shelf label at (508,274), which is a product category printed in badged aisle 13, not a service counter. Carried over verbatim so this file stays a pure shape fix of the checkstand rect; the aisle is restored by inclusions.json",
+   "pt": [508.0354309082031, 274.06549072265625], "r": 130, "bridge": 12},
+
+  {"name": "Pharmacy disk — derived disk carried over verbatim. The pharmacy is drawn as a closed room [125,408,166,551] against the west wall, so the disk changes nothing here (dropping it moves zero cells)",
+   "pt": [145.84498596191406, 486.9317321777344], "r": 130, "bridge": 12},
+
+  {"name": "Seafood disk — derived disk carried over verbatim. Seafood/Sushi/Market here are open island cases with no drawn back-of-counter area, so the wider SEAFOOD bridge (20 pt) had nothing staff-side to seal and instead closed the 20-23 pt customer crossovers between the island runs; those are restored by inclusions.json",
+   "pt": [960.0199279785156, 353.24253845214844], "r": 130, "bridge": 20},
+
+  {"name": "Checkstand lane bank — SHAPE FIX. The derived rect was [503.5,520.9,896.1,646.0]: the +/-200 x +/-45 pt window around the CHECKSTANDS label (693.5,569.7) swept in the front-right service block east of the lanes ([847,529,858,569], [858,529,869,638], [894,529,903,558] and their neighbours, y-centres 549-610), which dragged the rect's top up to y=521 and its right edge out to x=896. At bridge=20 that sealed 460 cells of real floor at x 846-898, y 522-608 — the corridor from the right entrance north past the service block into Produce. Retightened to the drawn lane bodies themselves (x 512-842, y 587-626, same +/-8 pt pad); bridge unchanged so all 17 lanes still seal while the front action alley and the entrance corridor stay open",
+   "rect": [504, 579, 850, 634], "bridge": 20}
+]

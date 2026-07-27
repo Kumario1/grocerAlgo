@@ -1,0 +1,19 @@
+[
+  {"name": "Deli/Bakery/Tortilleria service block (staff only) — the work side behind the drawn counter chain. The chain runs unbroken from the SW: diagonal counter poly (578,395)->(606,427)->(619,429), up the vertical counter x=569-578 (y 359-395), east along the counter run y=350-361 ([579,350,638,360], [646,350,726,361], [736,352,801,360]) and out the bakery diagonal poly (801,351)-(825,376); its only breaks are the 8 pt gap at x=638-646 and the 10 pt gap at x=726-736, i.e. ~0.8-1.0 m staff pass-throughs. Customers are served from the north cross-aisle (y 307-350, promo bins at y 323-334). Inside there is not one shelf fixture and not one product label over 25 m x 6.7 m — only the two staff rooms whose door swings ((654,413)-(654,427) and (691,415)-(691,429)) open NORTH into this pocket, while the restrooms in the same block open SOUTH to the Floral floor. The east half is the Tortilleria production room, walled by the office block x=818, the tortilla counter x=900-907 (its service face is the east side) and the y=508-512 counter bars, whose only opening is the 14 pt gap at x=870-885; the poly closes it and the 2.1 m corner mouth at x=900-904, y=379-401",
+   "poly": [[578, 350], [801, 350], [825, 372], [835, 379], [904, 379],
+            [904, 512], [818, 512], [818, 429], [627, 429], [627, 426],
+            [619, 429], [606, 427], [578, 395]]},
+
+  {"name": "Dairy walk-in behind the dairy cases (staff/cooler access): the box x=124-286, y=37-87 is closed by the north wall y=35, the west wall x=123, the wall x=286 (y 37-75) with the fixture [286,75,337,87] under it, and the case-front zigzag along y=87-92 that faces SOUTH into the store. Shoppers reach dairy from the y=88-115 corridor; the DAIRY label prints inside the cooler, which is why its anchor snaps 2.7 m out to that corridor",
+   "rect": [124, 37, 286, 87]},
+
+  {"name": "North-wall service band (staff): the 39 pt strip between the north wall (y=35) and the perimeter run [286,75,337,87]/[353,77,646,87]/[670,75,888,86]/[903,76,980,86]. Every case in that run is drawn with its zigzag cooler front on the SOUTH side (x 810-888 and x 903-929) and the shopping cross-aisle plus every aisle badge sit south of it at y 88-115, so this band is the back of the run — the same cooler-access band the Dairy walk-in continues to the west. It holds no fixture and no product label, its only links to the floor are the 15-24 pt breaks in the run at x 337-353 / 646-670 / 888-903, and the north wall carries a door at x=466-478 plus the door symbol at (735,33)-(751,39)",
+   "rect": [286, 36, 1073, 75]},
+
+  {"name": "East-wall service band (staff): the strip between the east wall (x=1073) and the perimeter fixture line — Market run [1000,107,1012,257]/[999,275,1012,335], the diagonal case (1013,334)-(1043,374), and the Sushi cooler [1035,382,1046,519] whose zigzag front faces WEST into the store. Same signature as the north band it joins at the NE corner: no fixture, no product label, and its access is the door symbol at (1011,258)-(1013,274) in the Market run's own break plus the two wall doors at (1072,446)-(1074,461) and (1072,520)-(1074,535). Customer frontage for Market/Seafood/Sushi is west of the fixture line and stays open",
+   "poly": [[1007, 70], [1073, 70], [1073, 540], [1046, 540], [1046, 382],
+            [1043, 374], [1013, 334], [1012, 334], [1012, 100], [1007, 100]]},
+
+  {"name": "Lower half of the third Frozen Foods case — extraction gap, not floor. The case is drawn x=162-327, y=206-227 with end caps [162,206,171,227] and [318,206,327,227], but extract captured only its upper panel [171,206,323,216]; the leftover 11 pt band is the freezer interior and shows up as the store's second component (288 cells, x 172-314, y 218-224). The two identical cases above it (y 161-182) both had their panels captured",
+   "rect": [171, 216, 324, 227]}
+]

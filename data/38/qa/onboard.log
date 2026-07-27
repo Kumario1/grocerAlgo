@@ -1,0 +1,29 @@
+Store 38 is converged. Stopping here for the separate audit role, as the runbook requires.
+
+## Result
+
+`./rebuild.sh 38` → **exit 0**, 756 tests pass.
+
+```
+walkable: 32.5% of page (32.5% entrance-reachable)
+components: 1  sizes: [78834]
+verify: []
+coverage: {"sealed_floor_patches": [], "unreachable_shelf_labels": []}
+```
+
+Files authored (only store 38's): `exclusions.json`, `inclusions.json`, `seal_zones.json`, `walk_truth.json`. `zones.json` not needed — ENTRANCE/CHECKSTANDS both derive.
+
+## The three VERIFY flags
+
+- **DELI (636,385) / BAKERY (799,389)** — staff. The counter chain is continuous from the SW diagonal poly (578,395)→(619,429), up the vertical counter x=569-578, east along `[579,350,638,360]`/`[646,350,726,361]`/`[736,352,801,360]`, out the bakery diagonal (801,351)-(825,376); its only breaks are 8 pt and 10 pt staff pass-throughs. Inside: 25 m × 6.7 m with zero fixtures and zero product labels, and the two staff rooms' door swings at (654,413-427) and (691,415-429) open **north into it**, while the restrooms in the same block open south to the Floral floor. Sealed by poly, together with the Tortilleria production room east of it (walled by the office block x=818, the tortilla counter x=900-907 whose service face is east, and the y=508-512 bars — only a 14 pt gap).
+- **KITCHEN (508,274)** — false positive: it's the "Kitchen Gadgets" category label in badged aisle 13 between gondolas x=482-493 and x=513-524. Inclusion rect over the corridor (same as 660/790/388).
+
+## Also fixed (found by classifying every culled pocket, not just the top ones)
+
+- **988 + 225 cells swallowed** at the Market cross-aisle — the SEAFOOD disk's 20 pt bridge plus the BAKERY disk closed the 14-20 pt promo-bin gaps and ate the bottom 5 m of aisles 1-3. Restored by inclusion.
+- **445 cells swallowed at Floral** — the FLORAL disk bridged the gaps between the display tables, sealing the department including the south frontage of its own south-facing cooler. Restored by inclusion.
+- **460 + 212 cells** east of the checkstands — the derived checkstand rect `[503.5,520.9,896.1,646.0]` swept in the front-right service block (`[858,529,869,638]` et al.), dragging its top to y=521 and right edge to x=896 and sealing the right-entrance corridor into Produce. `seal_zones.json` retightens it to the drawn lane bodies (x 512-842, y 587-626, same ±8 pad); the six derived disks are carried over verbatim.
+- **Perimeter back-of-house** — the north band (y 36-75, behind a run whose cooler zigzags all face south, with wall doors) and the east band (behind the Market/Sushi runs, with a door symbol in the run's own break plus two wall doors), plus the Dairy walk-in. These were the bulk of the 39.6% → 32.5% drop.
+- **288-cell second component** — an extraction gap: only the upper panel of the third Frozen Foods case was captured; the leftover 11 pt band is freezer interior.
+
+Remaining culled pockets are all accounted for: front-vestibule rooms (y 680-718), office/restroom rooms in the y=429 block, the cart corral, and the 17 checkout lanes. `far_snaps` (DELI 3.6 m, DAIRY 2.7 m, PHARMACY 2.6 m, BAKERY 2.4 m) are all labels printed inside sealed staff space snapping out to their customer frontage.

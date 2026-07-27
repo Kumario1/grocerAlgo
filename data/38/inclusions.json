@@ -1,0 +1,16 @@
+[
+  {"name": "Aisle 13 corridor at the 'Kitchen Gadgets' shelf label (customer): the extracted KITCHEN anchor (508.0,274.1) is that printed product-category label between the gondolas x=482-493 and x=513-524, not a service kitchen, so its VERIFY is a false positive. The rect is the corridor itself (badge 13 at (503,102) down to the gondola south ends y=307); it also restores the crevices the auto KITCHEN seal disk bridged shut inside its rim",
+   "rect": [493, 116, 513, 307]},
+
+  {"name": "Market cross-aisle and the south ends of aisles 1-3 (customer): the SEAFOOD disk's 20 pt bridge plus the BAKERY disk closed the 14-20 pt gaps between the promo-bin rows ([829,324,840,334] / [854,325,869,332] / [883,323,903,334] and [823,341,834,346] / [854,347,870,355] / [884,346,904,356]) and swallowed 988+225 cells: the whole browsing floor in front of the bread case [835,369,904,379] plus the bottom 5 m of the aisle-1/2/3 corridors up past the Wine and Sodas shelf labels. It is ordinary shopping floor - the bins are merchandise and the aisle badges 1-3 sit at the far end of these same corridors",
+   "rect": [810, 240, 908, 379]},
+
+  {"name": "Market/Seafood/Sushi island crossovers (customer): three 20-23 pt walk-throughs in the island runs - [953,116,972,273] to [954,294,971,343] at y 273-294, [954,294,971,343] to [952,365,973,385] at y 343-365, and [981,400,1006,435] to [983,458,1001,476] at y 435-458 - that the SEAFOOD disk's wider 20 pt bridge closed. These are the customer paths between the open island cases; nothing here is drawn as a counter with a staff side",
+   "rect": [946, 260, 1004, 470]},
+
+  {"name": "Floral browsing floor (customer): the FLORAL disk bridged the 13-16 pt gaps between the rotated display tables ([617,506,636,523], [645,503,669,525], [681,500,705,522], [693,482,711,499]) and the counter bars, sealing 445 cells of the department - including the south frontage of the floral cooler [618,471,646,492], whose zigzag case front faces SOUTH into exactly this floor, and the FLORAL label itself at (670,512). The staff side would be north of the y=472-479 counter bars, but that is the office block's wall line, so there is no back-of-counter area to seal here",
+   "rect": [614, 484, 728, 532]},
+
+  {"name": "Cafe/dining seating floor west of Floral (customer): the same FLORAL disk (670,512 r=130) reaches 93 pt west and its 12 pt bridge also closed the 6-8 pt chair-to-chair gaps in the dining cluster - two columns of four four-top tables (x 562-573 and x 579-589, y 448-515) plus a column of four more at x 594-608 - sealing 310 cells / 12 m2 as one pocket at x 564-604, y 454-514. It is open sales floor, not staff and not an enclosed room: the drawing connects it to the aisle on every side (raw-reachable before our rules ran), there is no wall, no counter and no staff side anywhere in it, its widest internal passage is 1.11 m, and the bench [556,448,563,515] and end table [563,514,583,525] are the only fixtures in it. Same defect as the Floral entry above, 20 pt further west",
+   "rect": [552, 444, 614, 524]}
+]

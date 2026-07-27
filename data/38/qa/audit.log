@@ -1,0 +1,27 @@
+Audit complete. Full report:
+
+## Store 38 (San Juan) — adversarial map audit
+
+**Pass 1 — Mechanical.** `./rebuild.sh 38` rerun from scratch: exit 0, `verify: []`, `coverage.sealed_floor_patches: []`, `coverage.unreachable_shelf_labels: []`, components `n=1`, walkable 32.5% (in-band). 756 tests passed. No finding.
+
+**Pass 2 — Systematic visual sweep.** 3×3 crops of `walkable_overlay.png` plus ~15 targeted PDF-vs-overlay side-by-sides (west wall, Frozen Foods, Market, Produce, Deli/Bakery cross-aisle, Floral/restrooms, Sushi, South Main, SW corner, checkstand west end, SE entrance, vestibule, seating cluster). Backed by two mechanical nets I ran with every blessed-truth exemption **disabled**: all 285 printed words vs. distance-to-reachable-floor, and a component decomposition of `free_raw & ~free` split by whether *the drawing* or *our rules* sealed it. All 32 culled pockets classified (7 = drawn-sealed vestibule/office/restroom rooms, 13 = checkstand lane interiors by design, 4 = disk over-bridges restored by inclusions, rest = counter-bar and promo-bin interiors ≤93 cells). One finding.
+
+**Pass 3 — Label spot-probes.** 40 labels read off the map spanning every wing (Cotton Balls, Dog Food, Bird Seed, Diapers, Baby Formula, Vitamins, Hosiery, Laxatives, Napkins, A/C Filters, Charcoal, Bleach, Poptart, Pastries, Kitchen Gadgets, Sugar, Jalapeno, Tortillas, Crackers, Popcorn, Sodas, Beer, Wine, Mixers, Toys, Gift Wrap, Greeting Cards, School Supplies, Batteries, Seasonal, …) probed against `profile.npz`: **all 40 sit directly on reachable floor (0 pt)**. No finding.
+
+**Pass 5 — Config sanity.** All 5 exclusions verified against the drawing: no product label and no shelf fixture inside the north band, east band, or dairy walk-in; the deli block contains only counter fixtures and the three department names. No inclusion blankets a staff room (inclusions can only undo *sealing*, never an exclusion). The single 100-cell `staff_mask` pocket (SEAFOOD label at 952–972 × 344–364) is reopened by inclusion 3 — I verified on the printed map that this is a 21 pt through-gap between two open island cases with no counter/staff side, so that override is correct. No finding.
+
+---
+
+### Findings (worst first) — all three fixed
+
+**F1 — 310 cells (12.0 m²) of café/dining seating floor sealed shut.** `x 564–604, y 454–514 pt`.
+Crop `w_11` → 12× zoom at `x[545,620] y[440,525]`: two columns of four four-tops plus a third column of four, all floor between and around them untinted while the surrounding aisle is green. This is **raw-reachable customer floor** (the drawing connects it on every side) with no wall, no counter, no staff side, no enclosed room, and a widest internal passage of 1.11 m — it was closed by the auto `FLORAL` disk (670,512 r=130), whose 12 pt bridge reaches 93 pt west and welded the 6–8 pt chair-to-chair gaps shut. Exactly the defect `inclusions.json` entry 4 already documents for the floral display tables, 20 pt further west. *Truth: green.* **Fix: inclusion `[552,444,614,524]`** (restores 770/770 raw-floor cells, reconnects to the main component). New guard point: `must [582,483]` — `False` before the fix.
+
+**F2 — walk_truth had zero `must` points in aisles 19–33: the entire west wing.** Frozen Foods (19–20), pet/hardware (21–23), paper (24–25), HBA (26–31), baby (32–33) — 15 aisles, ~40% of the sales floor — had no coverage; `[178,480]` only pins the pharmacy-pickup end of aisle 29. This is the precise shape of the store-24 miss. I verified the wing is in fact correct (per-aisle corridor scans at x = 200/230/260 are green over their full length, and 12 west-wing labels probe at 0 pt), so it was a blind spot, not a live defect — but nothing would have caught a seal there. **Fix: 6 mid-length `must` points** (aisles 19, 21, 23, 26, 30, 33) placed deep inside each corridor, plus `[985,200]` for the Market perimeter frontage, which was also uncovered.
+
+**F3 — no `must_not` inside the pharmacy dispensing room or the room east of the restrooms.** The pharmacy `[122,410,166,551]` is the store's largest enclosed room and had nothing pinning it shut; likewise the 618-cell enclosed service room at `x[782,818] y[430,500]` (the largest room pocket after the vestibule). **Fix: `must_not [145,480]` and `[800,465]`.**
+
+### Post-fix rebuild
+`./rebuild.sh 38` → exit 0 · `verify: []` · both coverage lists empty · components `n=1`, 79144 cells · walkable 32.7% · **766 passed**. walk_truth is now 25 `must` + 19 `must_not`, all passing; aisle-corridor continuity has zero gaps; the only labels without floor within 16 pt remain the five red department names that print inside their own sealed block (Deli, Bakery, Tortilleria, Dairy walk-in, Pharmacy room), each with its customer frontage pinned by a `must` point. Changes are confined to `data/38/inclusions.json` and `data/38/walk_truth.json`.
+
+`AUDIT CLEAN — store 38 (3 findings fixed)`
