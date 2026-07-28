@@ -1,0 +1,89 @@
+{
+ "notes": [
+  "atlas aisles 33, guide aisles 38",
+  "pinned by data/<store>/store.json"
+ ],
+ "gates": {
+  "residual": true,
+  "margin": true,
+  "scale_skew": true,
+  "floor": {
+   "psas": 2255,
+   "on_floor_pct": 99.78,
+   "pass": true,
+   "off_floor": [
+    [
+     "16|94|A|1",
+     13.8
+    ],
+    [
+     "16|1|A|1",
+     12.8
+    ],
+    [
+     "16|1|A|2",
+     12.4
+    ],
+    [
+     "27|88|A|1",
+     6.1
+    ],
+    [
+     "27|88|A|2",
+     6.1
+    ]
+   ]
+  },
+  "labels": true
+ },
+ "x": {
+  "scale": 1.141760091674411,
+  "offset": 124.82411039382919,
+  "inliers": [
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16
+  ],
+  "aisle_offset": 0,
+  "source_axis": 0,
+  "pinned": true,
+  "max_residual_pt": 1.652
+ },
+ "y": {
+  "scale": 1.1468704781623875,
+  "offset": 74.11276875159665,
+  "inliers": [
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32
+  ],
+  "aisle_offset": 0,
+  "source_axis": 1,
+  "pinned": true,
+  "max_residual_pt": 2.578
+ },
+ "store": "38",
+ "verdict": "pass",
+ "verified": {
+  "checked": 11,
+  "agreed": 11,
+  "misses": [],
+  "pass": true
+ }
+}

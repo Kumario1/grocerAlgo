@@ -1,0 +1,50 @@
+Both commands pass. Here's what was wrong and what I changed.
+
+## Diagnosis
+
+The Atlas isn't rotated — the top row of aisles (1–16) constrains **x**, the left-hand column (18–33) constrains **y**. The search only found an x fit, so it derived y from the walkable floor. The floor score has a plateau there, and `derive_axis` keeps the first maximum it scans, which landed on offset **32.0** — about one aisle pitch below the truth (~74). Every column aisle therefore pinned one aisle low, which is exactly the three live misses recorded in the old `calibration.json` (labels said 26/24/19, products landed on 25/23/18).
+
+The correspondence itself is **identity on both axes** — no aisle renumbering in the geometry:
+
+| pin | residual | check |
+|---|---|---|
+| x: atlas 3–16 → guide 3–16 | 1.652 pt | aisle 1 also lands within 1.8 pt; aisle 2 is excluded because its *Atlas* badge is misplaced ~8 pt |
+| y: atlas 25–32 → guide 25–32 | 2.578 pt | predicts aisles it was **not** fitted on — 18 (0.0 pt), 19 (−0.8), 20 (−0.5), 21–23 (≤3.3) |
+
+Scales agree to 0.45%, so the skew gate holds honestly.
+
+## The separate vintage shift
+
+Above live aisle 33 the guide's numbering really is one lower. Comparing Atlas corridor centre-lines (midpoint of each aisle's two shelf faces) against the guide's own drawn corridors:
+
+| live | Atlas corridor | guide badge | Δ | identity Δ |
+|---|---|---|---|---|
+| 34 | y 618 | **33** @ 612.6 | 5 | — |
+| 36 | x 504.5 | **35** @ 515 | 10 | 21 |
+| 37 | x 479.5 | **36** @ 484 | 4.5 | 22 |
+| 38 | x 453 | **37** @ 457 | 4 | 24 |
+| 39 | x 427 | **38** @ 429 | 2 | no guide 39 |
+
+Live aisle 33 (corridor at guide y≈590) has no badge in the guide at all — the guide vintage predates it, which is what pushed everything after it up by one. That is also the single unexplained outlier in the y fit: the guide's "33" badge sits 24.7 pt (one pitch) off the Atlas's own 33, because it belongs to live 34.
+
+## `data/38/store.json` (new file, no existing keys to preserve)
+
+```json
+{
+ "atlas_fit": {
+  "x": {"atlas": [3, 16], "guide": [3, 16]},
+  "y": {"atlas": [25, 32], "guide": [25, 32]}
+ },
+ "aisle_label_shift": {"from": 34, "add": -1}
+}
+```
+
+## Result
+
+- `python3 calibrate.py 38` → PASS (residual/margin/scale_skew ok, floor 99.78%, up from 99.69%)
+- `python3 calibrate.py 38 --verify` → PASS, **11/11** products pinned to the aisle their own shelf label names (was 8/11)
+- `tests/test_calibrate.py`: 25 passed
+
+No gate was weakened, and no Atlas data or map geometry was touched.
+
+One thing to flag: **live aisle 35 is unresolvable either way.** The Atlas puts it in the bottom-left (guide y≈643) while the guide's "34" badge — the one the −1 rule assigns it — is in the middle block at x≈545. A product labelled "Aisle 35" will point at the wrong badge under the shift *and* under identity, so the rule doesn't make it worse; it just can't fix that one. The `from: 34` boundary is what resolves aisle 34 correctly (`from: 36` would leave both 34 and 35 wrong), and a plural `aisle_label_shifts` split would not recover 35 either, so the singular rule suffices.
