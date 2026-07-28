@@ -1,0 +1,43 @@
+I ran the runbook to completion but **it does not reach the stopping condition**: `python3 calibrate.py 16` and `--verify` still fail. Here's what I found and why.
+
+## The correspondence is real, and I pinned it
+
+The guide (`guide-burleson-16.pdf`, 2018) has 48 aisles; the current Atlas has 45. The three extra guide aisles are all in the middle bank:
+
+| bank | guide | Atlas | shift |
+|---|---|---|---|
+| top gondolas | 1–16 | 1–16 | 0 |
+| middle bank | 17–33 | 17–30 | 0 (guide 22, 31, 32, 33 no longer exist) |
+| left column | 34–48 | 31–45 | **+3** |
+
+Evidence, independent of the aisle labels:
+- **x** — mapping the 14 Atlas top-bank gondolas onto the guide's lands them within **rms 1.2 pt** at shift 0. Guide 31/32/33 ("Seasonal Items") are three vertical runs the Atlas has replaced with horizontal shelving; guide 22 (Electrical/Automotive) is now open floor beside Apparel.
+- **y** — the left column is **16 gondolas ↔ 16 gondolas, 15 corridors ↔ 15 corridors**, exactly. Fitting those 16 fixture pairs gives scale 1.1232 / offset 27.98, max residual 2.6 pt — which reproduces the aisle-label pin to well under a point.
+- The guide's own index confirms the numbering (Bread→3, Cereal→8, Beans (Canned)→6 all match live labels).
+
+`data/16/store.json`:
+
+```json
+{"atlas_fit": {"x": {"atlas": [2,15], "guide": [2,15]},
+               "y": {"atlas": [33,45], "guide": [36,48]}},
+ "aisle_label_shift": {"from": 31, "add": 3}}
+```
+
+`residual=ok margin=ok scale_skew=ok`; floor 98.74 % (the 33 stragglers are the non-retail 89–93 tail, above `LIVE_MIN_ON_FLOOR`, so live labels would excuse it).
+
+## Why `--verify` cannot pass
+
+Live labels: **5/11**. All five left-column probes (31, 35, 36, 39) agree, confirming +3. The six failures are all top-bank products (aisles 3, 5, 8, 14) pinned into the middle bank — and no correct transform can fix them, because of how this guide is drawn:
+
+- guide top-bank gondolas span y 181.1–380.6; their number row is printed at y ≈ 161 — **19.9 pt above** them;
+- the 17–33 number row is printed at y ≈ 388.9 — **8.3 pt below** them.
+
+`nearest_aisle` measures the printed number to the *whole* corridor segment, so for every aisle 1–16 the "20" below is nearer than its own "3" above. Store 659 (10 pt above / 25 pt below) and store 14 (5 pt / 110 pt) don't have this; Burleson's does.
+
+I rejected the one legal alternative that would have passed — pinning y on `[39,45]` (residual 1.19, the lowest of any pin). It only works by sliding the whole store up: it puts the top of the left column **11.3 pt** off against those 16 gondola pairs, and the top-bank gondola edge 11.8 pt off. That's a knowingly wrong fit bought for a green check, so I didn't take it.
+
+## What I left
+
+`data/16/store.json` is in place. It isn't the "drawings are incompatible" case the runbook anticipates — the two drawings register to 1–3 pt (`/tmp/overlay16.png` shows the mapped Atlas on the guide) — so I kept the correspondence rather than reverting to the search's answer, which was wrong (x shift −1, y derived from the floor, 0/11 labels). Store 16 stays unroutable either way. Say the word and I'll `rm data/16/store.json` to restore the literal pre-run state.
+
+The unblocking fix is in `nearest_aisle`, which I'm not allowed to touch here: weighting the printed number toward the *end* of the corridor it labels, or preferring the number row on the entrance side of a gondola bank, would resolve Burleson without disturbing 659 or 14.
