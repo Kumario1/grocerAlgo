@@ -202,6 +202,13 @@ EOF
     if [ "$PLACEMENT" != ok ] &&
             [ -f "data/$S-atlas/calibration.json" ]; then
         echo "    calibration blocked — starting data-only repair agent"
+        store_config="data/$S/store.json"
+        store_backup="data/$S-atlas/.store-before-repair.json"
+        store_existed=0
+        if [ -f "$store_config" ]; then
+            cp "$store_config" "$store_backup"
+            store_existed=1
+        fi
         repair_try=0
         while [ "$repair_try" -lt 3 ]; do
             repair_try=$((repair_try + 1))
@@ -215,7 +222,13 @@ EOF
         if "$PYTHON" calibrate.py "$S" &&
                 "$PYTHON" calibrate.py "$S" --verify; then
             PLACEMENT=ok
+        elif [ "$store_existed" = 1 ]; then
+            cp "$store_backup" "$store_config"
+        else
+            rm -f "$store_config"
         fi
+        rm -f "$store_backup"
+        [ "$PLACEMENT" = ok ] || "$PYTHON" calibrate.py "$S" || true
     fi
     if [ "$PLACEMENT" = ok ]; then
         echo "    store $S places products exactly"
