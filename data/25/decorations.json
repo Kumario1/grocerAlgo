@@ -1,0 +1,10 @@
+[
+ {"name": "MEAL SIMPLE brand artwork printed on the customer corridor east of the Deli island. The rotated logo (11 letter outlines x=658.3-665.5 plus the chef-hat/fork icon x=651.4-666.6, y=250.1-293.5) extracts as fixture_polys and seals the floor a shopper stands on to shop the Meal Simple case run (x=636.5-647.8, y=219.6-322.6). Restores the case frontage; stops short of the case itself (x<=647.8) and of the real round-ended display bin to the east (x>=670.4).",
+  "rect": [650.0, 249.0, 668.0, 295.0]},
+
+ {"name": "SUSHIYA brand artwork printed on the same north-south customer corridor, in front of the Sushiya case run (x=631.7-647.7, y=337.4-376.0). The rotated logo's letter outlines (x=652.8-660.3, y=340.6-369.5) extract as fixture_polys and seal the counter's only frontage. Restores it; stops short of the case (x<=647.7).",
+  "rect": [651.5, 339.5, 661.5, 370.5]},
+
+ {"name": "H-E-B baby brand artwork printed on the aisle-1 floor between the 'Baby Food / Baby Formula' and 'Baby Wipes / Baby Diapers' label rows. The wordmark outlines (x=188.4-216.7, y=632.0-644.0) extract as fixture_polys and punch a hole through the middle of the aisle-1 corridor, leaving only a ~0.2 m slot along its south edge. Restores the corridor; stays inside the open floor (shelf run above ends y=629.6, run below starts y~647).",
+  "rect": [187.5, 631.0, 217.5, 645.0]}
+]

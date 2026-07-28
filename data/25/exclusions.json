@@ -1,0 +1,19 @@
+[
+ {"name": "Deli/Bakery service island interior (staff prep behind the counters). The drawing walls it on all four sides — west case x=507-520, north case x=556-646, NW cooler x=520-553, east case run x=632-648, south counters y=494-504 — with only staff gaps (a door arc at the NW corner, a 17 pt break at x=575-593 in the south counter line, 3-8 pt breaks in the east run). The interior is drawn empty: no fixtures, no shelf labels, only the DELI/BAKERY department names. Customers shop the outside faces (Meal Simple / Sushiya on the east, the sawtooth bakery cases on the south).",
+  "rect": [519, 206, 638, 505]},
+
+ {"name": "Lease Space tenant unit (not H-E-B sales floor): the labelled bump-out south of the front action alley, walled west at x=510 and south at y=738, closed east by the diagonal + wall at x=655. No aisle, fixture or product label inside; a shopper route must never enter it.",
+  "rect": [510, 697, 656, 740]},
+
+ {"name": "Back-of-house access slot between the two back-room blocks (left room x=335-762, right room x=791-1012): a 29 pt dead-end running from the sales floor at y=102 straight to the exterior wall at y=39, with no fixture, no label and no frontage — the staff way into the stockroom, not shopping floor.",
+  "rect": [762, 38, 792, 103]},
+
+ {"name": "Dead ~0.4 m sliver between the Water/Sodas run (x=996-1008) and the east exterior wall (x=1012), plus its south pocket: the run's customer frontage is the aisle to its west, where the Water and Sodas labels are printed. Too tight to walk and it only shortcuts the east aisle.",
+  "rect": [1006, 318, 1014, 664]},
+
+ {"name": "Dead ~0.4 m strip between the Tortillas/Bread run (bottom y=656) and the wall at y=661, running the full width x=762-1008 with no frontage — a one-cell artifact channel, not the restroom lobby (that is the wider floor at y=662-672 reached from the west).",
+  "rect": [762, 650, 1010, 660]},
+
+ {"name": "Dead ~0.2 m sliver between the Trial Suncare / Hair Accessories run (x=100-106) and the west exterior wall (x=97.5), plus the SW corner pocket it feeds: both labels are printed east of the run, so its frontage is the aisle-1 side.",
+  "rect": [96, 572, 106, 658]}
+]

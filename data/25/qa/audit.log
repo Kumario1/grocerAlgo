@@ -1,0 +1,39 @@
+Audit complete. Everything I touched is under `data/25/`.
+
+## Findings (worst first)
+
+**1. `MEAL SIMPLE` floor logo extracted as furniture — sealed the Meal Simple counter's only frontage**
+- Coords: glyph polys at x 651.4–666.6, y 250.1–293.5 (PDF pt), in the N–S customer corridor east of the Deli island.
+- Evidence: crop 1,1 + zoom `x 625–715, y 230–500`; `geometry.json` carries 11 letter outlines + the chef-hat icon as `fixture_polys`. Row scan of the corridor: free floor started at x=666 for y 250–274 and x=686 for y 280–296 instead of x=648 — ~5 m of the case run (x 636.5–647.8, y 219.6–322.6) with **no reachable floor in front of it**. Probe (665, 270) → blocked.
+- Truth: brand artwork printed on customer floor; the case face must be shoppable end to end.
+- Fix: `decorations.json` rect `[650, 249, 668, 295]` (stops short of the case at x≤647.8 and the real round-ended bin at x≥670.4).
+
+**2. `SUSHIYA` floor logo extracted as furniture — same defect, Sushiya counter**
+- Coords: glyph polys x 652.8–660.3, y 340.6–369.5; case run x 631.7–647.7, y 337.4–376.0.
+- Evidence: same zoom; free floor started at x=660–662 over y 338–371 → ~3.5 m of frontage sealed. Probe (655, 350) → blocked, 0.63 m to floor.
+- Fix: `decorations.json` rect `[651.5, 339.5, 661.5, 370.5]`.
+
+**3. `H-E-B baby` floor logo extracted as furniture — pinched the aisle-1 corridor**
+- Coords: wordmark polys x 188.4–216.7, y 632.0–644.0, dead centre of the aisle-1 corridor (y 630–646).
+- Evidence: crop 2,0 + zoom `x 150–290, y 615–660` — a white island punched through the green corridor between the "Baby Food/Baby Formula" and "Baby Wipes/Baby Diapers" label rows. Row scan showed only y 644–646 (~0.2 m) passable across x 186–212.
+- Fix: `decorations.json` rect `[187.5, 631, 217.5, 645]`.
+
+**4. `walk_truth` coverage gaps (no `must` on two customer sections)**
+- The aisle-19 top corridor (y≈77, the northernmost west-wing aisle) and the Blooms floral island floor had no `must` point.
+- Fix: added `[200, 77, ...]` and `[533, 556, ...]`, plus one witness point per defect above — `[657, 271]`, `[652, 262]` (hard against the case face, so a re-narrowing is caught, not just a mid-corridor hole), `[656, 355]`, `[202, 638]`. `must` 29 → 35.
+
+## What passed
+- **Mechanical:** `verify: []`, both coverage lists empty, 1 component, walkable 32.1 % → 32.3 %.
+- **Visual sweep:** all 9 crops compared against page 2. Every aisle 1–31 corridor is green full length (row scans confirm: west wing to x=110, or x=168 where aisles 4–9 stop at the Pharmacy room; east wing to x≈992 at the Water/Sodas run). Back-wall service aisle green x 110–994 continuous. All 13 culled pockets classified: 4 enclosed rooms (restroom vestibule + both restrooms + the room east of Lease Space), 8 checkout-lane interiors, 1 cart-corral interior — every one already carries a `must_not`. Pharmacy is a sealed drawn block with green frontage on its east and south faces (the store-24 failure mode is **not** present here).
+- **Label probes:** 880 sample points along every printed shelf-label row (not just centres). Worst distance to reachable floor **0.21 m**; zero misses.
+- **walk_truth:** 35 `must` + 23 `must_not`, 0 violations, all with real margin.
+- **Config:** all 6 exclusions and 2 inclusions state a WHY that matches the drawing. Neither inclusion blankets a staff room; no exclusion covers a label's only frontage (checked — the Trial Suncare and Water/Sodas slivers both have their labels printed on the far side).
+
+## One thing to know about your shell
+`./rebuild.sh 25` exited 1 on my first runs with 2 failures (`test_heb.py::test_heb_client_launches_normal_chrome...`, `test_onboarding_placement.py::test_pipeline_requires_live_verification...`). These are **not** store data: they reproduce with `data/25/` moved out of the tree entirely, and they are caused by two env vars set in this session — `HEB_RUNTIME_DIR=runtime/onboarding-25` (so the chrome profile path is `runtime/onboarding-25/chrome`, not `runtime/chrome`) and `PIPE_NO_BROWSER=1` (pipeline defers placement and returns 0). With both unset:
+
+```
+./rebuild.sh 25  →  EXIT=0,  2365 passed, 1 skipped
+```
+
+`AUDIT CLEAN — store 25 (4 findings fixed)`

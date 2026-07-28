@@ -1,0 +1,7 @@
+[
+ {"name": "Seafood/Market back-wall frontage (customer): 'SEAFOOD MARKET' is a department name printed on the shopping aisle between the back-wall service cases (bottom y=102) and the Market island cases (top y=139) — the counter itself is the case run north of it, so this floor is where shoppers stand to be served.",
+  "rect": [400, 104, 620, 138]},
+
+ {"name": "Aisle 13 corridor (customer): 'KITCHEN GADGETS' is a shelf tag, not a service counter — it labels the Bakeware/Foil run at y=298 from the aisle between it and the Cat Litter run ending at y=278. Every aisle-13 product label is read from this floor.",
+  "rect": [129, 279, 310, 298]}
+]

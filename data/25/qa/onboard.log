@@ -1,0 +1,37 @@
+Store 25 (Floresville) is converged. Stopping here for the separate audit role as instructed.
+
+## Result
+
+`./rebuild.sh 25` → **exit 0, 768 tests pass** (incl. store 659's pixel-frozen golden). `data/25/qa/report.json`:
+
+```
+verify: []          coverage: {sealed_floor_patches: [], unreachable_shelf_labels: []}
+components: 1 [77779]              walkable_pct: 32.1  (was 36.1)
+```
+
+## What the first pass got wrong, and the evidence
+
+**4 VERIFY flags, resolved by judgment from the drawing:**
+
+- **DELI (586,311) + BAKERY (594,423) → exclusion.** Both labels sit inside one large enclosure walled on all four sides (west case x=507‑520, north case x=556‑646, NW cooler x=520‑553, east case run x=632‑648, south counters y=494‑504). The only breaks are staff-sized: a door arc at the NW corner, a 17 pt gap at x=575‑593 in the south counter line, 3‑8 pt breaks in the east run. The interior is drawn completely empty — no fixture, no shelf label. The auto seal disks (r=130, bridge=12) were trying to close exactly this and couldn't reach the wider gaps. Excluded `[519,206,638,505]`; DELI/BAKERY now snap to the customer corridor on the island's east face (649,247)/(651,397).
+- **SEAFOOD MARKET (478,119) → inclusion.** A department name printed on the shopping aisle between the back-wall service cases (bottom y=102) and the Market island (top y=139) — customer floor.
+- **KITCHEN GADGETS (255,294) → inclusion.** A shelf tag, not a service counter: it labels the Bakeware/Foil run in the aisle-13 corridor (y=278‑298).
+
+**Three things no mechanical net flagged, found on the visual sweep:**
+
+- **Lease Space was green.** The labelled bump-out at `[510,697,656,740]` is a tenant unit — no aisle, fixture or product label — and the drawing gives it no north wall, so the sealing rules had nothing to bite on. Excluded.
+- **Back-of-house access slot.** A 29 pt dead-end at `[762,38,792,103]` running from the sales floor straight to the exterior wall between the two stockroom blocks (x=335‑762 and x=791‑1012). No fixture, no frontage. Excluded.
+- **Three artifact slivers** (found by a 3×3 opening on the free grid, visible red in `corridor_width.png`): 0.4 m behind the Water/Sodas run against the east wall (175 cells), 0.4 m behind the Tortillas/Bread run against the south wall (115 cells), 0.2 m behind the Trial Suncare run against the west wall (43 cells). Each excluded together with the pocket it fed, so the grid stayed one component.
+
+**`zones.json` authored** because the derived ENTRANCE was wrong: the "Entrance" text is printed in the parking lot, 34 pt outside the south wall, and snapped 3.84 m to land near the Exit door. Moved to the door threshold (346,653); CHECKOUT carried over verbatim from the derived value. ENTRANCE's far_snap is gone.
+
+All 13 culled pockets classify: 8 checkout lane interiors, the restroom vestibule + stalls + corridor, the enclosed room east of the Lease Space, and the dot-grid fixture at (694,679).
+
+## Remaining known signals (deliberate, not defects)
+
+- `far_snaps`: DELI 6.75 m, BAKERY 5.97 m — both labels are printed in the middle of a 12 m-wide staff island, so they correctly snap out to the nearest customer frontage. Blessed store 659 shows the same pattern (BAKERY 4.46 m).
+- The **Meal Simple** and **Sushiya** logos are extracted as `fixture_polys` and block ~20×44 pt of the east corridor at x=650‑670. The corridor still routes around them east of x=670, and `inclusions` cannot restore fixture-blocked cells (`free |= free_raw & incl_mask`), so this is not fixable by data. Flagging it as an observation only — it costs no connectivity and no label frontage.
+
+## Files written (store 25 only)
+
+`data/25/{zones,exclusions,inclusions,walk_truth}.json` — 6 exclusions, 2 inclusions, 26 `must` / 20 `must_not` truth points. No `seal_zones.json` override was needed; the derived zones were right in shape.

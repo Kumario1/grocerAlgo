@@ -1,0 +1,165 @@
+{
+ "components": {
+  "n": 1,
+  "sizes": [
+   78166
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 939,
+   "near": "RESTROOMS",
+   "x": 758.8,
+   "y": 705.4
+  },
+  {
+   "cells": 445,
+   "near": "RESTROOMS",
+   "x": 845.9,
+   "y": 697.1
+  },
+  {
+   "cells": 434,
+   "near": "AISLE 20",
+   "x": 686.5,
+   "y": 721.9
+  },
+  {
+   "cells": 299,
+   "near": "RESTROOMS",
+   "x": 811.9,
+   "y": 706.8
+  },
+  {
+   "cells": 183,
+   "near": "CHECKSTANDS",
+   "x": 596.0,
+   "y": 598.9
+  },
+  {
+   "cells": 183,
+   "near": "AISLE 20",
+   "x": 693.8,
+   "y": 678.7
+  },
+  {
+   "cells": 177,
+   "near": "CHECKSTANDS",
+   "x": 572.0,
+   "y": 599.9
+  },
+  {
+   "cells": 176,
+   "near": "CHECKSTANDS",
+   "x": 644.1,
+   "y": 601.1
+  },
+  {
+   "cells": 172,
+   "near": "AISLE 22",
+   "x": 668.2,
+   "y": 601.9
+  },
+  {
+   "cells": 167,
+   "near": "CHECKSTANDS",
+   "x": 547.4,
+   "y": 598.7
+  },
+  {
+   "cells": 167,
+   "near": "CHECKSTANDS",
+   "x": 619.7,
+   "y": 601.6
+  },
+  {
+   "cells": 164,
+   "near": "CHECKSTANDS",
+   "x": 523.1,
+   "y": 599.5
+  },
+  {
+   "cells": 108,
+   "near": "CHECKSTANDS",
+   "x": 497.0,
+   "y": 609.0
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 32.2,
+   "meters": 6.75,
+   "name": "DELI"
+  },
+  {
+   "cells": 27.9,
+   "meters": 5.83,
+   "name": "BAKERY"
+  }
+ ],
+ "m_per_cell": 0.2093,
+ "narrow": [
+  {
+   "half_width_m": 0.84,
+   "name": "RESTROOMS"
+  },
+  {
+   "half_width_m": 1.05,
+   "name": "BAKERY"
+  },
+  {
+   "half_width_m": 1.05,
+   "name": "DELI"
+  },
+  {
+   "half_width_m": 1.05,
+   "name": "KITCHEN GADGETS"
+  },
+  {
+   "half_width_m": 1.13,
+   "name": "FROZEN FOODS"
+  },
+  {
+   "half_width_m": 1.26,
+   "name": "AISLE 4"
+  },
+  {
+   "half_width_m": 1.26,
+   "name": "AISLE 5"
+  },
+  {
+   "half_width_m": 1.26,
+   "name": "MEAT"
+  }
+ ],
+ "provenance": {
+  "decorations": "file",
+  "drift": {
+   "zones": {
+    "ENTRANCE": {
+     "derived": [
+      350.4118347167969,
+      693.7368774414062
+     ],
+     "file": [
+      346.0,
+      653.0
+     ]
+    }
+   }
+  },
+  "exclusions": "file",
+  "inclusions": "file",
+  "openings": "absent",
+  "seal_zones": "derived",
+  "zones": "file"
+ },
+ "reachable_pct": 32.3,
+ "store": "25",
+ "verify": [],
+ "walkable_pct": 32.3
+}

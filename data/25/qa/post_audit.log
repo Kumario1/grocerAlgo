@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/Users/princekumar/Documents/grocerAlgo/.wt/25/extract.py", line 8, in <module>
+    import json, math, os, sys, fitz
+ModuleNotFoundError: No module named 'fitz'
