@@ -1,0 +1,139 @@
+{
+ "notes": [
+  "atlas aisles 54, guide aisles 54",
+  "y: aisle labels did not constrain this axis, so its scale came from the other axis and its offset from the walkable floor",
+  "aisle offsets x+38 y=floor: 100% of sampled shelves land on a walkable cell and 10 anchors agree, against 100%/9 for x+37 y=floor"
+ ],
+ "gates": {
+  "residual": true,
+  "margin": false,
+  "scale_skew": true,
+  "floor": {
+   "psas": 3610,
+   "on_floor_pct": 99.17,
+   "pass": true,
+   "off_floor": [
+    [
+     "05|87|B|8",
+     6.7
+    ],
+    [
+     "05|87|B|9",
+     6.7
+    ],
+    [
+     "05|87|B|10",
+     6.7
+    ],
+    [
+     "05|87|B|15",
+     6.7
+    ],
+    [
+     "05|87|B|16",
+     6.7
+    ],
+    [
+     "05|87|B|17",
+     6.7
+    ],
+    [
+     "05|87|B|18",
+     6.7
+    ],
+    [
+     "05|87|B|13",
+     6.7
+    ],
+    [
+     "05|87|B|14",
+     6.7
+    ],
+    [
+     "05|87|B|1",
+     6.7
+    ]
+   ]
+  },
+  "labels": false
+ },
+ "x": {
+  "scale": 0.7210970162349292,
+  "offset": 176.988585712048,
+  "inliers": [
+   5,
+   6,
+   7,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16
+  ],
+  "max_residual_pt": 2.986,
+  "aisle_offset": 38,
+  "source_axis": 0
+ },
+ "y": {
+  "scale": 0.7210970162349292,
+  "offset": 43.0,
+  "inliers": [],
+  "aisle_offset": null,
+  "source_axis": 1,
+  "derived": true,
+  "max_residual_pt": null
+ },
+ "store": "14",
+ "verdict": "fail",
+ "verified": {
+  "checked": 11,
+  "agreed": 4,
+  "misses": [
+   {
+    "product": "Post Fruity Pebbles Cereal Bag, 32 oz",
+    "label": "Aisle 12, A7",
+    "want": "AISLE 12",
+    "got": "AISLE 11"
+   },
+   {
+    "product": "CAFE Ol\u00e9 by H-E-B Texas Pecan Medium Roast Ground Coffee, 12 oz",
+    "label": "Aisle 20, A3",
+    "want": "AISLE 20",
+    "got": "AISLE 18"
+   },
+   {
+    "product": "Dove Coconut & Hydration Shampoo & Conditioner, 2 Pk, 24 oz",
+    "label": "Aisle 34, A10",
+    "want": "AISLE 34",
+    "got": "AISLE 29"
+   },
+   {
+    "product": "H-E-B Our Finest Invent-A-Size Paper Towels, 6 Double Rolls",
+    "label": "Aisle 23, B4",
+    "want": "AISLE 23",
+    "got": "AISLE 20"
+   },
+   {
+    "product": "H-E-B Uncured Pepperoni Thin Crust Frozen Pizza, 14.15 oz",
+    "label": "Aisle 40, A27",
+    "want": "AISLE 40",
+    "got": "AISLE 41"
+   },
+   {
+    "product": "H-E-B Black Beans, 15 oz",
+    "label": "Aisle 10, A21",
+    "want": "AISLE 10",
+    "got": "AISLE 9"
+   },
+   {
+    "product": "H-E-B Ultra Liquid Dish Soap, Texas Size Pack - Fresh Scent, 90 oz",
+    "label": "Aisle 25, A4",
+    "want": "AISLE 25",
+    "got": "AISLE 22"
+   }
+  ],
+  "pass": false
+ }
+}
