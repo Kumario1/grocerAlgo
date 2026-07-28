@@ -1,0 +1,30 @@
+Store 370 (Mercedes) is converged. Handing off for the audit.
+
+## Result
+
+`./rebuild.sh 370` → exit 0, **744 passed**. `data/370/qa/report.json`:
+
+```
+components: {"n": 1, "sizes": [58650]}
+coverage:   {"sealed_floor_patches": [], "unreachable_shelf_labels": []}
+verify:     []
+far_snaps:  []
+walkable:   24.2% of page (24.2% entrance-reachable)
+```
+
+Zones stayed derived; no `zones.json` authored. Four files written.
+
+## What the first pass got wrong, and the evidence
+
+**1. The derived checkstand rect ate six aisle mouths** → `seal_zones.json`
+The auto rect was `[259.3, 478.3, 645.4, 594.7]` because the fixture cluster swept in the two Bakery/Deli display tables (x0 267) and the aisle end-cap arcs (y0 486). Its 20-pt bridge then closed the south mouths of aisles 7, 9, 11, 12, 13, 14 — a grid probe showed `y 481–507` blocked at x = 355/395/433/472/550/636, so those aisles were only enterable from the north. The override is the lane cluster itself, `[348, 545, 580, 618]`, bridge 20. I dropped the second derived zone, `auto:KITCHEN` (r=130 disk in the middle of the grocery block): the `KITCHEN` anchor is the printed shelf label *"Kitchen Gadgets"* in aisle 4, not a service counter — this store's map draws no kitchen. It sealed nothing before and nothing after; the drift is recorded in provenance.
+
+**2. Whole back-of-house stockroom was walkable** → largest exclusion
+~500 m² north of the drawn back wall (bands `[211.4,155.4,361.2,171.5]`, `[389,157.3,613.6,170.3]`, the diagonal `(614.7,156)–(656.4,114.9)`, band `[667.8,97.3,903.6,110.2]`) with zero fixtures, badges or product labels. The two breaks in that wall are dashed double-door swings (x 361–389, x 889–913) — stockroom doors — so the poly seals them. Both "Market" labels print on the south side of the wall. This is what dropped walkable from 31.6% to 24.2%.
+
+**3. Three more staff/artifact regions** → exclusions: the SW room behind the y=586 Bakery/Deli wall (was the orange 5013-cell second component); the Business Center room interior (only the decorative X graphic's interior stayed open — a stroke-tracing artifact); and two 0.3 m slivers between fixture runs and the wall (235 pt along the south front, and the east-wall leg) that `corridor_width.png` painted red end to end. Tight-cell count fell 372 → 81, the remainder being the Exit doorway itself.
+
+**4. Both VERIFY flags were floor labels, not counters** → `inclusions.json`
+`BAKERY/DELI (297,565)` prints on open floor south of two free-standing display tables — no counter enclosure drawn. `KITCHEN (742.7,327.9)` is the aisle-4 shelf label. Both got inclusions over their real customer corridors.
+
+**5. `walk_truth.json`** — 12 `must` (front alley, front corridor, entrance approach, exit vestibule, Produce, Dairy frontage, Bakery/Deli, Frozen west aisle, Market corridor, aisles 4/12/7) and 10 `must_not` (page corner, two parking points, both halves of the north stockroom, SW room, Business Center, restroom interior, a checkout lane interior, the south sliver). Every coordinate was probed against the grid before writing.

@@ -1,0 +1,6 @@
+[
+ {"name": "Bakery/Deli customer frontage — the SW end of the front action alley plus the floor around the two bakery/deli display tables; the drawing shows free-standing tables, no counter enclosure, and prints the department name on the shopping floor (customer space; suppresses the BAKERY/DELI VERIFY)",
+  "rect": [256, 508, 348, 585]},
+ {"name": "Aisle 4 shopping corridor (Baking Needs / Sugar / Foil Bakeware) — the KITCHEN anchor is the printed shelf label 'Kitchen Gadgets' inside the aisle, not a service kitchen; this store's map draws no kitchen counter (customer space; suppresses the KITCHEN VERIFY)",
+  "rect": [739, 208, 758, 506]}
+]

@@ -1,0 +1,4 @@
+[
+ {"name": "Checkstand lane bank — the eight drawn lanes only (x 352-557, y 545-615 on the page, padded). The derived rect grew west to the Bakery/Deli display tables (x0 259) and north to the aisle end-cap arcs (y0 478), so its 20-pt bridge sealed the south mouths of aisles 7, 9, 11, 12, 13 and 14 shut; bounding the zone to the lanes seals the lane interiors and nothing else",
+  "rect": [348, 545, 580, 618], "bridge": 20}
+]

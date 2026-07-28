@@ -1,0 +1,29 @@
+## Findings — store 370, worst first
+
+**1. Enclosed, unlabeled lobby room shipped walkable — PDF x 575–633, y 664–734 (~18 m², 772 cells)**
+
+- *Evidence.* Crop `r2c1` / 8× lobby zoom: the front-lobby strip is divided by a drawn partition at **x = 575.1 (y 688.7→733.7)** into the Business Center (already excluded) and a second room to its east, bounded north by the peaked partition `(570.9,684.6)-(593.3,664.6)-(609.5,664.0)-(629.5,683.4)` (PDF drawing #240, same 0.924 stroke class as the Business Center's own walls) and east/south by the store outline. That room was **green**.
+- *Why nothing caught it.* No product label lives there, so net 1 was silent; the guide has no floor paint, so net 2 was silent; it isn't a culled pocket, so it never appeared in the top-ten stats. It was reachable **only through a one-cell leak at (630, 682)**: the drawn wall stub ends at x = 632.8, ~0.9 pt short of the outline corner at (633.68, 683.2). An erosion test is decisive — at a **0.3 m** throat those 772 cells split off the 49 674-cell sales floor, and they were the *only* such region in the store.
+- *Truth.* Not walkable — same lease/office class as the Business Center beside it and the two restrooms. No door swing, no label, no fixture (every real door in this PDF is drawn as a dashed bowtie swing; there is none here).
+- *Fix applied.* `exclusions.json` poly `[[575,740],[575,689],[571,685],[593.5,665],[609.5,664.5],[630,684],[650,684],[650,740]]` — traced to the drawn walls so the genuine exit-approach wedge east of the peak's right leg stays open, and extended to take the exit-threshold notch (x 634–648, y 726–736) that only this room fed, so no orphan pocket is created.
+
+**2. `walk_truth` `must` [600, 700] "exit vestibule east of the Business Center" was inside that room**
+
+- *Evidence.* Probe: the point sits at the centre of the sealed room, not in any vestibule — the exit vestibule is outside the storefront diagonal `(633.68,683.2)–(673.55,642.56)`. This is the pass-4 failure mode exactly: the authored truth point ratified the defect and would have blocked the fix.
+- *Fix applied.* Replaced with **[600, 650]** — the real lobby corridor *north* of the peaked partitions, the walk-out path from the checkstand front alley to the Exit doors. Plus new `must_not` **[600, 705]** inside the sealed room: that point alone would have caught finding 1.
+
+**3. Missing `must_not` for the men's restroom interior — PDF x 363–398, y 658–734**
+
+- *Evidence.* Both lobby restrooms are enclosed rooms; only the women's (icon box 403.8–425.7) had a point at (415, 690). The men's room (icon box 369–391) is sealed only by the boundary-trace notch and had no regression lock.
+- *Fix applied.* `must_not` **[378, 700]**.
+
+## Passes that came back clean
+
+- **Mechanical:** exit 0, `verify: []`, both `coverage` lists empty, `far_snaps: []`, one component, walkable 23.8 %.
+- **Visual sweep (3×3 + targeted 4–9× zooms):** all 16 aisle corridors green **170/170 rows** from y 200→540; Market (both bands), Frozen west aisle, Bakery/Deli, Produce, Dairy and the east-wall corridor all have green frontage; back-of-house purple/untinted; checkout lanes sealed, front action alley green. All **9 culled pockets classified** — 8 checkstand lane interiors + the women's restroom; the 18 smaller sealed comps are the stockroom door swing, aisle-end crevices and a 2-pt wall sliver. The white strip at x 210–228 is a real drawn fixture (frozen case body, PDF drawing #197).
+- **Label probes:** all **225** printed words on page 2 probed with none of the built-in net's exemptions — every product label has reachable floor at distance 0 pt. The only words beyond 16 pt are `Carts`, `Entrance`, `Exit` in the parking lot, correctly outside the boundary. 18 named labels spot-checked across every wing (Water, Charcoal, Cotton, Diapers, Cookies, Tortillas, Picante, Beer, Batteries, Coffee, Soup, Pickles, Popcorn, Bleach, Sauce, Toys, Vinegar, Salt) — all OK.
+- **Config sanity:** no product label is trapped inside any exclusion (checked directly, bypassing the `blessed` exemption); the only words inside exclusion shapes are "Business Center" itself. Both inclusions are justified — the aisle-4 inclusion correctly opens 14 shelf labels' corridor, the Bakery/Deli one covers open display tables with no counter enclosure.
+
+Rebuild rerun after the fixes: **exit 0, 746 passed** (up from 744 — the two new truth points), `verify: []`, coverage empty, one component, `isolated: 0`, and at a 0.6 m erosion the entire reachable grid is now a single connected body. Only `data/370/exclusions.json` and `data/370/walk_truth.json` were edited; `git status` shows no other file touched.
+
+`AUDIT CLEAN — store 370 (3 findings fixed)`

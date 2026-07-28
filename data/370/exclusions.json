@@ -1,0 +1,14 @@
+[
+ {"name": "Back-of-house strip along the north wall (staff only): the sales floor stops at the drawn back wall — bands [211.4,155.4,361.2,171.5] and [389.0,157.3,613.6,170.3] on the west, the diagonal band (614.7,156.0)-(656.4,114.9) in the middle, band [667.8,97.3,903.6,110.2] on the east — and everything north of it is empty: no fixture, no aisle badge, no product label over ~500 m2. The two breaks in that wall are dashed double-door swings (x 361-389 and x 889-913), i.e. stockroom doors, so the poly seals them too; both 'Market' labels print on the SOUTH (customer) side of the wall",
+  "poly": [[210, 36], [980, 36], [980, 108], [668, 108], [668, 126], [625, 168], [210, 168]]},
+ {"name": "Business Center room interior (staff side of the service counter drawn at [433.7,654.5,478.4,662.7]): a walled block in the front lobby between the restrooms and the exit vestibule, south of the peaked storefront line. Only the interior of the decorative X graphic stayed open, a stroke-tracing artifact, not a shopper path",
+  "poly": [[433, 662], [537, 653], [571, 688], [571, 736], [433, 736]]},
+ {"name": "Unlabeled enclosed room in the front-lobby strip, immediately east of the Business Center: walled west by the drawn partition at x=575.1 (y 688.7-733.7), north by the peaked partition (570.9,684.6)-(593.3,664.6)-(609.5,664.0)-(629.5,683.4), east by the store outline at x=633.7 and south by the front wall at y=733.7. No door swing, no label, no fixture and no product label anywhere inside — the same lease/office class as the Business Center beside it and the two restrooms west of that. It rendered walkable only because the drawn wall ends at x=632.8, ~0.9 pt short of the outline corner at (633.68,683.2): that left a one-cell leak at (630,682), and eroding the reachable grid by a single cell splits these 772 cells (~18 m2) off the sales floor at a throat under 0.3 m. The poly also takes the exit-threshold notch (x 634-648, y 726-736), which no other floor feeds",
+  "poly": [[575, 740], [575, 689], [571, 685], [593.5, 665], [609.5, 664.5], [630, 684], [650, 684], [650, 740]]},
+ {"name": "Back-of-house room in the SW corner, behind the wall that closes the Bakery/Deli end of the sales floor (y=586 wall): the drawing puts no fixture, aisle badge, product label or door into it — bakery/deli production + receiving, staff only",
+  "rect": [210, 587, 368, 746]},
+ {"name": "0.3 m sliver between the long south-front fixture run (y 637.5-654.2, x 725-962) and the sales-floor boundary line at y=659.4 — 235 pt of 2-cell-tall 'corridor' no shopper fits in; corridor_width.png paints the whole strip red. The real front walkway is north of that fixture",
+  "rect": [724, 652, 981, 662]},
+ {"name": "0.3 m sliver between the east-wall fixture run (x 960-975, y 522-638) and the east wall at x=980, plus the dead corner block it feeds at y 638-656 — same artifact, the vertical leg of the same L",
+  "rect": [960, 522, 981, 662]}
+]

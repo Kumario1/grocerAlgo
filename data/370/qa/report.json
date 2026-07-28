@@ -1,0 +1,127 @@
+{
+ "components": {
+  "n": 1,
+  "sizes": [
+   57758
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 387,
+   "near": "RESTROOMS",
+   "x": 415.4,
+   "y": 697.2
+  },
+  {
+   "cells": 237,
+   "near": "CHECKSTANDS",
+   "x": 451.7,
+   "y": 578.0
+  },
+  {
+   "cells": 222,
+   "near": "CHECKSTANDS",
+   "x": 424.6,
+   "y": 578.3
+  },
+  {
+   "cells": 215,
+   "near": "CHECKSTANDS",
+   "x": 478.9,
+   "y": 578.1
+  },
+  {
+   "cells": 210,
+   "near": "CHECKSTANDS",
+   "x": 531.2,
+   "y": 577.7
+  },
+  {
+   "cells": 202,
+   "near": "CHECKSTANDS",
+   "x": 505.1,
+   "y": 577.5
+  },
+  {
+   "cells": 196,
+   "near": "RESTROOMS",
+   "x": 397.7,
+   "y": 578.3
+  },
+  {
+   "cells": 195,
+   "near": "BAKERY/DELI",
+   "x": 371.8,
+   "y": 576.9
+  },
+  {
+   "cells": 191,
+   "near": "CHECKSTANDS",
+   "x": 558.6,
+   "y": 588.2
+  }
+ ],
+ "far_snaps": [],
+ "m_per_cell": 0.1541,
+ "narrow": [
+  {
+   "half_width_m": 0.56,
+   "name": "EXIT"
+  },
+  {
+   "half_width_m": 0.77,
+   "name": "ENTRANCE"
+  },
+  {
+   "half_width_m": 0.77,
+   "name": "KITCHEN"
+  },
+  {
+   "half_width_m": 0.92,
+   "name": "CHILI/MEAT/FISH"
+  },
+  {
+   "half_width_m": 1.08,
+   "name": "FROZEN"
+  },
+  {
+   "half_width_m": 1.23,
+   "name": "DAIRY"
+  },
+  {
+   "half_width_m": 1.31,
+   "name": "PRODUCE"
+  },
+  {
+   "half_width_m": 1.39,
+   "name": "AISLE 4"
+  }
+ ],
+ "provenance": {
+  "drift": {
+   "seal_zones": {
+    "derived_n": 2,
+    "derived_names": [
+     "auto:KITCHEN",
+     "auto:CHECKSTANDS"
+    ],
+    "file_n": 1,
+    "file_names": [
+     "Checkstand lane bank \u2014 the eight drawn lanes only (x 352-557, y 545-615 on the page, padded). The derived rect grew west to the Bakery/Deli display tables (x0 259) and north to the aisle end-cap arcs (y0 478), so its 20-pt bridge sealed the south mouths of aisles 7, 9, 11, 12, 13 and 14 shut; bounding the zone to the lanes seals the lane interiors and nothing else"
+    ]
+   }
+  },
+  "exclusions": "file",
+  "inclusions": "file",
+  "seal_zones": "file",
+  "zones": "derived"
+ },
+ "reachable_pct": 23.8,
+ "store": "370",
+ "verify": [],
+ "walkable_pct": 23.8
+}
