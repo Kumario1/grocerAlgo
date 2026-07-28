@@ -239,9 +239,11 @@ while read -r S CITY; do
         say "start  $S${CITY:+ ($CITY)} — stage $st"
         touch "$LOG/.mark-$S"
         if [ "$st" = 1 ] && [ -n "$CITY" ]; then
-            (cd "$WT" && PIPE_NO_BROWSER=1 ./pipeline.sh "$S" "$CITY") >> "$LOG/$S.log" 2>&1
+            (cd "$WT" && PIPE_PYTHON="$PYTHON" PIPE_NO_BROWSER=1 \
+                ./pipeline.sh "$S" "$CITY") >> "$LOG/$S.log" 2>&1
         else
-            (cd "$WT" && PIPE_NO_BROWSER=1 ./pipeline.sh "$S" --from "$st") >> "$LOG/$S.log" 2>&1
+            (cd "$WT" && PIPE_PYTHON="$PYTHON" PIPE_NO_BROWSER=1 \
+                ./pipeline.sh "$S" --from "$st") >> "$LOG/$S.log" 2>&1
         fi
         rc=$?
         if [ "$rc" = 0 ]; then
