@@ -75,6 +75,15 @@ esac
 # pinching aisle mouths) — and a medium audit blesses them. High reproduced
 # the shipped xhigh map exactly (60/60 walk-truth points).
 AGENT=${PIPE_AGENT:-"claude --safe-mode --model claude-opus-5 --effort high --disallowedTools Task,Agent --dangerously-skip-permissions -p"}
+AGENT_TIMEOUT=${PIPE_AGENT_TIMEOUT:-2700}
+case $AGENT_TIMEOUT in
+    ''|*[!0-9]*) echo "PIPE_AGENT_TIMEOUT must be seconds"; exit 2 ;;
+esac
+run_agent() {
+    # alarm survives exec; `exec` also prevents an orphan shell on timeout.
+    perl -e 'alarm shift; exec @ARGV' "$AGENT_TIMEOUT" \
+        sh -c "exec $AGENT"
+}
 LOG="data/$S/qa"
 mkdir -p "$LOG"
 [ "$FROM" = 1 ] || echo "==> resuming store $S at stage $FROM"
@@ -109,7 +118,7 @@ if [ "$FROM" -le 3 ]; then
       echo; sed "s/<N>/$S/g" docs/onboarding.md; \
       echo; sed "s/<N>/$S/g" docs/openings.md; \
       echo; sed "s/<N>/$S/g" docs/decorations.md; \
-      echo; sed "s/<N>/$S/g" docs/boundaries.md; } | $AGENT > "$LOG/onboard.log" 2>&1 \
+      echo; sed "s/<N>/$S/g" docs/boundaries.md; } | run_agent > "$LOG/onboard.log" 2>&1 \
         || { echo "onboarding agent failed — read $LOG/onboard.log"; exit 1; }
     echo "    onboarding agent done ($LOG/onboard.log)"
 
@@ -124,7 +133,7 @@ if [ "$FROM" -le 4 ]; then
       echo; sed "s/<N>/$S/g" docs/audit.md; \
       echo; sed "s/<N>/$S/g" docs/openings.md; \
       echo; sed "s/<N>/$S/g" docs/decorations.md; \
-      echo; sed "s/<N>/$S/g" docs/boundaries.md; } | $AGENT > "$LOG/audit.log" 2>&1 \
+      echo; sed "s/<N>/$S/g" docs/boundaries.md; } | run_agent > "$LOG/audit.log" 2>&1 \
         || { echo "audit agent failed — read $LOG/audit.log"; exit 1; }
 
     ./rebuild.sh "$S" > "$LOG/post_audit.log" 2>&1 \
@@ -223,7 +232,7 @@ else
             repair_try=$((repair_try + 1))
             { echo "Execute this calibration runbook for store $S:"; \
               echo; sed "s/<N>/$S/g" docs/calibration.md; } |
-                $AGENT > "data/$S-atlas/repair.log" 2>&1 && break
+                run_agent > "data/$S-atlas/repair.log" 2>&1 && break
             grep -Eiq "api error|connection (closed|error)|timed? out|overloaded" \
                 "data/$S-atlas/repair.log" || break
             [ "$repair_try" -ge 3 ] || sleep 60
