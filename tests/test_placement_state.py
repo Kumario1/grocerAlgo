@@ -10,7 +10,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 import app as application
-from app import LOCATED_PRODUCTS, app, load_store
+from app import app, load_store
 
 client = TestClient(app)
 STORE = load_store("659")
@@ -18,14 +18,14 @@ STORE = load_store("659")
 
 @pytest.fixture(autouse=True)
 def clean():
-    LOCATED_PRODUCTS.clear()
+    app.state.catalog_cache.clear_cache("located")
     yield
-    LOCATED_PRODUCTS.clear()
+    app.state.catalog_cache.clear_cache("located")
 
 
 def locate(placement):
     class FakeHEB:
-        async def locate(self, product_id, location_label, atlas):
+        async def locate(self, product_id, location_label, atlas, store=None):
             return placement
 
     original = getattr(app.state, "heb")

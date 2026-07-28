@@ -71,8 +71,9 @@ Three problems. The third one is the easy one.
 The hard one, and the real bottleneck. H-E-B exposes per-store product
 locations through PALS — a product resolves to a PSA (a spot on a specific
 shelf face) and a printed label like "Aisle 17" or "In Dairy on the Back Wall".
-grocerAlgo drives a local browser session to read the catalog the way a
-customer's browser does, then maps each PSA onto the store's floor plan.
+grocerAlgo drives one normal Chrome process to read the catalog the way a
+customer's browser does. Each supported store has an isolated browser context,
+then its PSA is mapped onto that store's floor plan.
 
 That mapping is a per-store transform, and it has to be *earned* before the
 store is offered. `capture_atlas.py` pulls the store's live Atlas; `calibrate.py`
@@ -175,10 +176,10 @@ entrance. Any placement landing more than 5 m from walkable floor is no longer
 believed; the printed label wins. All 2,677 PSAs in the store are swept in CI
 to keep it that way.
 
-**One browser page, one navigation.** Typeahead fires overlapping searches, and
-a second navigation aborts the first — which the client read as "H-E-B dropped
-us" and answered by tearing down the whole browser. Every keystroke could kill
-the session. Navigation is now serialised and a single failure retries.
+**One browser, one queue.** The six stores have isolated cookies and local
+storage, but uncached navigation is serialized across one Chrome process.
+Identical searches share one in-flight request; search results persist for five
+minutes and placements for 24 hours in SQLite.
 
 ---
 
@@ -219,20 +220,26 @@ those either match the blessed artifact or the build is red.
 pip install -r requirements.txt
 brew install tesseract             # macOS — raster-PDF OCR fallback
 # apt install tesseract-ocr        # Debian/Ubuntu
+export CHROME_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+export HEB_RUNTIME_DIR="$(mktemp -d)"  # fresh anonymous bootstrap state
 
 python3 -m uvicorn app:app --port 8000
 # open http://localhost:8000
 ```
 
-Pick a store in the header, then choose **Connect H-E-B**. A persistent local
-Chrome profile opens — select that store there, return to the app, and confirm.
-Each store gets its own profile (`.heb-<store>/`, gitignored), so switching
-stores does not mean picking the store again. **grocerAlgo never stores
-credentials**; the session belongs to your own browser profile.
+The public UI has no browser controls. An operator bootstraps each store once
+from a fresh anonymous context:
 
-One store at a time: H-E-B's own session carries the selected store, so the app
-reports any other store as disconnected rather than quietly placing its products
-through the wrong building's catalog.
+```bash
+curl -X POST 'http://localhost:8000/api/heb/connect?store=659'
+# Select store #659 in the Chrome window that opens.
+curl -X POST 'http://localhost:8000/api/heb/connect/confirm?store=659'
+curl 'http://localhost:8000/api/heb/state?store=659' > heb-state-659.json
+```
+
+Repeat for `24`, `265`, `269`, `659`, `790`, and `811`. The old `.heb-*`
+profiles are never read or deployed. SQLite stores only H-E-B cookies,
+localStorage, and IndexedDB from these anonymous contexts.
 
 Logs land in `logs/app.log` (rotating, gitignored): every catalog fetch with
 timing, every disconnect with its exception, and every placement as
@@ -251,6 +258,48 @@ python3 calibrate.py 659 --verify     # fit, gate, and check live shelf labels
 The connection fails closed: if H-E-B's drawing no longer matches the one a
 store was calibrated against, that store stops placing products rather than
 placing them from a stale transform.
+
+### Deploy to Railway
+
+Railway builds the included `Dockerfile`, starts one normal Google Chrome under
+Xvfb, and runs exactly one Uvicorn worker. Attach a persistent volume at
+`/app/runtime` and set a strong `GROCER_ADMIN_TOKEN`.
+
+Import every locally verified anonymous state into the deployed service:
+
+```bash
+curl -X PUT 'https://YOUR-SERVICE/api/heb/state?store=659' \
+  -H 'Authorization: Bearer YOUR_ADMIN_TOKEN' \
+  -H 'Content-Type: application/json' \
+  --data-binary @heb-state-659.json
+```
+
+The import is accepted only after the deployed browser confirms the selected
+store and the live Atlas digest. Preconfigure `HEB_PROXY_SERVER` and, when
+required, `HEB_PROXY_USERNAME` and `HEB_PROXY_PASSWORD` for one sticky US
+residential proxy; set `HEB_CDP_URL` to one Browserless CDP endpoint as the
+last fallback. The service still starts at tier 1 with local Chrome and no
+proxy. When the rolling 20-navigation failure rate exceeds 5%, it automatically
+activates the configured proxy, then the configured CDP endpoint if the proxy
+also crosses the gate. Set `HEB_START_TIER=2` or `3` only when a previous
+deployment has already failed its cheaper tier. The same six stored contexts
+and global queue are reused, so no six-session pool is needed.
+
+`HEB_QUEUE_TIMEOUT` defaults to five seconds. Requests that cannot enter the
+single browser slot return `429` with `Retry-After`; cached requests bypass it.
+
+Run the live acceptance gate after bootstrap. Restart the Railway service twice
+during the 24-hour run; the command records distinct process IDs and verifies
+that every store remains searchable afterward:
+
+```bash
+GROCER_ADMIN_TOKEN=... python3 soak_heb.py https://YOUR-SERVICE \
+  --hours 24 --expected-restarts 2
+```
+
+The command exits nonzero unless every store completes at least 20 searches,
+locates five products, retains at least 95% successful searches, and observes
+the requested restarts.
 
 ### Onboarding another store
 
@@ -329,17 +378,9 @@ python3 raster_benchmark.py --backend vision      # exits nonzero on a miss
 
 ## Where it's going
 
-Today this runs on one machine against one store account. Making it something
-other people can use means solving one thing first:
-
-**The catalog connection is a local browser session.** That is what makes the
-data honest — it is the same page a customer sees — and it is exactly what
-does not survive being moved to a server. A hosted version needs a real answer
-here: a server-side session pool, an official data agreement, or a thin local
-companion that keeps the browser on the user's own machine. This is the gate,
-not the UI.
-
-Behind that:
+The hosted beta now uses one server-side Chrome with isolated, persisted store
+contexts. The next work is driven by measured queue time and H-E-B challenge
+rate, not a speculative browser pool.
 
 - **Mobile-first UI.** Check items off as you shop; the route re-solves from
   where you are. The solver is already fast enough to do this on every tap.

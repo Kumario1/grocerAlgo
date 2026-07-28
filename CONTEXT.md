@@ -1,8 +1,9 @@
 # grocerAlgo domain context
 
-This local pilot routes a shopper through Lakeline H‑E‑B Plus! corporate
-store #659. These terms are canonical in code, tests, UI copy, and future
-planning.
+This public beta routes a shopper through one of six calibrated H‑E‑B stores.
+Each request targets one Store, while one Chrome process keeps every Store's
+catalog state in an isolated browser context. These terms are canonical in
+code, tests, UI copy, and future planning.
 
 ## Catalog Product
 

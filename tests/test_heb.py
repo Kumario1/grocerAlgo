@@ -103,8 +103,8 @@ def test_search_rejects_challenge_and_malformed_pages():
         extract_products('<script id="__NEXT_DATA__">{nope}</script>')
 
 
-def test_heb_client_caches_ranked_queries_for_five_minutes():
-    client = HEBClient()
+def test_heb_client_caches_ranked_queries_for_five_minutes(tmp_path):
+    client = HEBClient(database_path=tmp_path / "heb.sqlite")
     client.map_ready = True
     calls = []
     product = {
@@ -116,7 +116,8 @@ def test_heb_client_caches_ranked_queries_for_five_minutes():
         "productLocation": {"location": "In Dairy"},
     }
 
-    async def fake_fetch(url):
+    async def fake_fetch(url, store):
+        assert store == 659
         calls.append(url)
         return search_html(product)
 
@@ -127,6 +128,184 @@ def test_heb_client_caches_ranked_queries_for_five_minutes():
 
     assert first == second
     assert calls == ["/search?q=whole%20milk"]
+
+
+def test_verified_store_and_search_cache_survive_restart(tmp_path):
+    database = tmp_path / "heb.sqlite"
+    client = HEBClient(database_path=database)
+    product = {
+        "id": "1",
+        "storeId": 659,
+        "displayName": "H-E-B Whole Milk",
+        "inventory": {"inventoryState": "IN_STOCK"},
+    }
+
+    class Context:
+        async def storage_state(self, **kwargs):
+            return {"cookies": [], "origins": []}
+
+    async def fake_fetch(url, store):
+        assert store == 659
+        if url.startswith("/atlas/"):
+            return Path("data/659-atlas/store-map.svg").read_text()
+        return search_html(product)
+
+    client._contexts[659] = Context()
+    client._fetch = fake_fetch
+    assert asyncio.run(client.confirm(659))["map_ready"] is True
+    products = asyncio.run(client.search("whole milk", 659))
+
+    restarted = HEBClient(database_path=database)
+
+    async def should_not_fetch(*_):
+        raise AssertionError("fresh cache should avoid H-E-B")
+
+    restarted._fetch = should_not_fetch
+    assert restarted.status(659)["map_ready"] is True
+    assert restarted.storage.cache_count("search", 659) == 1
+    restarted._failed.add(659)
+    assert asyncio.run(restarted.search("whole milk", 659)) == products
+    assert restarted.status(24)["connected"] is False
+
+
+def test_identical_searches_share_one_in_flight_navigation(tmp_path):
+    client = HEBClient(database_path=tmp_path / "heb.sqlite")
+    client.map_ready = True
+    calls = 0
+    product = {
+        "id": "1",
+        "storeId": 659,
+        "displayName": "H-E-B Whole Milk",
+        "inventory": {"inventoryState": "IN_STOCK"},
+    }
+
+    async def fake_fetch(url, store):
+        nonlocal calls
+        calls += 1
+        await asyncio.sleep(0)
+        return search_html(product)
+
+    client._fetch = fake_fetch
+
+    async def search_together():
+        return await asyncio.gather(*(
+            client.search("whole milk", 659) for _ in range(6)))
+
+    results = asyncio.run(search_together())
+
+    assert all(result == results[0] for result in results)
+    assert calls == 1
+
+
+def test_persisted_browser_state_keeps_only_heb_origins():
+    state = HEBClient._clean_state({
+        "cookies": [
+            {"name": "store", "domain": ".heb.com"},
+            {"name": "tracker", "domain": ".example.com"},
+            {"name": "lookalike", "domain": ".notheb.com"},
+        ],
+        "origins": [
+            {"origin": "https://www.heb.com", "localStorage": []},
+            {"origin": "https://example.com", "localStorage": []},
+        ],
+    })
+
+    assert [cookie["name"] for cookie in state["cookies"]] == ["store"]
+    assert [origin["origin"] for origin in state["origins"]] == [
+        "https://www.heb.com"]
+
+
+def test_each_store_gets_its_own_browser_context(tmp_path):
+    client = HEBClient(database_path=tmp_path / "heb.sqlite")
+    for store in (24, 659):
+        client.storage.save_state(
+            store,
+            {"cookies": [{"name": "store", "value": str(store),
+                          "domain": ".heb.com", "path": "/"}],
+             "origins": []},
+            client._digest(store=store),
+        )
+    supplied_states = []
+
+    class Page:
+        def is_closed(self):
+            return False
+
+    class Context:
+        async def new_page(self):
+            return Page()
+
+    class Browser:
+        async def new_context(self, **options):
+            supplied_states.append(options["storage_state"])
+            return Context()
+
+    client._browser = Browser()
+
+    async def open_both():
+        await client._ensure_context(24)
+        await client._ensure_context(659)
+
+    asyncio.run(open_both())
+
+    assert client._contexts[24] is not client._contexts[659]
+    assert [state["cookies"][0]["value"] for state in supplied_states] == [
+        "24", "659"]
+
+
+def test_switching_store_does_not_alias_the_previous_context(tmp_path):
+    client = HEBClient(database_path=tmp_path / "heb.sqlite")
+    old_context, old_page = object(), object()
+    client._contexts[659], client._pages[659] = old_context, old_page
+    client._context, client._page = old_context, old_page
+
+    asyncio.run(client.use(24))
+
+    assert client._context is None
+    assert client._page is None
+
+
+def test_missing_placement_is_cached_for_24_hours_across_restart(tmp_path):
+    database = tmp_path / "heb.sqlite"
+    client = HEBClient(database_path=database)
+    client.map_ready = True
+    calls = 0
+
+    async def fake_fetch(url, store):
+        nonlocal calls
+        calls += 1
+        return '{"results":[]}'
+
+    client._fetch = fake_fetch
+    atlas = {"psas": {}, "geometry": {"anchors": {}}}
+
+    assert asyncio.run(client.locate("missing", None, atlas, 659)) is None
+
+    restarted = HEBClient(database_path=database)
+    restarted.map_ready = True
+    restarted._fetch = fake_fetch
+    assert asyncio.run(
+        restarted.locate("missing", None, atlas, 659)) is None
+    assert calls == 1
+
+
+def test_failure_window_escalates_through_configured_browser_tiers(
+        tmp_path, monkeypatch):
+    monkeypatch.setenv("HEB_PROXY_SERVER", "http://proxy.example:8000")
+    monkeypatch.setenv("HEB_CDP_URL", "wss://browser.example")
+    client = HEBClient(database_path=tmp_path / "heb.sqlite")
+
+    for failed in [False] * 19 + [True]:
+        client._record_outcome(failed)
+    assert client._pending_tier is None  # exactly 5% does not cross the gate
+
+    client._record_outcome(True)
+    assert client._pending_tier == 2
+
+    client._tier, client._pending_tier, client._outcomes = 2, None, []
+    for failed in [False] * 18 + [True, True]:
+        client._record_outcome(failed)
+    assert client._pending_tier == 3
 
 
 def test_heb_client_fails_closed_when_atlas_structure_changes():
@@ -140,7 +319,8 @@ def test_heb_client_fails_closed_when_atlas_structure_changes():
         "productLocation": {"location": "In Dairy"},
     }
 
-    async def fake_fetch(url):
+    async def fake_fetch(url, store):
+        assert store == 659
         if url.startswith("/search"):
             return search_html(product)
         return '<svg viewBox="0 0 10 10"></svg>'
@@ -156,30 +336,62 @@ def test_heb_client_fails_closed_when_atlas_structure_changes():
     }
 
 
-def test_heb_client_refreshes_a_challenged_existing_browser():
-    client = HEBClient()
-    navigated = []
+def test_heb_client_refreshes_a_challenged_existing_browser(tmp_path):
+    client = HEBClient(database_path=tmp_path / "heb.sqlite")
+    client.storage.save_state(
+        659, {"cookies": [], "origins": []}, client._digest(store=659))
+    actions = []
 
-    class Page:
-        def is_closed(self):
-            return False
+    async def drop(store):
+        actions.append(("drop", store))
 
-        async def goto(self, url, wait_until):
-            navigated.append((url, wait_until))
+    async def ensure(store, load_saved=True):
+        actions.append(("ensure", store, load_saved))
 
-    client._context = object()
-    client._page = Page()
+    async def navigate(store, url):
+        actions.append(("navigate", store, url))
 
-    assert asyncio.run(client.connect())["connected"] is False
-    assert navigated == [("https://www.heb.com/", "domcontentloaded")]
+    client._drop_context = drop
+    client._ensure_context = ensure
+    client._navigate_unlocked = navigate
+
+    assert asyncio.run(client.connect(fresh=True)) == {
+        "connected": False, "map_ready": False, "store_id": 659}
+    assert actions == [
+        ("drop", 659), ("ensure", 659, False), ("navigate", 659, "/")]
 
 
-def test_heb_client_launches_normal_chrome_instead_of_automation_mode():
+def test_failed_fresh_confirmation_restores_previous_verified_state(tmp_path):
+    client = HEBClient(database_path=tmp_path / "heb.sqlite")
+    client.storage.save_state(
+        659, {"cookies": [], "origins": []}, client._digest(store=659))
+    client._pending_verification.add(659)
+
+    async def wrong_store(url, store):
+        return search_html({
+            "id": "1",
+            "storeId": 24,
+            "displayName": "Wrong-store milk",
+            "inventory": {"inventoryState": "IN_STOCK"},
+        })
+
+    client._fetch = wrong_store
+
+    with pytest.raises(HEBConnectionError, match="Select H-E-B #659"):
+        asyncio.run(client.confirm(659))
+    assert client.status(659) == {
+        "connected": True, "map_ready": True, "store_id": 659}
+
+
+def test_heb_client_launches_normal_chrome_instead_of_automation_mode(
+        monkeypatch):
+    monkeypatch.setenv("CHROME_PATH", "/usr/bin/google-chrome")
     command = HEBClient()._chrome_command(9223)
 
-    assert command[0].endswith(
-        "Google Chrome.app/Contents/MacOS/Google Chrome")
+    assert command[0] == "/usr/bin/google-chrome"
     assert "--remote-debugging-port=9223" in command
+    assert any("runtime/chrome" in arg for arg in command)
+    assert not any(".heb-" in arg for arg in command)
     assert not any("enable-automation" in arg for arg in command)
 
 
@@ -193,6 +405,9 @@ def test_heb_client_reports_incapsula_error_15_as_reconnect_required(
             return '{"errorCode" : "15"}'
 
     class Page:
+        def is_closed(self):
+            return False
+
         async def goto(self, url, wait_until):
             return Response()
 
@@ -200,7 +415,7 @@ def test_heb_client_reports_incapsula_error_15_as_reconnect_required(
         pass
 
     monkeypatch.setattr("router.heb.asyncio.sleep", no_wait)
-    client._page = Page()
+    client._pages[659] = Page()
 
     with pytest.raises(HEBConnectionError, match="reconnect required"):
         asyncio.run(client._fetch("/search?q=milk"))
@@ -216,6 +431,9 @@ def test_heb_client_navigates_instead_of_using_blocked_page_fetch():
             return "normal H-E-B response"
 
     class Page:
+        def is_closed(self):
+            return False
+
         async def goto(self, url, wait_until):
             navigated.append((url, wait_until))
             return Response()
@@ -223,7 +441,7 @@ def test_heb_client_navigates_instead_of_using_blocked_page_fetch():
         async def evaluate(self, script, url):
             return '{"errorCode" : "15"}'
 
-    client._page = Page()
+    client._pages[659] = Page()
 
     assert asyncio.run(client._fetch("/search?q=milk")) == (
         "normal H-E-B response")
@@ -244,6 +462,9 @@ def test_heb_client_retries_a_transient_incapsula_page(monkeypatch):
             return self.body
 
     class Page:
+        def is_closed(self):
+            return False
+
         async def goto(self, url, wait_until):
             navigated.append(url)
             return Response(next(replies))
@@ -252,7 +473,7 @@ def test_heb_client_retries_a_transient_incapsula_page(monkeypatch):
         pass
 
     monkeypatch.setattr("router.heb.asyncio.sleep", no_wait)
-    client._page = Page()
+    client._pages[659] = Page()
 
     assert asyncio.run(client._fetch("/search?q=milk")) == (
         "normal H-E-B response")
@@ -477,6 +698,9 @@ def test_concurrent_fetches_do_not_overlap_on_the_single_page():
     class Page:
         in_flight = 0
 
+        def is_closed(self):
+            return False
+
         async def goto(self, url, wait_until):
             Page.in_flight += 1
             overlapping.append(Page.in_flight)
@@ -484,7 +708,7 @@ def test_concurrent_fetches_do_not_overlap_on_the_single_page():
             Page.in_flight -= 1
             return Response()
 
-    client._page = Page()
+    client._pages[659] = Page()
 
     async def race():
         return await asyncio.gather(*(

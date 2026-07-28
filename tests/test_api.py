@@ -2,6 +2,7 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 from app import app, load_store
+from router.heb import HEBBusyError
 
 client = TestClient(app)
 STORE = load_store("659")
@@ -14,6 +15,13 @@ def test_geometry_endpoint():
 
     assert g["page"] == {"w": 1266.0, "h": 834.0}
     assert len(aisles) == 45
+
+
+def test_public_page_has_no_browser_bootstrap_controls():
+    html = client.get("/").text
+
+    assert 'id="connect"' not in html
+    assert 'id="confirm"' not in html
 
 
 def test_walkability_endpoint_returns_the_exact_659_qa_overlay():
@@ -118,6 +126,19 @@ def test_product_search_requires_three_non_whitespace_characters():
     assert client.get("/api/products", params={"q": "  a"}).status_code == 422
 
 
+def test_product_search_reports_browser_queue_back_pressure(monkeypatch):
+    class BusyHEB:
+        async def search(self, query, store=None):
+            raise HEBBusyError(5)
+
+    monkeypatch.setattr(app.state, "heb", BusyHEB(), raising=False)
+
+    response = client.get("/api/products", params={"q": "milk"})
+
+    assert response.status_code == 429
+    assert response.headers["retry-after"] == "5"
+
+
 def test_product_search_keeps_out_of_stock_results_disabled(monkeypatch):
     out_of_stock = {
         "id": "100",
@@ -150,7 +171,7 @@ def test_heb_connection_flow_reports_status(monkeypatch):
             return {"connected": self.connected, "map_ready": self.connected,
                     "store_id": 659}
 
-        async def connect(self, store=None):
+        async def connect(self, store=None, fresh=True):
             return self.status()
 
         async def confirm(self, store=None):
@@ -159,17 +180,66 @@ def test_heb_connection_flow_reports_status(monkeypatch):
 
     fake = FakeHEB()
     monkeypatch.setattr(app.state, "heb", fake, raising=False)
+    monkeypatch.setenv("GROCER_ADMIN_TOKEN", "s3cret")
 
     assert client.get("/api/heb/status").json()["connected"] is False
-    assert client.post("/api/heb/connect").status_code == 200
-    assert client.post("/api/heb/connect/confirm").json() == {
+    assert client.post("/api/heb/connect").status_code == 401
+    headers = {"Authorization": "Bearer s3cret"}
+    assert client.post("/api/heb/connect", headers=headers).status_code == 200
+    assert client.post(
+        "/api/heb/connect/confirm", headers=headers).json() == {
         "connected": True, "map_ready": True, "store_id": 659,
     }
 
 
+def test_heb_state_transfer_is_admin_only(monkeypatch):
+    state = {"cookies": [{"name": "store", "value": "659",
+                          "domain": ".heb.com", "path": "/"}],
+             "origins": []}
+
+    class FakeHEB:
+        async def import_state(self, store, supplied):
+            assert int(store) == 659
+            assert supplied == state
+            return {"connected": True, "map_ready": True, "store_id": 659}
+
+        def export_state(self, store):
+            assert int(store) == 659
+            return state
+
+    monkeypatch.setattr(app.state, "heb", FakeHEB(), raising=False)
+    monkeypatch.setenv("GROCER_ADMIN_TOKEN", "s3cret")
+    headers = {"Authorization": "Bearer s3cret"}
+
+    assert client.put("/api/heb/state", json=state).status_code == 401
+    assert client.put(
+        "/api/heb/state", json=state, headers=headers).json()["map_ready"] is True
+    assert client.get("/api/heb/state", headers=headers).json() == state
+
+
+def test_heb_recovery_status_is_admin_only(monkeypatch):
+    class FakeHEB:
+        def recovery_status(self, store):
+            return {
+                "connected": True,
+                "map_ready": True,
+                "store_id": int(store),
+                "cache": {"search": 20, "placement": 5, "located": 5},
+            }
+
+    monkeypatch.setattr(app.state, "heb", FakeHEB(), raising=False)
+    monkeypatch.setenv("GROCER_ADMIN_TOKEN", "s3cret")
+
+    assert client.get("/api/heb/recovery").status_code == 401
+    response = client.get(
+        "/api/heb/recovery",
+        headers={"Authorization": "Bearer s3cret"})
+    assert response.json()["cache"]["placement"] == 5
+
+
 def test_locate_products_returns_reachable_atlas_placements(monkeypatch):
     class FakeHEB:
-        async def locate(self, product_id, location_label, atlas):
+        async def locate(self, product_id, location_label, atlas, store=None):
             return {
                 "point": atlas["geometry"]["anchors"]["PRODUCE"],
                 "group": "ANCHOR:PRODUCE",
@@ -213,7 +283,7 @@ def test_locate_products_returns_reachable_atlas_placements(monkeypatch):
 
 def test_locate_products_preserves_exact_pals_section_on_the_guide(monkeypatch):
     class FakeHEB:
-        async def locate(self, product_id, location_label, atlas):
+        async def locate(self, product_id, location_label, atlas, store=None):
             return {
                 "point": [225.5742, 177.3972],
                 "group": "PSA:01:13",
@@ -243,7 +313,7 @@ def test_locate_products_preserves_exact_pals_section_on_the_guide(monkeypatch):
 
 def test_department_edge_pin_is_the_reachable_route_stop(monkeypatch):
     class FakeHEB:
-        async def locate(self, product_id, location_label, atlas):
+        async def locate(self, product_id, location_label, atlas, store=None):
             return {
                 "point": [625.05, 410.1768],
                 "group": "PSA:05:86",
@@ -283,7 +353,7 @@ def test_selected_products_route_consolidates_quantity_and_reports_unrouted(
     }
 
     class FakeHEB:
-        async def locate(self, product_id, location_label, atlas):
+        async def locate(self, product_id, location_label, atlas, store=None):
             if product_id == "mystery":
                 return None
             anchor, label = placed[product_id]
@@ -339,7 +409,7 @@ def test_selected_products_route_consolidates_quantity_and_reports_unrouted(
 
 def test_selected_route_is_422_when_nothing_is_routable(monkeypatch):
     class FakeHEB:
-        async def locate(self, product_id, location_label, atlas):
+        async def locate(self, product_id, location_label, atlas, store=None):
             return None
 
     monkeypatch.setattr(app.state, "heb", FakeHEB(), raising=False)

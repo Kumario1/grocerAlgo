@@ -46,12 +46,6 @@
     }
     h1 { margin: 0; font-size: 1.55rem; letter-spacing: -.035em; }
     .lede { margin: .3rem 0 1rem; color: var(--muted); font-size: .92rem; }
-    .connection {
-      padding: .9rem; margin-bottom: 1rem; border: 1px solid #efc2ca;
-      border-radius: 10px; background: #fff4f5;
-    }
-    .connection p { margin: 0 0 .65rem; font-size: .9rem; }
-    .connection-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
     .button {
       min-height: 42px; padding: .55rem .9rem; border: 0;
       border-radius: 8px; color: #fff; background: var(--red);
@@ -205,16 +199,6 @@
       <h1 id="page-title">Build your store route</h1>
       <p class="lede">Choose the exact products you plan to pick up.</p>
 
-      <div id="connection" class="connection" hidden>
-        <p id="connection-copy">Connect H‑E‑B to search this store’s live catalog.</p>
-        <div class="connection-actions">
-          <button id="connect" class="button" type="button">Connect H‑E‑B</button>
-          <button id="confirm" class="button secondary" type="button" hidden>
-            <span id="confirm-label">I selected this store</span>
-          </button>
-        </div>
-      </div>
-
       <label class="field-label" for="search">Search H‑E‑B products</label>
       <div class="search-wrap">
         <input id="search" type="search" autocomplete="off" disabled
@@ -323,10 +307,6 @@
     const draftList = document.querySelector('#draft');
     const routeButton = document.querySelector('#route-button');
     const summary = document.querySelector('#summary');
-    const connection = document.querySelector('#connection');
-    const connectionCopy = document.querySelector('#connection-copy');
-    const connectButton = document.querySelector('#connect');
-    const confirmButton = document.querySelector('#confirm');
     const NS = 'http://www.w3.org/2000/svg';
 
     let connected = false;
@@ -367,53 +347,21 @@
       return body;
     }
 
-    function showReconnect(message = 'Your H‑E‑B session needs to be reconnected. Your list is safe.') {
+    function showUnavailable(message = 'The live H‑E‑B catalog is temporarily unavailable. Your list is safe.') {
       connected = false;
       search.disabled = true;
-      connection.hidden = false;
-      connectionCopy.textContent = message;
-      connectButton.hidden = false;
-      confirmButton.hidden = true;
+      searchStatus.textContent = message;
       updateRouteButton();
     }
 
     function applyStatus(status) {
       connected = Boolean(status.connected && status.map_ready);
       search.disabled = !connected;
-      connection.hidden = connected;
-      if (!connected) showReconnect(
+      if (!connected) showUnavailable(
         status.connected && !status.map_ready
           ? `H‑E‑B’s map for ${storeName} has changed. Recapture and recalibrate it before routing.`
-          : `Connect H‑E‑B to search ${storeName}’s live catalog.`);
-      updateRouteButton();
-    }
-
-    async function connectHEB() {
-      connectButton.disabled = true;
-      connectionCopy.textContent =
-        `Opening H‑E‑B… select ${storeName} (store #${storeId}) there.`;
-      try {
-        await jsonFetch(withStore('/api/heb/connect'), {method: 'POST'});
-        connectButton.hidden = true;
-        confirmButton.hidden = false;
-      } catch (error) {
-        connectionCopy.textContent = error.message;
-      } finally {
-        connectButton.disabled = false;
-      }
-    }
-
-    async function confirmHEB() {
-      confirmButton.disabled = true;
-      connectionCopy.textContent = `Verifying ${storeName} and its map…`;
-      try {
-        applyStatus(await jsonFetch(withStore('/api/heb/connect/confirm'), {method: 'POST'}));
-        if (connected && entries.length) await locateEntries(entries);
-      } catch (error) {
-        connectionCopy.textContent = error.message;
-      } finally {
-        confirmButton.disabled = false;
-      }
+          : `Live catalog setup for ${storeName} is incomplete.`);
+      else updateRouteButton();
     }
 
     function renderMap(geometry) {
@@ -514,7 +462,7 @@
         searchStatus.textContent = query ? 'Type at least 3 characters.' : '';
         return;
       }
-      searchStatus.textContent = 'Searching Lakeline H‑E‑B…';
+      searchStatus.textContent = `Searching ${storeName}…`;
       search.setAttribute('aria-busy', 'true');
       try {
         const body = await jsonFetch(
@@ -528,7 +476,7 @@
       } catch (error) {
         if (error.name === 'AbortError' || request !== searchRequest) return;
         searchStatus.textContent = error.message;
-        if (error.status === 503) showReconnect();
+        if (error.status === 503) showUnavailable(error.message);
       } finally {
         if (request === searchRequest) search.removeAttribute('aria-busy');
       }
@@ -558,7 +506,7 @@
           textNode('span', entry.product.name, 'product-name'),
           textNode('span',
             entry.pending
-              ? (connected ? 'Locating…' : 'Connect H‑E‑B to restore location')
+              ? (connected ? 'Locating…' : 'Live catalog unavailable')
               : entry.placement?.location_label || 'Cannot place on this map',
             'location'),
         );
@@ -603,7 +551,7 @@
         });
       } catch (error) {
         targets.forEach(entry => entry.pending = false);
-        if (error.status === 503) showReconnect();
+        if (error.status === 503) showUnavailable(error.message);
         searchStatus.textContent = error.message;
       } finally {
         locating = false;
@@ -738,7 +686,7 @@
       } catch (error) {
         clearRoute();
         summary.replaceChildren(textNode('p', error.message, 'warning'));
-        if (error.status === 503) showReconnect();
+        if (error.status === 503) showUnavailable(error.message);
       } finally {
         renderDraft();
       }
@@ -767,8 +715,6 @@
         renderSuggestions();
       }
     });
-    connectButton.addEventListener('click', connectHEB);
-    confirmButton.addEventListener('click', confirmHEB);
     routeButton.addEventListener('click', generateRoute);
 
     const ONBOARD = 'onboard';
@@ -777,21 +723,17 @@
       const body = await jsonFetch('/api/stores');
       knownStores = body.stores;
       showBlockedStores();
-      // A store that cannot place products exactly is shown, and shown why —
-      // it is not silently missing, and it is not silently approximate.
-      if (!body.stores.some(store => store.id === storeId && store.ready)) {
-        storeId = (body.stores.find(store => store.ready) || {}).id
+      const catalogStores = body.stores.filter(
+        store => store.catalog_enabled && store.ready);
+      if (!catalogStores.some(store => store.id === storeId)) {
+        storeId = (catalogStores[0] || {}).id
           || body.default;
       }
       storeSelect.replaceChildren();
-      body.stores.forEach(store => {
+      catalogStores.forEach(store => {
         const option = document.createElement('option');
         option.value = store.id;
-        // Not disabled: a blocked store is the one you most want to act on,
-        // and picking it opens the dialog that can finish it rather than
-        // switching the app to a store it cannot route.
-        option.textContent = store.ready ? store.name
-          : `${store.name} — ${store.blocked_reason}`;
+        option.textContent = store.name;
         option.selected = store.id === storeId;
         storeSelect.append(option);
       });
@@ -801,8 +743,6 @@
       storeSelect.append(onboard);
       storeName = (body.stores.find(store => store.id === storeId) || {}).name
         || `store #${storeId}`;
-      document.querySelector('#confirm-label').textContent =
-        `I selected ${storeName}`;
       mapTitle.textContent = `Exact walkable overlay · ${storeName}`;
       document.title = `${storeName} route`;
       return body;

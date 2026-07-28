@@ -23,7 +23,13 @@ from router import calibrate as cal
 from router import engine
 from router.directory import load_directory
 from router.resolve import resolve
-from router.heb import HEBClient, HEBConnectionError
+from router.heb import (
+    HEBBusyError,
+    HEBClient,
+    HEBConnectionError,
+    PLACEMENT_TTL,
+    SUPPORTED_STORES,
+)
 
 os.makedirs("logs", exist_ok=True)
 _handler = logging.handlers.RotatingFileHandler(
@@ -37,6 +43,31 @@ log = logging.getLogger("grocer.app")
 
 DEFAULT_STORE = "659"
 MAX_SNAP_M = 5.0        # nothing on a shelf is further than this from a corridor
+BOOT_ID = secrets.token_hex(8)
+ADMIN_TOKEN = "GROCER_ADMIN_TOKEN"
+LOOPBACK = {"127.0.0.1", "::1", "localhost", "testclient"}
+
+
+def admin(request: Request):
+    """Require the configured bearer token, or a local caller in development."""
+    token = os.environ.get(ADMIN_TOKEN)
+    if token:
+        scheme, _, given = request.headers.get("authorization", "").partition(" ")
+        if scheme.lower() != "bearer" or not secrets.compare_digest(
+                given.encode(), token.encode()):
+            raise HTTPException(401, "admin token required",
+                                headers={"WWW-Authenticate": "Bearer"})
+        return
+    if (request.client.host if request.client else None) not in LOOPBACK:
+        raise HTTPException(403, f"set {ADMIN_TOKEN} to administer from off-box")
+
+
+def heb_http_error(error):
+    if isinstance(error, HEBBusyError):
+        raise HTTPException(
+            429, str(error),
+            headers={"Retry-After": str(error.retry_after)}) from error
+    raise HTTPException(503, str(error)) from error
 
 
 @asynccontextmanager
@@ -50,6 +81,7 @@ async def lifespan(api):
 
 app = FastAPI(title="grocerAlgo — H-E-B store routes", lifespan=lifespan)
 app.state.heb = HEBClient(int(DEFAULT_STORE))
+app.state.catalog_cache = app.state.heb.storage
 app.state.onboarding = None
 
 # Both spellings of a department: H-E-B's Atlas and the printed guide disagree
@@ -165,6 +197,8 @@ def get_store(store_id):
 
 def catalog_store(store_id):
     """A store allowed to place products: exact placement or nothing."""
+    if not str(store_id).isdigit() or int(store_id) not in SUPPORTED_STORES:
+        raise HTTPException(409, f"store {store_id} is not catalog-enabled")
     store = get_store(store_id)
     if store.calibration is None:
         raise HTTPException(409, f"store {store_id} cannot place products yet — "
@@ -303,6 +337,11 @@ class LocateReq(BaseModel):
     products: list[CatalogProduct]
 
 
+class BrowserState(BaseModel):
+    cookies: list[dict] = Field(default_factory=list)
+    origins: list[dict] = Field(default_factory=list)
+
+
 class ProductRouteItem(BaseModel):
     product_id: str
     quantity: int = Field(default=1, ge=1)
@@ -327,14 +366,24 @@ def index():
     return FileResponse("static/index.html")
 
 
+@app.get("/api/health")
+def health():
+    return {"ok": True, "instance": BOOT_ID}
+
+
 @app.get("/api/stores")
 def stores():
     """Every onboarded store, and for those that cannot place products, why."""
     out = []
     for store_id in store_ids():
         reason = cal.blocked_reason(store_id)
-        out.append({"id": store_id, "name": store_name(store_id),
-                    "ready": reason is None, "blocked_reason": reason})
+        out.append({
+            "id": store_id,
+            "name": store_name(store_id),
+            "ready": reason is None,
+            "blocked_reason": reason,
+            "catalog_enabled": int(store_id) in SUPPORTED_STORES,
+        })
     return {"stores": out, "default": DEFAULT_STORE}
 
 
@@ -355,22 +404,48 @@ def heb_status(store: str = Query(DEFAULT_STORE)):
     return app.state.heb.status(store)
 
 
-@app.post("/api/heb/connect")
-async def heb_connect(store: str = Query(DEFAULT_STORE)):
+@app.get("/api/heb/recovery", dependencies=[Depends(admin)])
+def heb_recovery(store: str = Query(DEFAULT_STORE)):
+    catalog_store(store)
+    return app.state.heb.recovery_status(store)
+
+
+@app.post("/api/heb/connect", dependencies=[Depends(admin)])
+async def heb_connect(store: str = Query(DEFAULT_STORE),
+                      fresh: bool = Query(True)):
     catalog_store(store)
     try:
-        return await app.state.heb.connect(store)
+        return await app.state.heb.connect(store, fresh=fresh)
     except HEBConnectionError as e:
-        raise HTTPException(503, str(e)) from e
+        heb_http_error(e)
 
 
-@app.post("/api/heb/connect/confirm")
+@app.post("/api/heb/connect/confirm", dependencies=[Depends(admin)])
 async def heb_confirm(store: str = Query(DEFAULT_STORE)):
     catalog_store(store)
     try:
         return await app.state.heb.confirm(store)
     except (HEBConnectionError, ValueError) as e:
-        raise HTTPException(503, str(e)) from e
+        heb_http_error(e)
+
+
+@app.get("/api/heb/state", dependencies=[Depends(admin)])
+def heb_state(store: str = Query(DEFAULT_STORE)):
+    catalog_store(store)
+    try:
+        return app.state.heb.export_state(store)
+    except HEBConnectionError as e:
+        heb_http_error(e)
+
+
+@app.put("/api/heb/state", dependencies=[Depends(admin)])
+async def heb_import_state(state: BrowserState,
+                           store: str = Query(DEFAULT_STORE)):
+    catalog_store(store)
+    try:
+        return await app.state.heb.import_state(store, state.model_dump())
+    except (HEBConnectionError, ValueError) as e:
+        heb_http_error(e)
 
 
 @app.get("/api/products")
@@ -383,7 +458,7 @@ async def products(q: str = Query(min_length=3),
     try:
         return {"products": await app.state.heb.search(q, store)}
     except (HEBConnectionError, ValueError) as e:
-        raise HTTPException(503, str(e)) from e
+        heb_http_error(e)
 
 
 def snap_distance_m(store, point):
@@ -454,26 +529,17 @@ def exact_map_point(store, location_label, placement):
     return place(store, location_label, placement)[0]
 
 
-LOCATED_PRODUCTS = {}
-
-
 @app.post("/api/products/locate")
 async def locate_products(req: LocateReq, store: str = Query(DEFAULT_STORE)):
     shop = catalog_store(store)
-    # One session carries one store. Placing this store's products through a
-    # session logged into another would pin the wrong building's shelves onto
-    # this map, and every coordinate would look perfectly reasonable.
-    session = getattr(app.state.heb, "store_id", None)
-    if session is not None and session != int(store):
-        raise HTTPException(503, f"Connect store #{store} first")
     located = []
     for model in req.products:
         product = model.model_dump()
         try:
             placement = await app.state.heb.locate(
-                model.id, model.location_label, shop.atlas)
+                model.id, model.location_label, shop.atlas, store)
         except (HEBConnectionError, ValueError) as e:
-            raise HTTPException(503, str(e)) from e
+            heb_http_error(e)
         result = product | {
             "routable": False,
             "approx": None,
@@ -516,7 +582,8 @@ async def locate_products(req: LocateReq, store: str = Query(DEFAULT_STORE)):
                     "y": y,
                     "route_cell": route_cell,
                 }
-        LOCATED_PRODUCTS[(store, model.id)] = result
+        app.state.catalog_cache.save_cache(
+            "located", store, model.id, result, PLACEMENT_TTL)
         located.append({k: v for k, v in result.items()
                         if k != "route_cell"})
     return {"products": located}
@@ -533,7 +600,8 @@ def selected_route(store, items):
 
     groups, unrouted = {}, []
     for product_id in requested:
-        product = LOCATED_PRODUCTS.get((store.id, product_id))
+        product = app.state.catalog_cache.get_cache(
+            "located", store.id, product_id)
         if not product or not product.get("routable"):
             unrouted.append({
                 "product_id": product_id,
@@ -689,37 +757,6 @@ STORE_NUMBER = re.compile(r"^\d{1,4}$")
 CITY_SLUG = re.compile(r"^[a-z-]{2,40}$")
 PIPELINE_STAGE = re.compile(r"^[1-6]$")
 ONBOARDING_STATE = "logs/onboarding.json"
-ADMIN_TOKEN = "GROCER_ADMIN_TOKEN"
-# starlette's TestClient calls itself "testclient" instead of an address — it
-# is the same process, which is as loopback as a client gets.
-LOOPBACK = {"127.0.0.1", "::1", "localhost", "testclient"}
-
-
-def admin(request: Request):
-    """Who may spawn an hour-long agent with permissions skipped.
-
-    Two trust models, and which one is in force is decided by whether the
-    operator set GROCER_ADMIN_TOKEN. Set: the bearer is the only credential,
-    which is what makes putting this on a public address safe. Unset: the
-    credential is being on the box — loopback only, so local dev and the test
-    suite need no configuration, and an exposed deploy refuses rather than
-    quietly onboarding for strangers. Reading endpoints stay public; these
-    three are the ones that start processes.
-    """
-    token = os.environ.get(ADMIN_TOKEN)
-    if token:
-        scheme, _, given = request.headers.get("authorization", "").partition(" ")
-        # compare_digest: a timing oracle on the token is worth more to an
-        # attacker than the microseconds it costs us
-        if scheme.lower() != "bearer" or not secrets.compare_digest(
-                given.encode(), token.encode()):
-            raise HTTPException(401, "admin token required",
-                                headers={"WWW-Authenticate": "Bearer"})
-        return
-    if (request.client.host if request.client else None) not in LOOPBACK:
-        raise HTTPException(403, f"set {ADMIN_TOKEN} to onboard from off-box")
-
-
 def _alive(pid):
     try:
         os.kill(pid, 0)

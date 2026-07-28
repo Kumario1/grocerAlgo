@@ -11,6 +11,7 @@ from fastapi.testclient import TestClient
 import app as app_module
 from app import app
 from router import calibrate
+from router.heb import SUPPORTED_STORES
 
 client = TestClient(app)
 
@@ -76,13 +77,25 @@ def test_only_a_calibrated_store_is_offered_for_routing():
         assert store["ready"] != bool(store["blocked_reason"])
 
 
+def test_public_catalog_is_limited_to_the_six_verified_stores():
+    enabled = {
+        store_id for store_id, store in stores().items()
+        if store["catalog_enabled"]
+    }
+
+    assert enabled == {str(store) for store in SUPPORTED_STORES}
+
+
 @pytest.mark.parametrize("store_id", sorted(stores()))
 def test_a_store_that_cannot_place_products_says_so_and_refuses(store_id):
     listed = stores()[store_id]
     response = client.post(f"/api/products/locate?store={store_id}",
                            json={"products": []})
 
-    if listed["ready"]:
+    if not listed["catalog_enabled"]:
+        assert response.status_code == 409
+        assert "not catalog-enabled" in response.json()["detail"]
+    elif listed["ready"]:
         # Calibrated. The live session may still be on a different store,
         # which is a connection problem and names itself as one.
         assert response.status_code in (200, 503)
