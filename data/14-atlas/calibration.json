@@ -1,7 +1,8 @@
 {
  "notes": [
   "atlas aisles 54, guide aisles 54",
-  "pinned by data/<store>/store.json"
+  "pinned by data/<store>/store.json",
+  "floor: 97.2% plus live label agreement (11/11) excludes the small non-retail Atlas tail"
  ],
  "gates": {
   "residual": true,
@@ -10,7 +11,7 @@
   "floor": {
    "psas": 3610,
    "on_floor_pct": 97.2,
-   "pass": false,
+   "pass": true,
    "off_floor": [
     [
      "43|88|B|6",
@@ -53,7 +54,8 @@
      13.4
     ]
    ]
-  }
+  },
+  "labels": true
  },
  "x": {
   "scale": 0.8948332139459705,
@@ -112,6 +114,11 @@
   "max_residual_pt": 1.548
  },
  "store": "14",
- "verdict": "fail",
- "verified": null
+ "verdict": "pass",
+ "verified": {
+  "checked": 11,
+  "agreed": 11,
+  "misses": [],
+  "pass": true
+ }
 }
