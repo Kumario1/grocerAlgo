@@ -30,7 +30,7 @@ sequence the whole trip. That gap is the product.
 ## Where it is today
 
 A working local app with a **store picker**, a map pipeline that has onboarded
-**7 stores**, and an in-app button to onboard the next one.
+dozens of stores, and an in-app button to onboard the next one.
 
 - Search H-E-B's **live catalog** — real products, real stock state, real
   shelf labels, scoped to one store.
@@ -40,16 +40,14 @@ A working local app with a **store picker**, a map pipeline that has onboarded
 
 **A store is only offered once it can place products exactly.** Being mapped is
 not enough: the store's live Atlas has to be captured and calibrated onto its
-guide, and that calibration has to pass its gates. **Six of the seven pass** —
-24, 265, 269, 659, 790 and 811, each landing 99.4–100% of its shelf positions
-on walkable floor. #388 does not: its guide is a 2011 drawing of a store that
-has since been remodelled. The map converges and the geometry even calibrates
-cleanly, but live shelf labels disagree with where products land — 0 of 11
-checks, and not by any single shift a pin could express — so it is listed with
-that reason instead of being served pins that only look precise. `discover.py`
-now reads those tells off the PDF itself (creation year, foreign store number
-in the title, QuarkXPress tooling, sparse drawings) and warns before an
-onboarding run is spent.
+guide, and that calibration has to pass its gates. **22 stores pass and are
+catalog-enabled** — 6, 14, 16, 24, 25, 26, 28, 31, 38, 39, 178, 183, 189, 224,
+265, 269, 333, 370, 373, 659, 790 and 811. Mapped stores that fail calibration
+(for example #388, whose guide is a 2011 drawing of a remodelled store) stay
+listed with that reason instead of being served pins that only look precise.
+`discover.py` now reads those tells off the PDF itself (creation year, foreign
+store number in the title, QuarkXPress tooling, sparse drawings) and warns
+before an onboarding run is spent.
 
 Against the goals in [`plan.md`](plan.md):
 
@@ -128,10 +126,10 @@ lives in small JSON files under `data/<store>/` — zones, seal zones,
 exclusions, inclusions, walk truth. Adding a store means adding data, never
 code. That constraint is what makes the sixth store as cheap as the second.
 
-![Six H-E-B stores onboarded through the same pipeline](docs/img/stores.png)
+![H-E-B stores onboarded through the same pipeline](docs/img/stores.png)
 
-All six report zero VERIFY flags, zero sealed floor patches, and zero
-unreachable shelf labels.
+Every catalog-enabled store reports zero VERIFY flags, zero sealed floor
+patches, and zero unreachable shelf labels.
 
 ### 3 · Compute the optimal order
 
@@ -176,8 +174,8 @@ entrance. Any placement landing more than 5 m from walkable floor is no longer
 believed; the printed label wins. All 2,677 PSAs in the store are swept in CI
 to keep it that way.
 
-**One browser, one queue.** The six stores have isolated cookies and local
-storage, but uncached navigation is serialized across one Chrome process.
+**One browser, one queue.** Catalog-enabled stores have isolated cookies and
+local storage, but uncached navigation is serialized across one Chrome process.
 Identical searches share one in-flight request; search results persist for five
 minutes and placements for 24 hours in SQLite.
 
@@ -282,8 +280,9 @@ last fallback. The service still starts at tier 1 with local Chrome and no
 proxy. When the rolling 20-navigation failure rate exceeds 5%, it automatically
 activates the configured proxy, then the configured CDP endpoint if the proxy
 also crosses the gate. Set `HEB_START_TIER=2` or `3` only when a previous
-deployment has already failed its cheaper tier. The same six stored contexts
-and global queue are reused, so no six-session pool is needed.
+deployment has already failed its cheaper tier. The same stored contexts
+(one per catalog-enabled store) and global queue are reused, so no
+multi-session pool is needed.
 
 `HEB_QUEUE_TIMEOUT` defaults to five seconds. Requests that cannot enter the
 single browser slot return `429` with `Retry-After`; cached requests bypass it.

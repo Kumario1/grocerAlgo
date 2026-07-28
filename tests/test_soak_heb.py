@@ -1,5 +1,6 @@
 import httpx
 
+from router.heb import SUPPORTED_STORES
 from soak_heb import (
     accepted,
     prime_recovery_cache,
@@ -11,7 +12,7 @@ from soak_heb import (
 def test_soak_gate_requires_every_store_and_every_restart():
     healthy = {
         str(store): {"searches": 20, "search_ok": 19, "located": 5}
-        for store in (24, 265, 269, 659, 790, 811)
+        for store in SUPPORTED_STORES
     }
 
     assert accepted(

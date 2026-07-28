@@ -277,7 +277,11 @@ class HEBBusyError(HEBConnectionError):
         super().__init__("H-E-B is busy; retry shortly")
 
 
-SUPPORTED_STORES = (24, 265, 269, 659, 790, 811)
+SUPPORTED_STORES = (
+    6, 14, 16, 24, 25, 26, 28, 31, 38, 39,
+    178, 183, 189, 224, 265, 269, 333, 370, 373,
+    659, 790, 811,
+)
 SEARCH_TTL = 300
 PLACEMENT_TTL = 24 * 60 * 60
 CACHE_MISS = object()
