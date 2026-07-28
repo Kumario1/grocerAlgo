@@ -1,0 +1,4 @@
+[
+  {"name": "Administrative office block behind the front wall (staff only). Drawn as a walled room x=637.1-812.6, y=714.9-770.6 with the Lease Space above it; the extracted sales-floor boundary happens to run (637.1,714.9)->(733.0,714.9)->(733.0,769.7), so its WEST half falls inside the polygon and stays walkable, and the room's only floor link — the 21.7 pt gap in its west wall between the y=675.0-714.9 and y=736.6-770.6 wall runs — opens onto the restroom lobby, giving it an entrance-reachable path (west past the Lease Space wall at x=634, east along y=716). Offices are not shopping floor, so the whole drawn room is blocked. The restroom lobby north of it (y=713.8-736.6) stays open — it is how customers reach the two restrooms",
+   "rect": [637.6, 714.9, 812.6, 770.6]}
+]

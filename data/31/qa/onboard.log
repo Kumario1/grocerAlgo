@@ -1,0 +1,46 @@
+Store 31 is converged and green. Here's what I found and did.
+
+## Result
+
+`./rebuild.sh 31` → **exit 0**, `2421 passed, 1 skipped`.
+
+```
+verify        []
+coverage      {"sealed_floor_patches": [], "unreachable_shelf_labels": []}
+components    1  sizes: [112072]
+walkable_pct  42.5   reachable_pct 42.5
+provenance    zones=derived  seal_zones/exclusions/inclusions=file  openings/decorations=absent
+```
+
+## Two test failures were environment leakage, not store 31
+
+My first run showed 2 failures. Both are caused by the fleet driver's exported env vars bleeding into pytest:
+
+- `HEB_RUNTIME_DIR=runtime/onboarding-31` breaks `test_heb_client_launches_normal_chrome_instead_of_automation_mode` (it asserts `runtime/chrome`).
+- `PIPE_NO_BROWSER=1` makes `pipeline.sh` defer placement and return 0, breaking `test_pipeline_requires_live_verification_after_offline_pass`.
+
+`env -u HEB_RUNTIME_DIR -u PIPE_NO_BROWSER python3 -m pytest <those two>` → both pass. I ran the final rebuild with those unset. I did not touch `tests/` or `pipeline.sh`. The auditor will see the same two failures if they rebuild with the driver env intact.
+
+## Verification I ran on the inherited data
+
+3×3 printed-map-vs-overlay sweep plus targeted zooms — all corridors green end to end, checkout lanes sealed with the action alley and both front walkways open, self-checkout pod interior open, Business Center / Lease Space / restrooms / Administrative not green, outside-boundary not green.
+
+- **All 19 culled pockets classified.** The big ones are the pharmacy dispensary, deli staff block, Business Center, the enclosed west-wall block, the tobacco back room, the NW dead corner behind the diagonal wine display, both restrooms, the Market-alcove wall cavity, the wine-run sliver, and the six checkstand lanes. The three I had to dig into: the 313-cell pocket at (1122.6, 486.3) is a 0.70 m slot between the produce/bakery case run and the three bakery display boxes (too narrow to shop; the real 1.15 m bakery aisle east of the boxes stays open), and the 277/108-cell deli pockets are the interiors of the two drawn counter bodies.
+- **Label frontage, all 250 printed words** (not just 10 spot probes): every product label is within **0.37 m** of walkable floor. The only words beyond 1 m are `Deli`, `Administrative`, `Entrance`×2, `Carts`, `Bakery`, `Pharmacy`, `Lease Space` — each one a deliberately sealed staff area, an enclosed room, or margin/outside artwork.
+- **`corridor_width.png` has no genuine red.** All red clusters are the red *text* labels in the base render; the only non-text red is 8 px at the NE exterior service door.
+- **Config sanity, verified by ablation.** Dropping `exclusions.json` makes (690, 745) walkable — the boundary really does run `(637.1,714.8)→(733.1,714.8)→(733.1,769.7)`, so the Administrative room's west half is inside the polygon, exactly as the entry's name claims. `inclusions.json` changes no walkable cell; its only effect is suppressing the KITCHEN VERIFY, which is correct — "Kitchen Gadgets" is a vertical *shelf label* in the aisle-4 corridor, not a service kitchen. The `seal_zones.json` checkstand shape fix is load-bearing: the derived rect sealed zero lanes.
+
+## What I changed
+
+Only `data/31/walk_truth.json` (24 must / 22 must_not), adding four points for gaps I found:
+
+- `must [852, 725]` — east entrance approach. The store has two customer entrances and only the west one was covered.
+- `must [118, 300]` — the far-west wine aisle. The three `Wine` labels at x=105.3–131.6 shop off this corridor, not off aisle 17's east side, which was the only west-wing point.
+- `must_not [580, 753]` — women's restroom interior. It seals as its own 854-cell pocket, so the men's-room point never covered it.
+- `must_not [1116, 490]` — the 0.70 m bakery dead slot, paired with the existing `must [1152, 500]` on the real frontage.
+
+## One thing to flag for the audit
+
+`walkable_pct` is 42.5%, above the runbook's nominal 40% ceiling for sparse schematics. I believe it's real, not a sealing miss: this guide has only 670 drawings and 172 fixtures (store 659 has 491), and draws gondolas as thin outlines. Measured against the store interior rather than the page, 31 is 64.3% walkable vs 659's 48.8%, and 31's boundary covers 66% of the page vs 659's 49% — so the page-relative number is inflated by framing too. The complete label probe and the visual sweep are the evidence that no staff-only floor remains.
+
+Stopping here for the separate audit role, per the runbook.

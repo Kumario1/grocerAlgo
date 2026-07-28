@@ -1,0 +1,19 @@
+[
+  {"name": "Bakery service disk (BAKERY label prints in the right margin at x=1190.8, outside the x=1171 east wall, so the disk reaches back over the bakery case run along that wall) — derived disk, carried over unchanged",
+   "pt": [1190.783447265625, 492.48228454589844], "r": 130, "bridge": 12},
+
+  {"name": "Deli service disk (staff side of the Deli block in the south-east corner, behind the two drawn counter runs) — derived disk, carried over unchanged",
+   "pt": [1138.1395263671875, 715.9848022460938], "r": 130, "bridge": 12},
+
+  {"name": "Floral counter disk at the front-left Floral/Tobacco kiosks — derived disk, carried over unchanged",
+   "pt": [382.1435546875, 645.5732421875], "r": 130, "bridge": 12},
+
+  {"name": "Kitchen disk — derived from the 'Kitchen Gadgets' shelf label printed vertically at (807.6-822.0, 198.7-261.3) in the aisle 4 corridor, not from a service counter; kept verbatim (as at 660 and 790) so this file stays a pure shape fix of the checkstand rect. The corridor it over-seals is restored by inclusions.json",
+   "pt": [814.8187866210938, 247.1415786743164], "r": 130, "bridge": 12},
+
+  {"name": "Pharmacy disk over the walled dispensary room (x=90.9-157.3, y=565-738.7) in the south-west corner — derived disk, carried over unchanged",
+   "pt": [133.44842529296875, 654.3527221679688], "r": 130, "bridge": 12},
+
+  {"name": "Checkstand lane bank — SHAPE FIX. The derived rect was [433.3, 519.2, 834.9, 636.3] with bridge 20 and sealed no lane at all: (a) the +/-45 pt window around the CHECKSTANDS label (624.6, 576.3) swept in the aisle-end shelving and one self-checkout unit, dragging the rect north to y=519 (over the aisle 3-13 badge row at y=545 and the whole front action alley) and east to x=834.9; (b) its south edge stopped at y=636.3, above the y=639.9 bottom of the register bodies, so every lane stayed open southward into the front walkway; (c) the seven register bodies stand at x 501.8-515.8, 539.3-553.3, 580.7-594.7, 619.9-633.9, 659.7-673.7, 695.8-709.8, 731.8-745.8, leaving 22.0-27.4 pt lane gaps that a 20 pt bridge cannot close. Retightened to the register cluster itself (x 501.8-745.8, y 591.2-639.9, the same +/-8 pt CHECK_PAD, east edge clipped to the last lane's face so the pad does not reach the open floor between the bank and the self-checkout pod at x=772.5) and the bridge widened to 28 pt so all six lanes seal. The action alley north of y=583 and the front walkway south of y=648 both stay open, and the floor still forms one component",
+   "rect": [493.8, 583.2, 746.0, 647.9], "bridge": 28}
+]

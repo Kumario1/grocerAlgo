@@ -1,0 +1,49 @@
+## Audit report — H‑E‑B store 31 (`guide-austin-31.pdf`, Austin)
+
+### Pass 1 — Mechanical
+
+The first `./rebuild.sh 31` exited non‑zero on `test_heb_client_launches_normal_chrome_instead_of_automation_mode` and `test_pipeline_requires_live_verification_after_offline_pass`. Root cause is the **shell environment, not store data**: `PIPE_NO_BROWSER=1`, `CHROME_PATH` and `HEB_RUNTIME_DIR` are exported in this session and leak into both tests' subprocesses. Re-run under `env -u PIPE_NO_BROWSER -u HEB_RUNTIME_DIR` → both pass. Not a finding.
+
+Clean-env baseline: **exit 0**, `verify: []`, `coverage: {sealed_floor_patches: [], unreachable_shelf_labels: []}`, **1 component** (112 072 cells), walkable **42.5 %**.
+
+**42.5 % > 40 % — documented, not a blocker.** `source.json` flags *"only 670 drawings on the map"*. The guide draws every gondola as a 12.6 pt (0.78 m) hollow outline and leaves the whole front-of-store, Produce and Market as blank floor; 64 % of the boundary interior is walkable, which is what a sparse source yields. Corroborated below by a complete label probe (233/233) and by all 17 aisle corridors being continuous end to end. (`test_walkable_fraction_sane` independently raises its ceiling to 0.45 for sparse-flagged sources.)
+
+All 19 culled pockets in the stats classify to an existing `must_not`. I also enumerated **every** sealed component down to 1 cell (135 total) — see the finding, which lived below the 100-cell reporting floor.
+
+### Finding 1 (fixed) — Bakery east frontage aisle severed in two places
+
+**Where.** PDF pt `(1144–1154, 412–416)` and `(1150–1154, 570)` — the 1.1 m perimeter aisle between the bakery display boxes (east faces 1143.6 / 1148.5) and the east-wall bakery case run (west face 1161.5).
+
+**Evidence.** `/tmp/a31/bakeast_ov.png` (5×) shows the frontage white-barred at y≈414; grid dump of `profile.npz` confirms `x=1152` blocked at y = 412, 414, 416 and at y = 570, with the corridor free above and below. Nothing printed there but blank floor and two door leaves drawn **swung open** into the aisle (strokes `(1155.7,402.6)→(1161.3,391.4)` and `(1155.5,416.1)→(1161.4,405.0)`, each with its swing arc).
+
+**Cause.** The `BAKERY` seal disk (pt 1190.8, 492.5, r 130) bridges gaps ≤ 12 pt. The aisle narrows to 11.7 pt past the open leaves and 13 pt at the last box's corner, so `binary_closing` shut it. The resulting slivers were 26 and 5 cells — **below the 100-cell floor `report.json` prints**, so they never appeared in `culled_pockets`, coverage stayed empty, and the store shipped "converged". Consequence: y = 418–534 of the frontage was reachable only from the south end of the produce/bakery case run, y = 542–568 only from its north end — a ~9 m detour each; BFS from (1152,400) to (1152,500) now costs 6.2 m.
+
+**Truth.** An open door leaf is not a wall; the floor in front of the bakery cases is shoppable end to end.
+
+**Fix type: inclusion** (`data/31/inclusions.json`, rect `[1145.0, 380.0, 1156.0, 576.0]`). Restores only cells the drawing left blank — the leaf strokes, the 0.70 m dead slot at x 1112–1120 (313-cell pocket, `must_not` at 1116,490) and the east-wall run all stay blocked. East edge stopped at 1156.0 because restoring the 2 pt slot *behind* a leaf (x = 1158) added 2- and 3-cell orphans (components 1 → 3 on the first attempt); west edge at 1145.0 because 1143.6 nibbled the box gaps and shrank the dead-slot pocket 313 → 301.
+
+**New `walk_truth` points that would have caught it:** `[1152, 414, …]` and `[1154, 570, …]` — the two pinch cells themselves, each independent of the other.
+
+**After the fix:** exit 0, `verify: []`, coverage empty, **1 component** (112 096), walkable 42.5 %, all 19 pockets byte-identical, 24 cells restored / 0 lost, **2429 passed, 1 skipped**.
+
+### Pass 2 — Visual sweep (no other findings)
+
+3×3 crops plus 9 targeted high-zoom crops. Verified green end-to-end in all 17 aisle corridors; Market/Market-alcove, Dairy, Produce, Bakery, Deli-wedge, Pharmacy-waiting, Floral frontages all fronted by green; front action alley and both walkway ends around the checkstands open; all six checkout lanes sealed; self-checkout pod interior open; both entrance approaches and the cart corral green. Purple/untinted where required: Pharmacy dispensary, Deli staff block, Lease Space, Administrative (exclusion), Business Center, both restrooms, Tobacco back room, west-wall beer cooler, wine-run sliver, NW dead corner behind the diagonal wine display, Market-alcove wall cavity — each probed at **0 free cells**. Nothing green outside the boundary.
+
+Sub-threshold seals I classified and cleared: 80-cell 0.5 m crevice between the two Floral displays; 67-cell strip inside the checkstand bank; 45-cell north lobe of the bakery dead slot; ~9 tick-mark crevices on the Frozen island faces; beer-cooler and north-case sawtooth nibbles; restroom door-leaf cells.
+
+### Pass 3 — Label probes
+
+Not 10 — **all 233 printed page labels**. Every product label probes **0.0 pt** to reachable floor. The only 12 non-zero are department/room/wayfinding text: `Deli` 55 pt and `Pharmacy` 26 pt (printed inside their staff rooms), `Administrative`/`Lease Space` (excluded room), `Bakery` 30 pt (prints outside the x = 1171 wall), `Entrance`/`Exit`/`Carts` (vestibules and apron outside the boundary), `Center` 4 pt (on the Business Center wall).
+
+### Pass 4 — `walk_truth` adequacy
+
+Every wing carries a `must`; every sealed staff area, enclosed room and each of the six lane interiors carries a `must_not`. I re-probed each `must_not` against the actual sealed-component bounding boxes — all lie inside the named feature, not an adjacent frontage (e.g. the two Deli counter-body pockets at 1068,635 / 1126,638 are separate 277- and 108-cell components, the six lanes are six separate 283–318-cell pockets). Two `must` points added for Finding 1.
+
+### Pass 5 — Config sanity
+
+`exclusions.json` (1): Administrative office block — WHY matches the drawing and the odd boundary tail; covers no product label and does not touch the restroom lobby's x-range. `inclusions.json` (2): the Aisle-4 "Kitchen Gadgets" corridor (KITCHEN is a printed shelf label, verified from the page words, not a service counter) and the new Bakery frontage. `seal_zones.json` (6): five derived disks plus the documented checkstand rect shape fix; the KITCHEN false-positive disk is kept verbatim and compensated by its inclusion, as at 660/790. No inclusion blankets a staff room; no exclusion covers a shelf label's only frontage.
+
+---
+
+`AUDIT CLEAN — store 31 (1 finding fixed)`
