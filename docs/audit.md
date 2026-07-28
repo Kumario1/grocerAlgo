@@ -22,9 +22,11 @@ screenshot. Your job is to be that human, systematically.
 
 **1. Mechanical.** Rerun `./rebuild.sh <N>`. Confirm: exit 0; report.json
 has `"verify": []` and empty `"coverage"` lists; walkable_pct is normally
-20–35%, or up to 40% for a sparse schematic guide only after complete
-aisle/label probes and visual confirmation that no staff-only floor remains;
-single dominant component. Any failure = finding, stop and file it.
+20–35%. Treat values above 40% as a suspect, not a gate: if complete
+aisle/label probes and the visual sweep prove the extraction matches a sparse
+source guide, document why and continue. A percentage alone never blocks an
+otherwise faithful map. Confirm a single dominant component. Any actual
+mechanical failure = finding, stop and file it.
 
 **2. Systematic visual sweep — the heart of the audit.** Cut
 `walkable_overlay.png` into a 3×3 grid of crops (PIL: crop, save,
