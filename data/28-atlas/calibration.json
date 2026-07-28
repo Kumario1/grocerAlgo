@@ -1,8 +1,7 @@
 {
  "notes": [
   "atlas aisles 31, guide aisles 33",
-  "y: aisle labels did not constrain this axis, so its scale came from the other axis and its offset from the walkable floor",
-  "aisle offsets x-2 y=floor: 100% of sampled shelves land on a walkable cell and 14 anchors agree, against 96%/16 for x=floor y-4"
+  "pinned by data/<store>/store.json"
  ],
  "gates": {
   "residual": true,
@@ -10,132 +9,84 @@
   "scale_skew": true,
   "floor": {
    "psas": 2009,
-   "on_floor_pct": 99.6,
+   "on_floor_pct": 99.7,
    "pass": true,
    "off_floor": [
     [
      "16|1|A|4",
-     13.8
+     null
     ],
     [
      "16|1|A|6",
-     13.8
+     20.3
     ],
     [
      "16|1|A|5",
-     13.6
+     19.9
     ],
     [
      "16|1|A|3",
-     12.5
+     18.2
     ],
     [
      "16|1|A|2",
-     11.4
+     17.8
     ],
     [
      "16|1|A|1",
-     9.2
-    ],
-    [
-     "10|95|A|1",
-     5.1
-    ],
-    [
-     "10|91|B|6",
-     5.0
+     15.4
     ]
    ]
   },
-  "labels": false
+  "labels": true
  },
  "x": {
-  "scale": 1.0549743366255342,
-  "offset": 270.59363142839203,
+  "scale": 1.1218566010402364,
+  "offset": 186.92997613468512,
   "inliers": [
+   3,
+   4,
+   5,
+   6,
    7,
    8,
    9,
    10,
    11,
-   15,
+   12,
+   13,
+   14,
+   15
+  ],
+  "aisle_offset": 0,
+  "source_axis": 0,
+  "pinned": true,
+  "max_residual_pt": 2.206
+ },
+ "y": {
+  "scale": 1.079017630851416,
+  "offset": 110.18999578174339,
+  "inliers": [
+   17,
    18,
    19,
    20,
+   21,
+   22,
    23,
-   24,
-   25,
-   26,
-   27
+   24
   ],
-  "max_residual_pt": 2.531,
-  "aisle_offset": -2,
-  "source_axis": 0
- },
- "y": {
-  "scale": 1.0549743366255342,
-  "offset": 100.0,
-  "inliers": [],
-  "aisle_offset": null,
+  "aisle_offset": 0,
   "source_axis": 1,
-  "derived": true,
-  "max_residual_pt": null
+  "pinned": true,
+  "max_residual_pt": 2.781
  },
  "store": "28",
- "verdict": "fail",
+ "verdict": "pass",
  "verified": {
   "checked": 10,
-  "agreed": 2,
-  "misses": [
-   {
-    "product": "H-E-B Round Top Large White Enriched Sliced\u00a0Bread, 20 oz",
-    "label": "Aisle 4",
-    "want": "AISLE 4",
-    "got": "AISLE 2"
-   },
-   {
-    "product": "H-E-B Original Fajita Flour Tortillas, 20 ct",
-    "label": "Aisle 4",
-    "want": "AISLE 4",
-    "got": "AISLE 2"
-   },
-   {
-    "product": "General Mills Cinnamon Toast Crunch Cereal - Mega Size, 27 oz",
-    "label": "Aisle 9",
-    "want": "AISLE 9",
-    "got": "AISLE 7"
-   },
-   {
-    "product": "H-E-B Healthy Roasted Garlic Pasta Sauce, 15.5 oz",
-    "label": "Aisle 6",
-    "want": "AISLE 6",
-    "got": "AISLE 4"
-   },
-   {
-    "product": "CAFE Ol\u00e9 by H-E-B Texas Pecan Medium Roast Ground Coffee, 12 oz",
-    "label": "Aisle 11",
-    "want": "AISLE 11",
-    "got": "AISLE 9"
-   },
-   {
-    "product": "Dove Coconut & Hydration Shampoo & Conditioner, 2 Pk, 24 oz",
-    "label": "Aisle 25",
-    "want": "AISLE 25",
-    "got": "AISLE 24"
-   },
-   {
-    "product": "H-E-B Made in Texas Creamy Peanut Butter, 28 oz",
-    "label": "Aisle 4",
-    "want": "AISLE 4",
-    "got": "AISLE 2"
-   },
-   {
-    "product": "H-E-B Black Beans, 15 oz",
-    "label": "Aisle 7",
-    "want": "AISLE 7",
-    "got": "AISLE 5"
-   }
-  ],
-  "pass": false
+  "agreed": 10,
+  "misses": [],
+  "pass": true
  }
 }

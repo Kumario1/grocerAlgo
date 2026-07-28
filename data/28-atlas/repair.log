@@ -1,0 +1,44 @@
+Both commands pass. Store 28 is calibrated.
+
+## What was wrong
+
+Both drawings have the same layout: aisles 1–15 in a top row (x varies, y constant) and 16–31 in a left column (y varies, x constant ≈ 155 in the Atlas / 434 in the guide).
+
+Because the column's Atlas x-coordinates are nearly constant, they act as a single degenerate point for any x fit. The search exploited that: its winning x candidate (shift −2, scale 1.055) drew a line through the row cluster at one end and the column cluster at the other, collecting 14 "inliers" of which 10 carried no x information at all. That off-scale x then forced the y axis to be derived from the walkable floor — and a floor-derived offset can't rule out a whole-aisle slip, which is exactly what happened. Live labels showed the damage: 2/10, with products labelled Aisle 4/6/7/9/11 pinned two aisles low.
+
+## The correspondence
+
+There is no vintage renumbering here — it's identity on both axes. Fitting each axis only from the aisles that actually span it:
+
+- **x** from row aisles 3–15: scale 1.12186, residual 2.21 pt, shift 0. Aisles 1–2 are the wide front aisles whose labels sit ~5 pt off the run in both drawings, so they're outside the pin.
+- **y** from column aisles 17–24: scale 1.07902, residual 2.78 pt, shift 0. This is the widest identity range in the column that clears the 3 pt residual bar; it extrapolates to within 2.4 pt at aisles 28–31 and 3.3 pt at 16.
+
+The guide's 33 aisles vs the Atlas's 31 are accounted for by guide aisles 32–33 sitting past the end of the Atlas column, not by a shift — so no `aisle_label_shift` is warranted. I confirmed this offline before touching the network: mapping all 24 dry-grocery shelf runs through the transform, every one lands in the guide aisle bearing its own number.
+
+## Change
+
+`data/28/store.json` (new file, the only file I edited):
+
+```json
+{
+ "atlas_fit": {
+  "x": {"atlas": [3, 15], "guide": [3, 15]},
+  "y": {"atlas": [17, 24], "guide": [17, 24]}
+ }
+}
+```
+
+## Results
+
+```
+x: scale 1.12186 offset 186.93 from 13 aisles (shift +0), residual 2.206 pt [pinned]
+y: scale 1.07902 offset 110.19 from  8 aisles (shift +0), residual 2.781 pt [pinned]
+floor: 99.7% of 2009 PSAs land on reachable floor
+labels: 10/10 products pinned to the aisle their label names
+gates: residual=ok margin=ok scale_skew=ok floor=ok labels=ok
+PASS
+```
+
+No gate was relaxed and no live-label resolution was invoked — the floor gate passes at 99.7% against the strict 99% bar on its own, and labels are 10/10 with zero misses. One caveat worth recording: axis skew is 3.97%, inside the 5% bar but not comfortably. It's real, not fitting error — the guide draws its aisle column about 3% tighter than its aisle row, so the column's internal spacing is the limiting factor on how wide the y pin can be.
+
+`data/28-atlas/calibration.json` was rewritten by the two validation runs, as those commands do by design.
