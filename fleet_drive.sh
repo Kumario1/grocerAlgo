@@ -4,7 +4,6 @@
 #   ./fleet_drive.sh                 drive every store in stores.txt
 #   ./fleet_drive.sh 658 660         drive only these stores
 #   FLEET_REF=<commit> ./fleet_drive.sh    pin worktrees to a commit
-#   FLEET_RETRY=1 ./fleet_drive.sh   retry stores marked FLEET_FAILED
 #
 # What the first driver (fleet_all.sh) got wrong, and this one fixes:
 #   - one store at a time: a usage-limit hit costs one stage of one store,
@@ -50,7 +49,7 @@ trap 'rm -f "$PIDFILE"; exit 1' HUP INT TERM
 # ---- state -----------------------------------------------------------------
 
 # The furthest checkpoint decides what happens next. Echoes one of:
-#   done | placement | calibration_blocked | blocked | failed | 1 | 3 | 4 | 5
+#   done | placement | 1 | 3 | 4 | 5
 # (5 = audit already CLEAN: rerun the mechanical verdict/output stage on the
 # current ref, and its exit 0 is what triggers promotion — the pipeline stays
 # the only judge of "green", the driver never re-implements it)
@@ -63,17 +62,9 @@ stage_for() {
 import json, sys
 record = json.load(open(sys.argv[1]))
 verified = record.get("verified")
-failed = [
-    name for name, gate in record.get("gates", {}).items()
-    if not (gate.get("pass") if isinstance(gate, dict) else gate)
-]
-retryable = verified is None and (
-    record.get("verdict") == "pass" or failed == ["margin"])
 print("done" if record.get("verdict") == "pass" and
       isinstance(verified, dict) and verified.get("pass")
-      else "placement" if retryable or
-      __import__("os").environ.get("FLEET_RETRY")
-      else "calibration_blocked")
+      else "placement")
 EOF
         else
             echo placement
@@ -81,7 +72,6 @@ EOF
         return
     fi
     [ -d "$wt" ] || { echo 1; return; }
-    [ -z "${FLEET_RETRY:-}" ] && [ -f "$wt/FLEET_FAILED" ] && { echo failed; return; }
     if [ -f "$d/walk_truth.json" ]; then
         if [ ! -f "$d/qa/post_onboard.ok" ] &&
                 { ! grep -Eq '[0-9]+ passed' "$d/qa/post_onboard.log" 2>/dev/null ||
@@ -91,7 +81,10 @@ EOF
         fi
         if [ -f "$d/qa/audit.log" ]; then
             tail -5 "$d/qa/audit.log" | grep -q "AUDIT CLEAN" && { echo 5; return; }
-            tail -5 "$d/qa/audit.log" | grep -q "AUDIT BLOCKED" && { echo blocked; return; }
+            if tail -5 "$d/qa/audit.log" | grep -q "AUDIT BLOCKED"; then
+                echo 4
+                return
+            fi
         fi
         echo 4
         return
@@ -169,15 +162,6 @@ place() {
     return "$rc"
 }
 
-place_blocked_audit() {
-    s=$1
-    say "place  $s — audit blocked, checking placement independently"
-    (cd "$ROOT/.wt/$s" &&
-        HEB_RUNTIME_DIR="$ROOT/runtime/onboarding-$s" PIPE_PYTHON="$PYTHON" \
-        ./pipeline.sh "$s" --from 6) >> "$LOG/$s.log" 2>&1
-    say "BLOCK  $s — audit blocked, worktree kept: .wt/$s"
-}
-
 # Did a qa log WRITTEN DURING THIS RUN (newer than the mark file — stale
 # limit lines from an earlier cascade sit at the tail of old logs) match a
 # pattern? Prints matching tail lines.
@@ -216,10 +200,6 @@ while read -r S CITY; do
         case $st in
             done)    say "skip   $S — already in main"; break ;;
             placement) place "$S"; break ;;
-            calibration_blocked)
-                say "BLOCK  $S — incompatible guide/Atlas; FLEET_RETRY=1 after source repair"
-                break ;;
-            failed)  say "skip   $S — FLEET_FAILED marker (FLEET_RETRY=1 to retry)"; break ;;
         esac
 
         WT="$ROOT/.wt/$S"
@@ -236,11 +216,6 @@ while read -r S CITY; do
             heal_ref "$S" || { say "FAIL   $S — worktree heal failed"; break; }
             continue      # recompute the stage off the healed tree
         fi
-        if [ "$st" = blocked ]; then
-            place_blocked_audit "$S"
-            break
-        fi
-
         say "start  $S${CITY:+ ($CITY)} — stage $st"
         touch "$LOG/.mark-$S"
         if [ "$st" = 1 ] && [ -n "$CITY" ]; then
@@ -256,7 +231,7 @@ while read -r S CITY; do
         fi
         if tail -5 "$WT/data/$S/qa/audit.log" 2>/dev/null |
                 grep -q "AUDIT BLOCKED"; then
-            place_blocked_audit "$S"
+            say "BLOCK  $S — audit unresolved, worktree kept: .wt/$S"
             break
         fi
 

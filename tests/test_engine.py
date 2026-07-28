@@ -11,6 +11,13 @@ def test_build_grid_blocks_fixture_interior():
     assert not free[5, 5]          # inside the fixture
     assert free[0, 0] and free[9, 9]
 
+def test_opening_clears_only_a_wall_not_a_fixture():
+    geom = {**TOY_GEOM, "obstacle_paths": [[[0, 20], [40, 20]]]}
+    opening = [{"rect": [8, 18, 22, 22]}]
+    free = engine.build_grid(geom, cell=4.0, openings=opening)
+    assert free[5, 3] and not free[5, 6]
+    assert not free[5, 5]             # opening overlaps but cannot erase shelf
+
 def test_bfs_routes_around_obstacle():
     free = engine.build_grid(TOY_GEOM, cell=4.0)
     dist, parent = engine.bfs(free, (0, 5))         # left of shelf

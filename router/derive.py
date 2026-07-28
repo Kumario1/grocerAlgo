@@ -219,12 +219,14 @@ def load_store(store_dir):
     geom = json.load(open(os.path.join(store_dir, "geometry.json")))
     zones = _load_json(os.path.join(store_dir, "zones.json"))
     exclusions = _load_json(os.path.join(store_dir, "exclusions.json"))
+    openings = _load_json(os.path.join(store_dir, "openings.json"))
     inclusions = _load_json(os.path.join(store_dir, "inclusions.json"))
     seal_zones = _load_json(os.path.join(store_dir, "seal_zones.json"))
     provenance = {name: ("file" if val is not None else "absent")
                   for name, val in (("zones", zones),
                                     ("seal_zones", seal_zones),
                                     ("exclusions", exclusions),
+                                    ("openings", openings),
                                     ("inclusions", inclusions))}
     drift = {}
 
@@ -252,7 +254,8 @@ def load_store(store_dir):
             f"{store_dir}/zones.json must define ENTRANCE and CHECKOUT "
             f"(has: {sorted(zones)})")
     return {"geom": geom, "anchors": anchors, "zones": zones,
-            "exclusions": exclusions or [], "inclusions": inclusions or [],
+            "exclusions": exclusions or [], "openings": openings or [],
+            "inclusions": inclusions or [],
             "seal_zones": seal_zones or [], "provenance": provenance}
 
 
@@ -281,7 +284,8 @@ def build_free(cfg, seed_name="ENTRANCE"):
         incl_mask   bool mask of the inclusion shapes
     """
     geom, anchors = cfg["geom"], cfg["anchors"]
-    free_raw = engine.build_grid(geom, exclusions=cfg["exclusions"])
+    free_raw = engine.build_grid(
+        geom, exclusions=cfg["exclusions"], openings=cfg["openings"])
     h, w = free_raw.shape
 
     if seed_name in anchors:

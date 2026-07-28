@@ -10,7 +10,7 @@ from scipy import ndimage
 # is the ONLY number to change for a different resolution.
 CELL = 2.0
 
-def build_grid(geom, cell=CELL, exclusions=()):
+def build_grid(geom, cell=CELL, exclusions=(), openings=()):
     """True = walkable.
 
     Walkable space starts as the interior of the sales-floor boundary
@@ -19,8 +19,9 @@ def build_grid(geom, cell=CELL, exclusions=()):
     line, and exclusion shapes (hand-QA zones the drawing shows open but
     shoppers can't use, e.g. behind-Dairy) block like fixtures.
     `exclusions` is a list of {"rect": ...} / {"poly": ...} entries
-    (see shape_mask). Geometries without a boundary (toy tests) start
-    fully walkable.
+    (see shape_mask). `openings` uses the same shapes but clears only wall
+    strokes, for doorways the PDF paints white over an unbroken line.
+    Geometries without a boundary (toy tests) start fully walkable.
     """
     w = int(np.ceil(geom["page"]["w"] / cell))
     h = int(np.ceil(geom["page"]["h"] / cell))
@@ -40,12 +41,16 @@ def build_grid(geom, cell=CELL, exclusions=()):
                             (h, w), cell)
     if exclusions:
         free &= ~shape_mask(exclusions, (h, w), cell)
+    walls = np.zeros_like(free)
     for (x0, y0), (x1, y1) in geom["obstacle_paths"]:
         n = max(2, int(max(abs(x1 - x0), abs(y1 - y0)) / cell) * 2)
         for t in np.linspace(0, 1, n):
             cx, cy = int((x0 + t * (x1 - x0)) // cell), int((y0 + t * (y1 - y0)) // cell)
             if 0 <= cy < h and 0 <= cx < w:
-                free[cy, cx] = False
+                walls[cy, cx] = True
+    if openings:
+        walls &= ~shape_mask(openings, (h, w), cell)
+    free &= ~walls
     return free
 
 def bfs(free, start):
