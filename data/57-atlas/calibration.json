@@ -1,0 +1,123 @@
+{
+ "notes": [
+  "atlas aisles 37, guide aisles 39",
+  "y: aisle labels did not constrain this axis, so its scale came from the other axis and its offset from the walkable floor",
+  "aisle offsets x+0 y=floor: 100% of sampled shelves land on a walkable cell and 20 anchors agree, against 100%/13 for x+1 y=floor"
+ ],
+ "gates": {
+  "residual": true,
+  "margin": true,
+  "scale_skew": true,
+  "floor": {
+   "psas": 3043,
+   "on_floor_pct": 99.74,
+   "pass": true,
+   "off_floor": [
+    [
+     "16|1|A|1",
+     15.9
+    ],
+    [
+     "16|1|A|2",
+     15.8
+    ],
+    [
+     "16|1|A|4",
+     15.7
+    ],
+    [
+     "16|1|A|3",
+     15.4
+    ],
+    [
+     "15|88|B|1",
+     7.3
+    ],
+    [
+     "15|88|B|2",
+     6.4
+    ],
+    [
+     "15|88|B|3",
+     5.7
+    ],
+    [
+     "05|88|A|4",
+     5.2
+    ]
+   ]
+  },
+  "labels": false
+ },
+ "x": {
+  "scale": 0.9760666308791058,
+  "offset": 240.84097798396084,
+  "inliers": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   36,
+   37,
+   38,
+   39
+  ],
+  "max_residual_pt": 2.49,
+  "aisle_offset": 0,
+  "source_axis": 0
+ },
+ "y": {
+  "scale": 0.9760666308791058,
+  "offset": 46.0,
+  "inliers": [],
+  "aisle_offset": null,
+  "source_axis": 1,
+  "derived": true,
+  "max_residual_pt": null
+ },
+ "store": "57",
+ "verdict": "fail",
+ "verified": {
+  "checked": 12,
+  "agreed": 8,
+  "misses": [
+   {
+    "product": "H-E-B Reduced Fat 2% Milk, 1 gal",
+    "label": "Aisle 37",
+    "want": "AISLE 37",
+    "got": "AISLE 24"
+   },
+   {
+    "product": "H-E-B Mi Tienda Ready to Cook Flour Tortillas, 36 ct",
+    "label": "Aisle 38",
+    "want": "AISLE 38",
+    "got": "AISLE 24"
+   },
+   {
+    "product": "Dove Coconut & Hydration Shampoo & Conditioner, 2 Pk, 24 oz",
+    "label": "Aisle 28",
+    "want": "AISLE 28",
+    "got": "AISLE 27"
+   },
+   {
+    "product": "Dawn Platinum Refreshing Rain Scent Ez-Squeeze Liquid Dish Soap, 18 oz",
+    "label": "Aisle 19",
+    "want": "AISLE 19",
+    "got": "AISLE 18"
+   }
+  ],
+  "pass": false
+ }
+}
