@@ -23,6 +23,6 @@ COPY . .
 RUN mkdir -p /app/runtime
 
 EXPOSE 8000
-VOLUME ["/app/runtime"]
+# Persist /app/runtime with a Railway Volume (Docker VOLUME is not supported).
 
 CMD ["sh", "-c", "Xvfb :99 -screen 0 1280x720x24 -nolisten tcp & exec python -m uvicorn app:app --host 0.0.0.0 --port ${PORT:-8000} --workers 1"]
