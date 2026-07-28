@@ -1,0 +1,118 @@
+{
+ "notes": [
+  "atlas aisles 26, guide aisles 25",
+  "y: aisle labels did not constrain this axis, so its scale came from the other axis and its offset from the walkable floor",
+  "aisle offsets x-3 y=floor: 100% of sampled shelves land on a walkable cell and 12 anchors agree, against 99%/11 for x-4 y=floor"
+ ],
+ "gates": {
+  "residual": true,
+  "margin": true,
+  "scale_skew": true,
+  "floor": {
+   "psas": 1592,
+   "on_floor_pct": 100.0,
+   "pass": true,
+   "off_floor": []
+  },
+  "labels": false
+ },
+ "x": {
+  "scale": 1.3022018352666547,
+  "offset": 269.6312890357985,
+  "inliers": [
+   8,
+   9,
+   11,
+   13,
+   17,
+   18,
+   19,
+   22,
+   23,
+   24,
+   25,
+   26
+  ],
+  "max_residual_pt": 2.583,
+  "aisle_offset": -3,
+  "source_axis": 0
+ },
+ "y": {
+  "scale": 1.3022018352666547,
+  "offset": -51.0,
+  "inliers": [],
+  "aisle_offset": null,
+  "source_axis": 1,
+  "derived": true,
+  "max_residual_pt": null
+ },
+ "store": "229",
+ "verdict": "fail",
+ "verified": {
+  "checked": 10,
+  "agreed": 0,
+  "misses": [
+   {
+    "product": "H-E-B Split Top Honey Wheat Enriched Sliced\u00a0Bread, 20 oz",
+    "label": "Aisle 2",
+    "want": "AISLE 2",
+    "got": "AISLE 1"
+   },
+   {
+    "product": "H-E-B Mixla Corn & Flour Blend Tortillas - Texas-Size Pack, 24 ct",
+    "label": "Aisle 2",
+    "want": "AISLE 2",
+    "got": "AISLE 1"
+   },
+   {
+    "product": "Post Fruity Pebbles Cereal Bag, 32 oz",
+    "label": "Aisle 7",
+    "want": "AISLE 7",
+    "got": "AISLE 4"
+   },
+   {
+    "product": "H-E-B Healthy Roasted Garlic Pasta Sauce, 15.5 oz",
+    "label": "Aisle 3",
+    "want": "AISLE 3",
+    "got": "AISLE 1"
+   },
+   {
+    "product": "H-E-B Classic Roast Medium Ground Coffee, 39 oz",
+    "label": "Aisle 9",
+    "want": "AISLE 9",
+    "got": "AISLE 6"
+   },
+   {
+    "product": "Dove Coconut & Hydration Shampoo & Conditioner, 2 Pk, 24 oz",
+    "label": "Aisle 22",
+    "want": "AISLE 22",
+    "got": "AISLE 19"
+   },
+   {
+    "product": "H-E-B Uncured Pepperoni Thin Crust Frozen Pizza, 14.15 oz",
+    "label": "Aisle 11",
+    "want": "AISLE 11",
+    "got": "AISLE 8"
+   },
+   {
+    "product": "H-E-B Made in Texas Creamy Peanut Butter, 28 oz",
+    "label": "Aisle 2",
+    "want": "AISLE 2",
+    "got": "AISLE 1"
+   },
+   {
+    "product": "H-E-B Black Beans, 15 oz",
+    "label": "Aisle 4",
+    "want": "AISLE 4",
+    "got": "AISLE 2"
+   },
+   {
+    "product": "Hill Country Fare Liquid Dish Soap - Original Scent, 25 oz",
+    "label": "Aisle 17",
+    "want": "AISLE 17",
+    "got": "AISLE 14"
+   }
+  ],
+  "pass": false
+ }
+}
