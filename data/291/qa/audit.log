@@ -1,0 +1,32 @@
+All passes complete. Rebuild is green: exit 0, `verify: []`, both coverage lists empty, 1 component, 32.0% walkable, 766/766 tests pass (up from 760 — the 6 new truth points are 6 new test cases).
+
+## Findings, worst first
+
+**1 — East entry lobby: 56.4 m² sealed with zero documentation** *(largest defect)*
+- **Where:** pocket at PDF pt **(1044, 661)**, bbox x 961.8–1153.8 / y 636–683.8 — 1631 cells. Report lists it as "1631 cells near PHARMACY"; the name is misleading, it is the store's **east Exit/Entrance lobby** with its arrow pair, two cart nests and a bench.
+- **Evidence:** crop `w_r2c2` shows the whole SE front white, not green; isolated-pocket render `/tmp/a291/pk_p1631.png` shows the doors sitting inside orange (culled) floor.
+- **Truth:** it *is* correctly sealed. I ablated every seal zone and both exclusions one at a time — the pocket never reconnects, so it is drawn-sealed, not a seal-rim over-reach. Its north edge is continuous drawn wall (`[1009.8,629.2,1056.2,636.2]` + zero-height stroke `[1056.1,636.1,1117,636.1]` + `[1103.6,635.8,1153,639.4]`, continued west by the 1.15-pt lobby walls) with no 20-pt jambed opening — the inner doors simply aren't drawn. Same call as store 660's east vestibule. No product or shelf label lies inside, so nothing routable is lost.
+- **Defect:** the 56 m² cull was completely silent — no `walk_truth` point, no mention in any of the five JSONs. That is exactly the store-24 failure shape, minus the luck.
+- **Fix (applied):** `walk_truth` `must_not` at **(1044, 668)** and **(1000, 672)** — the second deliberately on structurally-free floor clear of the glyph ink, so the pocket can't start passing on artwork. Plus a `must` at **(1060, 630)** guarding the live front walkway just north of the lobby wall.
+
+**2 — Enclosed room at (600, 645) undocumented** — 368 cells / 12.7 m², x 580–626 / y 626–662, walled on all four sides with no drawn opening. `walk_truth` had `[633,610]` for the *adjacent, narrower* room (`[626.3,598.5,655.1,663.5]`) but nothing for this one. Fix: `must_not` **(600, 645)**.
+
+**3 — South restroom undocumented** — 150 cells / 5.2 m², x 495–517.3 / y 592–623.3, the twin below the y=592 divider. Only the north room was covered. Fix: `must_not` **(505, 606)**.
+
+**4 — Mislabeled coverage at (505, 575)** — described as "west of the vestibule wall x=479.3"; the room is at x 495–517.3, i.e. **east** of it (the vestibule bay `[441.3,570.1,480.2,664.2]` is the customer half). Point was right, the reason was backwards. Fix: corrected text.
+
+**5 — Meal Simple had no `must` point** — a named department (title 299,439; open case `[329,427,347.1,492.4]`) with **no extracted anchor** in `geometry.json`; nearest `must` was Floral at 5.6 m. Floor around it is green on all four sides. Fix: `must` **(325, 460)**.
+
+## Passes that came back clean
+
+- **Mechanical:** exit 0; `verify: []`; `sealed_floor_patches` and `unreachable_shelf_labels` both empty; 32.0% walkable, all entrance-reachable; single component `[77622]`.
+- **All 20 culled pockets classified:** Deli service block (staff, purple), the east lobby (F1), SW back room, Business Center, two restrooms, the room at (633,610), F2's room, ten checkout-lane interiors, and sub-3 m² crevices (wall-shelf slot at x 1170–1180, Floral/Bakery scallop teeth, door-glyph interiors, west-wall gaps). The 701- and 471-cell "CHECKSTANDS/PHARMACY" pockets are lane interiors plus the 8-pt register apron, with one 1 m dead-end alcove at (978, 635) walled at x=973.4/x=984.9/y=647.9 — no frontage, no label.
+- **Visual sweep:** all 19 aisle corridors green end to end; Market back alley, Dairy scallop frontage, Frozen runs, Produce, Bakery both walkways, Seafood (free-standing case *and* the scalloped wall case), Floral south frontage, Deli north frontage, restroom vestibule, Pharmacy approach all green. NW back-of-house wedge and Pharmacy room salmon; Deli block purple; checkout lanes sealed with the front action alley and south walkway open; the big NE white block is the Dairy walk-in cooler fixture, and the east-wall strip is the wall-shelf `[1164.5,187.4,1179.8,450.3]` — both correctly untinted, not lost floor.
+- **Label probes:** rather than 10, I probed **every** text label on the map page against the shipped grid via a distance transform on `profile.npz`. All 41 product labels and all 13 department titles sit at **0.00 m** from reachable floor. The only non-zero results are the two `Entrance`/`Exit` glyph texts (west one printed outside the outline, east one in the sealed lobby) — no product is stranded.
+- **Config sanity:** both exclusions state a WHY that the drawing supports (traced wall vertices; alcove with zero fixtures/labels), and neither covers a shelf label's only frontage — the Floral cases sit *south* of the wedge polygon and their scallop frontage is green. All four inclusions restore only customer floor, and since exclusions are applied first the Bakery rect cannot reach back into the wedge. All six seal zones are named with rationale; the retightened checkstand rect is correct.
+
+## Note for the human (not a finding)
+
+Store 291 has two customer entrances but only one `ENTRANCE` anchor (the west one, at 199.7/660.4, snapping 4.4 m inside). Because the east lobby is drawn closed, routes can never start there. That is PDF-driven and matches store 660, and no product placement is affected — but if east-door route starts ever matter, it needs a drawing-level or code-level answer, not a data edit.
+
+`AUDIT CLEAN — store 291 (5 findings fixed)`

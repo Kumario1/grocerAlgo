@@ -1,0 +1,26 @@
+Store 291 (H-E-B Harlingen) is converged. `./rebuild.sh 291` exits 0, `report.json` has `"verify": []` and both `coverage` lists empty, one connected component, 760 tests pass (including 659's pixel-frozen golden).
+
+## What the first pass got wrong, and the fix
+
+**1. Pharmacy room read 100% walkable** → `exclusions.json` (poly)
+A 90 m² alcove in the SE corner containing nothing but the printed "Pharmacy" title — no fixture, no counter, no product label — walled on every side (curved 1.15-pt wall stroke west, wall-shelf rect [1164.5,187.4,1179.8,450.3] north, wall y=639.45 south, building outline east). It was reachable only through two sub-cell raster leaks in that drawn wall: the BFS route in crosses the curve at (1155–1159, 495), and a second 3.6×1.5-pt hole sits where the wall rect corner (1109.8,634.6) fails to meet the wall jog at (1103.6,635.8). Every real opening on this map is drawn ≥20 pt with jambs. Matches 790/659/265, where only a *drawn* waiting recess in front of a *drawn* counter is customer space — this guide draws neither.
+
+**2. Seafood VERIFY** → `inclusions.json`
+The title sits on open Market floor beside a freestanding diagonal case with walkable floor on all four sides. The real seafood service case is the scalloped wall run at x=300–335, served from the sealed back room.
+
+**3. 211 m² NW back-of-house was sealed only by a leaking staff door** → `exclusions.json` (poly, traced vertex-for-vertex off the one continuous 0.575-pt wall stroke). The FLORAL title is printed inside it. That door leak (x=294.8–296.4) is what merged **78 m² of Bakery customer floor** — two display tables and the aisle around them — into the same culled pocket, which the BAKERY title then condemned as staff. Restored by an inclusion.
+
+**4. Derived CHECKSTANDS rect ate ten aisle mouths** → `seal_zones.json` override. One stray fixture (aisle-19 end display [1069.6,483.6,1082.9,503.2]) landed in the ±200×±45 pt window and dragged the bbox 74 pt north of the first register, while the same window clipped the registers' own south ends back out. With bridge 20 that sealed every 16–20 pt aisle mouth at y=476–514, leaving aisles 9–19 enterable only from the north. Retightened to the 76 register fixtures (x=730–1065, y=557.7–614.1, pad 8). The override also drops the `auto:KITCHEN` disk — KITCHEN here is the printed "Kitchen Gadgets" category column in aisle 13, the same false anchor as stores 24/388/658/660/790/811.
+
+**5. Restrooms vestibule (11 m²) culled** → `inclusions.json`. A 3.5×7 m walled bay off the front alley, sealed by the DELI disk's rim reaching 10 m from (333.4,580.6) and bridging its 16-pt mouth. Verified by rebuilding with that one disk removed: the bay is then free and reachable with no other change.
+
+`walk_truth.json`: 20 `must` / 18 `must_not` — page corners and parking, both staff blocks, the Deli block interior, two checkout-lane interiors, four drawing-enclosed rooms; entrance approach, produce walkway, front alley, front walkway, back alley, six named aisle corridors, and each department's customer frontage.
+
+## Two things the audit should see, not surprises
+
+- **Right-hand entrance vestibule (x 944–1152, y 638–682, 56 m²) stays unreachable.** The drawing encloses it: wall y=636.1 (x 1056–1117), wall y=647.9 (x 943–1015), wall x=984.9, wall x=1015.5 — no inner door is drawn anywhere along that line. It is a *separate raw component*, so no rule of ours sealed it; qa_checks exempts drawing-sealed rooms by design, and no file I'm allowed to edit can open it (inclusions AND with `free_raw`, so restoring it would only paint an orange isolated pocket). Flagged rather than worked around.
+- **Three residual crevices ≤1.4 m²**, all classified: two nooks between the stacked Meal Simple cases (x 334–348), a wall-thickness gap at the north-wall door recess (x 376–396, y 120–134), and a 1 m² sliver the SEAFOOD disk's 20-pt bridge shaved off aisle 3's west wall (corridor still 1.2 m wide and badge-protected).
+
+`ENTRANCE` snapping 4.4 m is expected — the Exit/Entrance arrows are printed outside the outline; the doors are the y=614.8 break in the south wall. `PHARMACY` now snaps 2.3 m west to its customer approach, as 269's DAIRY title does off its back block.
+
+Only `data/291/{exclusions,inclusions,seal_zones,walk_truth}.json` were created; `git status` shows no other change. Stopping here for the audit context.
