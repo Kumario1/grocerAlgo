@@ -1,0 +1,6 @@
+[
+  {"name": "Bakery department floor (open self-serve bakery: display shelf north, bread/pastry tables south, no counter enclosure anywhere around the label — customer space)",
+   "rect": [252, 218, 332, 268]},
+  {"name": "Kitchen / Kitchen Gadgets housewares aisles (shelf department, not a service kitchen: both labels are printed in the customer aisles between the Appliances, Kitchen Gadgets and Cookware gondolas)",
+   "rect": [330, 268, 450, 314]}
+]

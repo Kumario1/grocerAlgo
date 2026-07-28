@@ -1,0 +1,23 @@
+Store 382 is converged. Summary of what I found and did:
+
+## Starting state
+A prior mechanical pass had already authored `zones.json`, `seal_zones.json`, `exclusions.json`, `inclusions.json` and reached `verify: []` with empty coverage lists — but the map was **not** converged: `components: {n: 2, sizes: [70759, 8118]}`, and `walk_truth.json` did not exist.
+
+## The one real defect: an 8118-cell second component
+The orphan was the **outdoor covered apron outside the building** — `Outdoor Covered Merchandise` (152,598), `Carts` (386,629), `Landscape Bed Area` (563,653) — exterior sidewalk under the canopy, south/west of the front wall. `extract.py`'s sales-floor boundary swept it in, so it built as walkable floor the entrance can never reach (rendered orange across the bottom of `walkable_overlay.png`). No product label exists there in the PDF, so none of the mechanical nets fired.
+
+Fixed with a fifth entry in `data/382/exclusions.json`: a staircase polygon hugging the **outside** face of the front wall as it steps south (y=578 → x=314, y=594 → x=374, y=614 → x=470, y=642 → x=866). I verified it cell-exact before rebuilding: **0 interior cells clipped, 0 apron cells left over**. Interior floor is unchanged at exactly 70759 cells; `walkable_pct` went 32.5 → 29.2 with `reachable_pct` untouched.
+
+## Verification done
+- **Culled pockets, all six classified**: Deli island interior (2230), exterior front cart strip east of the apron (1437), Pharmacy room (1246), checkstand lane bank (1179), Stairwell/Smoking Area rooms (368), Cooking Connection demo island (139). The last one is the demo island, not the seafood counter as the "near SEAFOOD" label suggests.
+- **3×3 visual sweep**: every aisle corridor green end to end, all department frontages green (including the unanchored `Sushi` / `Meal Simple` / `Tortilleria` artwork), checkout lanes sealed with the front action alley open, Pharmacy correctly sealed — the guide draws it as a fully walled room with no interior customer space, and its frontage aisle west of the diagonal wall is green.
+- **22 label spot-probes** across all wings (Tortilleria, Kombucha, Birdseed, Popcorn, Deodorant, Batteries, Tobacco…): all land on walkable floor, 0.00 m.
+- `far_snaps: DELI 3.91 m` is expected — the DELI label sits at the centre of the sealed island, so it snaps to the island's customer frontage.
+
+## walk_truth.json
+Authored 18 `must` + 11 `must_not` points. Each coordinate was probed against the shipped `profile.npz` and placed at the local max-clearance point inside the feature it names (not an adjacent frontage) — e.g. the checkout `must_not` sits in the gap between the checkstand units at x 798–808 and x 816–826. `must_not` covers every sealed staff area (Deli island, Pharmacy, Cooking Connection), both enclosed rooms (restrooms, stairwell/smoking area), a checkout-lane interior, the newly-excluded apron and landscape bed, and page corners.
+
+## Final state
+`./rebuild.sh 382` exits 0, **751 passed**. `report.json`: `components {n:1}`, `verify: []`, `coverage` both lists empty, `walkable_pct 29.2`. Only `data/382/` is modified.
+
+Stopping here for the separate audit context, as instructed.

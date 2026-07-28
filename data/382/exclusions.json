@@ -1,0 +1,14 @@
+[
+  {"name": "Restrooms enclosure (public toilets + their entry vestibule, behind the drawn block wall; the only opening is the 11-pt doorway at x=490-501 on its north face — not shopping floor. Poly follows the block's NE diagonal corner)",
+   "poly": [[471, 574], [513.5, 574], [522.5, 583.5], [522.5, 645], [471, 645]]},
+  {"name": "Behind the Market/Dairy counter run on the north wall — 3-pt band between the wall line and the case (cooler access, staff only; 0.23 m, unwalkable)",
+   "rect": [776, 140, 946, 147]},
+  {"name": "Behind the north-wall Deli case in the NW corner — 2-pt band between the wall line and the case (cooler access, staff only)",
+   "rect": [344, 152, 442, 160]},
+  {"name": "0.65 m gap between the Appliances endcap boxes and the gondola below them (fixture crevice, not an aisle; the real Kitchen/Kitchen Gadgets aisles are two rows south)",
+   "rect": [373, 211.5, 446, 216.5]},
+  {"name": "Outdoor covered apron OUTSIDE the building — everything south/west of the front wall: 'Outdoor Covered Merchandise' (152,598), 'Carts' (386,629), 'Landscape Bed Area' (563,653). Exterior sidewalk under the canopy, not sales floor; the PDF holds no product label there. extract.py's boundary swept it in, so it built as a second 8118-cell component the entrance cannot reach. Poly is a staircase hugging the OUTSIDE face of the front wall as it steps south: y=578 to x=314, y=594 to x=374, y=614 to x=470, y=642 to x=866 (verified cell-exact: 0 interior cells clipped, 0 apron cells left)",
+   "poly": [[42, 548], [132, 548], [132, 578], [314, 578], [314, 594],
+            [374, 594], [374, 614], [470, 614], [470, 642], [866, 642],
+            [866, 700], [42, 700]]}
+]

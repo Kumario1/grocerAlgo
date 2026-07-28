@@ -1,0 +1,145 @@
+{
+ "components": {
+  "n": 1,
+  "sizes": [
+   70971
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 2230,
+   "near": "DELI",
+   "x": 383.8,
+   "y": 445.7
+  },
+  {
+   "cells": 1437,
+   "near": "AISLE 45",
+   "x": 988.1,
+   "y": 657.6
+  },
+  {
+   "cells": 1246,
+   "near": "PHARMACY",
+   "x": 1096.1,
+   "y": 560.8
+  },
+  {
+   "cells": 1179,
+   "near": "CHECKSTANDS",
+   "x": 810.9,
+   "y": 592.9
+  },
+  {
+   "cells": 368,
+   "near": "PHARMACY",
+   "x": 1084.7,
+   "y": 628.7
+  },
+  {
+   "cells": 139,
+   "near": "SEAFOOD",
+   "x": 700.8,
+   "y": 181.9
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 17.3,
+   "meters": 3.91,
+   "name": "DELI"
+  }
+ ],
+ "m_per_cell": 0.2266,
+ "narrow": [
+  {
+   "half_width_m": 0.64,
+   "name": "FLORAL"
+  },
+  {
+   "half_width_m": 0.82,
+   "name": "FROZEN"
+  },
+  {
+   "half_width_m": 0.91,
+   "name": "KITCHEN"
+  },
+  {
+   "half_width_m": 0.91,
+   "name": "KITCHEN GADGETS"
+  },
+  {
+   "half_width_m": 0.96,
+   "name": "AISLE 46"
+  },
+  {
+   "half_width_m": 1.01,
+   "name": "AISLE 4"
+  },
+  {
+   "half_width_m": 1.01,
+   "name": "AISLE 5"
+  },
+  {
+   "half_width_m": 1.01,
+   "name": "AISLE 6"
+  }
+ ],
+ "provenance": {
+  "drift": {
+   "seal_zones": {
+    "derived_n": 7,
+    "derived_names": [
+     "auto:BAKERY",
+     "auto:DELI",
+     "auto:FLORAL",
+     "auto:KITCHEN",
+     "auto:PHARMACY",
+     "auto:SEAFOOD",
+     "auto:CHECKSTANDS"
+    ],
+    "file_n": 4,
+    "file_names": [
+     "Deli island interior (staff prep; the label sits inside a block ringed by counters \u2014 Healthy Living/Kombucha north, the diagonal service cases west, a long counter south, a wall east). Radius cut 130->95: 95 pt still covers the whole island (x 326-432, y 402-502) while the derived 130 pt reached the Floral display nook at (343,567) and bridged it shut",
+     "Seafood counter + Cooking Connection demo island (staff; wider staff entrances). Radius cut 130->85: the derived disk reached y=253 and, at bridge 20, sealed the north ends of aisles 9-13 shut",
+     "Pharmacy room (staff; the guide walls it off with a diagonal partition and prints the label inside). Disk r=130 at the label replaced by the room's own bbox: the drawn partition already encloses the room, so the disk sealed NOTHING extra there (verified: dropping it entirely leaves 1095,560 / 1080,600 / 1090,625 unwalkable) while its 130 pt reach \u2014 112 pt west of the label \u2014 bridged 231 cells of customer floor shut at the EAST Self Check station (the 1.0 m lane at x 984-1014, y 566-606 and the gaps between its three display boxes) and the endcap slots at the heads of aisles 46-47 (x 998-1010 y 470-480, x 1024-1040 y 478-508). The identical WEST Self Check island at (639,595) was left fully green, so the two stations disagreed. Rect stops at x=1044, clear of the pharmacy pickup frontage at (1031,543)",
+     "Checkstand lane bank \u2014 rect cut to the lanes themselves. The derived rect [583.8,502.8,995.9,629.2] swept in the Seasonal shelves to the north and at bridge 20 sealed BOTH the front exit corridor south of the lanes (y 617-631) and the Bus Ctr./Self Check passage at x 584-620"
+    ]
+   },
+   "zones": {
+    "CHECKOUT": {
+     "derived": [
+      784.0843811035156,
+      557.5395202636719
+     ],
+     "file": [
+      784.1,
+      557.5
+     ]
+    },
+    "ENTRANCE": {
+     "derived": [
+      278.5547332763672,
+      591.447509765625
+     ],
+     "file": [
+      280.0,
+      565.0
+     ]
+    }
+   }
+  },
+  "exclusions": "file",
+  "inclusions": "file",
+  "seal_zones": "file",
+  "zones": "file"
+ },
+ "reachable_pct": 29.3,
+ "store": "382",
+ "verify": [],
+ "walkable_pct": 29.3
+}

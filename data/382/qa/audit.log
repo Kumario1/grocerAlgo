@@ -1,0 +1,33 @@
+Audit complete. Rebuild is green (exit 0, 761 tests pass, `verify: []`, empty coverage lists, 29.3% walkable, single component).
+
+## Findings, worst first
+
+**1. Pharmacy seal disk over-sealed customer floor at the east Self Check station** — `seal_zones.json` (fixed)
+- Coords: disk `pt [1102.7, 553.8] r=130`; collateral at (984–1014, 566–606), (998–1010, 470–480), (1024–1040, 478–508), (1032–1044, 576–592) PDF pt.
+- Evidence: `/tmp/E_selfcheck_east.png` vs `/tmp/D_selfcheck_west.png` — the **west** Self Check island at (639,595) is fully green; the **east** one at (961,558) had its kiosk lane and the gaps between its three display boxes sealed. Mutation proof: deleting the zone entirely leaves (1095,560)/(1080,600)/(1090,625) unwalkable — the drawn diagonal partition already encloses the room, so the disk sealed *nothing* of the pharmacy and 231 cells (≈12 m²) of Self Check / aisle-46-47 endcap floor instead. Its stated WHY ("Pharmacy room (staff…)") did not describe what it did.
+- Truth: those lanes are customer-accessible and must be green. Fix type: **seal_zones override** — disk → `rect [1044, 494, 1122, 644]`, stopping clear of the pharmacy pickup frontage at (1031,543). Recovers 212 cells; AISLE 46 corridor half-width improved 0.91 → 0.96 m.
+- New guard: `must [993, 585]`.
+
+**2. `must_not [493, 605]` was vacuous — it guarded nothing** — `walk_truth.json` (fixed)
+- Evidence: probe with `exclusions.json` entry 0 deleted → (493,605) stays `False` even in `free_raw`; it sits inside the drawn restroom-pictogram fixture (`/tmp/H_restroom.png`). The restroom enclosure could have been opened to shoppers (+465 cells) with the whole suite still green.
+- Fix type: **walk_truth point** — replaced with `[505, 599]`, 25 pt south of the only doorway (x 490–501 at y=574), which does flip.
+
+**3. Three exclusions had no `must_not` guard at all** — `walk_truth.json` (fixed)
+- Deleting them leaked +87 / +54 / +89 cells with zero test failures: the staff cooler band behind the north-wall Market/Dairy case (776–946, 144–148), the same band behind the NW Deli case (350–442, 156–164), and the Appliances fixture crevice (372–446, 210–218).
+- Fix type: **walk_truth points** — `[861,145]`, `[397,157]`, `[409,213]`. All four exclusions with a real effect are now guarded.
+
+**4. Whole wings had no `must` point** — `walk_truth.json` (fixed)
+- The north-centre Market wing (4239 cells), the west perimeter aisle (3536 cells), Beer & Wine, aisle 50 / east wall, aisle 40's block. Max distance from any walkable cell to a must point was 21.5 m — the store-24 failure class.
+- Fix type: **walk_truth points** — added `[861,161] Market frontage`, `[149,299]`+`[155,453]` west perimeter, `[525,257]` Beer & Wine, `[1111,429]` aisle 50, `[843,500]` aisle 40. Max distance now 17.5 m; uncovered floor 16163 → 9847 cells.
+
+walk_truth grew 18→25 `must`, 11→14 `must_not`; suite 751 → 761 tests.
+
+## Verified clean
+- **Label probe (all 180 printed labels, not just 10):** every product label is within 2 m of reachable floor. The 9 over-2 m hits are department headers printed inside blessed sealed areas (Deli island, Pharmacy room, Stairwell, Smoking Area, outdoor apron, Landscape Bed) or on service counters (Seafood/Deli/Floral, 2.1–2.3 m).
+- **All 6 culled pockets classified:** Deli island (2230, staff), SE covered entry apron outside the y=643 wall (1437, exterior — `/tmp/F_apron.png`), Pharmacy room (1246), checkstand lanes (1179), Stairwell/Smoking enclosure (368), Cooking Connection demo island (139).
+- **3×3 sweep on the shipped overlay:** every corridor green end to end, every badge corridor green full length, every department frontage green including the unanchored ones (Sushi, Meal Simple, Tortilleria, Beer & Wine, Healthy Living, Market, Tobacco, both Self Check stations, Bus Ctr.); lanes sealed, front alley green; restrooms/stairwell/smoking/outside not green.
+- **Config sanity:** all five exclusion and two inclusion WHYs match the map. Note: `exclusions[4]` (outdoor apron) has zero effect on the final grid — the apron is already dropped by the entrance-component cut — so it is documentation only, not a defect. Both inclusions are likewise inert against the authored `seal_zones.json` but become load-bearing if seal zones ever fall back to derivation (KITCHEN/BAKERY are `SERVICE_DEPTS`), which is correct insurance.
+
+One observation I did **not** treat as a finding: `geometry.json` has an anchor `BUS CTR. SELF CHECK` at (766.3, 559.0), an `extract.py` line-bucket merge of two labels 380 pt apart, landing on neither (mid-checkstands). It is inert here — not in `SERVICE_DEPTS`, so it never touches the grid, and `label_map_point` only matches it on a verbatim substring no product label carries. Both departments' frontages are green, which is what the runbook requires for unanchored departments. Flagging for awareness, not blocking.
+
+`AUDIT CLEAN — store 382 (4 findings fixed)`

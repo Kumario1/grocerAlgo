@@ -1,0 +1,10 @@
+[
+  {"name": "Deli island interior (staff prep; the label sits inside a block ringed by counters — Healthy Living/Kombucha north, the diagonal service cases west, a long counter south, a wall east). Radius cut 130->95: 95 pt still covers the whole island (x 326-432, y 402-502) while the derived 130 pt reached the Floral display nook at (343,567) and bridged it shut",
+   "pt": [379.5, 444.9], "r": 95, "bridge": 12},
+  {"name": "Seafood counter + Cooking Connection demo island (staff; wider staff entrances). Radius cut 130->85: the derived disk reached y=253 and, at bridge 20, sealed the north ends of aisles 9-13 shut",
+   "pt": [684.4, 123.5], "r": 85, "bridge": 20},
+  {"name": "Pharmacy room (staff; the guide walls it off with a diagonal partition and prints the label inside). Disk r=130 at the label replaced by the room's own bbox: the drawn partition already encloses the room, so the disk sealed NOTHING extra there (verified: dropping it entirely leaves 1095,560 / 1080,600 / 1090,625 unwalkable) while its 130 pt reach — 112 pt west of the label — bridged 231 cells of customer floor shut at the EAST Self Check station (the 1.0 m lane at x 984-1014, y 566-606 and the gaps between its three display boxes) and the endcap slots at the heads of aisles 46-47 (x 998-1010 y 470-480, x 1024-1040 y 478-508). The identical WEST Self Check island at (639,595) was left fully green, so the two stations disagreed. Rect stops at x=1044, clear of the pharmacy pickup frontage at (1031,543)",
+   "rect": [1044, 494, 1122, 644], "bridge": 12},
+  {"name": "Checkstand lane bank — rect cut to the lanes themselves. The derived rect [583.8,502.8,995.9,629.2] swept in the Seasonal shelves to the north and at bridge 20 sealed BOTH the front exit corridor south of the lanes (y 617-631) and the Bus Ctr./Self Check passage at x 584-620",
+   "rect": [670, 564, 950, 617], "bridge": 20}
+]
