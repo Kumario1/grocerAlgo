@@ -1,0 +1,48 @@
+## Audit report — H‑E‑B store 227 (Austin)
+
+### Pass 1 — Mechanical ✅
+`./rebuild.sh 227` exit 0. `report.json`: `verify: []`, `coverage.unreachable_shelf_labels: []`, `coverage.sealed_floor_patches: []`, `components: {n: 1}`, walkable 22.8 % (in the 20–35 % band), 742 tests green. No mechanical failure — as expected, since the store‑24 failure mode is invisible to these nets.
+
+### Pass 2 — Systematic visual sweep
+3×3 crops of `walkable_overlay.png` (overlay is exactly 2 px/pt), each compared against the page‑2 map underneath, plus targeted 8–20× zooms. I also enumerated **every** sealed region mechanically (`free_raw & ~free`, 21 components ≥ 40 cells) and classified all of them, and diffed the shipped grid against a densely re‑rasterised wall set to find leaks the nets can't see.
+
+---
+
+## Findings, worst first
+
+### Finding 1 — Restroom interior is walkable (centre‑entrance, right‑hand room) — **FIXED**
+**Coordinates (PDF pt):** room `[906.0, 611.7] – [946.6, 640.6]`; flooded region bbox `[906, 612, 944, 638]` = 153 cells ≈ **5.8 m²**.
+
+**Evidence:**
+- Overlay zoom `x 885..965, y 598..645` shows the whole room interior tinted green around its pictogram, while its identical twin next door (`[844.2,611.8,894.8,640.4]`) and both west‑entrance restrooms are correctly white.
+- Column probe of the shipped grid: `x 910..944` free at `y 612..618`, `x 906..916` free at `y 620..636`.
+- The room is drawn **closed on all four sides** — PDF paths `(946.6,640.6)→(946.6,611.7)→(906,611.7)` and `(906,640.5)→(906,623.7)→(909.2,623.7)→(909.2,611.7)`, plus the front wall. No door, no gap, no fixture, no badge, **no product label** inside.
+- Root cause: `engine.build_grid` samples an obstacle path at `n = max(2, int(len/cell)*2)` points. The 3.2 pt wall jog `(906,623.7)→(909.2,623.7)` gets exactly 2 samples — its endpoints — so the cell between them (`x 906..908, y 622..624`) is never blocked. A dense re‑raster of every wall in the store closes **exactly one** region: this one.
+
+**Truth:** enclosed restroom, not sales floor, must not be walkable.
+**Fix type:** `exclusions.json` rect `[906, 611.5, 946.6, 640.6]` (the 11 pt restroom entry alcove at `x 894.8..906` is customer space and deliberately excluded from the rect — it is still green).
+**Witness added:** `must_not [930, 616]` — was `walkable=True` before the fix, `False` after.
+
+### Finding 2 — `walk_truth.json` coverage gaps — **FIXED**
+Sealed features with **no** `must_not` witness: the centre‑entrance walled service room `[768.3,616.7,844.2,640.6]` (407 cells, 15.5 m², the second‑largest unwitnessed seal), the left‑hand centre restroom, the right‑hand west restroom. Wings with **no** `must` point: Frozen Foods (aisles 21–24), the Market department frontage, the entire east front‑of‑store zone, the Sushiya customer side.
+
+**Fix type:** `walk_truth.json` — added 4 `must_not` (`[930,616]`, `[885,628]`, `[510,615]`, `[806,628]`) and 4 `must` (`[300,330]`, `[880,226]`, `[960,570]`, `[1050,565]`). Each new `must_not` sits in the feature's **open interior** (`raw=free`, sealed only by our rules), not on a drawn fixture, so it is a real witness.
+
+---
+
+## Passes 3–5
+
+**Pass 3 — Label probes:** 35 labels across every wing probed against `profile.npz` (cell 2.0 pt, 0.1954 m/cell) — Cotton, OTC, Vitamins, Laxatives, Hair Color, Toys, Batteries, Baby Wipes, Charcoal, Dry Dog Food, Sodas, Chips, Kitchen Gadget, Tortillas, Bread, Picante, Tobacco, Pastries, Juice, Diapers, Incontinence, Cosmetics, Seasonal, Foilware, Meat Snacks, Cereal — **35 OK / 0 MISS, all 0.00 m**. An independent sweep of all 229 in‑boundary page words found only two beyond 2 m: the `Bakery` and `Dairy` department titles, both printed inside blessed back‑of‑house rooms.
+
+**Pass 4 — walk_truth adequacy:** every original point re‑probed and confirmed inside its named feature (not an adjacent frontage). Gaps found and closed under Finding 2.
+
+**Pass 5 — Config sanity:** all four exclusions, four inclusions and five seal zones read and checked against the drawing. No inclusion blankets a staff room (the Produce/Seafood inclusion stops at `x=1184`, the wall band; the Deli inclusion stops at `x=1160` so the 7 pt staff gap stays sealed); no exclusion covers a shelf label's only frontage. The checkstand shape fix verified visually: 13 lanes sealed, the 25 pt front action alley open, aisles 12–19 running green to their south mouths.
+
+**Cleared, not findings:** all 23 culled pockets classified (Dairy BOH 93.7 m², pharmacy dispensary 54.9 m², two service rooms, four restrooms, 13 checkout lanes, three wall‑case crevices); the pharmacy wing is fully green with the dispensary correctly sealed (no product label, two staff doors); Blooms, Meal Simple, Healthy Living, Market and Beer & Wine are all unanchored but fully green‑fronted; the aisle‑18 `H-E-B baby` logo pinches its corridor to 0.28 m capacity — the pixel‑frozen reference store 659 pinches to 0.24 m in eight aisles, so this is baseline pipeline behaviour, not a 227 defect.
+
+**Note for maintainers (not a 227 blocker):** the short‑segment under‑sampling in `engine.build_grid` is a fleet‑wide risk — a drawn‑closed room can leak through any wall jog shorter than `2 × cell`. Store 227 is fully correct with data alone, so I did not touch code; worth a universal fix gated by the golden.
+
+### Post‑fix rebuild
+`./rebuild.sh 227` exit 0 · `verify: []` · both coverage lists empty · 1 component (60 063 cells) · walkable 22.8 % · **750 tests pass** · dense‑raster leak diff now returns **zero** regions. Only `data/227/exclusions.json` and `data/227/walk_truth.json` changed; no code, no goldens, no other store.
+
+`AUDIT CLEAN — store 227 (2 findings fixed)`

@@ -1,0 +1,31 @@
+Store 227 is converged and ready for the audit. I did not run the audit.
+
+## Result
+
+`./rebuild.sh 227` → exit 0, **742 tests pass** (incl. store 659's golden gate).
+
+```
+verify     : []
+coverage   : {sealed_floor_patches: [], unreachable_shelf_labels: []}
+components : 1  (60221 cells)
+walkable   : 22.8%   reachable: 22.8%   (every walkable cell is entrance-reachable)
+```
+
+## What the first pass got wrong, and the four data files that fix it
+
+**`exclusions.json`** (3 entries — staff floor the drawing leaves open)
+- **Market north back-of-house band** (poly, `y≈159..213`, `x 654..1024`): a blank 360×40 pt strip between the north wall and the back-wall case run, with only two staff openings (a drawn double swing door at `x=697..710` and an 11 pt pass-through behind the Seafood counter). It shipped as an isolated 3624-cell orange component — sealing it is what makes the store one component.
+- **Bakery/Deli east production block** (poly): ~88×300 pt of blank floor between the east wall and a continuous chevron of service counters. Both the `BAKERY` and `DELI` titles print inside it, which is what fired their VERIFYs.
+- **Sushiya work side + deli back passage**: the horseshoe opens *east*, so the pocket its legs enclose is the chef's side; it links to the back block, not to the floor.
+
+**`inclusions.json`** (4 entries — customer floor the sealing rules over-culled)
+- **Produce floor + Seafood frontage**: the auto SEAFOOD disk (r=130, bridge 20) reached 13 m into Produce and closed the 13–16 pt lanes between the display tables (537 + 577 cells). The `SEAFOOD` title prints on the *customer* side of the angled counter, so this also answers its VERIFY.
+- **Bakery display-table floor**: 11.4 pt lanes between five cross-shaped tables, just under the BAKERY disk's 12 pt bridge (302 cells).
+- **Deli frontage nook**: the deli case faces west; the nook it wraps is where shoppers are served and where the `DELI` title prints.
+- **Aisle 8 corridor**: `KITCHEN` here is the *"Kitchen Gadget"* shelf label, not a service kitchen (same call as stores 24/269/388/660).
+
+**`seal_zones.json`** — 4 derived disks carried over verbatim; the checkstand rect is a pure shape fix. The ±200×±45 pt window swept in two display bins on the north and the cart corral + self-checkout pod on the east, so the derived rect `[347.9, 473.9, 695.5, 579.2]` ate the south mouths of aisles 12–19 and the 15 pt walkway to the self-checkouts. Retightened to the 13 actual lanes: `[369.2, 516.2, 650.0, 579.2]`, bridge unchanged at 20.
+
+**`walk_truth.json`** — 20 points: 10 `must` (front action alley, entrance approach, Dairy/Produce/Seafood/Bakery/Deli frontages, three distinct aisle corridors) and 10 `must_not` (two outside/page points, each of the five sealed staff areas, restroom, the walled ICE service room, a checkout lane interior).
+
+Every remaining sealed region ≥100 cells is classified: Dairy cooler back-of-house, Pharmacy dispensary, four restroom/service rooms, the back-wall sliver above the Produce case, and the checkout lane interiors. What's left are sub-30-cell disk-rim nibbles (<1.2 m² each, below the pipeline's own 100-cell reporting floor) that disconnect nothing. Only `data/227/` was created or modified.

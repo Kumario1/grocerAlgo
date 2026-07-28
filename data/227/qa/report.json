@@ -1,0 +1,229 @@
+{
+ "components": {
+  "n": 1,
+  "sizes": [
+   60063
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 2455,
+   "near": "DAIRY",
+   "x": 493.0,
+   "y": 191.7
+  },
+  {
+   "cells": 1439,
+   "near": "AISLE 30",
+   "x": 182.3,
+   "y": 576.2
+  },
+  {
+   "cells": 577,
+   "near": "PRODUCE",
+   "x": 1063.0,
+   "y": 301.7
+  },
+  {
+   "cells": 537,
+   "near": "PRODUCE",
+   "x": 1094.5,
+   "y": 243.0
+  },
+  {
+   "cells": 407,
+   "near": "KITCHEN",
+   "x": 806.0,
+   "y": 628.0
+  },
+  {
+   "cells": 304,
+   "near": "EXIT",
+   "x": 408.9,
+   "y": 627.7
+  },
+  {
+   "cells": 302,
+   "near": "BAKERY",
+   "x": 1068.0,
+   "y": 442.5
+  },
+  {
+   "cells": 271,
+   "near": "RESTROOMS",
+   "x": 464.4,
+   "y": 623.1
+  },
+  {
+   "cells": 270,
+   "near": "CHECKSTANDS",
+   "x": 593.2,
+   "y": 551.1
+  },
+  {
+   "cells": 247,
+   "near": "RESTROOMS",
+   "x": 522.0,
+   "y": 623.6
+  },
+  {
+   "cells": 210,
+   "near": "KITCHEN",
+   "x": 874.4,
+   "y": 623.8
+  },
+  {
+   "cells": 201,
+   "near": "SEAFOOD",
+   "x": 1081.8,
+   "y": 164.2
+  },
+  {
+   "cells": 143,
+   "near": "AISLE 29",
+   "x": 392.6,
+   "y": 552.1
+  },
+  {
+   "cells": 143,
+   "near": "CHECKSTANDS",
+   "x": 476.6,
+   "y": 552.1
+  },
+  {
+   "cells": 142,
+   "near": "CHECKSTANDS",
+   "x": 434.6,
+   "y": 552.0
+  },
+  {
+   "cells": 140,
+   "near": "CHECKSTANDS",
+   "x": 518.7,
+   "y": 552.1
+  },
+  {
+   "cells": 135,
+   "near": "MEAT",
+   "x": 644.8,
+   "y": 556.8
+  },
+  {
+   "cells": 129,
+   "near": "CHECKSTANDS",
+   "x": 560.9,
+   "y": 553.2
+  },
+  {
+   "cells": 117,
+   "near": "AISLE 29",
+   "x": 413.5,
+   "y": 551.9
+  },
+  {
+   "cells": 117,
+   "near": "CHECKSTANDS",
+   "x": 455.5,
+   "y": 551.9
+  },
+  {
+   "cells": 114,
+   "near": "CHECKSTANDS",
+   "x": 497.7,
+   "y": 551.9
+  },
+  {
+   "cells": 114,
+   "near": "CHECKSTANDS",
+   "x": 539.7,
+   "y": 551.9
+  },
+  {
+   "cells": 114,
+   "near": "CHECKSTANDS",
+   "x": 623.7,
+   "y": 551.9
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 24.5,
+   "meters": 4.78,
+   "name": "BAKERY"
+  },
+  {
+   "cells": 12.8,
+   "meters": 2.5,
+   "name": "DAIRY"
+  }
+ ],
+ "m_per_cell": 0.1954,
+ "narrow": [
+  {
+   "half_width_m": 0.55,
+   "name": "DAIRY"
+  },
+  {
+   "half_width_m": 0.62,
+   "name": "FROZEN FOODS"
+  },
+  {
+   "half_width_m": 0.62,
+   "name": "RESTROOMS"
+  },
+  {
+   "half_width_m": 0.78,
+   "name": "AISLE 25"
+  },
+  {
+   "half_width_m": 0.87,
+   "name": "AISLE 26"
+  },
+  {
+   "half_width_m": 0.87,
+   "name": "ENTRANCE"
+  },
+  {
+   "half_width_m": 0.98,
+   "name": "BAKERY"
+  },
+  {
+   "half_width_m": 0.98,
+   "name": "KITCHEN"
+  }
+ ],
+ "provenance": {
+  "drift": {
+   "seal_zones": {
+    "derived_n": 5,
+    "derived_names": [
+     "auto:BAKERY",
+     "auto:DELI",
+     "auto:KITCHEN",
+     "auto:SEAFOOD",
+     "auto:CHECKSTANDS"
+    ],
+    "file_n": 5,
+    "file_names": [
+     "Bakery service counters (staff) \u2014 derived disk, carried over unchanged",
+     "Deli service counters (staff) \u2014 derived disk, carried over unchanged",
+     "Kitchen disk \u2014 derived from the 'Kitchen Gadget' shelf label in aisle 8; kept verbatim so this file stays a pure shape fix of the checkstand rect (the label is customer space, restored by inclusions.json)",
+     "Seafood counter (staff; wider staff entrances) \u2014 derived disk, carried over unchanged",
+     "Checkstand lane bank \u2014 SHAPE FIX. The derived rect was [347.9, 473.9, 695.5, 579.2]: the +/-200 x +/-45 pt window around the CHECKSTANDS label (510.4,517.0) swept in fixtures that are not checkstands on both edges. On the north, the two bottom bins of the freestanding column at x=356..381 \u2014 [355.9,481.9,377,492.7] and [388.3,486.2,399.5,496.7] \u2014 dragged the top edge up from y=516 to y=474; at bridge=20 that closed the ~14 pt south mouths of the grocery aisles, which end at y=502, cutting the south 3 m off aisles 12-19 (culled pockets of 112-150 cells at (431,488), (459,487), (489,487), (521,487), (554,487), (587,487), (625,488), (660,487)) and leaving each a cul-de-sac enterable only from the north cross-aisle. On the east, the cart-corral column [658.6,535,664.2,556.9] and the self-checkout pod's west stations [677.6,524.2,687.5,530.7] / [683.1,539.8,685.9,557.4] pushed the right edge out to x=695.5, and the same 20 pt bridge then swallowed the 15 pt walkway between the corral and the pod (192 cells at (676,550)) \u2014 the route from the centre Entrance up to the front action alley, not a checkout lane. Rect retightened to the 13 actual lanes (belts, registers and bagging wells, x=377.2..642.0, y=524.2..571.2) with the same +/-8 pt pad. Bridge unchanged at 20 so the lanes themselves still seal while the 25 pt front action alley (y=502..527) between the aisle ends and the lane heads stays open"
+    ]
+   }
+  },
+  "exclusions": "file",
+  "inclusions": "file",
+  "seal_zones": "file",
+  "zones": "derived"
+ },
+ "reachable_pct": 22.8,
+ "store": "227",
+ "verify": [],
+ "walkable_pct": 22.8
+}

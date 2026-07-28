@@ -1,0 +1,34 @@
+{
+ "must": [
+  [500, 514, "front action alley: the cross-walkway between the grocery aisle ends (gondolas stop at y=502) and the checkstand heads (lanes start at y=527)"],
+  [350, 630, "west entrance approach, just inside the doors — the break in the front wall left of the wall stub at x=364, under the Exit/Entrance arrows"],
+  [500, 238, "top cross-aisle in front of the Dairy cases: south of the sawtooth cooler doors (case bottom y=223) and north of the aisle 13-20 gondola ends (y=251.6)"],
+  [490, 400, "aisle 17 corridor between gondolas [469,251.8,480.3,501.7] and [499.6,251.8,512.7,501.7] (badge AISLE 17 at 490.5,243.6)"],
+  [784, 400, "aisle 8 corridor between gondolas [762.9,283.3,774,501.9] and [793.7,283.5,804.8,501.9] — the one carrying the 'Kitchen Gadget' shelf label (badge AISLE 8 at 783.8,277.3)"],
+  [260, 454, "aisle 25 corridor in the HBC/Pharmacy block, between the shelf runs [190.1,428.3,340.7,446.5] and [184.7,461.8,340.1,469.6] (badge AISLE 25 at 342.3,454.5)"],
+  [1075, 292, "Produce shopping floor between the wall-side table [1042,264,1162,280] and the produce bins at y=304..322"],
+  [1000, 222, "Seafood counter customer frontage: the floor SE of the angled counter (1009,159)-(1024,186)-(977,213), where shoppers are served"],
+  [1098, 430, "Bakery counter frontage: the walkway between the bakery display tables (east face x=1091) and the west face of the bakery case [1108,401.8,1119.4,464.3]"],
+  [1140, 528, "Deli counter frontage nook: the floor the counter chevron wraps around, west of the deli case [1162,506.9,1173.4,540.7], where the DELI title is printed"],
+  [300, 330, "Frozen Foods wing: the aisle 22 corridor between the freezer islands (badge AISLE 22 at 342.3,327.2) — aisles 21-24 had no must point of their own"],
+  [880, 226, "Market department frontage: the cross-aisle south of the north wall-case run drawn at y=200..214, where shoppers stand to shop the Market cases"],
+  [960, 570, "front-of-store east zone: the walkway east of the self-checkout pod and cart corral, between the checkstand bank and the Meal Simple / Blooms islands"],
+  [1050, 565, "Sushiya customer frontage: the floor north of the sushi bar counter [1021.4,578.6,1083.6,620] — the served side, opposite the excluded chef's side inside the U"]
+ ],
+ "must_not": [
+  [100, 100, "parking apron / page margin NW of the building, outside the sales-floor outline (boundary starts at x=153.3, y=159.3)"],
+  [1240, 815, "page SE corner, outside the building (east wall x=1195.6, front wall y=640.2)"],
+  [493, 190, "Dairy cooler back-of-house: the blank box behind the sawtooth wall cases, reached only by the double swing door at x=375..398 (staff)"],
+  [850, 180, "Market north back-of-house band between the building's north wall (y=159.3) and the back-wall case run (y=200..214), reached only by the staff door at x=697..710 (staff)"],
+  [1160, 420, "Bakery back-of-house production block east of the counter run, between the counters and the east wall — the blank area the BAKERY title is printed in (staff)"],
+  [182, 576, "Pharmacy dispensary behind the drawn counter wall (x=214), two door swings, no product label inside (staff)"],
+  [1060, 598, "inside the Sushiya horseshoe counter — the chef's work side of the U, which opens east into the deli back passage (staff)"],
+  [464, 623, "left restroom interior: an enclosed room in the front-wall block, no floor connection to the sales aisle"],
+  [409, 628, "walled service room behind the ICE merchandiser at the west entrance — two drawn doors, no product and no badge inside"],
+  [477, 552, "checkout lane interior, between the checkstand bodies at x=461.2..467 and x=482.4..488.3"],
+  [930, 616, "centre-entrance restrooms, RIGHT-HAND room interior [906,611.7,946.6,640.6]: drawn closed on all four sides, holds only its pictogram, no product label — it leaked 153 cells through a 2 pt raster hole in the jog of its west wall until exclusions.json sealed it"],
+  [885, 628, "centre-entrance restrooms, LEFT-HAND room interior [844.2,611.8,894.8,640.4]: the twin of the room above, sealed only by the entrance-component cut — the witness that its drawn walls still hold"],
+  [510, 615, "west-entrance restrooms, RIGHT-HAND room interior [501.6,607.3,553.9,639.8]: enclosed room in the front-wall block, no floor connection to the sales aisle"],
+  [806, 628, "centre-entrance walled service room [768.3,616.7,844.2,640.6], behind the ICE merchandiser and west of the restroom block — drawn enclosed, no product and no badge inside (staff)"]
+ ]
+}

@@ -1,0 +1,16 @@
+[
+  {"name": "Bakery service counters (staff) — derived disk, carried over unchanged",
+   "pt": [1157.9078369140625, 419.09584045410156], "r": 130, "bridge": 12},
+
+  {"name": "Deli service counters (staff) — derived disk, carried over unchanged",
+   "pt": [1139.8433227539062, 541.5804443359375], "r": 130, "bridge": 12},
+
+  {"name": "Kitchen disk — derived from the 'Kitchen Gadget' shelf label in aisle 8; kept verbatim so this file stays a pure shape fix of the checkstand rect (the label is customer space, restored by inclusions.json)",
+   "pt": [789.7391357421875, 487.8305358886719], "r": 130, "bridge": 12},
+
+  {"name": "Seafood counter (staff; wider staff entrances) — derived disk, carried over unchanged",
+   "pt": [1005.7573852539062, 208.30194091796875], "r": 130, "bridge": 20},
+
+  {"name": "Checkstand lane bank — SHAPE FIX. The derived rect was [347.9, 473.9, 695.5, 579.2]: the +/-200 x +/-45 pt window around the CHECKSTANDS label (510.4,517.0) swept in fixtures that are not checkstands on both edges. On the north, the two bottom bins of the freestanding column at x=356..381 — [355.9,481.9,377,492.7] and [388.3,486.2,399.5,496.7] — dragged the top edge up from y=516 to y=474; at bridge=20 that closed the ~14 pt south mouths of the grocery aisles, which end at y=502, cutting the south 3 m off aisles 12-19 (culled pockets of 112-150 cells at (431,488), (459,487), (489,487), (521,487), (554,487), (587,487), (625,488), (660,487)) and leaving each a cul-de-sac enterable only from the north cross-aisle. On the east, the cart-corral column [658.6,535,664.2,556.9] and the self-checkout pod's west stations [677.6,524.2,687.5,530.7] / [683.1,539.8,685.9,557.4] pushed the right edge out to x=695.5, and the same 20 pt bridge then swallowed the 15 pt walkway between the corral and the pod (192 cells at (676,550)) — the route from the centre Entrance up to the front action alley, not a checkout lane. Rect retightened to the 13 actual lanes (belts, registers and bagging wells, x=377.2..642.0, y=524.2..571.2) with the same +/-8 pt pad. Bridge unchanged at 20 so the lanes themselves still seal while the 25 pt front action alley (y=502..527) between the aisle ends and the lane heads stays open",
+   "rect": [369.2, 516.2, 650.0, 579.2], "bridge": 20}
+]
