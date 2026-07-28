@@ -194,6 +194,17 @@ def test_aisle_label_shift_is_per_store_data():
     assert cal.guide_aisle_name({}, 23) == "AISLE 23"
 
 
+def test_aisle_label_shifts_can_describe_multiple_guide_vintages():
+    config = {"aisle_label_shifts": [
+        {"from": 1, "to": 14, "add": 15},
+        {"from": 31, "to": 45, "add": 5},
+    ]}
+
+    assert cal.guide_aisle_name(config, 3) == "AISLE 18"
+    assert cal.guide_aisle_name(config, 20) == "AISLE 20"
+    assert cal.guide_aisle_name(config, 35) == "AISLE 40"
+
+
 def test_659_ships_a_passing_calibration():
     assert cal.load_calibration("659")["verdict"] == "pass"
     assert cal.blocked_reason("659") is None

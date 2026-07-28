@@ -619,9 +619,14 @@ def guide_aisle_name(config, number):
     lower than today's shelf labels say. Any store can drift like this, so the
     correspondence is data (`aisle_label_shift`), and absent means identity.
     """
-    shift = config.get("aisle_label_shift")
-    if shift and number >= shift["from"]:
-        number += shift["add"]
+    shifts = config.get("aisle_label_shifts")
+    if shifts is None:
+        shift = config.get("aisle_label_shift")
+        shifts = [shift] if shift else []
+    for shift in shifts:
+        if number >= shift["from"] and number <= shift.get("to", number):
+            number += shift["add"]
+            break
     return f"AISLE {number}"
 
 

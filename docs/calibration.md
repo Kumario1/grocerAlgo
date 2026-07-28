@@ -13,6 +13,9 @@ The supported corrections are:
   numbers on each axis.
 - `aisle_label_shift`: describe a guide-vintage numbering shift with
   `{"from": first_live_aisle, "add": guide_minus_live}`.
+- `aisle_label_shifts`: when the vintage changed in multiple sections, list
+  non-overlapping `{"from": first_live, "to": last_live, "add":
+  guide_minus_live}` ranges. Prefer the singular rule when one range suffices.
 
 Never weaken a gate, edit captured Atlas data, change map geometry, or guess a
 correspondence merely to obtain PASS. Validate every edit with:
