@@ -1,0 +1,40 @@
+Both commands run; here is where store 14 stands.
+
+## What was wrong
+
+The incumbent calibration matched **Atlas aisle n → guide aisle n+38** with a floor‑derived y (scale 0.721). That is a false alias of the evenly spaced aisle grid: it laid the Atlas's *top* row (aisles 5–16) onto the guide's *bottom* row (43–54), shrinking the whole store ~19%. Shrinking is exactly what makes the floor gate look good (99.17%) while the placement is wrong — live labels agreed only 4/11, missing by up to 5 aisles.
+
+## The correct correspondence: identity, both axes
+
+- **x**: Atlas 4–17 → guide 4–17, scale 0.89483, residual **1.27 pt** over 14 aisles. Shift 0 also collects the bottom row (40–54) — 30 anchors in the unpinned search. Atlas aisles 1–3 are excluded from the pin because their labels are printed out of order (Atlas 2 x=364.2 sits right of 3 x=357.9).
+- **y**: Atlas 18–39 → guide 18–39, scale 0.89126, residual **1.548 pt** over 22 aisles. The next-best shift (−1) is 3.39 pt, +1 is 274 pt.
+- Skew 0.4%. Independent structural confirmation: the Atlas's east wall shelving maps to guide x≈971 (guide draws it at 962–972), and the Atlas's right annex maps onto the guide's walled Curbside box at x 1013–1117 / y 157–371 exactly.
+
+`data/14/store.json` (new file):
+
+```json
+{"atlas_fit": {"x": {"atlas": [4, 17], "guide": [4, 17]},
+               "y": {"atlas": [18, 39], "guide": [18, 39]}}}
+```
+
+No `aisle_label_shift` — the guide's numbering matches today's shelf labels, proven live: **11/11 products pinned to the aisle their own label names** (was 4/11).
+
+## Remaining blocker: the floor gate, and it is not the fit
+
+`residual=ok margin=ok scale_skew=ok labels=ok floor=FAIL (97.2%, needs 99%)`
+
+101 of 3610 PSAs land off the shopping floor. They are not scattered — they are three coherent groups the guide map deliberately or structurally has no floor for:
+
+| n | where they land |
+|---|---|
+| 52 | inside the **H‑E‑B Curbside staging room** (`data/14/exclusions.json` #3, x 971–1117 / y 152–372) — Atlas runs 43\|86–89 + 01\|92. The guide draws only the "Curbside" logo there; the audit sealed it as staff. |
+| 34 | **outside the guide's traced boundary** — the front patio strip (22\|89, 22\|87) and the outdoor bottom‑left corner (16\|88), all beyond the front wall at y=697.5 in both drawings. |
+| 15 | inside the boundary, on fixtures (22\|89 tail, 47\|1, 47\|87). |
+
+This cannot be closed by any transform: the Curbside group alone is 52 PSAs against a 36‑PSA budget (1%). A ±40 pt offset sweep around the pinned fit peaks at 98.34%, and disabling the corridor‑midline projection changes 101 → 99, so neither offset nor `to_corridor` is the cause. The blocker is map coverage — the Atlas stocks shelves in a staff staging room and on the front patio; the audited guide map excludes both.
+
+## What I did not do
+
+I did not weaken `MIN_ON_FLOOR`, touch Atlas data, or edit geometry/exclusions — fixing this would mean re‑auditing the Curbside exclusion in `data/14/exclusions.json`, which is outside this runbook.
+
+One deviation to flag: the runbook's "leave `store.json` unchanged" branch is conditioned on the drawings being genuinely incompatible, and they are not — they are the same store, agreeing to ~1.5 pt across 36 aisles and 11/11 live labels. So I kept the pin: verdict is `fail` either way (store stays unroutable, no placements happen), but the record now carries the correct transform instead of a wrong one that passed the floor gate by shrinking the store. Say the word and I'll delete `data/14/store.json` and re-run to restore the previous record. `data/14-atlas/calibration.json` is modified by the two validation runs, as expected.
