@@ -1,0 +1,26 @@
+Store 404 has converged. Stopping here for the separate audit role as instructed.
+
+## Result — store 404 (H-E-B Bee Cave) converged
+
+`./rebuild.sh 404` → exit 0, **774 passed**, `"verify": []`, `"coverage": {"sealed_floor_patches": [], "unreachable_shelf_labels": []}`, **components: 1** (87,795 cells), walkable/reachable **36.2%**.
+
+### The three VERIFY flags — judgments made
+
+| flag | call | evidence |
+|---|---|---|
+| **BAKERY** (851,230) @100% | **staff → exclusion** | The title sits in a 64×160 pt pocket with **zero fixtures and zero product labels**, ringed by the bakery cases/walls. Two **drawn double swing doors** in its perimeter settle it: one in the NE diagonal band at (863–876, 111–124) — two leaves plus quarter-circle arcs — and one across the west wall's south end at (803.5–815.2, 298.3–301.8). Its only floor opening is a 23 pt staff mouth onto the back alley. The east cases face the Market aisle (x 891–927), which stays walkable. |
+| **KITCHEN** (559,231) @62% | **customer → inclusion** | It is the **"Kitchen Gadgets" shelf label** printed in the badged aisle 4 corridor (gondolas at x 543–555 / 577–589, AISLE 4 badge at 565.7,98.9). Same call as stores 24, 269, 388, 658, 660, 790, 811. |
+| **SHOWTIME KITCHEN** (335,305) @92% | **customer → inclusion** | Department name printed on the open 30 pt mid-store cross-aisle between the aisle 1–17 gondola ends (y≈296) and the aisle 18+ runs (y≈328); the AISLE 18 and AISLE 28 badges sit in the same band. No counter or enclosure drawn anywhere near it. |
+
+### Other findings fixed (from the pocket sweep, not from VERIFY)
+
+- **Cooking Connection** and **Sushiya** horseshoe interiors were walkable — neither has an anchor (`COOKING`/`SUSHI` are dead tokens in extract.py's whitelist), so the substring cull never fires. Excluded, as on stores 24/265/660.
+- **Beer & Wine cross-gaps** — the BAKERY seal disk's rim bridged three 15–16 pt shopper walkways between the wine gondolas shut (163 + 113 + 94 cells). Restored.
+- **Market prepared-foods floor** — the SEAFOOD disk's 20 pt bridge culled the 20 pt corridor east of the Meal Simple cases (149 + 40 cells), strips between the 4-way display tables (51/61/47 cells), and the **east-wall display bay** between Seafood and Produce (364 cells). All restored; the poly steps back to x≤999 / x≤1104 so the back-of-house east of the wall stays sealed.
+
+Correctly sealed and left alone (classified, not changed): the 10,552-cell Market/Seafood back-of-house (blank floor behind the case-and-wall line, with drawn staff doors), the Deli staff block, the Pharmacy dispensary (walled, two doors), the restroom/lease rooms, the walled front-end office room at x 797–833, the checkout lanes, and wall-thickness slivers.
+
+### Files written (store 404 only)
+`data/404/exclusions.json` (3), `data/404/inclusions.json` (6), `data/404/walk_truth.json` (34 `must` / 18 `must_not`). No `zones.json` or `seal_zones.json` — both derived correctly.
+
+**One thing to flag:** `walkable_pct` is **36.2%**, above the usual 20–35% band. This guide is a sparse schematic — the Market, Produce and Seafood wings are drawn with only outlines and a handful of free-standing display units, so genuine customer floor is a larger share of the page. I ran the full visual sweep plus grid probes over every wing and found no remaining staff-only floor, but that number is the thing an auditor should re-derive independently.

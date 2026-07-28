@@ -1,0 +1,200 @@
+{
+ "components": {
+  "n": 1,
+  "sizes": [
+   88099
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 10552,
+   "near": "SEAFOOD",
+   "x": 1056.3,
+   "y": 228.6
+  },
+  {
+   "cells": 3392,
+   "near": "DELI",
+   "x": 851.7,
+   "y": 410.8
+  },
+  {
+   "cells": 2485,
+   "near": "CHECKSTANDS",
+   "x": 604.6,
+   "y": 600.4
+  },
+  {
+   "cells": 2200,
+   "near": "PHARMACY",
+   "x": 106.9,
+   "y": 614.5
+  },
+  {
+   "cells": 1209,
+   "near": "CHECKSTANDS",
+   "x": 762.8,
+   "y": 598.2
+  },
+  {
+   "cells": 955,
+   "near": "EXIT EXIT",
+   "x": 814.8,
+   "y": 606.9
+  },
+  {
+   "cells": 388,
+   "near": "RESTROOMS",
+   "x": 464.0,
+   "y": 639.7
+  },
+  {
+   "cells": 364,
+   "near": "SEAFOOD",
+   "x": 1089.4,
+   "y": 457.5
+  },
+  {
+   "cells": 348,
+   "near": "RESTROOMS",
+   "x": 448.0,
+   "y": 613.0
+  },
+  {
+   "cells": 206,
+   "near": "RESTROOMS",
+   "x": 400.2,
+   "y": 683.0
+  },
+  {
+   "cells": 163,
+   "near": "BAKERY",
+   "x": 755.8,
+   "y": 187.1
+  },
+  {
+   "cells": 149,
+   "near": "SEAFOOD",
+   "x": 990.1,
+   "y": 307.0
+  },
+  {
+   "cells": 144,
+   "near": "EXIT",
+   "x": 379.0,
+   "y": 675.0
+  },
+  {
+   "cells": 140,
+   "near": "RESTROOMS",
+   "x": 517.9,
+   "y": 572.8
+  },
+  {
+   "cells": 135,
+   "near": "AISLE 1",
+   "x": 740.0,
+   "y": 64.0
+  },
+  {
+   "cells": 133,
+   "near": "RESTROOMS",
+   "x": 459.1,
+   "y": 592.2
+  },
+  {
+   "cells": 124,
+   "near": "RESTROOMS",
+   "x": 516.8,
+   "y": 632.9
+  },
+  {
+   "cells": 113,
+   "near": "AISLE 35",
+   "x": 746.1,
+   "y": 268.9
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 23.1,
+   "meters": 4.18,
+   "name": "SEAFOOD"
+  },
+  {
+   "cells": 20.3,
+   "meters": 3.67,
+   "name": "CHECKOUT"
+  },
+  {
+   "cells": 20.3,
+   "meters": 3.67,
+   "name": "CHECKSTANDS"
+  },
+  {
+   "cells": 18.8,
+   "meters": 3.4,
+   "name": "BAKERY"
+  },
+  {
+   "cells": 14.2,
+   "meters": 2.57,
+   "name": "PHARMACY"
+  },
+  {
+   "cells": 13.2,
+   "meters": 2.39,
+   "name": "ENTRANCE"
+  }
+ ],
+ "m_per_cell": 0.1808,
+ "narrow": [
+  {
+   "half_width_m": 0.18,
+   "name": "EXIT EXIT"
+  },
+  {
+   "half_width_m": 0.54,
+   "name": "AISLE 35"
+  },
+  {
+   "half_width_m": 0.54,
+   "name": "RESTROOMS"
+  },
+  {
+   "half_width_m": 0.81,
+   "name": "AISLE 33"
+  },
+  {
+   "half_width_m": 0.9,
+   "name": "AISLE 36"
+  },
+  {
+   "half_width_m": 0.9,
+   "name": "BAKERY"
+  },
+  {
+   "half_width_m": 0.9,
+   "name": "CHECKOUT"
+  },
+  {
+   "half_width_m": 0.9,
+   "name": "CHECKSTANDS"
+  }
+ ],
+ "provenance": {
+  "drift": null,
+  "exclusions": "file",
+  "inclusions": "file",
+  "seal_zones": "derived",
+  "zones": "derived"
+ },
+ "reachable_pct": 36.4,
+ "store": "404",
+ "verify": [],
+ "walkable_pct": 36.4
+}

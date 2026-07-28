@@ -1,0 +1,30 @@
+Audit complete. Three findings, all real, all repaired in store 404's own JSONs; rebuild rerun and green.
+
+## Findings (worst first)
+
+### 1. Outside-the-building floor was walkable and entrance-reachable along the whole south front — 951 cells (≈31 m²)
+- **Coordinates:** wedge from `(140, 690)` to `(482, 718)` PDF pt — deepest at the west end (walkable down to y=718 where the drawn wall is at y≈686).
+- **Evidence:** crop `x[60,700] y[660,760]` of `walkable_overlay.png` showed green *below* the front wall, over the sidewalk merchandise racks `[141.9,691.8,279.5,702.3]` and `[142.6,721.5,276.4,730.8]`. Cause: `geometry.json`'s boundary never traces the front wall — its last edge is one straight run `(949.6,678.9) → (134.5,720.3)`, dipping up to 31 pt south of the wall band `[163.0,682.2,301.8,686.6]` / door band `[304.8,683.7,357.2,686.5]`. The front doors are an opening, so the flood filled the sidewalk. **The `ENTRANCE` anchor (331.4, 707.3) itself snapped onto the apron — every route started outside the building.**
+- **Truth:** exterior. Only the doorway threshold and north of it is sales floor.
+- **Fix type:** exclusion (poly, north edge flush under the wall at y=688 to x=372, then y=701 to x=500; east of x=500 the diagonal already runs above the wall — deepest walkable row y=698 vs wall y=700 — so nothing left to seal).
+
+### 2. ICE frontage strip and the west front-end walkway sealed by the derived checkstand zone — 1255 cells (≈41 m²)
+- **Coordinates:** `x[744,786] y[544,658]` (two columns flanking the impulse-rack column) and `x[510,524] y[558,648]`.
+- **Evidence:** probe of the printed `ICE` label at `(777.1, 622.7)` returned nearest walkable **3.37 m** away — the only label miss in 41 probes. The derived `auto:CHECKSTANDS` seal zone is `rect [455.5,536.9,850.2,659.2]`, bridge 20 pt: it reaches ~105 pt past the last lane fixture (x=745) and its bridge closed the 12–14 pt walkways in front of the five ICE merchandisers (`[786.0,636.3,795.0,658.1]` etc., west faces drawn with ice-cube gables) and west of the first checkstand. These surfaced as the 1209-cell pocket "near CHECKSTANDS" at (763,598) and the 140/124-cell pockets at (518,573)/(517,633) — none of which is a lane. Both corridors are open north onto the action alley (walkable to y=542/552) and south onto the front walkway (from y=656), i.e. through-corridors.
+- **Truth:** customer floor. Lane interiors (first free lane columns x=728–742 and x=540–544) stay sealed.
+- **Fix type:** two inclusions, `rect [743,537,787,660]` and `rect [509,537,526,660]`, edges held so the ice cases, the walled front-end office (x 798–856) and every lane interior remain sealed.
+
+### 3. `walk_truth.json` had no coverage of either defect, plus one mislabeled point
+- `[460, 630] "west Restrooms room interior"` probes into the **walled office/service room north** of the restroom (door swing at x=470), not the restroom — relabeled, and a real restroom-interior point `[450, 682]` added.
+- No `must` anywhere in the two sealed corridors; no `must_not` anywhere on the outdoor apron, the Café patio or the Curbside lobby; no `must` in Samuel's Jewelers (an open-front lease, correctly green) or at the Olive Cart (unanchored department).
+- **Fix type:** walk_truth points. Added 5 `must` (`779,600` · `750,620` · `517,630` · `385,630` · `842,526`) and 5 `must_not` (`220,705` · `330,700` · `826,715` · `1150,560` · `450,682`). Verified each new point **fails on the pre-fix grid** — i.e. they would have caught findings 1 and 2.
+
+## Passes that came back clean
+- **Mechanical (post-fix):** exit 0, `verify: []`, both coverage lists empty, 1 component (88099), **784 tests pass** (was 774 — the 10 new truth points).
+- **Visual sweep:** 3×3 grid plus 14 targeted gridded crops against the printed map. All 36 aisle corridors green end-to-end (marched from each badge: only the badge glyph blocks; aisles 23–27 stop correctly at the pharmacy wall). Bakery BOH (drawn double swing doors), Cooking Connection and Sushiya horseshoes, Deli staff block, Market/Seafood BOH, pharmacy dispensary, restrooms, front-end office, Curbside lobby, Café patio all correctly sealed. Unanchored departments (Sushiya, Meal Simple, Cooking Connection, Olive Cart, Business Center, Showtime Kitchen, Samuel's Jewelers) inspected individually against `geometry.json`. All 18 culled pockets classified — the four still listed (364/163/149/113) plus the three from this audit (1209/140/124) are reopened by inclusions; the rest are staff rooms, enclosed rooms, lane interiors, or the 1-row north-wall crevice at (740,64).
+- **Label probes:** 41 labels across every wing; worst nearest-walkable now **1.20 m** (was 3.37 m).
+- **Config sanity:** all 4 exclusions and 8 inclusions state a WHY that matches the drawing; none blankets a staff room or covers a shelf label's only frontage.
+
+**Note (not a finding):** `walkable_pct` is **36.4%**, above the 20–35% band. It is inside the ≤40% sparse-schematic allowance — 404 is a thin line schematic with large open Market/Produce/front-end floor, store 388 ships at 40.0%, and this rests on complete aisle/label probes and the full visual sweep above. `ENTRANCE` now appears in `far_snaps` at 2.39 m; that is the fix working — the label is printed on the apron and now snaps to the first floor inside the door.
+
+`AUDIT CLEAN — store 404 (3 findings fixed)`
