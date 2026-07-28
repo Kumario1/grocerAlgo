@@ -240,6 +240,12 @@ def test_live_labels_can_settle_a_tie_the_drawing_cannot():
     assert "live labels" in record["notes"][-1]
 
 
+def test_live_label_gate_tolerates_one_stale_catalog_item():
+    assert calibrate_cli.labels_pass(11, 10)
+    assert not calibrate_cli.labels_pass(11, 9)
+    assert not calibrate_cli.labels_pass(5, 5)
+
+
 def test_a_failed_live_check_leaves_the_tie_unresolved():
     record = {"gates": {"margin": False}, "notes": []}
     calibrate_cli.resolve_margin(

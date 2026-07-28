@@ -27,6 +27,10 @@ PROBES = ["milk", "bread", "tortillas", "cereal", "pasta sauce", "coffee",
           "shampoo", "paper towels", "frozen pizza", "peanut butter",
           "black beans", "dish soap"]
 
+def labels_pass(checked, agreed):
+    """Enough independent labels agree to tolerate one stale catalog item."""
+    return checked >= 6 and agreed / checked >= .9
+
 
 def corridor_segment(psas, runs, group, point):
     """The full corridor centre-line of the product's own shelf run."""
@@ -105,7 +109,7 @@ async def verify(store, record):
             break                       # one product per probe is enough
     await client.close()
     return {"checked": checked, "agreed": agreed, "misses": misses,
-            "pass": checked >= 6 and not misses}
+            "pass": labels_pass(checked, agreed)}
 
 
 def resolve_margin(record, seen):
