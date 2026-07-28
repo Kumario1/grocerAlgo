@@ -83,6 +83,15 @@ def label_fits_segment(label, segment, cross_tol=8.0, end_tol=30.0):
     return cross <= cross_tol and -end_tol <= along <= length + end_tol
 
 
+def aisle_agreement(guide_anchors, want, segment):
+    """Return (nearest badge, whether the expected badge fits this aisle)."""
+    got = nearest_aisle(guide_anchors, segment)
+    agreed = got == want or (
+        want in guide_anchors and
+        label_fits_segment(guide_anchors[want], segment))
+    return got, agreed
+
+
 async def verify(store, record):
     """Do labelled products land in the aisle their own label names?"""
     atlas = cal.load_atlas(store)
@@ -110,10 +119,10 @@ async def verify(store, record):
                                        placement["group"], placement["point"])
             want = cal.guide_aisle_name(config, int(label[1]))
             carried = [carry(end) for end in segment]
-            got = nearest_aisle(guide["anchors"], carried)
+            got, agreed_here = aisle_agreement(
+                guide["anchors"], want, carried)
             checked += 1
-            if (want in guide["anchors"] and
-                    label_fits_segment(guide["anchors"][want], carried)):
+            if agreed_here:
                 agreed += 1
             else:
                 misses.append({"product": product["name"], "label":
