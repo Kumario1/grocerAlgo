@@ -1,0 +1,130 @@
+{
+ "notes": [
+  "atlas aisles 48, guide aisles 50",
+  "y: aisle labels did not constrain this axis, so its scale came from the other axis and its offset from the walkable floor",
+  "aisle offsets x+0 y=floor: 100% of sampled shelves land on a walkable cell and 25 anchors agree, against 100%/23 for x-1 y=floor"
+ ],
+ "gates": {
+  "residual": true,
+  "margin": true,
+  "scale_skew": true,
+  "floor": {
+   "psas": 2629,
+   "on_floor_pct": 99.43,
+   "pass": true,
+   "off_floor": [
+    [
+     "16|1|A|1",
+     13.6
+    ],
+    [
+     "16|1|A|4",
+     13.3
+    ],
+    [
+     "16|1|A|2",
+     13.0
+    ],
+    [
+     "16|1|A|3",
+     12.5
+    ],
+    [
+     "16|1|A|5",
+     12.3
+    ],
+    [
+     "16|1|A|6",
+     11.7
+    ],
+    [
+     "10|95|A|1",
+     7.3
+    ],
+    [
+     "10|92|A|1",
+     6.8
+    ],
+    [
+     "10|92|A|2",
+     6.8
+    ],
+    [
+     "10|92|A|3",
+     6.8
+    ]
+   ]
+  },
+  "labels": false
+ },
+ "x": {
+  "scale": 1.0488182935265986,
+  "offset": 86.45696243508823,
+  "inliers": [
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   20,
+   23,
+   25,
+   26,
+   27,
+   28,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37,
+   38,
+   39,
+   40,
+   41,
+   42
+  ],
+  "max_residual_pt": 2.704,
+  "aisle_offset": 0,
+  "source_axis": 0
+ },
+ "y": {
+  "scale": 1.0488182935265986,
+  "offset": -53.0,
+  "inliers": [],
+  "aisle_offset": null,
+  "source_axis": 1,
+  "derived": true,
+  "max_residual_pt": null
+ },
+ "store": "382",
+ "verdict": "fail",
+ "verified": {
+  "checked": 11,
+  "agreed": 8,
+  "misses": [
+   {
+    "product": "CAFE Ol\u00e9 by H-E-B Texas Pecan Medium Roast Ground Coffee, 12 oz",
+    "label": "Aisle 20",
+    "want": "AISLE 20",
+    "got": "AISLE 21"
+   },
+   {
+    "product": "Dove Coconut & Hydration Shampoo & Conditioner, 2 Pk, 24 oz",
+    "label": "Aisle 37",
+    "want": "AISLE 37",
+    "got": "AISLE 14"
+   },
+   {
+    "product": "H-E-B Our Finest Invent-A-Size Paper Towels, 6 Triple Rolls",
+    "label": "Aisle 30",
+    "want": "AISLE 30",
+    "got": "AISLE 8"
+   }
+  ],
+  "pass": false
+ }
+}
