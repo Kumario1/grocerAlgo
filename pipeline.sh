@@ -99,7 +99,8 @@ fi
 
 if [ "$FROM" -le 2 ]; then
     echo "==> [2/6] first mechanical pass"
-    if ./rebuild.sh "$S" > "$LOG/first_pass.log" 2>&1; then
+    if env -u PIPE_NO_BROWSER -u HEB_RUNTIME_DIR \
+            ./rebuild.sh "$S" > "$LOG/first_pass.log" 2>&1; then
         echo "    first pass clean (see $LOG/first_pass.log)"
     else
         echo "    first pass exit $? — expected before truth exists; the"
@@ -122,7 +123,8 @@ if [ "$FROM" -le 3 ]; then
         || { echo "onboarding agent failed — read $LOG/onboard.log"; exit 1; }
     echo "    onboarding agent done ($LOG/onboard.log)"
 
-    ./rebuild.sh "$S" > "$LOG/post_onboard.log" 2>&1 \
+    env -u PIPE_NO_BROWSER -u HEB_RUNTIME_DIR \
+        ./rebuild.sh "$S" > "$LOG/post_onboard.log" 2>&1 \
         || { echo "rebuild after onboarding failed — read $LOG/post_onboard.log"; exit 1; }
     touch "$LOG/post_onboard.ok"
 fi
@@ -136,7 +138,8 @@ if [ "$FROM" -le 4 ]; then
       echo; sed "s/<N>/$S/g" docs/boundaries.md; } | run_agent > "$LOG/audit.log" 2>&1 \
         || { echo "audit agent failed — read $LOG/audit.log"; exit 1; }
 
-    ./rebuild.sh "$S" > "$LOG/post_audit.log" 2>&1 \
+    env -u PIPE_NO_BROWSER -u HEB_RUNTIME_DIR \
+        ./rebuild.sh "$S" > "$LOG/post_audit.log" 2>&1 \
         || { echo "rebuild after audit failed — read $LOG/post_audit.log"; exit 1; }
 fi
 
@@ -162,7 +165,8 @@ if [ "$FROM" -le 5 ]; then
     echo "    full suite (every store, goldens included)"
     # not piped: a pipeline's status is the LAST command's, which would swallow
     # a failing suite under set -e
-    "$PYTHON" -m pytest -q > "$LOG/full_suite.log" 2>&1 \
+    env -u PIPE_NO_BROWSER -u HEB_RUNTIME_DIR \
+        "$PYTHON" -m pytest -q > "$LOG/full_suite.log" 2>&1 \
         || { echo "    SUITE FAILED — read $LOG/full_suite.log"; exit 1; }
     tail -1 "$LOG/full_suite.log" | sed 's/^/    /'
     "$PYTHON" - "$S" <<'EOF'
