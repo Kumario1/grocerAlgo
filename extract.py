@@ -293,7 +293,8 @@ def extract():
         if not best:
             thick_chains = []
             for dr in page.get_drawings():
-                if dr["type"] == "s" and (dr.get("width") or 0) >= min_width:
+                if dr["type"] == "s" and dr.get("color") != WHITE \
+                        and (dr.get("width") or 0) >= min_width:
                     thick_chains.extend(chains(dr))
             best = stitch_open_boundary(thick_chains, W, H, min_span=min_span)
             if not best:
