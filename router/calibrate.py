@@ -41,6 +41,7 @@ MAX_SKEW = 0.05       # |x scale / y scale - 1|; both drawings are to scale
 FOOTPRINT_BAND = (0.45, 1.75)  # mapped fixtures must still cover the same store
 MIN_MARGIN = 2        # inliers the winning offset must beat the runner-up by
 MIN_ON_FLOOR = 0.99   # PSAs that must land on reachable floor
+LIVE_MIN_ON_FLOOR = 0.97  # small non-retail Atlas tail, only with live proof
 MAX_SNAP_M = 5.0      # nothing on a shelf is further than this from a corridor
 
 

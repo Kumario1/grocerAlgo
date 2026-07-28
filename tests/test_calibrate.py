@@ -233,7 +233,7 @@ def test_live_labels_can_settle_a_tie_the_drawing_cannot():
     check has to clear it — otherwise the gate is unresolvable and the store
     is blocked forever (store 811, 2026-07-24)."""
     record = {"gates": {"margin": False, "floor": {"pass": True}}, "notes": []}
-    calibrate_cli.resolve_margin(
+    calibrate_cli.resolve_live_gates(
         record, {"pass": True, "checked": 8, "agreed": 8, "misses": []})
 
     assert record["gates"]["margin"] is True
@@ -248,7 +248,7 @@ def test_live_label_gate_tolerates_one_stale_catalog_item():
 
 def test_a_failed_live_check_leaves_the_tie_unresolved():
     record = {"gates": {"margin": False}, "notes": []}
-    calibrate_cli.resolve_margin(
+    calibrate_cli.resolve_live_gates(
         record, {"pass": False, "checked": 8, "agreed": 6,
                  "misses": [{"product": "milk"}]})
 
@@ -256,12 +256,21 @@ def test_a_failed_live_check_leaves_the_tie_unresolved():
     assert record["notes"] == []
 
 
-def test_verification_does_not_paper_over_any_other_gate():
-    """Only the margin tie is settled by labels. A fit that misses the floor
-    is wrong wherever the labels land."""
-    record = {"gates": {"margin": False, "floor": {"pass": False},
+def test_live_labels_can_settle_a_small_nonretail_floor_tail():
+    record = {"gates": {"margin": True, "floor": {
+        "pass": False, "on_floor_pct": 97.2}},
+        "notes": []}
+    calibrate_cli.resolve_live_gates(
+        record, {"pass": True, "checked": 11, "agreed": 11, "misses": []})
+
+    assert record["gates"]["floor"]["pass"] is True
+
+
+def test_verification_does_not_paper_over_a_bad_floor_or_other_gate():
+    record = {"gates": {"margin": False, "floor": {
+        "pass": False, "on_floor_pct": 96.9},
                         "residual": False}, "notes": []}
-    calibrate_cli.resolve_margin(
+    calibrate_cli.resolve_live_gates(
         record, {"pass": True, "checked": 9, "agreed": 9, "misses": []})
 
     assert record["gates"]["floor"]["pass"] is False

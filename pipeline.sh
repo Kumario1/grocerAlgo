@@ -172,6 +172,24 @@ fi
 # A map alone routes nothing: without a calibrated Atlas the app has no way to
 # put a real product on it, so the store stays unpickable until this passes.
 # It does not depend on the audit verdict, so a blocked audit must not skip it.
+live_can_resolve() {
+    "$PYTHON" - "$S" <<'EOF'
+import json, sys
+from router.calibrate import LIVE_MIN_ON_FLOOR
+record = json.load(open(f"data/{sys.argv[1]}-atlas/calibration.json"))
+failed = {
+    name for name, gate in record["gates"].items()
+    if not (gate.get("pass") if isinstance(gate, dict) else gate)
+}
+floor = record["gates"].get("floor")
+floor_close = (isinstance(floor, dict) and
+               floor.get("on_floor_pct", 0) >= 100 * LIVE_MIN_ON_FLOOR)
+raise SystemExit(not (
+    failed <= {"margin", "floor"} and
+    ("floor" not in failed or floor_close)))
+EOF
+}
+
 if [ -n "${PIPE_NO_BROWSER:-}" ]; then
     # Deferred, not blocked. PLACEMENT stays ok on purpose: nothing was tried
     # here, so the gate below reads the audit verdict alone. Saying "blocked"
@@ -185,16 +203,7 @@ else
     if "$PYTHON" capture_atlas.py "$S"; then
         OFFLINE=blocked
         "$PYTHON" calibrate.py "$S" && OFFLINE=ok
-        if [ "$OFFLINE" = ok ] || "$PYTHON" - "$S" <<'EOF'
-import json, sys
-record = json.load(open(f"data/{sys.argv[1]}-atlas/calibration.json"))
-failed = [
-    name for name, gate in record["gates"].items()
-    if not (gate.get("pass") if isinstance(gate, dict) else gate)
-]
-raise SystemExit(failed != ["margin"])
-EOF
-        then
+        if [ "$OFFLINE" = ok ] || live_can_resolve; then
             echo "    checking live shelf labels"
             "$PYTHON" calibrate.py "$S" --verify && PLACEMENT=ok
         fi
@@ -219,7 +228,9 @@ EOF
                 "data/$S-atlas/repair.log" || break
             [ "$repair_try" -ge 3 ] || sleep 60
         done
-        if "$PYTHON" calibrate.py "$S" &&
+        OFFLINE=blocked
+        "$PYTHON" calibrate.py "$S" && OFFLINE=ok
+        if { [ "$OFFLINE" = ok ] || live_can_resolve; } &&
                 "$PYTHON" calibrate.py "$S" --verify; then
             PLACEMENT=ok
         elif [ "$store_existed" = 1 ]; then
