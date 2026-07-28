@@ -296,6 +296,20 @@ def extract():
                 if dr["type"] == "s" and (dr.get("width") or 0) >= min_width:
                     thick_chains.extend(chains(dr))
             best = stitch_open_boundary(thick_chains, W, H, min_span=min_span)
+            if not best:
+                mask = raster.Image.new("L", (round(W), round(H)), 0)
+                draw = raster.ImageDraw.Draw(mask)
+                for chain in thick_chains:
+                    draw.line([tuple(point) for point in chain],
+                              fill=255, width=2)
+                try:
+                    candidate = raster.discover_boundary(raster.np.array(mask))
+                    xs, ys = zip(*candidate)
+                    if min(xs) > 1 and min(ys) > 1 \
+                            and max(xs) < W - 2 and max(ys) < H - 2:
+                        best = candidate
+                except raster.RasterExtractionError:
+                    pass
         return best
 
     # A ladder, not a lower constant: 1.5 first (the classic template, and
