@@ -1,0 +1,10 @@
+[
+  {"name": "auto:BAKERY", "pt": [1056.6447448730469, 379.8492736816406], "r": 130, "bridge": 12},
+  {"name": "auto:DELI", "pt": [1015.0917663574219, 592.8583068847656], "r": 130, "bridge": 12},
+  {"name": "Floral display cluster — radius pulled in from the derived 130 to 40 so the disk hugs the floral fixtures (x=860..903, y=558..615) instead of reaching the aisle-badge row at y=528..541, where a 12 pt bridge seals the mouths of aisles 2-5. Floral here is an open display island, not a staffed counter, so the disk only closes the dead crevices between its own fixtures.",
+   "pt": [878, 588], "r": 40, "bridge": 12},
+  {"name": "auto:PHARMACY", "pt": [171.04235076904297, 657.2919616699219], "r": 130, "bridge": 12},
+  {"name": "auto:SEAFOOD", "pt": [916.1111755371094, 126.42728042602539], "r": 130, "bridge": 20},
+  {"name": "Checkstand lane bank — north edge pulled down to the register bank itself (y=565..613 drawn) instead of the derived y=506: the derived cluster swallowed the aisle-badge ovals at y=528..541, and a 20 pt bridge across that row seals the mouths of aisles 2-9",
+   "rect": [458, 557, 880, 621], "bridge": 20}
+]

@@ -1,0 +1,280 @@
+{
+ "components": {
+  "n": 1,
+  "sizes": [
+   88280
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 2230,
+   "near": "PHARMACY",
+   "x": 172.4,
+   "y": 650.5
+  },
+  {
+   "cells": 758,
+   "near": "DELI",
+   "x": 1114.9,
+   "y": 615.4
+  },
+  {
+   "cells": 461,
+   "near": "SEAFOOD",
+   "x": 873.0,
+   "y": 93.0
+  },
+  {
+   "cells": 432,
+   "near": "PHARMACY",
+   "x": 288.3,
+   "y": 658.9
+  },
+  {
+   "cells": 416,
+   "near": "BAKERY",
+   "x": 1126.0,
+   "y": 475.0
+  },
+  {
+   "cells": 309,
+   "near": "CHECKSTANDS",
+   "x": 638.7,
+   "y": 662.3
+  },
+  {
+   "cells": 269,
+   "near": "BAKERY",
+   "x": 1099.2,
+   "y": 474.3
+  },
+  {
+   "cells": 261,
+   "near": "AISLE 11",
+   "x": 511.5,
+   "y": 665.5
+  },
+  {
+   "cells": 248,
+   "near": "AISLE 10",
+   "x": 563.8,
+   "y": 664.6
+  },
+  {
+   "cells": 203,
+   "near": "RESTROOMS",
+   "x": 732.5,
+   "y": 659.3
+  },
+  {
+   "cells": 196,
+   "near": "RESTROOMS",
+   "x": 801.3,
+   "y": 659.2
+  },
+  {
+   "cells": 166,
+   "near": "AISLE 7",
+   "x": 706.3,
+   "y": 585.8
+  },
+  {
+   "cells": 162,
+   "near": "AISLE 11",
+   "x": 547.1,
+   "y": 585.0
+  },
+  {
+   "cells": 160,
+   "near": "AISLE 5",
+   "x": 796.7,
+   "y": 585.6
+  },
+  {
+   "cells": 158,
+   "near": "AISLE 10",
+   "x": 592.8,
+   "y": 585.4
+  },
+  {
+   "cells": 158,
+   "near": "CHECKSTANDS",
+   "x": 660.8,
+   "y": 585.4
+  },
+  {
+   "cells": 152,
+   "near": "AISLE 6",
+   "x": 729.2,
+   "y": 587.4
+  },
+  {
+   "cells": 151,
+   "near": "AISLE 9",
+   "x": 615.4,
+   "y": 585.8
+  },
+  {
+   "cells": 150,
+   "near": "RESTROOMS",
+   "x": 751.7,
+   "y": 586.1
+  },
+  {
+   "cells": 142,
+   "near": "AISLE 11",
+   "x": 501.5,
+   "y": 585.4
+  },
+  {
+   "cells": 140,
+   "near": "CHECKSTANDS",
+   "x": 683.4,
+   "y": 585.5
+  },
+  {
+   "cells": 139,
+   "near": "AISLE 11",
+   "x": 524.1,
+   "y": 584.8
+  },
+  {
+   "cells": 139,
+   "near": "CHECKSTANDS",
+   "x": 638.1,
+   "y": 584.8
+  },
+  {
+   "cells": 139,
+   "near": "AISLE 5",
+   "x": 774.1,
+   "y": 585.0
+  },
+  {
+   "cells": 138,
+   "near": "AISLE 12",
+   "x": 479.3,
+   "y": 586.2
+  },
+  {
+   "cells": 136,
+   "near": "AISLE 10",
+   "x": 569.9,
+   "y": 585.1
+  },
+  {
+   "cells": 135,
+   "near": "AISLE 4",
+   "x": 820.4,
+   "y": 593.4
+  },
+  {
+   "cells": 127,
+   "near": "DELI",
+   "x": 1079.7,
+   "y": 660.3
+  },
+  {
+   "cells": 120,
+   "near": "EXIT",
+   "x": 953.0,
+   "y": 664.0
+  },
+  {
+   "cells": 100,
+   "near": "DAIRY",
+   "x": 299.0,
+   "y": 144.0
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 18.1,
+   "meters": 2.87,
+   "name": "PHARMACY"
+  }
+ ],
+ "m_per_cell": 0.1582,
+ "narrow": [
+  {
+   "half_width_m": 0.35,
+   "name": "AISLE 13"
+  },
+  {
+   "half_width_m": 0.47,
+   "name": "AISLE 22"
+  },
+  {
+   "half_width_m": 0.63,
+   "name": "AISLE 16"
+  },
+  {
+   "half_width_m": 0.63,
+   "name": "AISLE 18"
+  },
+  {
+   "half_width_m": 0.63,
+   "name": "AISLE 19"
+  },
+  {
+   "half_width_m": 0.63,
+   "name": "AISLE 20"
+  },
+  {
+   "half_width_m": 0.63,
+   "name": "AISLE 24"
+  },
+  {
+   "half_width_m": 0.71,
+   "name": "AISLE 25"
+  }
+ ],
+ "provenance": {
+  "drift": {
+   "seal_zones": {
+    "derived_n": 6,
+    "derived_names": [
+     "auto:BAKERY",
+     "auto:DELI",
+     "auto:FLORAL",
+     "auto:PHARMACY",
+     "auto:SEAFOOD",
+     "auto:CHECKSTANDS"
+    ],
+    "file_n": 6,
+    "file_names": [
+     "auto:BAKERY",
+     "auto:DELI",
+     "Floral display cluster \u2014 radius pulled in from the derived 130 to 40 so the disk hugs the floral fixtures (x=860..903, y=558..615) instead of reaching the aisle-badge row at y=528..541, where a 12 pt bridge seals the mouths of aisles 2-5. Floral here is an open display island, not a staffed counter, so the disk only closes the dead crevices between its own fixtures.",
+     "auto:PHARMACY",
+     "auto:SEAFOOD",
+     "Checkstand lane bank \u2014 north edge pulled down to the register bank itself (y=565..613 drawn) instead of the derived y=506: the derived cluster swallowed the aisle-badge ovals at y=528..541, and a 20 pt bridge across that row seals the mouths of aisles 2-9"
+    ]
+   },
+   "zones": {
+    "ENTRANCE": {
+     "derived": [
+      885.1144104003906,
+      691.9639282226562
+     ],
+     "file": [
+      884,
+      650
+     ]
+    }
+   }
+  },
+  "exclusions": "file",
+  "inclusions": "file",
+  "seal_zones": "file",
+  "zones": "file"
+ },
+ "reachable_pct": 36.4,
+ "store": "229",
+ "verify": [],
+ "walkable_pct": 36.4
+}

@@ -1,0 +1,43 @@
+## Store map audit — H-E-B 229
+
+I reran everything and treated the committed artifacts as untrusted. All five passes complete.
+
+### Pass 1 — Mechanical: PASS
+`./rebuild.sh 229` → exit 0, 780 tests pass. `report.json`: `"verify": []`, both `coverage` lists empty, `components: 1` (88,280 cells), `walkable_pct 36.4` = `reachable_pct`.
+
+36.4% is above the 20–35% band, so I held it to the sparse-schematic bar rather than waving it through. Page 2 has **636 drawings — the sparsest onboarded guide in the repo** (659=2404, 660=1506, 24=1468, 658=943). The geometry is arithmetically consistent: aisle pitch 37.9 pt (=3.0 m), shelf runs ~19 pt, corridors ~20 pt, so corridor share ≈ 51% of each aisle block by construction. Cleared with complete probes, not by inspection: all 25 aisle corridors traced green end to end (`AISLE 1–12` north to y=150, `13–25` west to x=100 — the only breaks are the Market back-wall island cases at y 164–186, confirmed `free_raw == False`, i.e. drawn fixtures), and every green blob >6 m from any printed label classified as legitimate open Market/Produce/Bakery-east floor.
+
+### Pass 2 — Visual sweep: no sealed retail floor, no staff floor left green
+3×3 crops of `walkable_overlay.png` plus ~12 targeted high-zoom renders with the shipped grid tinted over the PDF. All 30 culled pockets located and classified: 9 staff rooms, 16 checkout-lane interiors, 5 wall cavities ≤10 pt thick. `free_uncut & ~free` is **empty** — zero isolated pockets.
+
+The store-24 failure mode is specifically ruled out. The Pharmacy's sealed room is genuinely staff — its north wall at y≈607 carries two counter/window units (x 152–165, 216–230) and two door swings, and the will-call fixture strip (x 88–147, y 620–636) is walled top and bottom. The pickup corridor y 578–606 and the NW waiting alcove (x 88–136, y 607–620) are green, and the `PHARMACY` anchor's 4.16 m snap lands on the door threshold at (134,620) — the correct customer standing point, not a drawing artifact. I also initially misread the front-left Magazines/Seasonal Items area as white at crop zoom; the high-zoom render settled it as green, and the 432-cell pocket there is a 14 pt wall chase, not retail floor.
+
+Every unanchored printed department was inspected against `geometry.json`: Market, Tortilleria, Meal Simple, Meal Deal, Business Center, Ice ×2, Tobacco, Magazines, Seasonal Items — all have green frontage.
+
+### Pass 3 — Label probes: PASS
+I probed all **333** printed words rather than 10. Worst product-label distance to reachable floor: **0.63 m**. Only three words exceed 2 m — `Pharmacy`, `Business`, `Center` — all service-room label centres whose customer frontages are green.
+
+### Pass 5 — Config sanity: PASS
+All 10 exclusions and 4 inclusions state a WHY the map supports. Two spot-checks worth recording: the Deli inclusion `[962,578,1040,614]` stops exactly at the service case's top edge, so it does not leak onto the staff side (y>620); and no exclusion covers a shelf label's only frontage — proved by the 333-word probe.
+
+---
+
+## Findings (worst first) — 3 found, 3 fixed
+
+**F1 — `walk_truth` must_not at (732,659) was tautological.** *(fix type: walk_truth point)*
+`free_raw[732,659]` is already `False` because the restroom **door pictogram artwork** is drawn at (725..739, 654..664). The point is non-free from the drawing alone, so it would keep passing even if the Restrooms room stopped being sealed entirely — the exact "author's blind spot passes its own test" pattern this role exists to catch. Probe: the point is not a member of the 203-cell sealed pocket x[710,758] y[650,674]. **Fixed:** relocated to **(748,658)**, 5 cells deep inside that pocket. Re-audited: zero in-store must_not points are now non-free from artwork alone.
+
+**F2 — six retail sections/departments had no `must` point.** *(fix type: walk_truth point)*
+The store-24 failure mode was undefended precisely where the risk is highest:
+- **Front-left retail pocket** x 265–385 / y 611–672, holding the `Magazines` and `Seasonal Items` labels — walled off from the Pharmacy by the x 251–265 chase, and the auto `PHARMACY` seal disk is r=130 at (171,657), so a radius change would swallow it silently. → **(285,645)**, **(330,666)**
+- **West-wall shelf frontage corridor** x≈112–130, the *only* frontage for five rotated labels (Household Storage and Containers / Paper Towels / Napkins / Bath Tissue / Facial Tissue), sitting directly under the west-wall staff-column exclusion. → **(116,300)**, **(116,520)**
+- **Ice ×2 / Tobacco frontages**, each a narrow band between a merchandiser and a sealed front-strip room. → **(505,630)**, **(568,630)**, **(808,628)**
+- **Business Center customer frontage**, north of its counter band y 648–655. → **(640,643)**
+- **Meat department frontage** (anchor at 868,465; aisles 1–4 were entirely unpinned). → **(859,465)**
+
+**F3 — eleven sealed staff areas / enclosed rooms had no `must_not` point.** *(fix type: walk_truth point)*
+Four of the ten exclusion shapes asserted staff status over ~4,000 cells of floor with no test defending the assertion (BOH western extension, second Dairy cooler room, Dairy-walk-in↔Market-back-room gap, west-wall staff column), plus the Seafood staff-door alcove. Six sealed pockets had a pinned twin but were themselves unpinned: second bakery-east room (269 cells, own door at x 1092–1104), second front-strip room behind Tobacco (248, own door at x 582–595), east Restrooms room (196), SE staff-room bank behind the Deli kitchen (127, three door swings), Business Center back-of-counter strip (309), and the Pharmacy/retail chase (244). **Fixed:** 12 points added. Re-audit: every exclusion shape and every sealed pocket ≥100 cells is now covered, except two genuine wall cavities 6 pt and 2 pt thick (behind the cafe counter; along the Dairy walk-in's south wall) — crevices, not rooms.
+
+`walk_truth.json` went from 21/17 to **30 must / 28 must_not**; test count 760 → **780**, all green. Only `data/229/walk_truth.json` was edited — no code, no goldens, no other store (`git diff --stat` is empty; `data/229/` is untracked).
+
+`AUDIT CLEAN — store 229 (3 findings fixed)`

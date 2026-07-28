@@ -1,0 +1,10 @@
+[
+  {"name": "Seafood counter customer frontage, south-east of the diagonal service case (the SEAFOOD label prints on the shopping floor here; the staff pocket north-west of the case stays sealed)",
+   "rect": [898, 108, 962, 152]},
+  {"name": "Market Deli aisle — 'Market Deli' is a packaged-product label printed in the 2.2 m corridor between the Dairy front case (y=193) and the aisle 13/14 shelf (y=222), not a service counter",
+   "rect": [130, 195, 378, 220]},
+  {"name": "Bakery customer frontage south of the bakery counter wall (y=345): the BAKERY label prints on the open shopping floor in front of the counter, beside the cafe tables",
+   "rect": [1042, 352, 1138, 415]},
+  {"name": "Deli customer frontage north of the service case (case top edge y=617): the DELI label prints on the shopping side, between the Meal Simple cases and the counter",
+   "rect": [962, 578, 1040, 614]}
+]

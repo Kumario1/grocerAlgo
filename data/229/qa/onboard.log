@@ -1,0 +1,40 @@
+Store 229 is converged. Handing off for the audit.
+
+## Result
+
+`./rebuild.sh 229` → **exit 0, 760 tests passed**. `data/229/qa/report.json`:
+
+| | before | after |
+|---|---|---|
+| `verify` | 4 flags | `[]` |
+| `coverage` | `[]`/`[]` | `[]`/`[]` |
+| `components` | 3 — `[89533, 11312, 4466]` | **1** — `[88280]` |
+| walkable / reachable | 43.5% / 36.9% | **36.4% / 36.4%** |
+| `far_snaps` | PHARMACY 2.9 m, ENTRANCE 2.3 m | PHARMACY 2.9 m only |
+
+## Files authored (only `data/229/{zones,seal_zones,exclusions,inclusions,walk_truth}.json`)
+
+**`seal_zones.json`** — two corrections, four derived disks carried over verbatim. The derived checkstand rect was `[450, 506, 880, 621]`: its cluster search pulled in the aisle-badge ovals at y=528–541, and a 20 pt bridge across that row **sealed the south mouths of aisles 2–9** — shoppers needed a 57–76 m detour around the north end to enter. Pulled the north edge down to the register bank itself (`y=557`). The FLORAL disk (r=130) did the same to aisles 2–5, so it now hugs the floral fixtures (`pt [878,588] r 40`); Floral here is an open display island, not a staffed counter. After both, all 25 badges connect locally through the row.
+
+**`exclusions.json`** (10) — north back-of-house band + its extensions (the 33 pt staff strip between the exterior wall and the back-room walls, running the full width; it was the 11 312-cell orange region), the Market back room (4 466 cells), both Dairy walk-in cooler rooms, the Seafood staff door alcove, and the **Deli back-of-counter work area** — that one was genuinely reachable customer-facing floor before: the kitchen door at (1105,585) opens onto the band behind the diagonal case, which runs continuously west behind the counter. Plus the café bar nook (L-counter with stools, no product frontage).
+
+**`inclusions.json`** (4) — one per VERIFY, all legitimate customer space: SEAFOOD, BAKERY and DELI labels all print on the shopping side of their counters, and `MARKET DELI` is a packaged-product label in the 2.2 m Dairy corridor, not a service counter. Verified they restore 0 cells each — pure VERIFY suppression, no staff space reopened.
+
+**`zones.json`** — ENTRANCE moved from the label position (885,692), which sits outside the boundary and snapped into a 0.5 m nook between the door-arrow glyphs, to (884,650) on the entry apron. CHECKOUT carried over verbatim.
+
+**`walk_truth.json`** — 21 `must` / 17 `must_not`, all verified point-by-point against the shipped grid.
+
+Checks I ran beyond the report: every one of the 30 culled pockets located and classified (pharmacy room, deli kitchen, seafood staff pocket, four enclosed rooms behind the bakery/tortilleria, restrooms, three front-vestibule rooms, 16 checkout lanes, the rest fixture slivers); and a scan for product labels swallowed by an exclusion returned only `Pharmacy` itself, inside its own label-condemned room.
+
+## One finding I could not fix in data — reporting, not working around
+
+`extract.py:236` skips aisle-badge glyphs only when their bbox is ≤14×14 pt (the hexagon of the 659-era template). Store 229 badges are **24.0×12.1 pt ovals**, so all 25 become blocking `fixture_polys` sitting squarely in their own aisle mouths:
+
+```
+y=520 (in aisle):  free runs 24-28 pt wide  (620-648, 662-686, 698-724, ...)
+y=534 (badge row): only 10-14 pt, and those are *between* badges, not in the mouths
+```
+
+Aisles 2–9 now enter through the ~2 pt (0.16 m) slot beside each oval instead of a 2.2 m mouth — topology and path lengths are right, mouth width is not. Same cause behind the two `narrow` flags that stay under 0.5 m (AISLE 13 at 0.35 m, AISLE 22 at 0.47 m): the anchor snaps into the 4–6 pt slot beside the oval in the left-wing action alley. These are **not** slivers to exclude — the mouths are fully open a few pt above and below each oval, and excluding there would remove real floor.
+
+No data file can unblock a fixture (`free |= free_raw & incl_mask` only restores what *sealing* removed), so this needs a universal change to that size window, which I did not make. Store 388 shipped with the same artifact on 3 badges (`19.6×10.1 pt` ovals); 658's `21.2×10.9 pt` ovals are wide enough not to pinch. I touched no code, no other store's data, and no goldens.
