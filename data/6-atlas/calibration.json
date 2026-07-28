@@ -1,0 +1,86 @@
+{
+ "notes": [
+  "atlas aisles 21, guide aisles 15",
+  "y: aisle labels did not constrain this axis, so its scale came from the other axis and its offset from the walkable floor",
+  "aisle offsets x+0 y=floor: 100% of sampled shelves land on a walkable cell and 13 anchors agree, against 100%/12 for x-1 y=floor"
+ ],
+ "gates": {
+  "residual": true,
+  "margin": false,
+  "scale_skew": true,
+  "floor": {
+   "psas": 1203,
+   "on_floor_pct": 99.58,
+   "pass": true,
+   "off_floor": [
+    [
+     "00|94|A|92",
+     null
+    ],
+    [
+     "00|94|A|93",
+     null
+    ],
+    [
+     "00|94|A|91",
+     null
+    ],
+    [
+     "00|94|A|90",
+     null
+    ],
+    [
+     "3000|3000|A|3000",
+     8.9
+    ]
+   ]
+  },
+  "labels": false
+ },
+ "x": {
+  "scale": 1.5517324121610787,
+  "offset": 277.2099365151373,
+  "inliers": [
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15
+  ],
+  "max_residual_pt": 2.183,
+  "aisle_offset": 0,
+  "source_axis": 0
+ },
+ "y": {
+  "scale": 1.5517324121610787,
+  "offset": -50.0,
+  "inliers": [],
+  "aisle_offset": null,
+  "source_axis": 1,
+  "derived": true,
+  "max_residual_pt": null
+ },
+ "store": "6",
+ "verdict": "fail",
+ "verified": {
+  "checked": 11,
+  "agreed": 10,
+  "misses": [
+   {
+    "product": "Dove Coconut & Hydration Shampoo & Conditioner, 2 Pk, 24 oz",
+    "label": "Aisle 12",
+    "want": "AISLE 12",
+    "got": "AISLE 14"
+   }
+  ],
+  "pass": false
+ }
+}
