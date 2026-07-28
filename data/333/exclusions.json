@@ -1,0 +1,18 @@
+[
+ {"name": "top wall service band behind the Market / meat cases (cooler + prep access, staff only; drawn open but walled off from the sales floor)",
+  "rect": [77, 43, 1150, 94]},
+ {"name": "back-of-house strip between the Seafood prep room and the Curbside staging bay (staff; same band, south of the top wall run)",
+  "rect": [648, 88, 792, 158]},
+ {"name": "north-west receiving dock alcove (inside the boundary, no door onto the sales floor)",
+  "rect": [77, 90, 246, 132]},
+ {"name": "west end of the top service band, above the store's west wall return (staff)",
+  "rect": [77, 132, 200, 158]},
+ {"name": "west staff corridor between the outer wall and the Deli/Bakery back rooms (staff; customer floor starts at x=202/212)",
+  "poly": [[170, 155], [200, 155], [200, 278], [210, 278], [210, 342], [170, 342]]},
+ {"name": "service gap between the Curbside kiosk and the Dairy walk-in (staff cooler access)",
+  "rect": [866, 88, 934, 158]},
+ {"name": "behind the Dairy cases / top-right service band (walk-in cooler access, staff only)",
+  "rect": [930, 88, 1150, 170]},
+ {"name": "Lease Space tenant bay in the front lobby (walled alcove between the SW vestibule and the Business Center; leased floor, not H-E-B sales floor — no product labels)",
+  "rect": [534, 690, 586, 738]}
+]

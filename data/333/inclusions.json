@@ -1,0 +1,8 @@
+[
+ {"name": "Deli/Sushi customer aisle — the DELI/SUSHI labels are printed on the shopping floor in front of the diagonal service cases, not inside them",
+  "rect": [290, 242, 348, 282]},
+ {"name": "Bakery customer aisle between the bakery display cases (the BAKERY label sits on this aisle, the prep room behind it is already walled off)",
+  "rect": [266, 360, 310, 412]},
+ {"name": "Aisle 3 corridor — 'Kitchen Gadgets' is a shelf label, not a service kitchen; this is ordinary shopping floor",
+  "rect": [444, 400, 464, 500]}
+]

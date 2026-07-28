@@ -1,0 +1,21 @@
+Store 333 (Aransas Pass) is converged. `./rebuild.sh 333` exits 0, all **758 tests pass** (including 659's pixel-frozen golden gate), and `data/333/qa/report.json` reports `"verify": []`, both `coverage` lists empty, **1 component**, walkable 32.3%.
+
+## What the first pass hit
+
+`build_profile.py` crashed: `no walkable cell near [889.8, 468.6]` (AISLE 12). Root cause wasn't aisle 12 at all — the derived `ENTRANCE` landed at (476.7, 748.2) inside the SW **entry airlock**, which the PDF draws as a closed door-bank rectangle. The vestibule is a 1917-cell island in the raw grid, so the seed sat there, the whole 83578-cell sales floor became one "pocket", and the service labels inside it condemned it as staff area. Every anchor was unreachable.
+
+## Data authored (five per-store JSONs only; no code touched)
+
+- **`zones.json`** — ENTRANCE moved to (505, 620), the sales floor just inside the door bank. CHECKOUT kept at the derived label point.
+- **`seal_zones.json`** — full override. Kept the Bakery / Floral / Pharmacy disks; replaced two derived zones that were wrong in shape:
+  - the `auto:SEAFOOD` r=130 disk reached y=284 and its 20 pt bridge closed the 18 pt aisle 4/5 corridor from y=206 down (the *Spices* / *Oil-Shortening* faces — only two labels, under the coverage net's 3-label cluster floor, so nothing mechanical caught it). Replaced with a box over the prep band, `[438,56,684,170]`.
+  - `auto:CHECKSTANDS` derived to `[414,580,860,683]` — it had swallowed the entrance apron (the ENTRANCE seed itself was being sealed), the restroom corridor and the south action alley. Retightened to the nine drawn registers, `[552,544,801,624]`; the 19–21 pt walkways beside the belt-less display racks stay open, only the 7–13 pt inter-register lanes seal.
+- **`exclusions.json`** (8) — the back-of-house band that was rendering orange as a second 16278-cell component: top wall service band behind the Market cases, NW receiving dock, west staff corridor, the Seafood↔Curbside strip, behind the Dairy walk-ins, and the *Lease Space* tenant bay in the front lobby.
+- **`inclusions.json`** (3) — resolved all three VERIFY flags as customer space: the Deli/Sushi aisle, the Bakery aisle, and aisle 3 (`KITCHEN` was extracted from the **"Kitchen Gadgets" shelf label**, not a service kitchen — that phantom department also spawned a bogus seal disk in the middle of the grocery bank, which the override drops).
+- **`walk_truth.json`** — 17 `must` / 19 `must_not`. Coordinates verified point-by-point against the grid; sealed-area points sit on *structurally free* floor wherever possible so they guard sealing regressions rather than only fixture extraction.
+
+## Residual signals, all explained
+
+`far_snaps`: EXIT (in the sealed vestibule), DAIRY (label prints in the staff band behind the cases), PHARMACY (label inside the dispensary) — all three snap correctly to their customer frontage. All 22 culled pockets classify as staff prep, enclosed rooms, checkout lanes or dead crevices. A sweep of every printed word found only 5 labels >16 pt from reachable floor: the two vestibule *Exit*s, *Dairy*, *Pharmacy*, and *Lease Space* — no product label is stranded.
+
+Stopping here for the separate audit context, per the runbook.

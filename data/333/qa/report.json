@@ -1,0 +1,251 @@
+{
+ "components": {
+  "n": 1,
+  "sizes": [
+   78176
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 3500,
+   "near": "PHARMACY",
+   "x": 1068.5,
+   "y": 623.0
+  },
+  {
+   "cells": 2434,
+   "near": "SEAFOOD",
+   "x": 560.1,
+   "y": 122.5
+  },
+  {
+   "cells": 1917,
+   "near": "EXIT",
+   "x": 473.3,
+   "y": 691.1
+  },
+  {
+   "cells": 1652,
+   "near": "PHARMACY",
+   "x": 1049.9,
+   "y": 695.4
+  },
+  {
+   "cells": 992,
+   "near": "RESTROOMS",
+   "x": 824.1,
+   "y": 698.2
+  },
+  {
+   "cells": 653,
+   "near": "PHARMACY",
+   "x": 959.9,
+   "y": 706.3
+  },
+  {
+   "cells": 340,
+   "near": "RESTROOMS",
+   "x": 744.0,
+   "y": 702.5
+  },
+  {
+   "cells": 335,
+   "near": "RESTROOMS",
+   "x": 778.6,
+   "y": 704.7
+  },
+  {
+   "cells": 326,
+   "near": "RESTROOMS",
+   "x": 706.6,
+   "y": 684.9
+  },
+  {
+   "cells": 269,
+   "near": "CHECKSTANDS",
+   "x": 630.3,
+   "y": 579.6
+  },
+  {
+   "cells": 260,
+   "near": "RESTROOMS",
+   "x": 710.5,
+   "y": 719.4
+  },
+  {
+   "cells": 254,
+   "near": "RESTROOMS",
+   "x": 745.7,
+   "y": 578.7
+  },
+  {
+   "cells": 202,
+   "near": "CHECKOUT",
+   "x": 649.2,
+   "y": 718.0
+  },
+  {
+   "cells": 201,
+   "near": "CHECKSTANDS",
+   "x": 688.0,
+   "y": 579.9
+  },
+  {
+   "cells": 195,
+   "near": "RESTROOMS",
+   "x": 715.8,
+   "y": 582.0
+  },
+  {
+   "cells": 193,
+   "near": "CHECKOUT",
+   "x": 601.7,
+   "y": 581.6
+  },
+  {
+   "cells": 193,
+   "near": "CHECKSTANDS",
+   "x": 660.1,
+   "y": 579.6
+  },
+  {
+   "cells": 193,
+   "near": "RESTROOMS",
+   "x": 774.1,
+   "y": 579.6
+  },
+  {
+   "cells": 164,
+   "near": "DELI SUSHI",
+   "x": 268.5,
+   "y": 225.2
+  },
+  {
+   "cells": 161,
+   "near": "ENTRANCE",
+   "x": 574.9,
+   "y": 582.3
+  },
+  {
+   "cells": 127,
+   "near": "SEAFOOD",
+   "x": 473.3,
+   "y": 149.7
+  },
+  {
+   "cells": 106,
+   "near": "CHECKOUT",
+   "x": 671.1,
+   "y": 725.0
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 21.8,
+   "meters": 3.17,
+   "name": "EXIT"
+  },
+  {
+   "cells": 18.5,
+   "meters": 2.68,
+   "name": "DAIRY"
+  },
+  {
+   "cells": 17.4,
+   "meters": 2.53,
+   "name": "PHARMACY"
+  }
+ ],
+ "m_per_cell": 0.1452,
+ "narrow": [
+  {
+   "half_width_m": 0.41,
+   "name": "EXIT"
+  },
+  {
+   "half_width_m": 0.73,
+   "name": "AISLE 4"
+  },
+  {
+   "half_width_m": 0.73,
+   "name": "DAIRY"
+  },
+  {
+   "half_width_m": 0.73,
+   "name": "PHARMACY"
+  },
+  {
+   "half_width_m": 0.73,
+   "name": "SEAFOOD"
+  },
+  {
+   "half_width_m": 0.78,
+   "name": "AISLE 12"
+  },
+  {
+   "half_width_m": 0.78,
+   "name": "AISLE 13"
+  },
+  {
+   "half_width_m": 0.78,
+   "name": "FROZEN"
+  }
+ ],
+ "provenance": {
+  "drift": {
+   "seal_zones": {
+    "derived_n": 6,
+    "derived_names": [
+     "auto:BAKERY",
+     "auto:FLORAL",
+     "auto:KITCHEN",
+     "auto:PHARMACY",
+     "auto:SEAFOOD",
+     "auto:CHECKSTANDS"
+    ],
+    "file_n": 5,
+    "file_names": [
+     "Bakery service counter island (staff behind the cases; ~1.4 m pass-throughs)",
+     "Floral service island (staff behind the counter)",
+     "Pharmacy counter + dispensing room (staff)",
+     "Seafood/Market staff prep band behind the counter run \u2014 a box, not the derived r=130 disk: the disk reached y=284 and its 20-pt bridge closed the 18-pt aisle 4/5 corridor from y=206 to y=284 (the 'Spices' / 'Oil/Shortening' shelf faces)",
+     "Checkstand lane bank \u2014 exactly the nine drawn registers (x 555-799, y 546-619). The derived rect ran x=414..860 / y=580..683: it swallowed the entrance apron on the west, the restroom corridor on the east and the front action alley to the south. The 19-21 pt walkways beside the belt-less display racks at x=520-536 and x=818-831 are left open; only the 7-13 pt inter-register lanes seal."
+    ]
+   },
+   "zones": {
+    "CHECKOUT": {
+     "derived": [
+      655.6407775878906,
+      637.0670776367188
+     ],
+     "file": [
+      655.6,
+      637.1
+     ]
+    },
+    "ENTRANCE": {
+     "derived": [
+      476.7195587158203,
+      748.1521301269531
+     ],
+     "file": [
+      505.0,
+      620.0
+     ]
+    }
+   }
+  },
+  "exclusions": "file",
+  "inclusions": "file",
+  "seal_zones": "file",
+  "zones": "file"
+ },
+ "reachable_pct": 32.3,
+ "store": "333",
+ "verify": [],
+ "walkable_pct": 32.3
+}

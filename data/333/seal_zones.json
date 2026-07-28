@@ -1,0 +1,12 @@
+[
+ {"name": "Bakery service counter island (staff behind the cases; ~1.4 m pass-throughs)",
+  "pt": [287.95, 387.69], "r": 130, "bridge": 12},
+ {"name": "Floral service island (staff behind the counter)",
+  "pt": [247.03, 505.52], "r": 130, "bridge": 12},
+ {"name": "Pharmacy counter + dispensing room (staff)",
+  "pt": [1060.31, 629.83], "r": 130, "bridge": 12},
+ {"name": "Seafood/Market staff prep band behind the counter run — a box, not the derived r=130 disk: the disk reached y=284 and its 20-pt bridge closed the 18-pt aisle 4/5 corridor from y=206 to y=284 (the 'Spices' / 'Oil/Shortening' shelf faces)",
+  "rect": [438, 56, 684, 170], "bridge": 20},
+ {"name": "Checkstand lane bank — exactly the nine drawn registers (x 555-799, y 546-619). The derived rect ran x=414..860 / y=580..683: it swallowed the entrance apron on the west, the restroom corridor on the east and the front action alley to the south. The 19-21 pt walkways beside the belt-less display racks at x=520-536 and x=818-831 are left open; only the 7-13 pt inter-register lanes seal.",
+  "rect": [552, 544, 801, 624], "bridge": 20}
+]

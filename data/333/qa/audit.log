@@ -1,0 +1,37 @@
+All five passes complete. Rebuild is green with the fixes in (766 tests, up from 758 — the 8 new truth points each became a test).
+
+## Findings — store 333, worst first
+
+**1 — Two customer sections had no `must` point (the store‑24 direction of failure)**
+- Coords: NW Market corridor `(350, 120)`; west perimeter corridor `(215, 250)`.
+- Evidence: crop `r0c0`/`r0c1` and zoom `z_nwmarket`. Both lanes are green today, but the NW Market lane's north edge *is* the exclusion‑0 boundary (`y=94`) and the west corridor sits 5–15 pt from exclusion‑4's right edge (`x=200/210`). Every other north‑wing `must` was east of `x=497`; nothing proved either lane survives a drift of those rects.
+- Truth: both are ordinary shopping floor and must stay reachable.
+- Fix: **walk_truth points** (2 × `must`).
+
+**2 — `must_not [212, 486]` was mislabeled and left the prep room untracked**
+- Probe: `free_raw` is **False** at `(205,420)`, `(215,360)`, `(230,470)` — the Bakery/Floral back prep room is extracted as a *fixture polygon*, not floor. `(212,486)` actually lands in a 0.3 m² sliver on the room's south edge, 0.73 m from open floor.
+- Truth: the note's claim "prep room interior … structurally free floor" is false on both counts; the point guards the Floral seal disk's bridge crevice, and nothing guarded the room block.
+- Fix: **walk_truth** — note corrected to describe the crevice, plus a new `must_not [205, 420]` on the room block itself.
+
+**3 — Largest wall‑enclosed room in the store had no `must_not`**
+- Coords: `(959, 705)`, component x 930–990 / y 684–736, **13.8 m²**.
+- Evidence: zoom `z_comp81` — walled room south of the Pharmacy, door swinging west onto the staff corridor; drawn‑sealed (walls‑only BFS unreachable). No product labels inside.
+- Fix: **walk_truth point** (`must_not`).
+
+**4 — Men's restroom interior had no `must_not`** — `(778, 705)`, 7.1 m², its own pocket (zoom `z_front_right`). The women's room had one; a half‑regression reopening only the men's room would have shipped green. Fix: **walk_truth point**.
+
+**5 — Business Center service pods had no `must_not`** — `(715, 721)` (5.5 m²) and `(649, 723)` (4.3 m²), separate enclosed booths from the counter interior already covered at `(706,684)` (zoom `z_comp8283`). Fix: **walk_truth point** on the larger pod.
+
+**6 — Two authored staff exclusions had no `must_not` over them** — exclusion 5 (Curbside↔Dairy service gap, `[866,88,934,158]`) and exclusion 3 (west end of top service band, `[77,132,200,158]`). Every other exclusion had one; `(120,100)` sits in exclusion 2, not 3. Fix: **walk_truth points** `(900,120)` and `(140,145)`.
+
+## What I cleared (and how)
+
+- **Pharmacy wing — the store‑24 scenario — is genuinely staff.** Its 118 m² is enclosed by a *continuous wall*: I rebuilt the grid with all shelf/case fixtures removed (walls + boundary only) and the dispensary and back offices stay unreachable. Zoom `z_firstaid` shows the First Aid shelf sitting *on top of* an unbroken wall, with green floor right up to its face. Only words inside the whole wing: "Pharmacy" and "First Aid".
+- **All 241 printed labels probed**, not a 10‑label sample. Only 6 exceed 1.9 m to reachable floor: `Entrance`/`Exit` ×3, `Dairy`, `Pharmacy`, `Lease Space` — all department/wayfinding words printing inside documented sealed areas.
+- **All 17 aisle corridors are 100 % free over their full 328 pt length** — no badge‑mouth‑only greening.
+- **Net 2 re‑run with every exemption stripped** (blessed, seal‑rect, raw‑unreachable): 7 patches ≥3 m², all identified — pharmacy wing, seafood prep, restroom/BC/seasonal block, checkout lanes, SW vestibule, BC pods, deli case interior. All 22 culled pockets located and classified.
+- **Config cost measured per shape:** 7 of 8 exclusions remove **0.0 m²** (redundant with drawn walls); only Lease Space removes floor (12.1 m², zero product labels). All 3 inclusions add 0.0 m² and contain only customer‑floor labels (Bakery, Kitchen Gadgets, Soup) — none blankets a staff room.
+
+Mechanical after the fixes: exit 0, `verify: []`, both coverage lists empty, 1 component (78 176 cells), walkable 32.3 %.
+
+`AUDIT CLEAN — store 333 (6 findings fixed)`
