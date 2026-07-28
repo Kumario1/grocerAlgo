@@ -4,7 +4,7 @@
 #   ./fleet_drive.sh                 drive every store in stores.txt
 #   ./fleet_drive.sh 658 660         drive only these stores
 #   FLEET_REF=<commit> ./fleet_drive.sh    pin worktrees to a commit
-#   FLEET_RETRY=1 ./fleet_drive.sh   also retry stores marked FLEET_FAILED
+#   FLEET_RETRY=1 ./fleet_drive.sh   retry stores marked FLEET_FAILED
 #
 # What the first driver (fleet_all.sh) got wrong, and this one fixes:
 #   - one store at a time: a usage-limit hit costs one stage of one store,
@@ -35,6 +35,17 @@ PYTHON="$ROOT/.venv/bin/python"
 mkdir -p "$LOG"
 
 say() { echo "$(date '+%m-%d %H:%M') $*" | tee -a "$LOG/drive.log"; }
+
+# One driver owns the shared main checkout and browser profile at a time.
+# ponytail: PID file, not a daemon manager; replace if this ever runs on
+# multiple hosts sharing one checkout.
+PIDFILE="$LOG/driver.pid"
+if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
+    say "fleet_drive already running — pid $(cat "$PIDFILE")"
+    exit 1
+fi
+echo $$ > "$PIDFILE"
+trap 'rm -f "$PIDFILE"; exit 1' HUP INT TERM
 
 # ---- state -----------------------------------------------------------------
 
@@ -71,11 +82,20 @@ EOF
     fi
     [ -d "$wt" ] || { echo 1; return; }
     [ -z "${FLEET_RETRY:-}" ] && [ -f "$wt/FLEET_FAILED" ] && { echo failed; return; }
-    if [ -f "$d/qa/audit.log" ]; then
-        tail -5 "$d/qa/audit.log" | grep -q "AUDIT CLEAN" && { echo 5; return; }
-        tail -5 "$d/qa/audit.log" | grep -q "AUDIT BLOCKED" && { echo blocked; return; }
+    if [ -f "$d/walk_truth.json" ]; then
+        if [ ! -f "$d/qa/post_onboard.ok" ] &&
+                { ! grep -Eq '[0-9]+ passed' "$d/qa/post_onboard.log" 2>/dev/null ||
+                  grep -Eq '(^|[[:space:]])FAILED|[0-9]+ failed' "$d/qa/post_onboard.log" 2>/dev/null; }; then
+            echo 3
+            return
+        fi
+        if [ -f "$d/qa/audit.log" ]; then
+            tail -5 "$d/qa/audit.log" | grep -q "AUDIT CLEAN" && { echo 5; return; }
+            tail -5 "$d/qa/audit.log" | grep -q "AUDIT BLOCKED" && { echo blocked; return; }
+        fi
+        echo 4
+        return
     fi
-    [ -f "$d/walk_truth.json" ] && { echo 4; return; }
     [ -f "$d/qa/first_pass.log" ] && { echo 3; return; }
     echo 1
 }
@@ -161,9 +181,10 @@ place_blocked_audit() {
 # Did a qa log WRITTEN DURING THIS RUN (newer than the mark file — stale
 # limit lines from an earlier cascade sit at the tail of old logs) match a
 # pattern? Prints matching tail lines.
-recent_qa() {  # $1 store, $2 grep pattern
+recent_qa() {  # $1 store, $2 extended grep pattern
     for f in "$ROOT/.wt/$1/data/$1/qa/onboard.log" "$ROOT/.wt/$1/data/$1/qa/audit.log"; do
-        [ -f "$f" ] && [ "$f" -nt "$LOG/.mark-$1" ] && tail -3 "$f" | grep -i "$2" && return 0
+        [ -f "$f" ] && [ "$f" -nt "$LOG/.mark-$1" ] &&
+            tail -3 "$f" | grep -Ei "$2" && return 0
     done
     return 1
 }
@@ -187,7 +208,7 @@ fi
 
 say "fleet_drive start — ref $REF, $(echo "$LIST" | wc -l | tr -d ' ') stores"
 
-echo "$LIST" | while read -r S CITY; do
+while read -r S CITY; do
     [ -n "$S" ] || continue
     tries=0
     while :; do
@@ -198,7 +219,6 @@ echo "$LIST" | while read -r S CITY; do
             calibration_blocked)
                 say "BLOCK  $S — incompatible guide/Atlas; FLEET_RETRY=1 after source repair"
                 break ;;
-            blocked) place_blocked_audit "$S"; break ;;
             failed)  say "skip   $S — FLEET_FAILED marker (FLEET_RETRY=1 to retry)"; break ;;
         esac
 
@@ -215,6 +235,10 @@ echo "$LIST" | while read -r S CITY; do
             say "heal   $S — worktree ref behind, rebuilding on $REF (data kept)"
             heal_ref "$S" || { say "FAIL   $S — worktree heal failed"; break; }
             continue      # recompute the stage off the healed tree
+        fi
+        if [ "$st" = blocked ]; then
+            place_blocked_audit "$S"
+            break
         fi
 
         say "start  $S${CITY:+ ($CITY)} — stage $st"
@@ -242,15 +266,20 @@ echo "$LIST" | while read -r S CITY; do
             continue
         fi
         tries=$((tries + 1))
-        if [ "$tries" -lt 3 ] && recent_qa "$S" "execution error" >/dev/null; then
-            say "retry  $S — transient agent error ($tries/3), parking 30 min"
-            sleep 1800
+        if [ "$tries" -lt 3 ] && recent_qa "$S" \
+                "execution error|api error|connection (closed|error)|timed? out|temporarily unavailable|overloaded" \
+                >/dev/null; then
+            say "retry  $S — transient agent error ($tries/3), parking 60 sec"
+            sleep 60
             continue
         fi
         touch "$WT/FLEET_FAILED"
         say "FAIL   $S (exit $rc) — logs/fleet/$S.log, worktree kept: .wt/$S"
         break
     done
-done
+done <<EOF
+$LIST
+EOF
 
 say "fleet_drive pass complete — $(ls "$ROOT"/data/*/walk_truth.json 2>/dev/null | wc -l | tr -d ' ') stores in main"
+rm -f "$PIDFILE"

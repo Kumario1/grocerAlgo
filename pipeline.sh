@@ -110,6 +110,7 @@ if [ "$FROM" -le 3 ]; then
 
     ./rebuild.sh "$S" > "$LOG/post_onboard.log" 2>&1 \
         || { echo "rebuild after onboarding failed — read $LOG/post_onboard.log"; exit 1; }
+    touch "$LOG/post_onboard.ok"
 fi
 
 if [ "$FROM" -le 4 ]; then
