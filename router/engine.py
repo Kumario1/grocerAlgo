@@ -10,7 +10,7 @@ from scipy import ndimage
 # is the ONLY number to change for a different resolution.
 CELL = 2.0
 
-def build_grid(geom, cell=CELL, exclusions=(), openings=()):
+def build_grid(geom, cell=CELL, exclusions=(), openings=(), decorations=()):
     """True = walkable.
 
     Walkable space starts as the interior of the sales-floor boundary
@@ -19,8 +19,8 @@ def build_grid(geom, cell=CELL, exclusions=(), openings=()):
     line, and exclusion shapes (hand-QA zones the drawing shows open but
     shoppers can't use, e.g. behind-Dairy) block like fixtures.
     `exclusions` is a list of {"rect": ...} / {"poly": ...} entries
-    (see shape_mask). `openings` uses the same shapes but clears only wall
-    strokes, for doorways the PDF paints white over an unbroken line.
+    (see shape_mask). `openings` clears only wall strokes; `decorations`
+    clears only fixtures, for printed artwork extracted as furniture.
     Geometries without a boundary (toy tests) start fully walkable.
     """
     w = int(np.ceil(geom["page"]["w"] / cell))
@@ -32,6 +32,7 @@ def build_grid(geom, cell=CELL, exclusions=(), openings=()):
         free = np.array(mask, bool)
     else:
         free = np.ones((h, w), bool)
+    floor = free.copy()
     for x0, y0, x1, y1 in geom["fixtures"]:
         free[int(y0 // cell):int(np.ceil(y1 / cell)),
              int(x0 // cell):int(np.ceil(x1 / cell))] = False
@@ -39,6 +40,8 @@ def build_grid(geom, cell=CELL, exclusions=(), openings=()):
         # exact non-rect furniture (diagonal counters, curved kiosks)
         free &= ~shape_mask([{"poly": p} for p in geom["fixture_polys"]],
                             (h, w), cell)
+    if decorations:
+        free |= floor & shape_mask(decorations, (h, w), cell)
     if exclusions:
         free &= ~shape_mask(exclusions, (h, w), cell)
     walls = np.zeros_like(free)

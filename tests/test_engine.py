@@ -18,6 +18,16 @@ def test_opening_clears_only_a_wall_not_a_fixture():
     assert free[5, 3] and not free[5, 6]
     assert not free[5, 5]             # opening overlaps but cannot erase shelf
 
+def test_decoration_clears_only_a_fixture_not_a_wall_or_exclusion():
+    geom = {**TOY_GEOM, "obstacle_paths": [[[0, 20], [40, 20]]]}
+    decoration = [{"rect": [16, 8, 24, 32]}]
+    exclusion = [{"rect": [20, 8, 24, 16]}]
+    free = engine.build_grid(
+        geom, cell=4.0, decorations=decoration, exclusions=exclusion)
+    assert free[4, 5]                 # printed art restored to floor
+    assert not free[5, 5]             # cannot erase the crossing wall
+    assert not free[2, 5]             # cannot erase the exclusion
+
 def test_bfs_routes_around_obstacle():
     free = engine.build_grid(TOY_GEOM, cell=4.0)
     dist, parent = engine.bfs(free, (0, 5))         # left of shelf

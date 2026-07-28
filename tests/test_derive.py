@@ -119,6 +119,7 @@ def test_absent_files_derive_with_provenance(tmp_path):
     assert cfg["provenance"]["zones"] == "derived"
     assert cfg["provenance"]["seal_zones"] == "derived"
     assert cfg["provenance"]["exclusions"] == "absent"
+    assert cfg["provenance"]["decorations"] == "absent"
     assert cfg["anchors"]["CHECKOUT"] == [50, 70]          # from CHECKSTANDS
     names = [z["name"] for z in cfg["seal_zones"]]
     assert names == ["auto:DELI", "auto:CHECKSTANDS"]
