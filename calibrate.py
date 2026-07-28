@@ -71,6 +71,18 @@ def nearest_aisle(guide_anchors, segment):
     return min(aisles, key=lambda n: dist(aisles[n]))
 
 
+def label_fits_segment(label, segment, cross_tol=8.0, end_tol=30.0):
+    """A badge aligns across a corridor and sits near either aisle mouth."""
+    (ax, ay), (bx, by) = segment
+    dx, dy = bx - ax, by - ay
+    length = math.hypot(dx, dy)
+    if not length:
+        return math.hypot(label[0] - ax, label[1] - ay) <= cross_tol
+    along = ((label[0] - ax) * dx + (label[1] - ay) * dy) / length
+    cross = abs((label[0] - ax) * dy - (label[1] - ay) * dx) / length
+    return cross <= cross_tol and -end_tol <= along <= length + end_tol
+
+
 async def verify(store, record):
     """Do labelled products land in the aisle their own label names?"""
     atlas = cal.load_atlas(store)
@@ -97,10 +109,11 @@ async def verify(store, record):
             segment = corridor_segment(atlas["psas"], runs,
                                        placement["group"], placement["point"])
             want = cal.guide_aisle_name(config, int(label[1]))
-            got = nearest_aisle(guide["anchors"],
-                                [carry(end) for end in segment])
+            carried = [carry(end) for end in segment]
+            got = nearest_aisle(guide["anchors"], carried)
             checked += 1
-            if got == want:
+            if (want in guide["anchors"] and
+                    label_fits_segment(guide["anchors"][want], carried)):
                 agreed += 1
             else:
                 misses.append({"product": product["name"], "label":

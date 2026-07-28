@@ -306,6 +306,14 @@ def test_a_product_deep_in_its_aisle_stays_in_its_aisle():
     assert calibrate_cli.nearest_aisle(anchors, [point, point]) == "AISLE 15"
 
 
+def test_badge_just_beyond_aisle_mouth_beats_closer_next_bank_badge():
+    segment = [[695.0, 181.0], [695.0, 380.0]]
+
+    assert calibrate_cli.label_fits_segment([698.0, 161.0], segment)
+    assert not calibrate_cli.label_fits_segment([668.0, 161.0], segment)
+    assert not calibrate_cli.label_fits_segment([698.0, 100.0], segment)
+
+
 def test_a_department_blob_still_verifies_by_its_point():
     anchors = {"AISLE 2": [10.0, 10.0], "AISLE 9": [90.0, 90.0]}
 
