@@ -3,9 +3,9 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-# Must wrap in sh -c so ${PORT} expands and Xvfb starts before uvicorn.
+# Waits for Xvfb, clears stale Chrome locks on the volume, then uvicorn.
 # Module is app:app (app.py), not main:app.
-startCommand = "sh -c 'Xvfb :99 -screen 0 1280x720x24 -nolisten tcp & exec python -m uvicorn app:app --host 0.0.0.0 --port ${PORT:-8000} --workers 1'"
+startCommand = "./scripts/start.sh"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 100
 restartPolicyType = "ON_FAILURE"

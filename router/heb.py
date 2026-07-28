@@ -536,6 +536,34 @@ class HEBClient:
         finally:
             self._nav.release()
 
+    def _clear_chrome_locks(self):
+        """A crashed Chrome on a persistent volume leaves locks that block CDP."""
+        self.profile_dir.mkdir(parents=True, exist_ok=True)
+        for name in ("SingletonLock", "SingletonSocket", "SingletonCookie"):
+            try:
+                (self.profile_dir / name).unlink(missing_ok=True)
+            except OSError:
+                pass
+
+    def _chrome_failure(self, port, last_error):
+        exit_code = None if self._chrome is None else self._chrome.poll()
+        log_path = self.runtime_dir / "chrome.log"
+        detail = ""
+        try:
+            detail = log_path.read_text(errors="replace")[-1500:]
+        except OSError:
+            pass
+        if exit_code is not None:
+            return (
+                f"Chrome exited before CDP on :{port} (exit {exit_code})"
+                + (f":\n{detail.strip()}" if detail.strip() else "")
+            )
+        return (
+            f"Chrome CDP on :{port} never accepted connections"
+            + (f": {last_error}" if last_error else "")
+            + (f"\n{detail.strip()}" if detail.strip() else "")
+        )
+
     async def _ensure_browser(self):
         if self._browser:
             return
@@ -549,16 +577,20 @@ class HEBClient:
                 self._browser = (
                     await self._playwright.chromium.connect_over_cdp(endpoint))
                 return
+            self._clear_chrome_locks()
             with socket.socket() as sock:
                 sock.bind(("127.0.0.1", 0))
                 port = sock.getsockname()[1]
+            log_path = self.runtime_dir / "chrome.log"
+            log_handle = open(log_path, "ab", buffering=0)
             self._chrome = subprocess.Popen(
                 self._chrome_command(port),
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
+                stdout=log_handle,
+                stderr=subprocess.STDOUT,
             )
+            log_handle.close()
             last_error = None
-            for _ in range(40):
+            for _ in range(80):
                 if self._chrome.poll() is not None:
                     break
                 try:
@@ -569,7 +601,7 @@ class HEBClient:
                 except Exception as e:
                     last_error = e
                     await asyncio.sleep(0.25)
-            raise last_error or RuntimeError("Chrome closed before startup")
+            raise RuntimeError(self._chrome_failure(port, last_error))
         except Exception as e:
             log.error("connect failed: %s: %s", type(e).__name__, e)
             await self.close()
@@ -586,17 +618,21 @@ class HEBClient:
         if not executable:
             raise HEBConnectionError(
                 "Chrome not found; set CHROME_PATH to its executable")
+        # Containers need --no-sandbox even when not root; without it Chrome
+        # exits immediately and CDP returns ECONNREFUSED.
         command = [
             executable,
             f"--user-data-dir={Path(self.profile_dir).resolve()}",
             f"--remote-debugging-port={port}",
+            "--remote-debugging-address=127.0.0.1",
             "--no-first-run",
             "--no-default-browser-check",
+            "--no-sandbox",
             "--disable-dev-shm-usage",
+            "--disable-gpu",
+            "--disable-software-rasterizer",
             "about:blank",
         ]
-        if hasattr(os, "geteuid") and os.geteuid() == 0:
-            command.insert(-1, "--no-sandbox")
         return command
 
     def _proxy(self):

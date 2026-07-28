@@ -390,9 +390,23 @@ def test_heb_client_launches_normal_chrome_instead_of_automation_mode(
 
     assert command[0] == "/usr/bin/google-chrome"
     assert "--remote-debugging-port=9223" in command
+    assert "--remote-debugging-address=127.0.0.1" in command
+    assert "--no-sandbox" in command
+    assert "--disable-gpu" in command
     assert any("runtime/chrome" in arg for arg in command)
     assert not any(".heb-" in arg for arg in command)
     assert not any("enable-automation" in arg for arg in command)
+
+
+def test_heb_client_clears_stale_chrome_profile_locks(tmp_path):
+    client = HEBClient(runtime_dir=tmp_path)
+    lock = client.profile_dir / "SingletonLock"
+    lock.parent.mkdir(parents=True, exist_ok=True)
+    lock.write_text("stale")
+    (client.profile_dir / "SingletonSocket").write_text("stale")
+    client._clear_chrome_locks()
+    assert not lock.exists()
+    assert not (client.profile_dir / "SingletonSocket").exists()
 
 
 def test_heb_client_reports_incapsula_error_15_as_reconnect_required(

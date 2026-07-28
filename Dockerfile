@@ -10,7 +10,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends wget xvfb tesseract-ocr \
+    && apt-get install -y --no-install-recommends \
+        wget xvfb x11-utils tesseract-ocr fonts-liberation \
     && wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
     && apt-get install -y --no-install-recommends ./google-chrome-stable_current_amd64.deb \
     && rm google-chrome-stable_current_amd64.deb \
@@ -20,9 +21,10 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 
 COPY . .
-RUN mkdir -p /app/runtime
+RUN mkdir -p /app/runtime \
+    && chmod +x scripts/start.sh
 
 EXPOSE 8000
 # Persist /app/runtime with a Railway Volume (Docker VOLUME is not supported).
 
-CMD ["sh", "-c", "Xvfb :99 -screen 0 1280x720x24 -nolisten tcp & exec python -m uvicorn app:app --host 0.0.0.0 --port ${PORT:-8000} --workers 1"]
+CMD ["./scripts/start.sh"]
