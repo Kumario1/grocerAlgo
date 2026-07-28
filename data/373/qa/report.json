@@ -1,0 +1,162 @@
+{
+ "components": {
+  "n": 1,
+  "sizes": [
+   76303
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 1340,
+   "near": "EXIT",
+   "x": 287.7,
+   "y": 660.3
+  },
+  {
+   "cells": 526,
+   "near": "CHECKSTANDS",
+   "x": 562.8,
+   "y": 585.8
+  },
+  {
+   "cells": 511,
+   "near": "CHECKSTANDS",
+   "x": 424.1,
+   "y": 586.9
+  },
+  {
+   "cells": 357,
+   "near": "CHECKSTANDS",
+   "x": 634.8,
+   "y": 695.3
+  },
+  {
+   "cells": 269,
+   "near": "CHECKSTANDS",
+   "x": 501.1,
+   "y": 585.5
+  },
+  {
+   "cells": 238,
+   "near": "EXIT",
+   "x": 373.9,
+   "y": 679.1
+  },
+  {
+   "cells": 206,
+   "near": "CHECKSTANDS",
+   "x": 376.1,
+   "y": 588.4
+  },
+  {
+   "cells": 160,
+   "near": "CHECKSTANDS",
+   "x": 469.6,
+   "y": 586.1
+  },
+  {
+   "cells": 153,
+   "near": "DELI",
+   "x": 846.1,
+   "y": 288.3
+  },
+  {
+   "cells": 127,
+   "near": "FLORAL",
+   "x": 693.7,
+   "y": 589.7
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 16.9,
+   "meters": 3.31,
+   "name": "PHARMACY"
+  },
+  {
+   "cells": 15.0,
+   "meters": 2.93,
+   "name": "SEAFOOD"
+  }
+ ],
+ "m_per_cell": 0.1957,
+ "narrow": [
+  {
+   "half_width_m": 0.55,
+   "name": "DAIRY"
+  },
+  {
+   "half_width_m": 0.62,
+   "name": "FROZEN"
+  },
+  {
+   "half_width_m": 0.71,
+   "name": "SEAFOOD"
+  },
+  {
+   "half_width_m": 0.98,
+   "name": "CHILI/MEAT/FISH"
+  },
+  {
+   "half_width_m": 0.98,
+   "name": "EXIT"
+  },
+  {
+   "half_width_m": 0.98,
+   "name": "KITCHEN"
+  },
+  {
+   "half_width_m": 0.98,
+   "name": "PHARMACY"
+  },
+  {
+   "half_width_m": 1.37,
+   "name": "AISLE 27"
+  }
+ ],
+ "provenance": {
+  "drift": {
+   "seal_zones": {
+    "derived_n": 7,
+    "derived_names": [
+     "auto:BAKERY",
+     "auto:DELI",
+     "auto:FLORAL",
+     "auto:KITCHEN",
+     "auto:PHARMACY",
+     "auto:SEAFOOD",
+     "auto:CHECKSTANDS"
+    ],
+    "file_n": 2,
+    "file_names": [
+     "Deli service island \u2014 the U-shaped counter at (832-870, 224-311) with the double-sided case above it; staff work inside the U and the only gap is the ~9 pt gap under the case. This is the ONLY service counter this guide draws as an enclosure; the auto-deriver instead put 130 pt disks on the DELI/BAKERY/KITCHEN/FLORAL/SEAFOOD/PHARMACY *floor labels*, which are printed on open shopping floor here, and those disks bridged the Frozen Foods aisles, the Floral shop floor and a Produce nook shut",
+     "Checkstand lane bank (same bbox the deriver computes from the CHECKSTANDS fixture cluster) \u2014 checkout lanes are wider than counter gaps, so bridge looser to seal the lanes while the front action alley stays open"
+    ]
+   },
+   "zones": {
+    "ENTRANCE": {
+     "derived": [
+      216.2171401977539,
+      662.1358337402344
+     ],
+     "file": [
+      222.0,
+      600.0
+     ]
+    }
+   }
+  },
+  "exclusions": "file",
+  "inclusions": "file",
+  "seal_zones": "file",
+  "zones": "file"
+ },
+ "reachable_pct": 31.5,
+ "store": "373",
+ "verify": [],
+ "walkable_pct": 31.5
+}

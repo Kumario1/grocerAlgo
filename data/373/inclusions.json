@@ -1,0 +1,6 @@
+[
+ {"name": "Deli/Bakery customer corridor between the Beer/Wine cooler (717-729) and the Market wall (796-807) — 68 pt (~6 m) wide, open its full width to the wine cross-aisle south of the cooler and to the top corridor at (704-716,136-166); the DELI and BAKERY labels are department names printed on this shopping floor, not counter interiors (the deli service island at 832-870,224-311 is sealed separately)",
+  "rect": [729, 150, 796, 456]},
+ {"name": "aisle corridor at the 'Kitchen Gadgets' shelf label — KITCHEN here is a product-category label on an aisle run, not a service kitchen (customer aisle between the shelf runs of aisles 5-6)",
+  "rect": [530, 163, 556, 207]}
+]

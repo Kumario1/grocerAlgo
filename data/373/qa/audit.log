@@ -1,0 +1,50 @@
+## Findings — store 373 (Round Rock), worst first
+
+### Pass 1 — Mechanical ✅ (before any edit)
+`./rebuild.sh 373` → exit 0; `verify: []`; `coverage.sealed_floor_patches: []`, `coverage.unreachable_shelf_labels: []`; components 1, size 76892; walkable 31.7% = reachable 31.7% (in the 20–35% band); 752 tests pass. No mechanical finding.
+
+---
+
+### Finding 1 — Restroom interiors were walkable (severity: moderate)
+- **Coordinates (PDF pt):** women's bay `119–156 × 566–624`, men's bay `161–197 × 566–624`. Probes on the shipped grid: `free[(136,595)] = True`, `free[(180,595)] = True`.
+- **Evidence:** crop of `walkable_overlay.png` over pt `108–280 × 520–640` (3×3 sweep cell r2c0, re-cut at 8 px/pt). Both bays are tinted green up to their walls; only the black pictogram signs read as blocked. The PDF at 600 dpi shows real enclosure: exterior wall `x=118.6`, east wall `x=197`, south wall `y=624`, thick partition `x=156–161`, and a stepped north wall at `y=566` (`x 136–156` and `x 168–182`) with a single entry throat at `x 156–168`.
+- **Why no net caught it:** no product labels inside (net 1 blind), and net 2 only fires when a sealed paint patch is corroborated by failing labels or an aisle badge — neither exists here. The connectivity cull in `derive.build_free` (which is what normally removes restrooms) can't fire either, because this guide draws them as open-throat bays rather than doored rooms. Only the visual sweep catches it.
+- **Internal inconsistency that confirms it:** the family restroom immediately north (`118–152 × 529–553`) *is* sealed — the guide draws it as a closed room with a hinged door, so `extract.py` emits it as a fixture. Two identical-purpose rooms, opposite treatment.
+- **Truth:** restroom interiors are not sales floor and must not be routable; the approach band `y 554–566` (where the `RESTROOMS` anchor sits at `156,558`) must stay open.
+- **Fix applied:** `exclusions.json` rect `[120, 567, 197, 623]`; `walk_truth.must_not` `[136,595]`, `[180,595]`; `walk_truth.must` `[160,558]` to pin the approach open.
+
+### Finding 2 — walk_truth under-covered the sealed features (severity: moderate)
+Every existing point passed, but five sealed features and three walkable ones had no truth point, so no test would have caught a regression on them:
+
+| Coordinate | Feature | Was |
+|---|---|---|
+| `789, 68` | 2nd excluded north-wall staff alcove | `exclusions.json` entry #4 had **no** truth point (entry #3 did) |
+| `180, 655` | west entry vestibule, drawn walled off (`y=624`, `x 119–248`, verified unbroken) | uncovered — mirror of the SE vestibule, which *was* covered |
+| `374, 679` | enclosed room in the south-wall cluster, hinged door on its west wall at `(358,678)` | uncovered — it is the 6th-largest culled pocket (238 cells) |
+| `136/180, 595` | restroom interiors | uncovered (Finding 1) |
+| `238, 68` | north-wall **egress** alcove, left walkable | uncovered — see below |
+| `1080, 470` | east perimeter aisle of Produce | uncovered wing |
+
+The `238,68` gap mattered most: three near-identical alcoves pierce the north wall, two are excluded and one is not, and nothing recorded the distinction. At 900 dpi the difference is real — `483–499,53–69` and `782–798,54–70` carry the dashed bow-tie **double-swing staff** glyph, while `230–248,~48–60` carries solid outward-swinging leaves (customer egress). Green is correct there; it just wasn't pinned.
+- **Fix applied:** 3 `must` + 5 `must_not` added to `walk_truth.json` (8 new tests: 752 → 760).
+
+### Finding 3 — `exclusions.json` SE-vestibule rationale contradicted by the map (severity: low, pass 5)
+- **Coordinates:** poly `(670,674)…(670,718)`, ~241 m².
+- The name claimed *"no shelf labels or fixtures inside."* The map draws **9 fixtures** inside it (rects `737–829,631–641`, `743–788,660–669`, `747–770,681–690`, `702–720,676–699`, `827–875,710–713` plus 4 polys). The *seal itself* is correct — I re-rendered the north wall at 900 dpi over `x 670–1040` and it is unbroken, with the only opening being the Exit/Entrance gap in the vestibule's own south wall at `(827–875, 711)` — and there are genuinely zero product labels, aisle badges or department names inside. But a WHY that misstates the map is exactly what pass 5 exists to catch.
+- **Fix applied:** rewrote the name to state the accurate evidence (unbroken wall verified at 900 dpi, own-south-wall opening, nine unlabelled lobby fixtures, zero labels/badges/departments).
+
+---
+
+### Checked and cleared (no finding)
+- **Pass 2 sweep**, 3×3 crops at 1.6× plus targeted 500–1200 dpi re-renders. All 33 aisle corridors **100% free end-to-end** by column scan (`y 104–332` for aisles 1–17, `y 352–530` for 18–33) — zero gaps, so no store-24 "green at the badge mouth, white deeper in".
+- **Every department frontage green:** Dairy (`y 82–102` clear across `x 380–700`), Market, Deli, Bakery, Seafood, Produce, Floral, Pharmacy, Restrooms approach. Checkout lanes sealed, front action alley green. `MARKET` has no extracted anchor (vector/label vocabulary gap, not a map defect) — its floor is covered by `must [820,180]`.
+- **Seafood label inside the NE exclusion** — the one thing that looks like a store-24 repeat. Cleared: the 5 cooler doors on the chevron `(936,351)–(891,392)` swing **NW onto the customer alcove** (confirmed at 1100 dpi), the region east of them is one contiguous 489 m² space with staff double-swing doors, hinged staff rooms and an exterior curbside door, and it holds zero product labels. This guide also prints "Pharmacy" over its sealed dispensing room, so a department name over back-of-house is its established convention. Green runs right up to the cooler doors (`must [890,358]` verified).
+- **All 10 culled pockets classified:** 5 checkstand lane interiors; enclosed room S of checkstands (`288,660`, hinged door at `266,632`); enclosed room in the south-wall cluster (`374,679`); deli service island (`846,288`); sliver between the curved storefront and the straight 16-vertex boundary chord (`635,695`, outside the drawn wall); dead-end crevice beside the west-facing floral cooler (`694,590` — the 0.5 m strip against the doors survives, connected full length, no labels).
+- **Independent blocked-area scan:** inside boundary ∧ not-free ∧ not-fixture/wall/exclusion yields only those four components — no unexplained sealed floor anywhere.
+- **All 217 product labels** on the map have reachable floor within 2 m (re-verified after the fix). No orange isolated pockets, no purple staff mask, all anchor pairs connected.
+- **Inclusions:** both consistent; the rect-1 overlap with fixture `(787.6,383.3,807.2,441.4)` is harmless — `derive.build_free` does `free |= free_raw & incl_mask`, so an inclusion can never open a fixture.
+
+### Post-fix rebuild
+`./rebuild.sh 373` → exit 0; `verify: []`; both coverage lists empty; components 1, size 76303; walkable 31.5% = reachable 31.5%; **760 passed**. Only `data/373/exclusions.json` and `data/373/walk_truth.json` were hand-edited — no code, no goldens, no other store.
+
+`AUDIT CLEAN — store 373 (3 findings fixed)`

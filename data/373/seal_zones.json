@@ -1,0 +1,7 @@
+[
+ {"name": "Deli service island — the U-shaped counter at (832-870, 224-311) with the double-sided case above it; staff work inside the U and the only gap is the ~9 pt gap under the case. This is the ONLY service counter this guide draws as an enclosure; the auto-deriver instead put 130 pt disks on the DELI/BAKERY/KITCHEN/FLORAL/SEAFOOD/PHARMACY *floor labels*, which are printed on open shopping floor here, and those disks bridged the Frozen Foods aisles, the Floral shop floor and a Produce nook shut",
+  "pt": [846, 288], "r": 50, "bridge": 12},
+ {"name": "Checkstand lane bank (same bbox the deriver computes from the CHECKSTANDS fixture cluster) — checkout lanes are wider than counter gaps, so bridge looser to seal the lanes while the front action alley stays open",
+  "rect": [283.2668151855469, 558.2579345703125, 698.3974609375, 616.6998901367188],
+  "bridge": 20}
+]

@@ -1,0 +1,15 @@
+[
+ {"name": "Market/Seafood back-of-house: NE block + the pocket east of the seafood cooler-door wall. Walled off from the sales floor by the case run x=895-907 (double-swing staff door at 900-913,217-229), the diagonal wall (894,267)-(941,307), the seafood counter/cooler-door chevron (936,351)-(891,392)-(933,447) whose door swings face NW onto the customer alcove, and the produce case run (961-1066,447-461) with a second double-swing staff door at (1069-1086,441-456). Holds staff rooms with single-leaf hinged doors (955-979,318-359), a door through the east wall to curbside, and zero product labels over ~450 m^2",
+  "poly": [[907, 61], [1025, 61], [1025, 348], [1102, 348], [1102, 462],
+           [1066, 462], [1066, 448], [963, 448], [942, 437], [933, 447],
+           [891, 392], [936, 351], [941, 307], [907, 268]]},
+ {"name": "SE entry vestibule along the south wall (Exit/Entrance at 842,700): the guide draws it fully enclosed by the wall y=628 x=718-847 / y=638 x=847-1024 (unbroken at 900 dpi — no door glyph anywhere along it), so no shopper can reach the sales floor from it in this drawing; its only opening is the Exit/Entrance gap in its OWN south wall at (827-875,711). It does hold nine unlabelled lobby fixtures (bar/block shapes at 737-829,631-641 / 743-788,660-669 / 747-770,681-690 / 702-720,676-699 — cart corrals, benches, vending) but zero product labels, zero aisle badges and zero department names over ~241 m^2",
+  "poly": [[670, 674], [720, 630], [848, 630], [848, 640], [1030, 640],
+           [1030, 692], [893, 692], [893, 718], [670, 718]]},
+ {"name": "north-wall staff doorway alcove behind the Dairy case run (double-swing door glyph at 483-499,53-69 through the exterior wall — cooler/receiving access, staff only)",
+  "rect": [466, 59, 504, 78]},
+ {"name": "north-wall staff doorway alcove between the Dairy run and the Market case wall (double-swing door glyph at 782-798,54-70 through the exterior wall — cooler/receiving access, staff only)",
+  "rect": [777, 59, 802, 78]},
+ {"name": "Restroom room interiors (SW corner). Two enclosed rooms behind the stepped wall at y=566 (x 136-156 and x 168-182) and the thick partition x=156-161, bounded west by the exterior wall x=119, east by the wall x=197 and south by the wall y=624; each holds only a full-height pictogram sign. Shoppers reach the doorway throat at (156-168,566) across the approach band y=554-566, which stays open — but the room interiors are not sales floor and must not be routable. The family restroom immediately north (118-152,529-553) is already sealed because the guide draws it as a closed room with a hinged door, so leaving these two bays walkable was internally inconsistent; the connectivity cull cannot reach them because this guide draws them as open-throat bays rather than doored rooms",
+  "rect": [120, 567, 197, 623]}
+]

@@ -1,0 +1,31 @@
+Store 373 is converged. Handing off for the audit.
+
+## Result
+
+`./rebuild.sh 373` → exit 0, **752 passed**. `data/373/qa/report.json`:
+
+```
+verify:     []
+coverage:   {sealed_floor_patches: [], unreachable_shelf_labels: []}
+components: {n: 1, sizes: [76892]}
+walkable:   31.7%  (reachable 31.7%)
+far_snaps:  PHARMACY 3.3 m, SEAFOOD 2.9 m
+```
+
+## What the first pass hit, and the four data fixes
+
+**1. `zones.json` — build_profile crashed** (`no walkable cell near [709.8, 100.9]`). The derived `ENTRANCE` came from the west door label at (216, 662), which sits in the exterior foyer *outside* the extracted boundary; `nearest_free` snapped it into a 1340-cell room disconnected from the floor, so the whole 90 758-cell sales floor became one unreachable "pocket" and the `KITCHEN` label inside it condemned it as staff area (walkable 0.55%). Moved ENTRANCE to (222, 600), the same doorway's approach on the sales floor. CHECKOUT kept as derived.
+
+**2. `exclusions.json` (4)** — Market/Seafood back-of-house (~450 m² NE block + the pocket east of the cooler-door chevron): walled by the case run at x=895–907 with a double-swing staff door, the diagonal wall, the chevron counter whose door swings face NW onto the customer alcove, and the produce case run with a second double-swing door; contains staff rooms with single-leaf hinged doors and a door to curbside, and **zero** product labels. Plus the SE entry vestibule (drawn fully enclosed — it was the 4600-cell orange pocket) and the two north-wall staff doorway alcoves behind the Dairy cases.
+
+**3. `inclusions.json` (2)** — the Deli/Bakery corridor (68 pt wide, open its full width to the wine cross-aisle; DELI/BAKERY are floor labels, not counter interiors) and the "Kitchen Gadgets" aisle (KITCHEN is a product category here). These cleared 3 of the 4 VERIFY flags; SEAFOOD cleared via the exclusion.
+
+**4. `seal_zones.json` — the significant find.** The auto-deriver put 130 pt disks on the DELI/BAKERY/KITCHEN/FLORAL/SEAFOOD/PHARMACY *floor labels*. Their bridging had sealed **all three Frozen Foods aisles** (aisle B 19% / C 7% reachable), the **Floral shop floor**, and a Produce nook — none of which any mechanical net caught (the "Frozen Foods" labels sit 43 pt apart, just over `CLUSTER_R`, so each stayed a 1-word group under `CLUSTER_MIN`). Replaced with the two zones this guide actually supports: the deli service island (the U counter at 846,288) and the checkstand lane bank (the deriver's own bbox). All three frozen aisles are now green end to end.
+
+**Culled pockets, all classified:** 1340 + 238 enclosed rooms off the west vestibule; 526/511/269/206/160 checkout-lane interiors; 357 sliver between the curved storefront glass and the boundary polygon; 153 deli-island interior; 127 dead-end sliver between the checkout end-cap and the floral fixtures.
+
+**`walk_truth.json`** — 19 `must` (front alley, entrance approach, Dairy frontage, 5 aisle corridors, 2 frozen aisles, wine cross-aisle, Deli, Bakery, Market, Seafood alcove, Produce, Floral, Pharmacy frontage) and 11 `must_not` (3 outside-boundary/corner, both back-of-house sub-areas, deli island, a lane interior, both enclosed rooms, the pharmacy room, the SE vestibule, a north-wall staff alcove).
+
+Judgment call worth the auditor's attention: the Market/Seafood exclusion is the largest and least mechanical decision here — the `Seafood` red label falls *inside* it, and I read that as label placement in the nearest white space (same as `Deli`/`Bakery`, which are printed well off their counters) rather than as evidence of shopping floor. Evidence is in the exclusion's `name` field.
+
+Only `data/373/` was touched. Not running `docs/audit.md`.
