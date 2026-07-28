@@ -1,0 +1,94 @@
+{
+ "notes": [
+  "atlas aisles 17, guide aisles 17",
+  "y: aisle labels did not constrain this axis, so its scale came from the other axis and its offset from the walkable floor",
+  "aisle offsets x+0 y=floor: 100% of sampled shelves land on a walkable cell and 11 anchors agree, against 100%/10 for x+1 y=floor",
+  "margin: the offline tie was resolved by live labels (11/11 products pinned to the aisle their label names)"
+ ],
+ "gates": {
+  "residual": true,
+  "margin": true,
+  "scale_skew": true,
+  "floor": {
+   "psas": 1238,
+   "on_floor_pct": 99.27,
+   "pass": true,
+   "off_floor": [
+    [
+     "27|88|A|3",
+     null
+    ],
+    [
+     "27|88|A|2",
+     null
+    ],
+    [
+     "27|88|A|None",
+     null
+    ],
+    [
+     "06|95|A|1",
+     null
+    ],
+    [
+     "27|88|A|1",
+     null
+    ],
+    [
+     "27|88|A|6",
+     null
+    ],
+    [
+     "27|88|A|4",
+     null
+    ],
+    [
+     "10|95|A|1",
+     5.9
+    ],
+    [
+     "05|95|A|1",
+     5.7
+    ]
+   ]
+  },
+  "labels": true
+ },
+ "x": {
+  "scale": 2.0497830635960845,
+  "offset": 102.23227324702779,
+  "inliers": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13
+  ],
+  "max_residual_pt": 2.217,
+  "aisle_offset": 0,
+  "source_axis": 0
+ },
+ "y": {
+  "scale": 2.0497830635960845,
+  "offset": -10.0,
+  "inliers": [],
+  "aisle_offset": null,
+  "source_axis": 1,
+  "derived": true,
+  "max_residual_pt": null
+ },
+ "store": "31",
+ "verdict": "pass",
+ "verified": {
+  "checked": 11,
+  "agreed": 11,
+  "misses": [],
+  "pass": true
+ }
+}
