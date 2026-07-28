@@ -20,7 +20,7 @@ def raster_experiment_enabled():
     return os.environ.get("GROCER_RASTER_EXPERIMENTAL") == "1"
 
 
-def stitch_open_boundary(chains, width, height, join_tol=3.0):
+def stitch_open_boundary(chains, width, height, join_tol=3.0, min_span=.4):
     """Close a fragmented perimeter whose chain endpoint meets another wall.
 
     Some guide PDFs split the sales-floor outline into two open drawings. One
@@ -68,8 +68,8 @@ def stitch_open_boundary(chains, width, height, join_tol=3.0):
                         poly.extend([list(p) for p in continuation[1:]])
                         poly.append(list(poly[0]))
                         xs, ys = zip(*poly)
-                        if (max(xs) - min(xs) <= .6 * width
-                                or max(ys) - min(ys) <= .6 * height):
+                        if (max(xs) - min(xs) <= min_span * width
+                                or max(ys) - min(ys) <= min_span * height):
                             continue
                         area = polygon_area(poly)
                         if area > .25 * width * height:
@@ -276,22 +276,18 @@ def extract():
         for dr in page.get_drawings():
             if dr["type"] != "s" or not dr.get("width") or dr["width"] < min_width:
                 continue
-            pts = []
-            for item in dr["items"]:
-                if item[0] == "l":
-                    if not pts:
-                        pts.append([item[1].x, item[1].y])
-                    pts.append([item[2].x, item[2].y])
-            if len(pts) > 4 and pts[0] == pts[-1]:        # closed chain
-                r = dr["rect"]
+            for pts in chains(dr):
+                if len(pts) <= 4 or pts[0] != pts[-1]:
+                    continue
+                xs, ys = zip(*pts)
                 # span floor is 0.45, not 0.6: store #6's real floor fills
                 # only 58% of its sheet. That lets the page frame compete,
                 # so a ~full-page bbox is rejected outright — the frame is
                 # never the floor.
-                spans = ((r.x1 - r.x0) > min_span * page.rect.width
-                         and (r.y1 - r.y0) > min_span * page.rect.height)
-                frame = ((r.x1 - r.x0) > 0.95 * page.rect.width
-                         and (r.y1 - r.y0) > 0.95 * page.rect.height)
+                spans = ((max(xs) - min(xs)) > min_span * page.rect.width
+                         and (max(ys) - min(ys)) > min_span * page.rect.height)
+                frame = ((max(xs) - min(xs)) > 0.95 * page.rect.width
+                         and (max(ys) - min(ys)) > 0.95 * page.rect.height)
                 if spans and not frame and len(pts) > len(best):
                     best = pts
         if not best:
@@ -299,7 +295,7 @@ def extract():
             for dr in page.get_drawings():
                 if dr["type"] == "s" and (dr.get("width") or 0) >= min_width:
                     thick_chains.extend(chains(dr))
-            best = stitch_open_boundary(thick_chains, W, H)
+            best = stitch_open_boundary(thick_chains, W, H, min_span=min_span)
         return best
 
     # A ladder, not a lower constant: 1.5 first (the classic template, and
