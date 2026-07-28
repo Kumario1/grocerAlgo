@@ -47,6 +47,8 @@ S=$1
 [ -n "$S" ] || { echo "usage: ./pipeline.sh <store> [city|--no-agents] [--from n]"; exit 2; }
 shift
 PYTHON=${PIPE_PYTHON:-python3}
+PATH=$(dirname "$PYTHON"):$PATH
+export PATH
 HEB_RUNTIME_DIR=${HEB_RUNTIME_DIR:-runtime/onboarding-$S}
 export HEB_RUNTIME_DIR
 if [ -z "${CHROME_PATH:-}" ] &&

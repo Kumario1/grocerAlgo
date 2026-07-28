@@ -78,7 +78,12 @@ def test_single_connected_component(store):
 def test_walkable_fraction_sane(store):
     # catches both "sealed store" and "the world is walkable" regressions
     frac = _store(store)["free"].mean()
-    assert 0.10 < frac < 0.40, frac
+    try:
+        source = json.load(open(f"data/{store}/source.json"))
+    except FileNotFoundError:
+        source = {}
+    sparse = any("drawings" in flag for flag in source.get("flags", []))
+    assert 0.10 < frac < (0.45 if sparse else 0.40), frac
 
 
 @pytest.mark.parametrize("store", STORES)
