@@ -1,0 +1,44 @@
+Both commands pass. Store 26 is calibrated.
+
+## What was wrong
+
+The geometric fit was already correct — `calibrate.py 26` passed residual, margin, scale_skew, and floor on its own (100% of sampled shelves on walkable floor, 33 anchors agreeing vs. 28 for the runner-up). What failed was the `labels` gate: 9/12, with all three misses off by exactly +5:
+
+| product label | landed at |
+|---|---|
+| Aisle 37 | AISLE 42 |
+| Aisle 29 | AISLE 34 |
+| Aisle 31 | AISLE 36 |
+
+## Evidence for the correspondence
+
+The guide is an older vintage that had five more aisles in the middle bank than the store has today. Counting anchors:
+
+- **Top row** — Atlas 1–18, guide 1–18. Identity, and the x fit uses exactly these 18 with shift +0.
+- **Middle bank** — Atlas 19–28 (10 aisles), guide 19–33 (15 aisles). Five aisles gone.
+- **Left column** — Atlas 29–44 (16 aisles), guide 34–49 (16 aisles). Same count, renumbered by 5.
+
+I confirmed this per-aisle rather than inferring it from the counts: pushing every Atlas shelf run's corridor segment through the fitted transform and asking `nearest_aisle`/`label_fits_segment` (the same functions `--verify` uses) reproduces `guide = live + 5` for every live aisle from 19 through 44, and identity for 1 through 18. Live 18 fits `AISLE 18`; live 19 fits `AISLE 24`; live 44 fits `AISLE 49`. The boundary is clean, so one range covers it — no need for `aisle_label_shifts`.
+
+## The change
+
+Created `data/26/store.json` (it did not previously exist, so no keys to preserve):
+
+```json
+{
+ "aisle_label_shift": {"from": 19, "add": 5}
+}
+```
+
+I deliberately did **not** add an `atlas_fit` pin. The search already finds x+0 / y+5 unaided and clears the margin gate honestly (5 anchors ahead of the rival); pinning would replace that earned margin result with an unconditional `True`, which is the kind of gate-weakening the runbook rules out. Nothing else was touched — the Atlas capture, geometry, and gate thresholds are unchanged.
+
+## Validation
+
+```
+python3 calibrate.py 26           → gates: residual=ok margin=ok scale_skew=ok floor=ok
+                                    PASS   (exit 0)
+python3 calibrate.py 26 --verify  → labels: 12/12 products pinned to the aisle their label names
+                                    gates: … labels=ok   PASS   (exit 0)
+```
+
+The verify run went to the live catalog (it retried past two bot challenges, then connected) and `verified.misses` is now empty — the label agreement is real, not a threshold that got moved. `data/26-atlas/calibration.json` was rewritten by the tool with `verdict: pass`, which is what makes the store routable.

@@ -54,7 +54,7 @@
     ]
    ]
   },
-  "labels": false
+  "labels": true
  },
  "x": {
   "scale": 0.9105996648860026,
@@ -108,30 +108,11 @@
   "source_axis": 1
  },
  "store": "26",
- "verdict": "fail",
+ "verdict": "pass",
  "verified": {
   "checked": 12,
-  "agreed": 9,
-  "misses": [
-   {
-    "product": "Dove Coconut & Hydration Shampoo & Conditioner, 2 Pk, 24 oz",
-    "label": "Aisle 37",
-    "want": "AISLE 37",
-    "got": "AISLE 42"
-   },
-   {
-    "product": "H-E-B Our Finest Invent-A-Size Paper Towels, 6 Double Rolls",
-    "label": "Aisle 29",
-    "want": "AISLE 29",
-    "got": "AISLE 34"
-   },
-   {
-    "product": "H-E-B Ultra Liquid Dish Soap, Texas Size Pack - Fresh Scent, 90 oz",
-    "label": "Aisle 31",
-    "want": "AISLE 31",
-    "got": "AISLE 36"
-   }
-  ],
-  "pass": false
+  "agreed": 12,
+  "misses": [],
+  "pass": true
  }
 }
