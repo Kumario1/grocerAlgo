@@ -1,0 +1,38 @@
+Store 401 (Kingsville) is converged and locked in.
+
+## Result
+
+`./rebuild.sh 401` exits 0, **754 tests pass** (includes 659's pixel-frozen golden gate). `data/401/qa/report.json`:
+
+```
+verify:     []
+coverage:   {"sealed_floor_patches": [], "unreachable_shelf_labels": []}
+components: 1  (86151 cells)
+walkable:   32.6 %
+```
+
+Only `data/401/` was written — no tracked file in the repo changed. No `zones.json` was needed (ENTRANCE/CHECKSTANDS derived fine).
+
+## Findings and the data edits that resolved them
+
+**All three VERIFY flags were label misreads, not staff areas** → `inclusions.json`:
+- **SEAFOOD** (349.9, 298.4): the word is the department name printed on open floor at x=337–363, y=259–338 — a 58 pt walkway between the west wall (x=324) and the first Market gondola (x=383). No counter is drawn anywhere near it (verified against the PDF vector art).
+- **BAKERY** (348.2, 469.3): same — floor label in the west walkway between the wall cases (x1=338.3) and the Meal Simple shelf run (x0=376.2).
+- **KITCHEN** (753.5, 541.1): not a department at all — it's the rotated shelf-category text *"Kitchen Gadgets"* in the aisle 15 corridor (badge 15 at x=744.8, corridor 730.7–757.7).
+
+**The derived checkstand rect was wrong in shape** → full `seal_zones.json` override:
+- Derived `[431.8, 564.9, 834.4, 672.0]` (fixture centres within ±200×45 pt of the label). Real bank fixtures span **x 613.7–904.0, y 636.9–704.4**. So it left the *south half of every lane* and the *two east lanes* walkable (1197 of 2312 cells in the y 672–706 band were free), while reaching west to x=432, where its 20 pt bridge swallowed ~400 cells of Floral display floor. Replaced with `[605, 634, 908, 706]`, bridge 20 — all lanes now sealed full depth, the front action alley and Floral floor stay open.
+- Carried over the **Deli/Sushi island** disk (real counter ring; the only break is the dashed staff swing-door) and the **Pharmacy** disk.
+- Dropped the auto BAKERY/SEAFOOD/KITCHEN disks: they are floor/shelf labels, not counters, and the SEAFOOD disk's 20 pt bridge was culling 655 cells of customer floor around the Meal Simple table cluster 130 pt away.
+
+**One exclusion**: the west-wall alcove at `[285, 338, 328, 365]` — a hinged door swings in from the sales floor, double staff swing doors lead out to the back; nothing is sold in it. It had only been sealed as a side effect of the bogus SEAFOOD disk.
+
+**Every culled pocket classified**: Deli island (4014, staff ✓), back-of-house wedge behind the Produce north wall (1862, reachable only through drawn swing doors ✓), ten checkstand-lane pockets ✓, east entrance vestibule (615 — see below). Both far snaps are explained: PHARMACY 2.64 m and DELI 2.31 m are anchors printed *inside* correctly sealed rooms, snapping out to their customer frontage. The `narrow` entries (0.62–0.76 m half-width) are the real aisle 20–25 / 13–19 corridors, not slivers.
+
+`walk_truth.json`: 17 `must` (front alley, both entrances, vestibule, and the Market/Bakery/Deli/Sushi/Produce/Floral/Dairy/Pharmacy frontages plus six distinct aisle corridors) and 15 `must_not` (page corners, three outside points, the Deli island, staff vestibule, pharmacy room, BOH wedge, Lease, Texas Backyard, and two checkout-lane interiors). Every point was checked for clearance so it sits inside the feature it names, not in an adjacent frontage.
+
+## One thing I could not fix from data
+
+The **east entrance vestibule** (615 cells at ~936, 754) is unreachable. The guide draws a continuous threshold bar — fixture `[904.9, 739.2, 944.1, 741.3]` in `geometry.json` — straight across the doorway opening, so the vestibule is *raw*-unreachable (blocked by the drawing itself, like the Lease room), not sealed by any rule of ours. Inclusions only restore cells that are free in `free_raw`, so no data edit can open it; that would need an extraction change, which the guardrails forbid. The west entrance, which the pipeline seeds from, has a genuine 33 pt opening and is fully connected, and the coverage nets exempt raw-unreachable regions by design — so this does not block convergence. Flagging it for the audit.
+
+Stopping here for the separate audit role as instructed.

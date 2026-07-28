@@ -1,0 +1,8 @@
+[
+  {"name": "Seafood dept name printed on the west Market floor (customer): the word sits at x=337-363, y=259-338 in the open 58pt-wide walkway between the west wall (x=324) and the first Market gondola (x=383). Nothing is drawn around it — the seafood service case is the wall run, not an enclosure — so this is shopping floor, not a staff pocket.",
+   "rect": [330, 255, 378, 342]},
+  {"name": "Bakery dept name printed on the west aisle floor (customer): the word sits at x=336-361, y=436-503 in the walkway between the west wall cases (x1=338.3) and the Meal Simple shelf run (x0=376.2). No counter is drawn anywhere near it.",
+   "rect": [339, 430, 376, 510]},
+  {"name": "\"Kitchen Gadgets\" shelf-category label in the aisle 15 corridor (customer): the extractor read the word Kitchen as a service department, but it is rotated product text at x=749.7-757.3, y=509.8-550.5 printed in the 27pt corridor (badge 15 sits at x=744.8) between the Charcoal gondola (x1=730.7) and the Greeting Cards gondola (x0=757.7).",
+   "rect": [732, 500, 757, 560]}
+]

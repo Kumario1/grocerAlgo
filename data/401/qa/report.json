@@ -1,0 +1,168 @@
+{
+ "components": {
+  "n": 1,
+  "sizes": [
+   86151
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 4014,
+   "near": "DELI",
+   "x": 504.8,
+   "y": 486.8
+  },
+  {
+   "cells": 1862,
+   "near": "BAKERY",
+   "x": 254.9,
+   "y": 536.4
+  },
+  {
+   "cells": 648,
+   "near": "AISLE 33",
+   "x": 831.2,
+   "y": 670.3
+  },
+  {
+   "cells": 615,
+   "near": "AISLE 35",
+   "x": 936.3,
+   "y": 754.4
+  },
+  {
+   "cells": 373,
+   "near": "AISLE 33",
+   "x": 884.7,
+   "y": 669.5
+  },
+  {
+   "cells": 212,
+   "near": "CHECKSTANDS",
+   "x": 705.9,
+   "y": 666.7
+  },
+  {
+   "cells": 212,
+   "near": "KITCHEN",
+   "x": 755.9,
+   "y": 666.7
+  },
+  {
+   "cells": 203,
+   "near": "CHECKSTANDS",
+   "x": 681.5,
+   "y": 667.0
+  },
+  {
+   "cells": 203,
+   "near": "CHECKSTANDS",
+   "x": 731.5,
+   "y": 667.0
+  },
+  {
+   "cells": 203,
+   "near": "KITCHEN",
+   "x": 781.5,
+   "y": 667.0
+  },
+  {
+   "cells": 193,
+   "near": "CHECKSTANDS",
+   "x": 631.9,
+   "y": 668.7
+  },
+  {
+   "cells": 182,
+   "near": "CHECKSTANDS",
+   "x": 656.6,
+   "y": 666.6
+  },
+  {
+   "cells": 140,
+   "near": "CHECKSTANDS",
+   "x": 609.3,
+   "y": 666.7
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 17.4,
+   "meters": 2.64,
+   "name": "PHARMACY"
+  },
+  {
+   "cells": 15.3,
+   "meters": 2.31,
+   "name": "DELI"
+  }
+ ],
+ "m_per_cell": 0.1513,
+ "narrow": [
+  {
+   "half_width_m": 0.62,
+   "name": "AISLE 20"
+  },
+  {
+   "half_width_m": 0.62,
+   "name": "AISLE 21"
+  },
+  {
+   "half_width_m": 0.62,
+   "name": "AISLE 25"
+  },
+  {
+   "half_width_m": 0.64,
+   "name": "AISLE 22"
+  },
+  {
+   "half_width_m": 0.68,
+   "name": "ENTRANCE"
+  },
+  {
+   "half_width_m": 0.76,
+   "name": "AISLE 13"
+  },
+  {
+   "half_width_m": 0.76,
+   "name": "AISLE 14"
+  },
+  {
+   "half_width_m": 0.76,
+   "name": "AISLE 19"
+  }
+ ],
+ "provenance": {
+  "drift": {
+   "seal_zones": {
+    "derived_n": 6,
+    "derived_names": [
+     "auto:BAKERY",
+     "auto:DELI",
+     "auto:KITCHEN",
+     "auto:PHARMACY",
+     "auto:SEAFOOD",
+     "auto:CHECKSTANDS"
+    ],
+    "file_n": 3,
+    "file_names": [
+     "Deli/Sushi service island (staff): the drawn counter ring around the printed Deli label \u2014 north counter with the dashed staff swing-door, west counter, south counter, east back of the Frozen Foods run. Only the staff door breaks the ring, so bridge at the counter-gap width.",
+     "Pharmacy counter/room, SE corner (staff behind the dispensing counter; the guide already walls the room off, this keeps its counter gaps sealed if the traced walls ever thin out)",
+     "Checkstand lane bank, full depth. Derived rect was [431.8,564.9,834.4,672.0] (fixture centers within +/-200x45pt of the CHECKSTANDS label): it stopped at y=672 and x=834, leaving the south half of every lane and the two east lanes walkable, while reaching west to x=432 where its 20pt bridge swallowed the Floral display floor. Real bank fixtures span x=613.7-904.0, y=636.9-704.4."
+    ]
+   }
+  },
+  "exclusions": "file",
+  "inclusions": "file",
+  "seal_zones": "file",
+  "zones": "derived"
+ },
+ "reachable_pct": 32.6,
+ "store": "401",
+ "verify": [],
+ "walkable_pct": 32.6
+}

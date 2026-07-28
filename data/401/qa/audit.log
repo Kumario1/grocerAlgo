@@ -1,0 +1,34 @@
+Rebuild green at 759 passed (was 754 — the five new truth points), `verify: []`, coverage lists empty, single component, walkable 32.6%. Only `data/401/` was touched.
+
+## Findings — store 401, worst first
+
+**1. Undocumented 615-cell sealed region: the east Exit/Entrance airlock** *(fixed — walk_truth point)*
+
+- **Coordinates:** centroid **(936.3, 754.4) pt**; region bbox **x[878,1070] y[740,770]**.
+- **Evidence:** `culled_pockets` entry `{cells: 615, near: "AISLE 35"}` — the 4th-largest removal in the store, and the *only* one of the 15 removed regions ≥40 cells with no `walk_truth` coverage. Crop `east_ent_ov.png` vs `east_ent_map.png` shows the whole labelled "Exit / Entrance" bump-out white while the sales floor above it is green; the grid probe shows every cell at y≥738 blocked across x 860–1000. The west entrance band is green, which is what made this look asymmetric.
+- **Ground truth:** the sealing is *correct*, but for a reason nothing in the shipped files recorded. It is an airlock — no merchandise, no department frontage, no aisle behind it (all 299 map words probe ≤0.43 m from walkable floor except the three blessed sealed features and the two `Entrance` labels). The guide draws it shut: a continuous wall line `(877.4,739.7)→(953.0,739.7)`, and the 39 pt door opening at x 904.9–944.1 is covered by the door-threshold fixture `[904.9,739.2,944.1,741.3]` plus the two Exit/Entrance arrow glyph polys. The west airlock is treated identically — it falls outside the traced boundary, and both `Entrance` labels probe 1.51 m from walkable floor.
+- **Note for whoever revisits this:** it could not be opened by config even if wanted. `free |= free_raw & incl_mask` masks inclusions by `free_raw`, and those doorway cells are already False there.
+- **Fix:** `must_not [930, 758]` with the full rationale, so a re-trace cannot flip it silently.
+
+**2. East block (aisles 20–35) under-covered by `must` points** *(fixed — walk_truth points)*
+
+- 16 of the store's 35 aisles shared a single `must` point (aisle 33, `[1000,657]`), and **none of the four narrowest corridors in the store had one** — AISLE 20/21/25 at 0.62 m and AISLE 22 at 0.64 m half-width, straight off the report's own `narrow` list. Those are the corridors likeliest to close under a future extractor or seal change, and store 24's failure was exactly a sealed wing.
+- **Fix:** `must` at `[1020,164]` (a20), `[1020,250]` (a22), `[1020,372]` (a25), `[1020,723]` (a35, the pharmacy-adjacent run). Each verified mid-corridor: 20–24 pt clear width, 128–174 pt clear run.
+
+**Observation, no fix — three inert inclusions.** All three entries in `inclusions.json` restore **0 cells**; removing all three changes the shipped grid by 0, and even under the auto-derived seal-zone scenario (which re-adds the `auto:SEAFOOD/BAKERY/KITCHEN` disks) they rescue 0. What actually keeps that floor open is `seal_zones.json` dropping those three auto disks. Their WHYs are geometrically accurate and none blankets a staff room, so I left them — but they read as load-bearing and are not. (`seal_zones[1]`, Pharmacy, is also a no-op, but its own WHY says so; left as-is.)
+
+## Pass results
+
+| Pass | Result |
+|---|---|
+| 1. Mechanical | exit 0, `verify: []`, coverage lists empty, components 1, walkable 32.6%, reproducible |
+| 2. Visual sweep | 3×3 crops + targeted zooms; all 13 culled pockets and all 15 removed regions ≥40 cells classified. Deli island, BOH wedge, 10 checkout lanes, east airlock, plus two ~1 m² wall cavities at (332,80) and (127,732) — drawn corner voids, left unpinned as below the bar |
+| 3. Label probes | exhaustive, not just 10: all **299** page-2 words probed. 294 at 0.00 m, aisle badges ≤0.43 m; only Pharmacy room, Lease, Deli island and the two `Entrance` labels exceed 1 m — all blessed |
+| 4. walk_truth | all 32 original points pass and sit inside their named features (verified on annotated crops); 2 coverage gaps found and fixed → now 21 must / 16 must_not, all passing |
+| 5. Config sanity | exclusion removes 237 real cells matching its WHY; Deli seal preserves both flanking walkways (x 430–444 west, 570–592 east); checkstand rect seals x[606,908] y[634,706] only, sparing the front alley and Floral. Inclusions inert (above) |
+
+Also checked, all clean: every one of the 35 aisle corridors runs its full length from its badge (226–272 pt for aisles 1–11, 256–264 pt for 12–19, 174 pt for 20–30, 128 pt for 31–35 stopping correctly at the pharmacy wall); every unanchored printed department (Sushi, Meal Simple, Tobacco, ICE, Healthy Living, Texas Backyard, Lease) inspected; PHARMACY and DELI far-snaps land on the pickup frontage (1070,644) and the deli perimeter walkway (442,422).
+
+No code, tests, goldens, or other stores were touched.
+
+`AUDIT CLEAN — store 401 (2 findings fixed)`

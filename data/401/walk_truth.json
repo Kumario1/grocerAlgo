@@ -1,0 +1,43 @@
+{
+  "must": [
+    [700, 715, "front action alley south of the checkstand bank, in front of the Tobacco kiosk"],
+    [444, 722, "approach to the west Exit/Entrance doors, front-left corner of the sales floor"],
+    [560, 755, "front vestibule strip inside the west entrance, between the doors and the Texas Backyard unit"],
+    [884, 720, "front alley at the east end, floor in front of the ICE cases"],
+    [352, 300, "Market west walkway at the Seafood department label, between the west wall and the first Market gondola"],
+    [356, 470, "Bakery frontage: the west walkway between the wall cases and the Meal Simple shelf run"],
+    [425, 470, "customer walkway west of the Deli counter, between the Meal Simple shelves and the deli's west counter"],
+    [450, 608, "walkway south of the Deli/Sushi counter, under the Sushi label"],
+    [230, 620, "Produce floor between the north wall run and the produce tables"],
+    [470, 670, "Floral: walkway between the north and south rows of floral display tables"],
+    [1050, 115, "Dairy frontage, corridor south of the north-east dairy coolers"],
+    [650, 300, "aisle 5 corridor, Market block"],
+    [809, 300, "aisle 9 corridor, Market block"],
+    [636, 500, "aisle 13 corridor, Frozen Foods block"],
+    [744, 540, "aisle 15 corridor, beside the Kitchen Gadgets shelf label"],
+    [1000, 657, "aisle 33 corridor, east block"],
+    [1020, 164, "aisle 20 corridor, east block north end (tightest corridor in the store, 0.62 m half-width at the badge)"],
+    [1020, 250, "aisle 22 corridor, east block (0.64 m half-width at the badge)"],
+    [1020, 372, "aisle 25 corridor, east block middle (0.62 m half-width at the badge)"],
+    [1020, 723, "aisle 35 corridor, east block south end, the pharmacy-adjacent run"],
+    [1065, 600, "Pharmacy pickup frontage: corridor at the pharmacy room's north door"]
+  ],
+  "must_not": [
+    [150, 150, "parking lot north-west of the store"],
+    [1200, 400, "parking east of the store, outside the east wall"],
+    [600, 810, "apron south of the front wall, outside the store"],
+    [5, 5, "page corner NW"],
+    [1261, 5, "page corner NE"],
+    [5, 829, "page corner SW"],
+    [1261, 829, "page corner SE"],
+    [505, 487, "Deli/Sushi service island interior (staff, behind the counter ring)"],
+    [305, 352, "west-wall staff door vestibule off the Market floor (exclusion)"],
+    [658, 690, "checkout lane interior, between the 3rd and 4th checkstands"],
+    [830, 690, "checkout lane interior, between the 9th and 10th checkstands"],
+    [1105, 679, "Pharmacy room interior, behind the dispensing counter"],
+    [255, 536, "back-of-house wedge behind the Produce north wall, reached only through the drawn double swing doors"],
+    [300, 755, "Lease unit interior (enclosed tenant space off the front wall)"],
+    [760, 760, "Texas Backyard interior (enclosed unit in the front vestibule band)"],
+    [930, 758, "east Exit/Entrance airlock interior: the walled bump-out south of the front wall (x 878-973, y 740-773). Customer transit space with no merchandise, and the guide draws it shut — a continuous wall line runs x=877.4-953.0 at y=739.7 and the 39pt door opening at x=904.9-944.1 is covered by the door-threshold rect plus the two Exit/Entrance arrow glyphs — so it is a 615-cell island no inclusion can reach (inclusions are masked by free_raw). Out of the walk model on purpose, exactly like the west airlock, which sits outside the traced boundary; both 'Entrance' labels probe 1.51 m from walkable floor. Pinned so a future re-trace cannot flip it silently."]
+  ]
+}

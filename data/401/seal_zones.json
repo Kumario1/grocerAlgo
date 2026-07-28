@@ -1,0 +1,8 @@
+[
+  {"name": "Deli/Sushi service island (staff): the drawn counter ring around the printed Deli label — north counter with the dashed staff swing-door, west counter, south counter, east back of the Frozen Foods run. Only the staff door breaks the ring, so bridge at the counter-gap width.",
+   "pt": [473.0, 453.6], "r": 130, "bridge": 12},
+  {"name": "Pharmacy counter/room, SE corner (staff behind the dispensing counter; the guide already walls the room off, this keeps its counter gaps sealed if the traced walls ever thin out)",
+   "pt": [1105.8, 679.0], "r": 130, "bridge": 12},
+  {"name": "Checkstand lane bank, full depth. Derived rect was [431.8,564.9,834.4,672.0] (fixture centers within +/-200x45pt of the CHECKSTANDS label): it stopped at y=672 and x=834, leaving the south half of every lane and the two east lanes walkable, while reaching west to x=432 where its 20pt bridge swallowed the Floral display floor. Real bank fixtures span x=613.7-904.0, y=636.9-704.4.",
+   "rect": [605, 634, 908, 706], "bridge": 20}
+]
