@@ -1,0 +1,43 @@
+# Store 231 (Weslaco) — adversarial map audit
+
+## Findings, worst first
+
+### 1 · Back-of-house strip behind the Market/Deli case run was walkable — and the BAKERY anchor snapped into it — FIXED
+**Coordinates (PDF pt):** rect `[964, 574] – [1050.5, 621]`, 29.3 m². **BAKERY** label `(935.5, 621.7)` snapped to `(965, 591)` — inside it.
+
+**Evidence:**
+- Crop `r2c2` of the 3×3 sweep, and the tight zooms at pt `[950,550]–[1090,640]` / `[940,480]–[1230,670]`.
+- `reachable.png` around the Deli: the red BAKERY tie-line runs **north-east across the counter line into the strip** (report `far_snaps: BAKERY 2.8 m`).
+- Independent net I wrote (unreachable floor inside boundary, minus fixtures and minus walls) plus a narrow-mouth sweep: at a 14-pt throat the strip falls off the entrance component — `31.7 m² at (1007,597) bbox[964,566,1048,618]`.
+- `get_drawings()` / `get_text()` over the rect: **nothing inside** — no fixture, no product label, no vector artwork (the Sushiya/Meal-Simple check).
+
+**What the truth should be:** staff. The existing exclusion already blesses this exact counter line as back-of-house but stops at the bakery room's east wall `x=964`; the north-facing case run does not stop there — it continues `[958.4,562.9,995.6,574]` then `[995.6,562.2,1035.4,578.7]`. The floor south of those two cases is the same work side. The drawing walls it on three sides at full weight (west `x=964`, south `(963.6,620.7)-(1050.8,620.7)`, east `(1050.1,579.6)-(1050.1,620.7)`) and its only opening is the **14.75-pt (1.34 m) staff gap** at `x=1035.4–1050.1` — the same kind of pass-through as the 18.9-pt gap already blessed in the run to the west. It survived the `auto:BAKERY` seal disk (r=130 covers it) only because 14.75 pt is 2.75 pt wider than that disk's 12-pt bridge. Store 659, the converged reference, seals its whole Deli/Bakery block the same way.
+
+**Fix type:** exclusion (second entry in `data/231/exclusions.json`) + `must_not` regression point `[1007, 597]`.
+
+**Residual, not blocking:** BAKERY now snaps to `(879, 565)` — *in front of* the counter line, on the customer side, 5.17 m west of the printed title. It lands on the deli end of the same continuous frontage rather than directly at the bakery case, because `engine.snap` returns the first cell in Chebyshev ring-scan order (`dy=-r, dx=-r`) rather than the true nearest; `(935,566)` is on the same ring. That is code, so I did not touch it — and the pin is now on walkable customer floor instead of behind the counter, which is the correction that mattered. Department pins are declared approximate.
+
+**Adjudicated the other way (checked, no change):** the 81 m² empty area east of the wall, `[1050.8,579]–[1205.8,644.5]`, *is* customer floor — it has a **52-pt (4.7 m) undrawn mouth** onto the Produce floor at `x=1153.4–1205.8` and no counter line in front of it. It stays green, and now carries a `must` point.
+
+### 2 · walk_truth coverage gaps and two mislabelled points — FIXED
+**Evidence:** pass-4 probe of every point against the shipped grid plus the culled-pocket list.
+- `[550,262] "corridor in front of the Dairy wall case"` — actually 195 pt (18 m) east of the Dairy case, in the back cross-aisle, duplicating `[700,260]`. Dairy therefore had **no** frontage point. → reworded; added `[355,246]` in the real 19.2-pt gap between the wall-case doors and the Dairy island.
+- `[620,620] "…at the Tobacco kiosk"` — 60 pt east of the kiosk `[513.8,629.4,555.8,633.7]`. → reworded; added `[534,626]` at the kiosk frontage.
+- No `must` point for **Market** (an unanchored department — it has no entry in `geometry.json`), **Floral**, the **west perimeter run** (Trash Bags / Paper Towels / Bath Tissue), or the SE walk-in floor. → added `[866,258]`, `[902,282]`, `[285,600]`, `[88,300]`, `[1130,610]`.
+- No `must_not` for the second restroom `(705,672)` or the 378-cell back room `(926,665)`, both in the top-ten culled pockets. → added.
+
+`must` 21 → 28, `must_not` 15 → 18; test count 758 → 768.
+
+## Passes that came back clean
+
+**1 · Mechanical** — `./rebuild.sh 231` exit 0; `verify: []`; both coverage lists empty; walkable 29.8 % (was 30.2 %); single component `[78787]`; 768 tests pass. The change is confined: 926 cells lost, 0 gained, **all inside the new exclusion rect**.
+
+**2 · Visual sweep** — 3×3 crops each viewed individually, plus targeted zooms of pharmacy, floral/entry bay, deli/bakery, both entrance vestibules, checkout (both ends), tobacco/restroom strip, dairy, frozen wing, seafood, produce, SE corner. Every one of the **top-ten culled pockets classified**: pharmacy (restored by inclusion, verified reachable), front-end room behind Tobacco and the SE back rooms (drawn-enclosed, no labels/fixtures), floral case interior + door wedges, checkstand lane bank (sealed by design, passages open at both ends — the bank's west end clears at `x≈350`), Business Center counter, both restrooms. Zero orange (isolated) regions in `free_uncut`. Both entrance vestibules sit outside the traced boundary — same convention as 659, and `zones.json` correctly places `ENTRANCE` at `(410,672)` inside the store rather than at the derived `(339.6,695.1)` in the vestibule.
+
+**3 · Label probes** — ran the probe over **all 258 words** on the page, not just ten: every product label sits at **0.00 m** from walkable floor. The only words off the floor are department titles printed inside fixtures or sealed rooms (Bakery, Deli, Floral, Frozen Foods, Entrance, Exit). Also scanned all 30 aisle corridors end-to-end along their full gondola length: **0 blocked samples**.
+
+**5 · Config sanity** — all four inclusions state a WHY that matches the drawing: pharmacy room (the 24.5-pt archway at `x=231.2` is real; I re-measured the bay and it is generously open — 108 pt across at `y=572`, not the 7.9-pt squeeze the note worries about), entry bay (south edge correctly held at `y=605` so the door arcs stay sealed), "Kitchen Gadgets" in aisle 5 (a shelf-category label under badge AISLE 5, not a service kitchen), seafood frontage (the case is against the north wall, so there is no staff side). The deli exclusion covers no product label and no customer frontage — its only under-coverage was finding 1.
+
+---
+
+`AUDIT CLEAN — store 231 (2 findings fixed)`

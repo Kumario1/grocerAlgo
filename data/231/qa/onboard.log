@@ -1,0 +1,44 @@
+Store 231 (Weslaco) is converged. Stopping here for the separate audit role.
+
+## Result
+
+`./rebuild.sh 231` → exit 0, **758 passed**.
+
+```
+walkable: 30.2% of page (30.2% entrance-reachable)
+components: 1  sizes: [79713]
+verify: []
+coverage: {"sealed_floor_patches": [], "unreachable_shelf_labels": []}
+far_snaps: BAKERY 2.80 m, DELI 2.45 m   (titles printed inside the excluded BOH)
+```
+
+Files authored — only `data/231/`: `zones.json`, `exclusions.json`, `inclusions.json`, `walk_truth.json`. `seal_zones.json` deliberately **not** authored (the derived checkstand rect's top edge sits at y=479, above the badge row, but bridge=20 never closed the 20–25 pt aisle mouths here — no culled pocket and no sealed frontage, so an override would have been a change without a defect).
+
+## The four VERIFY calls
+
+| Flag | Judgment | Fix |
+|---|---|---|
+| `KITCHEN (833.5,455.3)` | "Kitchen Gadgets" category label between gondolas `[816.2,331.3,828.8,507.6]`/`[853.8,331,866.7,507.6]`, badge AISLE 5 at (840.3,514.3) | inclusion (aisle corridor) |
+| `SEAFOOD (1036.9,233.7)` | department title on open floor between the north-wall case `[994.4,206.4,1168.9,218.8]` and the Market island | inclusion (counter frontage) |
+| `DELI (843.9,591.3)` | printed inside the back-of-house | exclusion |
+| `BAKERY (935.5,621.7)` | printed inside the bakery production room | exclusion |
+
+**Deli/Bakery exclusion** `[827.5,566,964,652]`: the service cases face west (x≤813.8) and north (y≤567); everything south of that counter line is walled off by the 1.03-pt partition at x=827.5 down to the front wall y=642.3 and the traced bakery wall (902.9,590.2)→(964,590.2)→(964,650.9)→(954.8,680). Its only sales-floor openings are a **drawn staff double door with swing arcs at x=941–958, y=559–567** and the 18.9-pt gap between the two case runs. No fixture and no product label inside — only the two titles. Customer frontage is untouched.
+
+## The Pharmacy — the big call
+
+The auto `PHARMACY` disk culled the entire 3497-cell room. **I opened it as customer space**, because the drawing says so:
+
+- The room's only interior boundary is one 1.03-pt partition traced from a single PDF stroke, and its east end leaves a **24.5 pt (2.2 m) archway** between the wall stub at (231.2,588.8) and the Floral case corner at (230.9,613.3) — **no door leaf, no swing arc**, while this guide *does* draw its doors (the deli staff double door, the Floral case doors, the frozen-case doors).
+- "Pharmacy" is set in the same large red department type as Frozen Foods / Dairy / Market / Seafood / Produce / Floral; the OTC wing (First Aid, Laxatives, Cough/Cold, Diabetic, Nutrition, Diet, Vitamins) is printed directly north of it.
+- I traced the pre-seal route out: east through the archway, along y≈596–604 between the display block `[255,574.9,270.1,601.1]` and the Floral case's open-door arcs, into the front alley. Two inclusions restore the room and that bay.
+
+This is the store-24 failure mode, so flagging it explicitly: **if the auditor reads that room as a dispensary, the fix is to swap those two inclusions for an exclusion** — the evidence is written into the entry names.
+
+## Culled pockets, all classified
+
+Raw-unreachable (drawn sealed, our rules never touched them): 1646 @ (586,678) front-end service/cart room behind the Tobacco kiosk · 1439 @ (1009,652) and 378 @ (926,665) back rooms SE of the Bakery · 581 @ (273,627) Floral case interior · 289 @ (450,684) Business Center room · 254/192 @ (741,672)/(705,672) restroom interiors. Sealed by our rules: 3497 @ (150,600) the Pharmacy — **restored by inclusion afterwards** (the stats list is printed pre-inclusion). The remaining ~11 pockets at y≈567–570 are checkout-lane interiors, sealed by design.
+
+Two side notes: `zones.json` moves `ENTRANCE` from the derived label at (339.6,695.1) — which is *outside* the traced boundary and snapped 3.95 m into a 0.72 m-wide sliver — to (410,672), the floor just inside the west doors; `CHECKOUT` carried over. `FLORAL 0.73 m` in `narrow` is real drawn geometry: the guide draws the floral case's six doors swung open, fencing the walkway (same class as 269's freezer-door arcs).
+
+`walk_truth.json`: 21 `must` (every wing, each aisle group, every department frontage, the pharmacy floor and its entry bay) + 15 `must_not` (page corners, three off-store points, both exclusions, four enclosed rooms, the Floral case, a checkout-lane interior). Every coordinate probed against the shipped grid; 20 product labels spot-probed across all wings all sit on reachable floor at 0.00 m.
