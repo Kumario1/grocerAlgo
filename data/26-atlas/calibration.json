@@ -1,0 +1,137 @@
+{
+ "notes": [
+  "atlas aisles 44, guide aisles 49",
+  "aisle offsets x+0 y+5: 100% of sampled shelves land on a walkable cell and 33 anchors agree, against 100%/28 for x+1 y+5"
+ ],
+ "gates": {
+  "residual": true,
+  "margin": true,
+  "scale_skew": true,
+  "floor": {
+   "psas": 2851,
+   "on_floor_pct": 99.65,
+   "pass": true,
+   "off_floor": [
+    [
+     "16|1|A|4",
+     22.4
+    ],
+    [
+     "16|1|A|6",
+     21.7
+    ],
+    [
+     "16|1|A|5",
+     21.7
+    ],
+    [
+     "16|1|A|3",
+     21.1
+    ],
+    [
+     "16|1|A|1",
+     20.1
+    ],
+    [
+     "16|1|A|2",
+     18.3
+    ],
+    [
+     "22|89|B|3",
+     5.4
+    ],
+    [
+     "22|89|B|9",
+     5.1
+    ],
+    [
+     "22|89|A|8",
+     5.1
+    ],
+    [
+     "22|89|A|7",
+     5.1
+    ]
+   ]
+  },
+  "labels": false
+ },
+ "x": {
+  "scale": 0.9105996648860026,
+  "offset": 272.43999630967835,
+  "inliers": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18
+  ],
+  "max_residual_pt": 2.106,
+  "aisle_offset": 0,
+  "source_axis": 0
+ },
+ "y": {
+  "scale": 0.9084414113933639,
+  "offset": 69.60022862925204,
+  "inliers": [
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37,
+   38,
+   40,
+   41,
+   42,
+   43,
+   44
+  ],
+  "max_residual_pt": 2.464,
+  "aisle_offset": 5,
+  "source_axis": 1
+ },
+ "store": "26",
+ "verdict": "fail",
+ "verified": {
+  "checked": 12,
+  "agreed": 9,
+  "misses": [
+   {
+    "product": "Dove Coconut & Hydration Shampoo & Conditioner, 2 Pk, 24 oz",
+    "label": "Aisle 37",
+    "want": "AISLE 37",
+    "got": "AISLE 42"
+   },
+   {
+    "product": "H-E-B Our Finest Invent-A-Size Paper Towels, 6 Double Rolls",
+    "label": "Aisle 29",
+    "want": "AISLE 29",
+    "got": "AISLE 34"
+   },
+   {
+    "product": "H-E-B Ultra Liquid Dish Soap, Texas Size Pack - Fresh Scent, 90 oz",
+    "label": "Aisle 31",
+    "want": "AISLE 31",
+    "got": "AISLE 36"
+   }
+  ],
+  "pass": false
+ }
+}
