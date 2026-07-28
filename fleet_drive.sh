@@ -158,7 +158,7 @@ place() {
     if [ -d "$ROOT/data/$s-atlas" ]; then
         git -C "$ROOT" add -- "data/$s-atlas"
         git -C "$ROOT" commit -q -m "feat(data): calibrate store $s Atlas" \
-            -- "data/$s-atlas" 2>/dev/null \
+            -- "data/$s-atlas" >/dev/null 2>&1 \
             || say "store $s: Atlas diagnostics already committed"
     fi
     if [ "$rc" = 0 ]; then
