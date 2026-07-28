@@ -1,0 +1,87 @@
+{
+ "notes": [
+  "atlas aisles 30, guide aisles 30",
+  "y: aisle labels did not constrain this axis, so its scale came from the other axis and its offset from the walkable floor",
+  "aisle offsets x+0 y=floor: 100% of sampled shelves land on a walkable cell and 14 anchors agree, against 100%/12 for x-1 y=floor"
+ ],
+ "gates": {
+  "residual": true,
+  "margin": true,
+  "scale_skew": true,
+  "floor": {
+   "psas": 1517,
+   "on_floor_pct": 99.67,
+   "pass": true,
+   "off_floor": [
+    [
+     "16|94|A|2",
+     9.7
+    ],
+    [
+     "16|94|A|1",
+     8.6
+    ],
+    [
+     "16|94|A|3",
+     8.4
+    ],
+    [
+     "16|94|A|4",
+     7.5
+    ],
+    [
+     "16|94|A|5",
+     6.9
+    ]
+   ]
+  },
+  "labels": false
+ },
+ "x": {
+  "scale": 1.4244836044210285,
+  "offset": 56.49247036220937,
+  "inliers": [
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   12,
+   13,
+   14,
+   16,
+   17,
+   18
+  ],
+  "max_residual_pt": 2.707,
+  "aisle_offset": 0,
+  "source_axis": 0
+ },
+ "y": {
+  "scale": 1.4244836044210285,
+  "offset": 87.0,
+  "inliers": [],
+  "aisle_offset": null,
+  "source_axis": 1,
+  "derived": true,
+  "max_residual_pt": null
+ },
+ "store": "231",
+ "verdict": "fail",
+ "verified": {
+  "checked": 10,
+  "agreed": 9,
+  "misses": [
+   {
+    "product": "L'Or\u00e9al Paris Elvive Hyaluron + Plump 72hr Hydrating Shampoo, 26.5 oz",
+    "label": "Aisle 26",
+    "want": "AISLE 26",
+    "got": "AISLE 25"
+   }
+  ],
+  "pass": false
+ }
+}
