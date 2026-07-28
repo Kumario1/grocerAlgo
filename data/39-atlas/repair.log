@@ -1,0 +1,42 @@
+Both commands pass.
+
+## What was wrong
+
+The unpinned search had derived x from the walkable floor and fit y with an `aisle_offset` of **+9** — an 11-anchor "consensus" whose inliers (`7…15, 18, 26`) mixed Atlas aisles 7–15, whose y-coordinates are near-constant (~300–302 pt, they run vertically), with two aisles from elsewhere. That gave it just enough spread to clear the spread gate while carrying almost no real information, and it landed 96.93% of PSAs on floor — below the 99% bar.
+
+## The actual correspondence
+
+Store 39 has three label banks in both drawings:
+
+| bank | identifies | Atlas | guide |
+|---|---|---|---|
+| aisles 1–24 | x (vertical runs) | x 194–559 | x 402–775 |
+| aisles 25–42 | y (horizontal runs) | y 214–635 | y 135–590 |
+
+The numbering is **identity** — no vintage shift. Fitting Atlas aisle *n* to guide aisle *n* gives a clean line on each axis; the other offsets (±1, ±2, …) blow up to 150–330 pt residuals, so there's no ambiguity to resolve.
+
+Only a per-axis window was needed to stay inside the 3 pt residual bar: aisles 4–7 and 19/24 have hand-placed labels that sit up to 9 pt off the line, and aisles 25–29 in the column likewise. Pinning the tight, widest-spanning sub-ranges — x from 8–18 (11 anchors, spans the full 194→558 pt of the bank) and y from 30–42 (13 anchors) — fits both axes without weakening anything.
+
+`data/39/store.json` (new file, `data/39-atlas/calibration.json` was the only other thing written):
+
+```json
+{
+ "atlas_fit": {
+  "x": {"atlas": [8, 18], "guide": [8, 18]},
+  "y": {"atlas": [30, 42], "guide": [30, 42]}
+ }
+}
+```
+
+## Results
+
+```
+x: scale 1.01539 offset 204.02 from 11 aisles (shift +0), residual 2.367 pt [pinned]
+y: scale 1.03312 offset -66.88 from 13 aisles (shift +0), residual 1.849 pt [pinned]
+floor: 99.26% of 2705 PSAs land on reachable floor
+labels: 11/11 products pinned to the aisle their label names
+gates: residual=ok margin=ok scale_skew=ok floor=ok labels=ok
+PASS
+```
+
+Scale skew is 1.7% (bar: 5%), floor clears the full 99% gate with no live-label concession, and the live check independently confirms identity numbering at 11/11 — so no `aisle_label_shift` is warranted.
