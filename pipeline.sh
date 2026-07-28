@@ -108,7 +108,8 @@ if [ "$FROM" -le 3 ]; then
     { echo "You are in the grocerAlgo repo. Execute this runbook for store $S:"; \
       echo; sed "s/<N>/$S/g" docs/onboarding.md; \
       echo; sed "s/<N>/$S/g" docs/openings.md; \
-      echo; sed "s/<N>/$S/g" docs/decorations.md; } | $AGENT > "$LOG/onboard.log" 2>&1 \
+      echo; sed "s/<N>/$S/g" docs/decorations.md; \
+      echo; sed "s/<N>/$S/g" docs/boundaries.md; } | $AGENT > "$LOG/onboard.log" 2>&1 \
         || { echo "onboarding agent failed — read $LOG/onboard.log"; exit 1; }
     echo "    onboarding agent done ($LOG/onboard.log)"
 
@@ -122,7 +123,8 @@ if [ "$FROM" -le 4 ]; then
     { echo "You are the adversarial auditor in the grocerAlgo repo. Execute this runbook for store $S:"; \
       echo; sed "s/<N>/$S/g" docs/audit.md; \
       echo; sed "s/<N>/$S/g" docs/openings.md; \
-      echo; sed "s/<N>/$S/g" docs/decorations.md; } | $AGENT > "$LOG/audit.log" 2>&1 \
+      echo; sed "s/<N>/$S/g" docs/decorations.md; \
+      echo; sed "s/<N>/$S/g" docs/boundaries.md; } | $AGENT > "$LOG/audit.log" 2>&1 \
         || { echo "audit agent failed — read $LOG/audit.log"; exit 1; }
 
     ./rebuild.sh "$S" > "$LOG/post_audit.log" 2>&1 \

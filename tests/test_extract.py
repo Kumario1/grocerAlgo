@@ -1,7 +1,11 @@
 import fitz
 from PIL import Image
 
-from extract import raster_experiment_enabled, stitch_open_boundary
+from extract import (
+    load_boundary_override,
+    raster_experiment_enabled,
+    stitch_open_boundary,
+)
 from router.raster import is_raster_page
 
 
@@ -38,4 +42,15 @@ def test_stitches_open_perimeter_chains_at_wall_junction():
     assert stitch_open_boundary(chains, 120, 100) == [
         [40, 10], [10, 10], [10, 70], [80, 70], [80, 90],
         [120, 90], [120, 10], [40, 10],
+    ]
+
+
+def test_boundary_override_is_named_closed_and_store_sized(tmp_path):
+    path = tmp_path / "boundary.json"
+    path.write_text('{"name":"printed sales-floor perimeter",'
+                    '"poly":[[10,10],[110,10],[110,90],[10,90]]}')
+
+    assert load_boundary_override(path, 120, 100) == [
+        [10.0, 10.0], [110.0, 10.0], [110.0, 90.0], [10.0, 90.0],
+        [10.0, 10.0],
     ]

@@ -5,7 +5,7 @@ Usage: python3 extract.py [store]   (default 659)
 Reads guides/guide-<city>-<store>.pdf (resolved via router.derive.pdf_path),
 writes data/<store>/geometry.json.
 """
-import json, os, sys, fitz
+import json, math, os, sys, fitz
 from router.derive import pdf_path
 from router import raster
 
@@ -13,6 +13,39 @@ STORE = "659"
 PDF = None            # resolved in __main__ (script-only entry point)
 OUT = f"data/{STORE}/geometry.json"
 WHITE = (1.0, 1.0, 1.0)
+
+
+def load_boundary_override(path, width, height):
+    """Validated per-store floor perimeter, or None when extraction owns it."""
+    try:
+        record = json.load(open(path))
+    except FileNotFoundError:
+        return None
+    if not isinstance(record, dict) or not str(record.get("name", "")).strip():
+        raise ValueError(f"{path} needs a non-empty name")
+    poly = record.get("poly")
+    if not isinstance(poly, list) or len(poly) < 4:
+        raise ValueError(f"{path} poly needs at least four points")
+    points = []
+    for point in poly:
+        if (not isinstance(point, list) or len(point) != 2
+                or not all(isinstance(v, (int, float)) and math.isfinite(v)
+                           for v in point)):
+            raise ValueError(f"{path} has an invalid point: {point!r}")
+        x, y = map(float, point)
+        if not (0 <= x <= width and 0 <= y <= height):
+            raise ValueError(f"{path} point is outside the page: {point!r}")
+        points.append([x, y])
+    if points[0] != points[-1]:
+        points.append(points[0])
+    xs, ys = zip(*points)
+    area = abs(sum(a[0] * b[1] - b[0] * a[1]
+                   for a, b in zip(points, points[1:]))) / 2
+    if ((max(xs) - min(xs)) <= .4 * width
+            or (max(ys) - min(ys)) <= .4 * height
+            or area <= .2 * width * height):
+        raise ValueError(f"{path} does not enclose a store-sized floor")
+    return points
 
 
 def raster_experiment_enabled():
@@ -317,8 +350,11 @@ def extract():
     # exactly the old behavior — every shipped store resolves here), then
     # 0.9 for newer guides that outline the floor at 0.96 pt (store #14),
     # then a 0.40 span for wide guides with a deep parking apron (#372).
-    boundary = (find_boundary(1.5) or find_boundary(0.9)
-                or find_boundary(1.5, .40) or find_boundary(.9, .40))
+    boundary = load_boundary_override(
+        f"data/{STORE}/boundary.json", W, H)
+    boundary = boundary or (
+        find_boundary(1.5) or find_boundary(0.9)
+        or find_boundary(1.5, .40) or find_boundary(.9, .40))
     assert boundary, "no closed thick-stroke boundary polygon found"
 
     geom = {"page": {"w": page.rect.width, "h": page.rect.height},
