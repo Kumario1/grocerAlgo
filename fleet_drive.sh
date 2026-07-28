@@ -93,6 +93,19 @@ EOF
     echo 1
 }
 
+# The full-suite gate checks every tracked store, so each disposable worktree
+# needs the guide cache that already exists in main. Symlinks avoid copying
+# hundreds of PDFs into every worktree.
+share_guides() {
+    wt=$1
+    mkdir -p "$wt/guides"
+    for pdf in "$ROOT"/guides/*.pdf; do
+        [ -f "$pdf" ] || continue
+        dst="$wt/guides/$(basename "$pdf")"
+        [ -e "$dst" ] || ln -s "$pdf" "$dst"
+    done
+}
+
 # Rebuild a worktree on $REF, carrying its data/<store> and guide PDF across.
 # ponytail: cp to a temp dir, not git stash — the worktree is disposable, the
 # data is not, and two plain copies are impossible to misread at 3am.
@@ -222,6 +235,7 @@ while read -r S CITY; do
             heal_ref "$S" || { say "FAIL   $S — worktree heal failed"; break; }
             continue      # recompute the stage off the healed tree
         fi
+        share_guides "$WT"
         say "start  $S${CITY:+ ($CITY)} — stage $st"
         touch "$LOG/.mark-$S"
         if [ "$st" = 1 ] && [ -n "$CITY" ]; then
