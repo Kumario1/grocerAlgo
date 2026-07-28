@@ -1,0 +1,120 @@
+{
+ "notes": [
+  "atlas aisles 33, guide aisles 35",
+  "aisle offsets x+0 y+2: 100% of sampled shelves land on a walkable cell and 28 anchors agree, against 100%/14 for x+0 y=floor"
+ ],
+ "gates": {
+  "residual": true,
+  "margin": true,
+  "scale_skew": true,
+  "floor": {
+   "psas": 1673,
+   "on_floor_pct": 99.58,
+   "pass": true,
+   "off_floor": [
+    [
+     "16|94|A|5",
+     null
+    ],
+    [
+     "16|94|A|4",
+     null
+    ],
+    [
+     "16|94|A|3",
+     null
+    ],
+    [
+     "16|94|A|1",
+     null
+    ],
+    [
+     "16|94|A|2",
+     null
+    ],
+    [
+     "22|93|A|8",
+     6.4
+    ],
+    [
+     "22|93|A|7",
+     6.4
+    ]
+   ]
+  },
+  "labels": false
+ },
+ "x": {
+  "scale": 1.5758807731791646,
+  "offset": 119.54836911623609,
+  "inliers": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14
+  ],
+  "max_residual_pt": 1.888,
+  "aisle_offset": 0,
+  "source_axis": 0
+ },
+ "y": {
+  "scale": 1.571623603615335,
+  "offset": 50.05006858601101,
+  "inliers": [
+   19,
+   20,
+   21,
+   22,
+   23,
+   24,
+   25,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33
+  ],
+  "max_residual_pt": 2.949,
+  "aisle_offset": 2,
+  "source_axis": 1
+ },
+ "store": "401",
+ "verdict": "fail",
+ "verified": {
+  "checked": 10,
+  "agreed": 7,
+  "misses": [
+   {
+    "product": "CAFE Ol\u00e9 by H-E-B Texas Pecan Medium Roast Ground Coffee, 12 oz",
+    "label": "Aisle 9",
+    "want": "AISLE 9",
+    "got": "AISLE 17"
+   },
+   {
+    "product": "Dove Coconut & Hydration Shampoo & Conditioner, 2 Pk, 24 oz",
+    "label": "Aisle 26",
+    "want": "AISLE 26",
+    "got": "AISLE 28"
+   },
+   {
+    "product": "Hill Country Fare Liquid Dish Soap - Original Scent, 25 oz",
+    "label": "Aisle 21",
+    "want": "AISLE 21",
+    "got": "AISLE 23"
+   }
+  ],
+  "pass": false
+ }
+}
