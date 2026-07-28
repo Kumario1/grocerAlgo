@@ -1155,7 +1155,8 @@ def _structural_mask(image, words, threshold, badges=()):
     lines = cv2.HoughLinesP(cv2.Canny(ink, 60, 180), 1, np.pi / 180,
                             threshold=max(8, length),
                             minLineLength=length, maxLineGap=4)
-    for [[x0, y0, x1, y1]] in lines if lines is not None else ():
+    for line in lines if lines is not None else ():
+        x0, y0, x1, y1 = np.asarray(line).reshape(-1)
         angle = abs(np.degrees(np.arctan2(y1 - y0, x1 - x0))) % 90
         if 8 < angle < 82:
             cv2.line(diagonal, (x0, y0), (x1, y1), 255, 2)
@@ -1242,7 +1243,8 @@ def _geometry(mask):
                             minLineLength=max(10, round(min(mask.shape) * .008)),
                             maxLineGap=5)
     paths, seen = [], set()
-    for [[x0, y0, x1, y1]] in lines if lines is not None else ():
+    for line in lines if lines is not None else ():
+        x0, y0, x1, y1 = np.asarray(line).reshape(-1)
         if (x1, y1) < (x0, y0):
             x0, y0, x1, y1 = x1, y1, x0, y0
         key = tuple(round(v / 3) for v in (x0, y0, x1, y1))

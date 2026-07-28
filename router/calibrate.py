@@ -38,6 +38,7 @@ MIN_INLIERS = 8       # per axis
 MIN_SPREAD = 0.25     # of the atlas page extent the fitted anchors must span
 SCALE_BAND = (0.2, 5.0)   # two renderings of one floor; outside this it collapsed
 MAX_SKEW = 0.05       # |x scale / y scale - 1|; both drawings are to scale
+FOOTPRINT_BAND = (0.45, 1.75)  # mapped fixtures must still cover the same store
 MIN_MARGIN = 2        # inliers the winning offset must beat the runner-up by
 MIN_ON_FLOOR = 0.99   # PSAs that must land on reachable floor
 MAX_SNAP_M = 5.0      # nothing on a shelf is further than this from a corridor
@@ -53,6 +54,7 @@ GATE_MEANING = {
     "margin": "two aisle correspondences fit the drawing equally well — "
               "verify against live shelf labels to decide",
     "scale_skew": "the two drawings disagree on scale — check the guide",
+    "footprint": "the fitted drawings disagree on store size — check the guide",
     "floor": "products land off the shopping floor — the map or the fit is wrong",
     "labels": "live shelf labels disagree with where products land",
 }
@@ -135,7 +137,8 @@ def axis_candidates(atlas_aisles, guide_aisles, axis, source_axis,
     return sorted(out, key=lambda c: (-len(c["inliers"]), c["max_residual_pt"]))
 
 
-def derive_axis(axis, known, atlas_extent, guide_extent, score):
+def derive_axis(axis, known, atlas_extent, guide_extent, score,
+                source_axis=None):
     """Recover an axis the aisle numbers cannot fit, from the floor itself.
 
     A store whose numbered aisles all run in one row gives its labels no
@@ -150,6 +153,7 @@ def derive_axis(axis, known, atlas_extent, guide_extent, score):
     whole aisle pitch is the thing this cannot rule out on its own, which is
     what the live label check is for.
     """
+    source_axis = axis if source_axis is None else source_axis
     best = None
     span = abs(known["scale"]) * atlas_extent
     for scale in (abs(known["scale"]), -abs(known["scale"])):
@@ -158,7 +162,7 @@ def derive_axis(axis, known, atlas_extent, guide_extent, score):
             offset = float(low) if scale > 0 else float(low + span)
             candidate = {"scale": scale, "offset": offset,
                          "inliers": [], "aisle_offset": None,
-                         "source_axis": axis, "derived": True,
+                         "source_axis": source_axis, "derived": True,
                          "max_residual_pt": None}
             landed = score(candidate)
             if best is None or landed > best[0]:
@@ -228,12 +232,62 @@ def floor_scorer(profile, psas, sample=400):
     shelf runs where nobody can walk.
     """
     away = floor_map(profile)
+    free, _, cell, _ = profile
+    height, width = free.shape
+    runs = shelf_runs(psas)
+    keys = list(psas)
+    if sample:
+        keys = keys[::max(1, len(keys) // sample)]
+    points = np.asarray([
+        to_corridor(
+            runs,
+            f"PSA:{key.split('|', 2)[0]}:{key.split('|', 2)[1]}",
+            psas[key],
+        )
+        for key in keys
+    ])
 
     def score(calibration):
-        landed = [metres for _, metres in
-                  landings(profile, calibration, psas, away, sample)]
-        return sum(m <= MAX_SNAP_M for m in landed) / max(len(landed), 1)
+        if not len(points):
+            return 0
+        x, y = calibration["x"], calibration["y"]
+        cx = ((x["scale"] * points[:, x["source_axis"]] + x["offset"])
+              // cell).astype(int)
+        cy = ((y["scale"] * points[:, y["source_axis"]] + y["offset"])
+              // cell).astype(int)
+        inside = (0 <= cx) & (cx < width) & (0 <= cy) & (cy < height)
+        landed = np.full(len(points), np.inf)
+        landed[inside] = away[cy[inside], cx[inside]]
+        return float(np.mean(landed <= MAX_SNAP_M))
     return score
+
+
+def _fixture_span(geometry):
+    points = []
+    for x1, y1, x2, y2 in geometry.get("fixtures", []):
+        points.extend(((x1, y1), (x2, y2)))
+    for polygon in geometry.get("fixture_polys", []):
+        points.extend(polygon)
+    if len(points) < 2:
+        return None
+    points = np.asarray(points)
+    return np.quantile(points, 0.98, axis=0) - np.quantile(
+        points, 0.02, axis=0)
+
+
+def _footprint_ok(pair, atlas_geometry, guide_geometry):
+    """Reject the tempting floor score produced by shrinking a whole store."""
+    atlas_span = _fixture_span(atlas_geometry)
+    guide_span = _fixture_span(guide_geometry)
+    if atlas_span is None or guide_span is None or np.any(guide_span <= 0):
+        return True
+    mapped = np.asarray([
+        abs(axis["scale"]) * atlas_span[axis["source_axis"]]
+        for axis in pair
+    ])
+    ratios = mapped / guide_span
+    return bool(np.all(
+        (FOOTPRINT_BAND[0] <= ratios) & (ratios <= FOOTPRINT_BAND[1])))
 
 
 def fit(atlas_geometry, guide_geometry, pin=None, floor=None):
@@ -274,39 +328,55 @@ def fit(atlas_geometry, guide_geometry, pin=None, floor=None):
         candidates[name].sort(key=lambda c: (-len(c["inliers"]),
                                              c["max_residual_pt"]))
 
-    # An axis with no candidates at all is a store whose aisles all run in one
-    # row. Its scale comes from the other axis and its offset from the floor —
-    # derived per candidate, because the best offset depends on which
-    # correspondence the other axis chose.
-    guide_extent = (guide_geometry["page"]["w"], guide_geometry["page"]["h"])
-    pairs = []
-    for axis, name in ((0, "x"), (1, "y")):
-        other_name = "y" if name == "x" else "x"
-        if candidates[name] or not candidates[other_name] or not floor:
-            continue
-        for base in candidates[other_name][:5]:
-            found = derive_axis(
-                axis, base, extent[axis], guide_extent[axis],
-                lambda c, o=base, n=name, m=other_name: floor({n: c, m: o}))
-            if found:
-                pairs.append((base, found) if name == "y" else (found, base))
-        if pairs:
-            notes.append(f"{name}: no aisle spans this axis, so its scale is "
-                         f"the other axis's and its offset was found by "
-                         f"sliding the shelves onto the floor")
-
     # Choose both axes together: the scale-skew check is what separates the
     # true offset from a neighbour that the aisle pitch absorbed into its
     # intercept, and it can only be applied to a PAIR.
+    pairs = [(x, y) for x in candidates["x"] for y in candidates["y"]
+             if _skew_ok(x, y) and x["source_axis"] != y["source_axis"]]
+
+    # A few stores have a bogus candidate along an axis their numbered aisles
+    # do not actually span. Zero candidates used to be the trigger for floor
+    # derivation, so one plausible-looking false line hid the valid transform.
+    # Derive the counterpart for the strongest candidates whether the other
+    # axis found lines or not; the footprint and floor gates disprove collapses.
+    guide_extent = (guide_geometry["page"]["w"], guide_geometry["page"]["h"])
+    if floor:
+        for base in candidates["x"][:5]:
+            source_axis = 1 - base["source_axis"]
+            found = derive_axis(
+                1, base, extent[source_axis], guide_extent[1],
+                lambda candidate, other=base: floor(
+                    {"x": other, "y": candidate}),
+                source_axis,
+            )
+            if found:
+                pairs.append((base, found))
+        for base in candidates["y"][:5]:
+            source_axis = 1 - base["source_axis"]
+            found = derive_axis(
+                0, base, extent[source_axis], guide_extent[0],
+                lambda candidate, other=base: floor(
+                    {"x": candidate, "y": other}),
+                source_axis,
+            )
+            if found:
+                pairs.append((found, base))
+
+    skew_pairs = pairs
+    pairs = [pair for pair in skew_pairs
+             if _footprint_ok(pair, atlas_geometry, guide_geometry)]
     if not pairs:
-        pairs = [(x, y) for x in candidates["x"] for y in candidates["y"]
-                 if _skew_ok(x, y) and x["source_axis"] != y["source_axis"]]
-    if not pairs:
-        notes.append("no pair of axis fits agrees on scale within "
-                     f"{MAX_SKEW:.0%}" if candidates["x"] and candidates["y"]
-                     else "no axis fit survived the spread gates")
+        footprint_failed = bool(skew_pairs)
+        notes.append(
+            "axis fits collapse or expand the store footprint"
+            if footprint_failed else
+            "no pair of axis fits agrees on scale within "
+            f"{MAX_SKEW:.0%}" if candidates["x"] and candidates["y"]
+            else "no axis fit survived the spread gates")
         result["gates"]["residual"] = result["gates"]["margin"] = False
-        result["gates"]["scale_skew"] = False
+        result["gates"]["scale_skew"] = footprint_failed
+        if footprint_failed:
+            result["gates"]["footprint"] = False
         return result
     # Rank by where the products actually land first, and only then by how
     # many anchors agree. Store 24's aisles are evenly enough spaced that the
@@ -321,6 +391,11 @@ def fit(atlas_geometry, guide_geometry, pin=None, floor=None):
 
     pairs.sort(key=rank, reverse=True)
     x, y = pairs[0]
+    if x.get("derived") or y.get("derived"):
+        name = "x" if x.get("derived") else "y"
+        notes.append(f"{name}: aisle labels did not constrain this axis, so "
+                     "its scale came from the other axis and its offset from "
+                     "the walkable floor")
 
     # An evenly spaced aisle grid fits almost as well one aisle over, so the
     # winner has to be clearly better than the best alternative correspondence

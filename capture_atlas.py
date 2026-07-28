@@ -21,10 +21,11 @@ from router.heb import (HEBClient, HEBConnectionError, parse_atlas,
 
 
 async def capture(store):
-    client = HEBClient(int(store))
+    client = HEBClient(int(store), allow_unsupported=True)
     out = Path(f"data/{store}-atlas")
     try:
         await client.connect()
+        await client.select_store(store)
         # locationNumber names the store explicitly, but the session still has
         # to be a real shopper session, so check the catalog answers first.
         if not await client.sees_store():

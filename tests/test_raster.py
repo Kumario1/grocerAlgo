@@ -1,3 +1,4 @@
+import importlib.util
 import json
 import math
 import re
@@ -210,8 +211,9 @@ def test_clean_vector_rasterization_retains_structural_parity(store):
 
 @pytest.mark.parametrize("backend", ["vision", "tesseract"])
 def test_store_265_ocr_backend_mechanical_contract(tmp_path, backend):
-    if backend == "vision" and sys.platform != "darwin":
-        pytest.skip("Apple Vision is macOS-only")
+    if backend == "vision" and (
+            sys.platform != "darwin" or importlib.util.find_spec("objc") is None):
+        pytest.skip("Apple Vision bindings are unavailable")
     if backend == "tesseract" and not shutil.which("tesseract"):
         pytest.skip("Tesseract CLI is not installed")
     page = fitz.open("guides/guide-cedar-park-265.pdf")[1]

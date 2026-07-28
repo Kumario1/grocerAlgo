@@ -14,6 +14,8 @@
 #   - promote-on-clean: the moment a store's pipeline exits green its data
 #     is copied to the main checkout and COMMITTED, so finished work can
 #     never be lost again
+#   - placement-after-promotion: Atlas capture, calibration, and live tie-break
+#     run in main, where each store's browser runtime persists across retries
 #   - limit-parking: the session-limit message names its reset time; the
 #     driver sleeps until then and retries the same store instead of
 #     marking everything after it failed
@@ -28,6 +30,8 @@ set -u
 ROOT=$(cd "$(dirname "$0")" && pwd)
 REF=${FLEET_REF:-$(git -C "$ROOT" rev-parse HEAD)}
 LOG="$ROOT/logs/fleet"
+PYTHON="$ROOT/.venv/bin/python"
+[ -x "$PYTHON" ] || PYTHON=python3
 mkdir -p "$LOG"
 
 say() { echo "$(date '+%m-%d %H:%M') $*" | tee -a "$LOG/drive.log"; }
@@ -35,13 +39,36 @@ say() { echo "$(date '+%m-%d %H:%M') $*" | tee -a "$LOG/drive.log"; }
 # ---- state -----------------------------------------------------------------
 
 # The furthest checkpoint decides what happens next. Echoes one of:
-#   done | blocked | failed | 1 | 3 | 4 | 5
+#   done | placement | calibration_blocked | blocked | failed | 1 | 3 | 4 | 5
 # (5 = audit already CLEAN: rerun the mechanical verdict/output stage on the
 # current ref, and its exit 0 is what triggers promotion — the pipeline stays
 # the only judge of "green", the driver never re-implements it)
 stage_for() {
     s=$1; wt="$ROOT/.wt/$s"; d="$wt/data/$s"
-    [ -f "$ROOT/data/$s/walk_truth.json" ] && { echo done; return; }
+    if [ -f "$ROOT/data/$s/walk_truth.json" ]; then
+        calibration="$ROOT/data/$s-atlas/calibration.json"
+        if [ -f "$calibration" ]; then
+            "$PYTHON" - "$calibration" <<'EOF'
+import json, sys
+record = json.load(open(sys.argv[1]))
+verified = record.get("verified")
+failed = [
+    name for name, gate in record.get("gates", {}).items()
+    if not (gate.get("pass") if isinstance(gate, dict) else gate)
+]
+retryable = verified is None and (
+    record.get("verdict") == "pass" or failed == ["margin"])
+print("done" if record.get("verdict") == "pass" and
+      isinstance(verified, dict) and verified.get("pass")
+      else "placement" if retryable or
+      __import__("os").environ.get("FLEET_RETRY")
+      else "calibration_blocked")
+EOF
+        else
+            echo placement
+        fi
+        return
+    fi
     [ -d "$wt" ] || { echo 1; return; }
     [ -z "${FLEET_RETRY:-}" ] && [ -f "$wt/FLEET_FAILED" ] && { echo failed; return; }
     if [ -f "$d/qa/audit.log" ]; then
@@ -99,7 +126,36 @@ promote() {
         -- $paths 2>/dev/null \
         || say "store $s: nothing new to commit (already promoted?)"
     git -C "$ROOT" worktree remove --force "$wt" 2>/dev/null || true
-    say "DONE   $s — promoted to main; placement still owed"
+    say "DONE   $s — map promoted to main"
+}
+
+place() {
+    s=$1
+    say "place  $s — Atlas capture + calibration in main"
+    (cd "$ROOT" && PIPE_PYTHON="$PYTHON" ./pipeline.sh "$s" --from 6) \
+        >> "$LOG/$s.log" 2>&1
+    rc=$?
+    if [ -d "$ROOT/data/$s-atlas" ]; then
+        git -C "$ROOT" add -- "data/$s-atlas"
+        git -C "$ROOT" commit -q -m "feat(data): calibrate store $s Atlas" \
+            -- "data/$s-atlas" 2>/dev/null \
+            || say "store $s: Atlas diagnostics already committed"
+    fi
+    if [ "$rc" = 0 ]; then
+        say "READY  $s — map + placement passed"
+    else
+        say "BLOCK  $s — calibration gates failed; data/$s-atlas/calibration.json"
+    fi
+    return "$rc"
+}
+
+place_blocked_audit() {
+    s=$1
+    say "place  $s — audit blocked, checking placement independently"
+    (cd "$ROOT/.wt/$s" &&
+        HEB_RUNTIME_DIR="$ROOT/runtime/onboarding-$s" PIPE_PYTHON="$PYTHON" \
+        ./pipeline.sh "$s" --from 6) >> "$LOG/$s.log" 2>&1
+    say "BLOCK  $s — audit blocked, worktree kept: .wt/$s"
 }
 
 # Did a qa log WRITTEN DURING THIS RUN (newer than the mark file — stale
@@ -138,7 +194,11 @@ echo "$LIST" | while read -r S CITY; do
         st=$(stage_for "$S")
         case $st in
             done)    say "skip   $S — already in main"; break ;;
-            blocked) say "BLOCK  $S — audit blocked, worktree kept: .wt/$S"; break ;;
+            placement) place "$S"; break ;;
+            calibration_blocked)
+                say "BLOCK  $S — incompatible guide/Atlas; FLEET_RETRY=1 after source repair"
+                break ;;
+            blocked) place_blocked_audit "$S"; break ;;
             failed)  say "skip   $S — FLEET_FAILED marker (FLEET_RETRY=1 to retry)"; break ;;
         esac
 
@@ -167,6 +227,12 @@ echo "$LIST" | while read -r S CITY; do
         rc=$?
         if [ "$rc" = 0 ]; then
             promote "$S"
+            place "$S"
+            break
+        fi
+        if tail -5 "$WT/data/$S/qa/audit.log" 2>/dev/null |
+                grep -q "AUDIT BLOCKED"; then
+            place_blocked_audit "$S"
             break
         fi
 

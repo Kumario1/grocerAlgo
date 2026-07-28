@@ -75,9 +75,9 @@ async def verify(store, record):
         guide = json.load(handle)
     carry, runs = cal.transform(record), cal.shelf_runs(atlas["psas"])
 
-    client = HEBClient(int(store))
+    client = HEBClient(int(store), allow_unsupported=True)
     await client.connect()
-    print(f"    select store #{store} in the browser if prompted…")
+    await client.select_store(store)
     await client.confirm()
     checked, agreed, misses = 0, 0, []
     for probe in PROBES:

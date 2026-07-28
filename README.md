@@ -359,9 +359,10 @@ no babysitting. Progress is in `logs/fleet/drive.log`; a killed run resumes
 by running it again. Pipeline agents cannot spawn subagents
 (`--disallowedTools`), so the usage rate stays flat and predictable.
 
-Placement needs a logged-in browser, so the fleet defers it; it is paid down
-later in batches from the main checkout with
-`python3 capture_atlas.py <N> && python3 calibrate.py <N>`.
+After a clean map is promoted, the driver immediately captures and calibrates
+Atlas from the main checkout. Placement passes only after live shelf labels
+agree; incompatible guide/Atlas sources are committed as diagnostics and stay
+blocked until the source is repaired, without being retried forever.
 
 Vector guides use the standard extraction path. The image-only fallback is
 still experimental — it passes the structural precision/recall, exact-aisle,

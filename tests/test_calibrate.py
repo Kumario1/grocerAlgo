@@ -85,6 +85,78 @@ def test_scrambled_aisle_positions_are_refused(atlas, guide):
     assert "x" not in found or not all(found["gates"].values())
 
 
+def test_a_false_axis_candidate_does_not_hide_floor_derivation(monkeypatch):
+    anchors = {f"AISLE {n}": [float(n), float(n)] for n in range(8)}
+    geometry = {
+        "page": {"w": 100, "h": 100},
+        "anchors": anchors,
+        "fixtures": [],
+        "fixture_polys": [],
+    }
+
+    def candidates(_atlas, _guide, axis, source_axis, _extent):
+        if source_axis != axis:
+            return []
+        return [{
+            "scale": 2.0 if axis == 0 else 0.5,
+            "offset": 0.0,
+            "inliers": list(range(8)),
+            "aisle_offset": 0,
+            "source_axis": source_axis,
+            "max_residual_pt": 1.0,
+        }]
+
+    monkeypatch.setattr(cal, "axis_candidates", candidates)
+    found = cal.fit(
+        geometry,
+        geometry,
+        floor=lambda pair: float(
+            pair["x"]["scale"] == pair["y"]["scale"] == 0.5),
+    )
+
+    assert found["x"]["derived"]
+    assert found["x"]["scale"] == found["y"]["scale"] == 0.5
+
+
+def test_a_floor_fit_cannot_win_by_collapsing_the_store_footprint():
+    geometry = {
+        "fixtures": [[0, 0, 100, 100]],
+        "fixture_polys": [],
+    }
+    collapsed = (
+        {"scale": 0.2, "source_axis": 0},
+        {"scale": 0.2, "source_axis": 1},
+    )
+    full_size = (
+        {"scale": 0.8, "source_axis": 0},
+        {"scale": 0.8, "source_axis": 1},
+    )
+
+    assert not cal._footprint_ok(collapsed, geometry, geometry)
+    assert cal._footprint_ok(full_size, geometry, geometry)
+
+
+def test_footprint_rejection_names_its_own_gate(monkeypatch):
+    geometry = {
+        "page": {"w": 100, "h": 100},
+        "anchors": {f"AISLE {n}": [n * 10, n * 10] for n in range(1, 11)},
+        "fixtures": [[0, 0, 100, 100]],
+    }
+    candidate = {
+        "scale": 1, "offset": 0, "source_axis": 0,
+        "inliers": [1, 2, 3], "max_residual_pt": 0,
+    }
+    monkeypatch.setattr(cal, "axis_candidates",
+                        lambda *args: [candidate | {"source_axis": args[3]}])
+    monkeypatch.setattr(cal, "_footprint_ok", lambda *args: False)
+
+    found = cal.fit(geometry, geometry)
+
+    assert found["gates"]["footprint"] is False
+    assert found["gates"]["scale_skew"] is True
+    assert "footprint" in found["notes"][-1]
+
+
 def test_floor_gate_catches_a_transform_that_misses_the_floor(atlas, profile):
     good = cal.fit(atlas["geometry"],
                    json.load(open("data/659/geometry.json")),

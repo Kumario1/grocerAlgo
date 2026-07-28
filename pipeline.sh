@@ -30,11 +30,10 @@
 # with a named reason instead of vanishing, which is the honest end state and
 # the one the app already knows how to render.
 #
-# PIPE_NO_BROWSER=1 skips stage 6 outright. It exists for the fleet: stage 6
-# wants a logged-in .heb-<store> Chrome profile in the working directory, and a
-# git worktree has nowhere to keep one. Nothing is attempted, so nothing is
-# blocked — the exit status is then the audit verdict alone, and the placement
-# is done later as a batch from the main checkout. See ./onboard_fleet.sh.
+# PIPE_NO_BROWSER=1 skips stage 6 outright. The fleet uses it inside disposable
+# map worktrees, promotes the clean map, then calls this pipeline at --from 6 in
+# the main checkout. Nothing is attempted in the worktree, so its exit status
+# remains the audit verdict alone.
 #
 # Agent runner: isolated Opus/xhigh Claude session (override the whole command
 # with PIPE_AGENT='codex exec' etc.). Runs with --dangerously-skip-permissions
@@ -47,6 +46,14 @@ set -e
 S=$1
 [ -n "$S" ] || { echo "usage: ./pipeline.sh <store> [city|--no-agents] [--from n]"; exit 2; }
 shift
+PYTHON=${PIPE_PYTHON:-python3}
+HEB_RUNTIME_DIR=${HEB_RUNTIME_DIR:-runtime/onboarding-$S}
+export HEB_RUNTIME_DIR
+if [ -z "${CHROME_PATH:-}" ] &&
+        [ -x "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" ]; then
+    CHROME_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+    export CHROME_PATH
+fi
 
 FROM=1
 CITY=""
@@ -73,9 +80,9 @@ mkdir -p "$LOG"
 if [ "$FROM" -le 1 ]; then
     echo "==> [1/6] discover: store $S"
     if [ "$CITY" = "--no-agents" ] || [ -z "$CITY" ]; then
-        python3 discover.py "$S"
+        "$PYTHON" discover.py "$S"
     else
-        python3 discover.py "$S" "$CITY"
+        "$PYTHON" discover.py "$S" "$CITY"
     fi
 fi
 
@@ -137,10 +144,10 @@ if [ "$FROM" -le 5 ]; then
     echo "    full suite (every store, goldens included)"
     # not piped: a pipeline's status is the LAST command's, which would swallow
     # a failing suite under set -e
-    python3 -m pytest -q > "$LOG/full_suite.log" 2>&1 \
+    "$PYTHON" -m pytest -q > "$LOG/full_suite.log" 2>&1 \
         || { echo "    SUITE FAILED — read $LOG/full_suite.log"; exit 1; }
     tail -1 "$LOG/full_suite.log" | sed 's/^/    /'
-    python3 - "$S" <<'EOF'
+    "$PYTHON" - "$S" <<'EOF'
 import json, sys
 r = json.load(open(f"data/{sys.argv[1]}/qa/report.json"))
 print(f"    walkable {r['walkable_pct']}%  reachable {r['reachable_pct']}%  "
@@ -156,7 +163,7 @@ fi
 # A map alone routes nothing: without a calibrated Atlas the app has no way to
 # put a real product on it, so the store stays unpickable until this passes.
 # It does not depend on the audit verdict, so a blocked audit must not skip it.
-if [ -n "$PIPE_NO_BROWSER" ]; then
+if [ -n "${PIPE_NO_BROWSER:-}" ]; then
     # Deferred, not blocked. PLACEMENT stays ok on purpose: nothing was tried
     # here, so the gate below reads the audit verdict alone. Saying "blocked"
     # for a stage nobody ran is the same lie in the other direction.
@@ -165,18 +172,31 @@ if [ -n "$PIPE_NO_BROWSER" ]; then
     echo "      python3 capture_atlas.py $S && python3 calibrate.py $S"
 else
     echo "==> [6/6] Atlas capture + calibration (opens a browser)"
-    if python3 capture_atlas.py "$S" && python3 calibrate.py "$S"; then
+    PLACEMENT=blocked
+    if "$PYTHON" capture_atlas.py "$S"; then
+        OFFLINE=blocked
+        "$PYTHON" calibrate.py "$S" && OFFLINE=ok
+        if [ "$OFFLINE" = ok ] || "$PYTHON" - "$S" <<'EOF'
+import json, sys
+record = json.load(open(f"data/{sys.argv[1]}-atlas/calibration.json"))
+failed = [
+    name for name, gate in record["gates"].items()
+    if not (gate.get("pass") if isinstance(gate, dict) else gate)
+]
+raise SystemExit(failed != ["margin"])
+EOF
+        then
+            echo "    checking live shelf labels"
+            "$PYTHON" calibrate.py "$S" --verify && PLACEMENT=ok
+        fi
+    fi
+    if [ "$PLACEMENT" = ok ]; then
         echo "    store $S places products exactly"
-        echo "    confirm against live labels: python3 calibrate.py $S --verify"
     else
         # Exit non-zero: the store is not routable, and a run that reports
         # success here is the same lie as a silent one — the app would list it
         # as blocked while the dialog said it finished.
-        PLACEMENT=blocked
         echo "    the map is done; the placement layer is not."
-        echo "    finish it with the browser on store $S, which is what lets live"
-        echo "    shelf labels settle an aisle correspondence the drawing cannot:"
-        echo "      python3 calibrate.py $S --verify"
     fi
 fi
 
