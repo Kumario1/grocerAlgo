@@ -271,7 +271,7 @@ def extract():
     # Sales-floor boundary: the map draws the interior outline as one CLOSED
     # thick-stroke polyline (store #659: 18 segments, stroke width ~1.85).
     # Everything outside it (parking, drive-thru, curbside) is not walkable.
-    def find_boundary(min_width):
+    def find_boundary(min_width, min_span=.45):
         best = []
         for dr in page.get_drawings():
             if dr["type"] != "s" or not dr.get("width") or dr["width"] < min_width:
@@ -288,8 +288,8 @@ def extract():
                 # only 58% of its sheet. That lets the page frame compete,
                 # so a ~full-page bbox is rejected outright — the frame is
                 # never the floor.
-                spans = ((r.x1 - r.x0) > 0.45 * page.rect.width
-                         and (r.y1 - r.y0) > 0.45 * page.rect.height)
+                spans = ((r.x1 - r.x0) > min_span * page.rect.width
+                         and (r.y1 - r.y0) > min_span * page.rect.height)
                 frame = ((r.x1 - r.x0) > 0.95 * page.rect.width
                          and (r.y1 - r.y0) > 0.95 * page.rect.height)
                 if spans and not frame and len(pts) > len(best):
@@ -304,8 +304,10 @@ def extract():
 
     # A ladder, not a lower constant: 1.5 first (the classic template, and
     # exactly the old behavior — every shipped store resolves here), then
-    # 0.9 for newer guides that outline the floor at 0.96 pt (store #14).
-    boundary = find_boundary(1.5) or find_boundary(0.9)
+    # 0.9 for newer guides that outline the floor at 0.96 pt (store #14),
+    # then a 0.40 span for wide guides with a deep parking apron (#372).
+    boundary = (find_boundary(1.5) or find_boundary(0.9)
+                or find_boundary(1.5, .40) or find_boundary(.9, .40))
     assert boundary, "no closed thick-stroke boundary polygon found"
 
     geom = {"page": {"w": page.rect.width, "h": page.rect.height},
