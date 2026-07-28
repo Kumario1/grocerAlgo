@@ -150,8 +150,14 @@ place() {
     rc=$?
     if [ -d "$ROOT/data/$s-atlas" ]; then
         git -C "$ROOT" add -- "data/$s-atlas"
+        paths="data/$s-atlas"
+        if [ -f "$ROOT/data/$s/store.json" ]; then
+            git -C "$ROOT" add -- "data/$s/store.json"
+            paths="$paths data/$s/store.json"
+        fi
+        # shellcheck disable=SC2086 — paths are fixed data/<store> names.
         git -C "$ROOT" commit -q -m "feat(data): calibrate store $s Atlas" \
-            -- "data/$s-atlas" >/dev/null 2>&1 \
+            -- $paths >/dev/null 2>&1 \
             || say "store $s: Atlas diagnostics already committed"
     fi
     if [ "$rc" = 0 ]; then

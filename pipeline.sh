@@ -193,6 +193,24 @@ EOF
             "$PYTHON" calibrate.py "$S" --verify && PLACEMENT=ok
         fi
     fi
+    if [ "$PLACEMENT" != ok ] &&
+            [ -f "data/$S-atlas/calibration.json" ]; then
+        echo "    calibration blocked — starting data-only repair agent"
+        repair_try=0
+        while [ "$repair_try" -lt 3 ]; do
+            repair_try=$((repair_try + 1))
+            { echo "Execute this calibration runbook for store $S:"; \
+              echo; sed "s/<N>/$S/g" docs/calibration.md; } |
+                $AGENT > "data/$S-atlas/repair.log" 2>&1 && break
+            grep -Eiq "api error|connection (closed|error)|timed? out|overloaded" \
+                "data/$S-atlas/repair.log" || break
+            [ "$repair_try" -ge 3 ] || sleep 60
+        done
+        if "$PYTHON" calibrate.py "$S" &&
+                "$PYTHON" calibrate.py "$S" --verify; then
+            PLACEMENT=ok
+        fi
+    fi
     if [ "$PLACEMENT" = ok ]; then
         echo "    store $S places products exactly"
     else
