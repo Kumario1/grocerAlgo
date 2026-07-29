@@ -70,7 +70,7 @@ esac
 # Keep max explicit: map truth is quality-sensitive and fleet runs must not
 # inherit a developer's personal CLI default.
 AGENT=${PIPE_AGENT:-"./scripts/codex_agent.sh"}
-AGENT_TIMEOUT=${PIPE_AGENT_TIMEOUT:-2700}
+AGENT_TIMEOUT=${PIPE_AGENT_TIMEOUT:-7200}
 case $AGENT_TIMEOUT in
     ''|*[!0-9]*) echo "PIPE_AGENT_TIMEOUT must be seconds"; exit 2 ;;
 esac
