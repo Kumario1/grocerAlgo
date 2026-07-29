@@ -34,7 +34,7 @@ while grep -Eiq 'selected model is at capacity' "$TRANSCRIPT"; do
     sleep "$WAIT"
     run_codex codex exec resume "$SESSION" --ignore-user-config \
         --disable multi_agent --model gpt-5.6-luna \
-        -c model_reasoning_effort=max \
+        -c model_reasoning_effort=max -c sandbox_mode=workspace-write \
         "Continue exactly where you stopped and complete the runbook." &&
         exit 0
 done

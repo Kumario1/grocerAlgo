@@ -106,4 +106,5 @@ exit 1
     assert prompt.read_text() == "runbook\n"
     assert len(log.read_text().splitlines()) == 2
     assert "exec resume 00000000-0000-0000-0000-000000000231" in log.read_text()
+    assert "-c sandbox_mode=workspace-write" in log.read_text()
     assert "AUDIT CLEAN" in result.stdout
