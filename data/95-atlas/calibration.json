@@ -1,0 +1,15 @@
+{
+ "notes": [
+  "atlas aisles 36, guide aisles 34",
+  "axis fits collapse or expand the store footprint"
+ ],
+ "gates": {
+  "residual": false,
+  "margin": false,
+  "scale_skew": true,
+  "footprint": false
+ },
+ "store": "95",
+ "verdict": "fail",
+ "verified": null
+}
