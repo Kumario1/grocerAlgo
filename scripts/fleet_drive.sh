@@ -118,7 +118,7 @@ heal_ref() {
     rm -rf "$keep"; mkdir -p "$keep"
     [ -d "$wt/data/$s" ] && cp -R "$wt/data/$s" "$keep/data"
     for pdf in "$wt"/guides/guide-*-"$s".pdf; do [ -f "$pdf" ] && cp "$pdf" "$keep/"; done
-    git -C "$ROOT" worktree remove --force "$wt" 2>/dev/null \
+    git -C "$ROOT" worktree remove --force --force "$wt" 2>/dev/null \
         || { rm -rf "$wt"; git -C "$ROOT" worktree prune; }
     git -C "$ROOT" worktree add "$wt" "$REF" >/dev/null 2>&1 || return 1
     [ -d "$keep/data" ] && { mkdir -p "$wt/data"; cp -R "$keep/data" "$wt/data/$s"; }
@@ -262,8 +262,9 @@ while read -r S CITY; do
                 mkdir -p "$WT/guides"
                 cp "$pdf" "$WT/guides/"
             done
-        elif [ "$(git -C "$WT" rev-parse HEAD 2>/dev/null)" != "$(git -C "$ROOT" rev-parse "$REF")" ]; then
-            say "heal   $S — worktree ref behind, rebuilding on $REF (data kept)"
+        elif [ ! -x "$WT/pipeline.sh" ] ||
+                [ "$(git -C "$WT" rev-parse HEAD 2>/dev/null)" != "$(git -C "$ROOT" rev-parse "$REF")" ]; then
+            say "heal   $S — worktree incomplete or behind, rebuilding on $REF (data kept)"
             heal_ref "$S" || { say "FAIL   $S — worktree heal failed"; break; }
             continue      # recompute the stage off the healed tree
         fi
