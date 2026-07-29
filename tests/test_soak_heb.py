@@ -1,6 +1,6 @@
 import httpx
 
-from router.heb import SUPPORTED_STORES
+from router.calibrate import catalog_store_ids
 from soak_heb import (
     accepted,
     prime_recovery_cache,
@@ -10,17 +10,18 @@ from soak_heb import (
 
 
 def test_soak_gate_requires_every_store_and_every_restart():
+    stores = catalog_store_ids()
     healthy = {
         str(store): {"searches": 20, "search_ok": 19, "located": 5}
-        for store in SUPPORTED_STORES
+        for store in stores
     }
 
     assert accepted(
         healthy, {"boot-1", "boot-2", "boot-3"}, 2, {"boot-2", "boot-3"})
-    healthy["24"]["search_ok"] = 18
+    healthy[str(stores[0])]["search_ok"] = 18
     assert not accepted(
         healthy, {"boot-1", "boot-2", "boot-3"}, 2, {"boot-2", "boot-3"})
-    healthy["24"]["search_ok"] = 19
+    healthy[str(stores[0])]["search_ok"] = 19
     assert not accepted(
         healthy, {"boot-1", "boot-2"}, 2, {"boot-2"})
     assert not accepted(

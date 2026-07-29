@@ -28,7 +28,6 @@ from router.heb import (
     HEBClient,
     HEBConnectionError,
     PLACEMENT_TTL,
-    SUPPORTED_STORES,
 )
 
 os.makedirs("logs", exist_ok=True)
@@ -197,12 +196,9 @@ def get_store(store_id):
 
 def catalog_store(store_id):
     """A store allowed to place products: exact placement or nothing."""
-    if not str(store_id).isdigit() or int(store_id) not in SUPPORTED_STORES:
-        raise HTTPException(409, f"store {store_id} is not catalog-enabled")
     store = get_store(store_id)
-    if store.calibration is None:
-        raise HTTPException(409, f"store {store_id} cannot place products yet — "
-                                 f"{store.blocked_reason}")
+    if not cal.is_catalog_enabled(store_id):
+        raise HTTPException(409, f"store {store_id} is not catalog-enabled")
     return store
 
 
@@ -382,7 +378,7 @@ def stores():
             "name": store_name(store_id),
             "ready": reason is None,
             "blocked_reason": reason,
-            "catalog_enabled": int(store_id) in SUPPORTED_STORES,
+            "catalog_enabled": cal.is_catalog_enabled(store_id),
         })
     return {"stores": out, "default": DEFAULT_STORE}
 

@@ -11,7 +11,7 @@ from fastapi.testclient import TestClient
 import app as app_module
 from app import app
 from router import calibrate
-from router.heb import SUPPORTED_STORES
+from router.calibrate import catalog_store_ids
 
 client = TestClient(app)
 
@@ -77,13 +77,16 @@ def test_only_a_calibrated_store_is_offered_for_routing():
         assert store["ready"] != bool(store["blocked_reason"])
 
 
-def test_public_catalog_is_limited_to_the_six_verified_stores():
+def test_public_catalog_matches_passing_calibrations():
     enabled = {
         store_id for store_id, store in stores().items()
         if store["catalog_enabled"]
     }
 
-    assert enabled == {str(store) for store in SUPPORTED_STORES}
+    assert enabled == {str(store) for store in catalog_store_ids()}
+    for store_id, store in stores().items():
+        assert store["catalog_enabled"] == (
+            calibrate.load_calibration(store_id) is not None)
 
 
 @pytest.mark.parametrize("store_id", sorted(stores()))

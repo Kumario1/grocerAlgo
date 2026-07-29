@@ -562,6 +562,24 @@ def load_calibration(store):
     return found if found.get("verdict") == "pass" else None
 
 
+def is_catalog_enabled(store):
+    """Searchable/placeable: a built map plus a passing calibration."""
+    store = str(store)
+    if not store.isdigit() or not os.path.exists(f"data/{store}/profile.npz"):
+        return False
+    return load_calibration(store) is not None
+
+
+def catalog_store_ids():
+    """Every catalog-enabled store id, sorted. Replaces the old hand list."""
+    found = []
+    for path in glob.glob("data/*/profile.npz"):
+        name = os.path.basename(os.path.dirname(path))
+        if name.isdigit() and load_calibration(name) is not None:
+            found.append(int(name))
+    return tuple(sorted(found))
+
+
 def blocked_reason(store):
     """Why this store cannot place products exactly, in one line, or None."""
     if load_atlas(store) is None:

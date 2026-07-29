@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exercise the deployed six-store H-E-B catalog and its restart persistence."""
+"""Exercise the deployed catalog-enabled H-E-B stores and restart persistence."""
 import argparse
 import json
 import os
@@ -8,7 +8,7 @@ import time
 
 import httpx
 
-from router.heb import SUPPORTED_STORES
+from router.calibrate import catalog_store_ids
 
 QUERIES = (
     "milk", "eggs", "bread", "bananas", "chicken", "rice", "coffee",
@@ -117,11 +117,14 @@ def main():
     args = parser.parse_args()
     if args.expected_restarts and not args.admin_token:
         parser.error("--admin-token is required when checking restarts")
+    stores = catalog_store_ids()
+    if not stores:
+        raise SystemExit("no catalog-enabled stores to soak")
     stats = {
         str(store): {
             "searches": 0, "search_ok": 0, "located": 0, "failures": [],
         }
-        for store in SUPPORTED_STORES
+        for store in stores
     }
     instances = set()
     recovered = set()
@@ -135,10 +138,10 @@ def main():
         health.raise_for_status()
         instances.add(health.json()["instance"])
         initial_instance = health.json()["instance"]
-        for store in SUPPORTED_STORES:
+        for store in stores:
             probe_store(client, store, stats, {})
         if args.expected_restarts and not prime_recovery_cache(
-                client, SUPPORTED_STORES):
+                client, stores):
             raise RuntimeError("could not prime restart recovery cache")
         if args.expected_restarts:
             print(
@@ -156,12 +159,12 @@ def main():
                 instance = health.json()["instance"]
                 if (instance != initial_instance and instance not in recovered
                         and recovered_after_restart(
-                            client, SUPPORTED_STORES, headers)):
+                            client, stores, headers)):
                     recovered.add(instance)
                 instances.add(instance)
             if time.monotonic() < next_probe:
                 continue
-            for index, store in enumerate(SUPPORTED_STORES):
+            for index, store in enumerate(stores):
                 query = QUERIES[
                     (stats[str(store)]["searches"] + index) % len(QUERIES)]
                 values = stats[str(store)]

@@ -208,6 +208,14 @@ def test_aisle_label_shifts_can_describe_multiple_guide_vintages():
 def test_659_ships_a_passing_calibration():
     assert cal.load_calibration("659")["verdict"] == "pass"
     assert cal.blocked_reason("659") is None
+    assert cal.is_catalog_enabled("659")
+    assert 659 in cal.catalog_store_ids()
+
+
+def test_catalog_excludes_failing_and_unknown_stores():
+    assert not cal.is_catalog_enabled("388")
+    assert not cal.is_catalog_enabled("9999")
+    assert 388 not in cal.catalog_store_ids()
 
 
 def test_a_store_without_an_atlas_says_why_it_cannot_place_products():

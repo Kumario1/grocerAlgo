@@ -277,11 +277,6 @@ class HEBBusyError(HEBConnectionError):
         super().__init__("H-E-B is busy; retry shortly")
 
 
-SUPPORTED_STORES = (
-    6, 14, 16, 24, 25, 26, 28, 31, 38, 39,
-    178, 183, 189, 224, 265, 269, 333, 370, 373,
-    659, 790, 811,
-)
 SEARCH_TTL = 300
 PLACEMENT_TTL = 24 * 60 * 60
 CACHE_MISS = object()
@@ -447,9 +442,13 @@ class HEBClient:
         except (FileNotFoundError, KeyError):
             return None
 
+    def _catalog_ok(self, store):
+        from router.calibrate import is_catalog_enabled
+        return self.allow_unsupported or is_catalog_enabled(store)
+
     def _store(self, store=None):
         store = self.store_id if store is None else int(store)
-        if store not in SUPPORTED_STORES and not self.allow_unsupported:
+        if not self._catalog_ok(store):
             raise HEBConnectionError(f"store #{store} is not catalog-enabled")
         return store
 
@@ -460,8 +459,7 @@ class HEBClient:
 
     def status(self, store=None):
         store = self.store_id if store is None else int(store)
-        valid = (store in SUPPORTED_STORES or self.allow_unsupported
-                 ) and self._valid_state(store)
+        valid = self._catalog_ok(store) and self._valid_state(store)
         failed = store in self._failed
         pending = store in self._pending_verification
         return {
