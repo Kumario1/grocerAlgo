@@ -1,0 +1,7 @@
+{
+ "atlas_fit": {
+  "x": {"atlas": [6, 7], "guide": [5, 6]},
+  "y": {"atlas": [23, 24], "guide": [22, 23]}
+ },
+ "aisle_label_shift": {"from": 5, "add": -1}
+}
