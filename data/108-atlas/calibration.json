@@ -1,17 +1,21 @@
 {
  "notes": [
   "atlas aisles 53, guide aisles 56",
-  "aisle offsets x+10 y+12: 100% of sampled shelves land on a walkable cell and 33 anchors agree, against 100%/33 for x+10 y+13"
+  "pinned by data/<store>/store.json"
  ],
  "gates": {
   "residual": true,
-  "margin": false,
+  "margin": true,
   "scale_skew": true,
   "floor": {
    "psas": 3316,
    "on_floor_pct": 99.85,
    "pass": true,
    "off_floor": [
+    [
+     "15|13|A|8",
+     5.7
+    ],
     [
      "15|17|A|8",
      5.4
@@ -21,42 +25,36 @@
      5.4
     ],
     [
-     "15|13|A|8",
-     5.4
+     "37|94|A|8",
+     5.1
     ],
     [
      "15|86|A|6",
-     5.2
-    ],
-    [
-     "37|94|A|10",
      5.1
     ]
    ]
-  }
+  },
+  "labels": true
  },
  "x": {
-  "scale": 0.5354348467719773,
-  "offset": 437.9589227539654,
+  "scale": 0.5531309583660617,
+  "offset": 425.6242127496328,
   "inliers": [
    30,
    31,
    32,
    33,
    34,
-   35,
-   43,
-   44,
-   45,
-   46
+   35
   ],
-  "max_residual_pt": 2.086,
   "aisle_offset": 10,
-  "source_axis": 0
+  "source_axis": 0,
+  "pinned": true,
+  "max_residual_pt": 0.987
  },
  "y": {
-  "scale": 0.5336476469233626,
-  "offset": 194.73239488448735,
+  "scale": 0.5323100233899729,
+  "offset": 195.02194652585703,
   "inliers": [
    10,
    11,
@@ -79,14 +77,19 @@
    28,
    29,
    30,
-   31,
-   37
+   31
   ],
-  "max_residual_pt": 2.303,
   "aisle_offset": 12,
-  "source_axis": 1
+  "source_axis": 1,
+  "pinned": true,
+  "max_residual_pt": 2.128
  },
  "store": "108",
- "verdict": "fail",
- "verified": null
+ "verdict": "pass",
+ "verified": {
+  "checked": 11,
+  "agreed": 11,
+  "misses": [],
+  "pass": true
+ }
 }

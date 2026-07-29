@@ -1,0 +1,17 @@
+{
+  "atlas_fit": {
+    "x": {"atlas": [30, 35], "guide": [40, 45]},
+    "y": {"atlas": [10, 31], "guide": [22, 43]}
+  },
+  "aisle_label_shifts": [
+    {"from": 3, "to": 3, "add": 24},
+    {"from": 5, "to": 5, "add": 24},
+    {"from": 7, "to": 7, "add": 23},
+    {"from": 9, "to": 9, "add": 23},
+    {"from": 12, "to": 12, "add": 21},
+    {"from": 13, "to": 13, "add": 20},
+    {"from": 23, "to": 23, "add": 14},
+    {"from": 26, "to": 26, "add": 12},
+    {"from": 64, "to": 64, "add": -16}
+  ]
+}
