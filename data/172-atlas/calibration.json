@@ -42,8 +42,7 @@
      5.1
     ]
    ]
-  },
-  "labels": false
+  }
  },
  "x": {
   "scale": 1.1935065994361755,
@@ -76,72 +75,6 @@
   "max_residual_pt": null
  },
  "store": "172",
- "verdict": "fail",
- "verified": {
-  "checked": 10,
-  "agreed": 0,
-  "misses": [
-   {
-    "product": "H-E-B Round Top Large White Enriched Sliced\u00a0Bread, 20 oz",
-    "label": "Aisle 3",
-    "want": "AISLE 3",
-    "got": "AISLE 2"
-   },
-   {
-    "product": "H-E-B White Corn Tortillas - Texas-Size Pack, 80 ct",
-    "label": "Aisle 3",
-    "want": "AISLE 3",
-    "got": "AISLE 2"
-   },
-   {
-    "product": "Post Fruity Pebbles Cereal Bag, 32 oz",
-    "label": "Aisle 7",
-    "want": "AISLE 7",
-    "got": "AISLE 6"
-   },
-   {
-    "product": "Prego Traditional Pasta Sauce, 45 oz",
-    "label": "Aisle 4",
-    "want": "AISLE 4",
-    "got": "AISLE 3"
-   },
-   {
-    "product": "Folgers Classic Roast Medium Roast Ground Coffee America\u2019s 250th Anniversary Limited-Edition, 9.6 oz",
-    "label": "Aisle 10",
-    "want": "AISLE 10",
-    "got": "AISLE 8"
-   },
-   {
-    "product": "L'Or\u00e9al Paris Elvive Hyaluron + Plump 72hr Hydrating Shampoo, 26.5 oz",
-    "label": "Aisle 20",
-    "want": "AISLE 20",
-    "got": "AISLE 19"
-   },
-   {
-    "product": "Totino's Pepperoni Party Pizza Pack, 4 ct",
-    "label": "Aisle 14",
-    "want": "AISLE 14",
-    "got": "AISLE 25"
-   },
-   {
-    "product": "H-E-B Made in Texas Creamy Peanut Butter, 28 oz",
-    "label": "Aisle 3",
-    "want": "AISLE 3",
-    "got": "AISLE 2"
-   },
-   {
-    "product": "H-E-B Black Beans, 15 oz",
-    "label": "Aisle 5",
-    "want": "AISLE 5",
-    "got": "AISLE 4"
-   },
-   {
-    "product": "Dawn Ultra Original Scent Liquid Dish Soap, 67 oz",
-    "label": "Aisle 16",
-    "want": "AISLE 16",
-    "got": "AISLE 23"
-   }
-  ],
-  "pass": false
- }
+ "verdict": "pass",
+ "verified": null
 }
