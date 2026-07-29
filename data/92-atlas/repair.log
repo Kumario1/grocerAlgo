@@ -1,1 +1,1 @@
-./pipeline.sh: line 82: 59041 Alarm clock: 14         perl -e 'alarm shift; exec @ARGV' "$AGENT_TIMEOUT" sh -c "exec $AGENT"
+You've hit your weekly limit · resets Aug 1 at 11am (America/Chicago)
