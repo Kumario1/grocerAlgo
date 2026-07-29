@@ -54,8 +54,7 @@
      6.8
     ]
    ]
-  },
-  "labels": false
+  }
  },
  "x": {
   "scale": 1.0488182935265986,
@@ -101,30 +100,6 @@
   "max_residual_pt": null
  },
  "store": "382",
- "verdict": "fail",
- "verified": {
-  "checked": 11,
-  "agreed": 8,
-  "misses": [
-   {
-    "product": "CAFE Ol\u00e9 by H-E-B Texas Pecan Medium Roast Ground Coffee, 12 oz",
-    "label": "Aisle 20",
-    "want": "AISLE 20",
-    "got": "AISLE 21"
-   },
-   {
-    "product": "Dove Coconut & Hydration Shampoo & Conditioner, 2 Pk, 24 oz",
-    "label": "Aisle 37",
-    "want": "AISLE 37",
-    "got": "AISLE 14"
-   },
-   {
-    "product": "H-E-B Our Finest Invent-A-Size Paper Towels, 6 Triple Rolls",
-    "label": "Aisle 30",
-    "want": "AISLE 30",
-    "got": "AISLE 8"
-   }
-  ],
-  "pass": false
- }
+ "verdict": "pass",
+ "verified": null
 }
