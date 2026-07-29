@@ -1,8 +1,7 @@
 {
  "notes": [
   "atlas aisles 37, guide aisles 39",
-  "y: aisle labels did not constrain this axis, so its scale came from the other axis and its offset from the walkable floor",
-  "aisle offsets x+0 y=floor: 100% of sampled shelves land on a walkable cell and 20 anchors agree, against 100%/13 for x+1 y=floor"
+  "pinned by data/<store>/store.json"
  ],
  "gates": {
   "residual": true,
@@ -10,47 +9,56 @@
   "scale_skew": true,
   "floor": {
    "psas": 3043,
-   "on_floor_pct": 99.74,
+   "on_floor_pct": 99.51,
    "pass": true,
    "off_floor": [
     [
      "16|1|A|1",
-     15.9
-    ],
-    [
-     "16|1|A|2",
-     15.8
+     21.5
     ],
     [
      "16|1|A|4",
-     15.7
+     21.3
+    ],
+    [
+     "16|1|A|2",
+     20.9
     ],
     [
      "16|1|A|3",
-     15.4
+     20.5
     ],
     [
      "15|88|B|1",
-     7.3
+     12.8
     ],
     [
      "15|88|B|2",
-     6.4
+     12.3
     ],
     [
      "15|88|B|3",
-     5.7
+     11.4
     ],
     [
-     "05|88|A|4",
-     5.2
+     "27|94|A|1",
+     8.1
+    ],
+    [
+     "27|94|A|2",
+     8.1
+    ],
+    [
+     "27|94|A|4",
+     7.4
     ]
    ]
-  }
+  },
+  "labels": true
  },
  "x": {
-  "scale": 0.9760666308791058,
-  "offset": 240.84097798396084,
+  "scale": 0.9790469685859341,
+  "offset": 239.10430290197536,
   "inliers": [
    1,
    2,
@@ -67,26 +75,38 @@
    13,
    14,
    15,
-   16,
-   36,
-   37,
-   38,
-   39
+   16
   ],
-  "max_residual_pt": 2.49,
   "aisle_offset": 0,
-  "source_axis": 0
+  "source_axis": 0,
+  "pinned": true,
+  "max_residual_pt": 1.896
  },
  "y": {
-  "scale": 0.9760666308791058,
-  "offset": 46.0,
-  "inliers": [],
-  "aisle_offset": null,
+  "scale": 1.0026292922042832,
+  "offset": 77.62097051055305,
+  "inliers": [
+   24,
+   25
+  ],
+  "aisle_offset": 0,
   "source_axis": 1,
-  "derived": true,
-  "max_residual_pt": null
+  "pinned": true,
+  "max_residual_pt": 0.0
  },
  "store": "57",
  "verdict": "pass",
- "verified": null
+ "verified": {
+  "checked": 12,
+  "agreed": 11,
+  "misses": [
+   {
+    "product": "Totino's Pepperoni Party Pizza Pack, 4 ct",
+    "label": "Aisle 39",
+    "want": "AISLE 27",
+    "got": "AISLE 39"
+   }
+  ],
+  "pass": true
+ }
 }
