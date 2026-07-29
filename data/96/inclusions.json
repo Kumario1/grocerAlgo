@@ -1,0 +1,8 @@
+[
+  {"name": "Deli customer frontage immediately above the service counter",
+   "rect": [490, 600, 540, 637]},
+  {"name": "Kitchen Gadgets product-label frontage in the aisle corridor (not a service room)",
+   "rect": [640, 485, 720, 503]},
+  {"name": "False merged Pharmacy/Dairy anchor midpoint in the open top customer corridor",
+   "rect": [470, 78, 520, 100]}
+]

@@ -1,0 +1,84 @@
+39 anchors, 142 rect fixtures + 63 poly fixtures, 1452 wall segments, boundary 28 vertices -> data/96/geometry.json
+overlay -> data/96/extract_overlay.png
+service pockets culled: 11 (largest 5598 cells)
+40 anchors, grid 633x417, m/cell=0.184 -> data/96/profile.npz
+walkable: 25.9% of page (25.9% entrance-reachable)
+components: 1  sizes: [np.int64(68314)]
+anchors: 40  |  exclusions: 2
+service pockets sealed (service + dead crevices): 11
+   5598 cells at (941,476) near BAKERY
+   1650 cells at (311,102) near PHARMACY DAIRY
+   1296 cells at (231,363) near CHECKSTANDS
+   1251 cells at (465,690) near DELI
+    754 cells at (927,369) near BAKERY
+    534 cells at (320,402) near CHECKSTANDS
+    529 cells at (319,466) near CHECKSTANDS
+    372 cells at (616,720) near FLORAL
+    338 cells at (466,696) near DELI
+    296 cells at (664,653) near FLORAL
+snaps moved >12 cells (check reachable.png):
+  SEAFOOD: 25 cells (~4.6 m)
+  BAKERY: 21 cells (~3.9 m)
+tightest corridors at anchors (half-width capacity):
+  BAKERY: 0.74 m
+  KITCHEN: 0.74 m
+  EXIT: 0.92 m
+  PHARMACY DAIRY: 0.92 m
+  SEAFOOD: 0.92 m
+  SOUP CANNED CHILI/MEAT/FISH: 0.92 m
+  ENTRANCE: 0.99 m
+  FROZEN FOODS: 0.99 m
+........................................................................ [  2%]
+........................................................................ [  5%]
+........................................................................ [  8%]
+.............................................s.......................... [ 11%]
+........................................................................ [ 14%]
+........................................................................ [ 17%]
+........................................................................ [ 20%]
+........................................................................ [ 23%]
+........................................................................ [ 26%]
+........................................................................ [ 29%]
+........................................................................ [ 31%]
+........................................................................ [ 34%]
+........................................................................ [ 37%]
+........................................................................ [ 40%]
+........................................................................ [ 43%]
+........................................................................ [ 46%]
+........................................................................ [ 49%]
+........................................................................ [ 52%]
+........................................................................ [ 55%]
+........................................................................ [ 58%]
+........................................................................ [ 60%]
+........................................................................ [ 63%]
+........................................................................ [ 66%]
+........................................................................ [ 69%]
+........................................................................ [ 72%]
+........................................................................ [ 75%]
+........................................................................ [ 78%]
+........................................................................ [ 81%]
+........................................................................ [ 84%]
+........................................................................ [ 87%]
+........................................................................ [ 89%]
+........................................................................ [ 92%]
+........................................................................ [ 95%]
+........................................................................ [ 98%]
+.................................                                        [100%]
+=============================== warnings summary ===============================
+../../.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /Users/princekumar/Documents/grocerAlgo/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+<frozen importlib._bootstrap>:488
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type swigvarlink has no __module__ attribute
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+2480 passed, 1 skipped, 6 warnings in 46.74s
+sys:1: DeprecationWarning: builtin type swigvarlink has no __module__ attribute

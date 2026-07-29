@@ -1,0 +1,10 @@
+[
+  {"name": "Deli service island (staff behind counter)",
+   "pt": [513.5, 628.0], "r": 130, "bridge": 12},
+  {"name": "Bakery service island (staff behind counter)",
+   "pt": [917.4, 439.8], "r": 130, "bridge": 12},
+  {"name": "Seafood counter (staff behind the customer-facing counter)",
+   "pt": [914.9, 257.1], "r": 130, "bridge": 20},
+  {"name": "Checkstand lane bank — seal checkout lanes while leaving the front action alley open",
+   "rect": [238.5, 377.2, 560.4, 493.1], "bridge": 20}
+]

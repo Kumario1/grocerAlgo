@@ -1,0 +1,159 @@
+{
+ "components": {
+  "n": 1,
+  "sizes": [
+   68314
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 5598,
+   "near": "BAKERY",
+   "x": 941.1,
+   "y": 476.2
+  },
+  {
+   "cells": 1650,
+   "near": "PHARMACY DAIRY",
+   "x": 310.7,
+   "y": 101.5
+  },
+  {
+   "cells": 1296,
+   "near": "CHECKSTANDS",
+   "x": 230.8,
+   "y": 363.1
+  },
+  {
+   "cells": 1251,
+   "near": "DELI",
+   "x": 465.4,
+   "y": 690.4
+  },
+  {
+   "cells": 754,
+   "near": "BAKERY",
+   "x": 927.1,
+   "y": 368.6
+  },
+  {
+   "cells": 534,
+   "near": "CHECKSTANDS",
+   "x": 320.3,
+   "y": 401.5
+  },
+  {
+   "cells": 529,
+   "near": "CHECKSTANDS",
+   "x": 319.5,
+   "y": 465.7
+  },
+  {
+   "cells": 372,
+   "near": "FLORAL",
+   "x": 616.5,
+   "y": 719.8
+  },
+  {
+   "cells": 338,
+   "near": "DELI",
+   "x": 465.6,
+   "y": 695.9
+  },
+  {
+   "cells": 296,
+   "near": "FLORAL",
+   "x": 664.3,
+   "y": 652.7
+  },
+  {
+   "cells": 265,
+   "near": "RESTROOMS",
+   "x": 227.9,
+   "y": 608.6
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 25.1,
+   "meters": 4.62,
+   "name": "SEAFOOD"
+  },
+  {
+   "cells": 21.2,
+   "meters": 3.9,
+   "name": "BAKERY"
+  }
+ ],
+ "m_per_cell": 0.1844,
+ "narrow": [
+  {
+   "half_width_m": 0.74,
+   "name": "BAKERY"
+  },
+  {
+   "half_width_m": 0.74,
+   "name": "KITCHEN"
+  },
+  {
+   "half_width_m": 0.92,
+   "name": "EXIT"
+  },
+  {
+   "half_width_m": 0.92,
+   "name": "PHARMACY DAIRY"
+  },
+  {
+   "half_width_m": 0.92,
+   "name": "SEAFOOD"
+  },
+  {
+   "half_width_m": 0.92,
+   "name": "SOUP CANNED CHILI/MEAT/FISH"
+  },
+  {
+   "half_width_m": 0.99,
+   "name": "ENTRANCE"
+  },
+  {
+   "half_width_m": 0.99,
+   "name": "FROZEN FOODS"
+  }
+ ],
+ "provenance": {
+  "decorations": "absent",
+  "drift": {
+   "seal_zones": {
+    "derived_n": 6,
+    "derived_names": [
+     "auto:BAKERY",
+     "auto:DELI",
+     "auto:FLORAL",
+     "auto:KITCHEN",
+     "auto:SEAFOOD",
+     "auto:CHECKSTANDS"
+    ],
+    "file_n": 4,
+    "file_names": [
+     "Deli service island (staff behind counter)",
+     "Bakery service island (staff behind counter)",
+     "Seafood counter (staff behind the customer-facing counter)",
+     "Checkstand lane bank \u2014 seal checkout lanes while leaving the front action alley open"
+    ]
+   }
+  },
+  "exclusions": "file",
+  "inclusions": "file",
+  "openings": "file",
+  "seal_zones": "file",
+  "zones": "derived"
+ },
+ "reachable_pct": 25.9,
+ "store": "96",
+ "verify": [],
+ "walkable_pct": 25.9
+}

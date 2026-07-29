@@ -1,0 +1,10 @@
+39 anchors, 142 rect fixtures + 63 poly fixtures, 1452 wall segments, boundary 12 vertices -> data/96/geometry.json
+overlay -> data/96/extract_overlay.png
+service pockets culled: 9 (largest 76482 cells)
+Traceback (most recent call last):
+  File "/Users/princekumar/Documents/grocerAlgo/.wt/96/build_profile.py", line 31, in <module>
+    cells = np.array([engine.snap(free, reach, anchors[n]) for n in names])
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/princekumar/Documents/grocerAlgo/.wt/96/router/engine.py", line 227, in snap
+    raise ValueError(f"no walkable cell near {xy_pt}")
+ValueError: no walkable cell near [794.0103759765625, 559.637939453125]
