@@ -69,6 +69,14 @@ data/*
 !data/95/**
 !data/95-atlas/
 !data/95-atlas/**
+!data/96/
+!data/96/**
+!data/96-atlas/
+!data/96-atlas/**
+!data/99/
+!data/99/**
+!data/99-atlas/
+!data/99-atlas/**
 !data/172/
 !data/172/**
 !data/172-atlas/
