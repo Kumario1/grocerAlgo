@@ -65,6 +65,10 @@ data/*
 !data/92/**
 !data/92-atlas/
 !data/92-atlas/**
+!data/95/
+!data/95/**
+!data/95-atlas/
+!data/95-atlas/**
 !data/172/
 !data/172/**
 !data/172-atlas/
