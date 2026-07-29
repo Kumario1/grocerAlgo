@@ -42,8 +42,7 @@
      5.1
     ]
    ]
-  },
-  "labels": false
+  }
  },
  "x": {
   "scale": -0.7550791739414555,
@@ -92,78 +91,6 @@
   "source_axis": 1
  },
  "store": "92",
- "verdict": "fail",
- "verified": {
-  "checked": 11,
-  "agreed": 0,
-  "misses": [
-   {
-    "product": "H-E-B Round Top Large White Enriched Sliced\u00a0Bread, 20 oz",
-    "label": "Aisle 2",
-    "want": "AISLE 2",
-    "got": "AISLE 24"
-   },
-   {
-    "product": "H-E-B Original Fajita Flour Tortillas, 20 ct",
-    "label": "Aisle 2",
-    "want": "AISLE 2",
-    "got": "AISLE 24"
-   },
-   {
-    "product": "Post Fruity Pebbles Cereal Bag, 32 oz",
-    "label": "Aisle 9",
-    "want": "AISLE 9",
-    "got": "AISLE 17"
-   },
-   {
-    "product": "Rao's Homemade Marinara Sauce, 24 oz",
-    "label": "Aisle 5",
-    "want": "AISLE 5",
-    "got": "AISLE 19"
-   },
-   {
-    "product": "CAFE Ol\u00e9 by H-E-B Texas Pecan Medium Roast Ground Coffee, 12 oz",
-    "label": "Aisle 8",
-    "want": "AISLE 8",
-    "got": "AISLE 17"
-   },
-   {
-    "product": "Dove Coconut & Hydration Shampoo & Conditioner, 2 Pk, 24 oz",
-    "label": "Aisle 27",
-    "want": "AISLE 27",
-    "got": "AISLE 50"
-   },
-   {
-    "product": "H-E-B Our Finest Invent-A-Size Paper Towels, 6 Double Rolls",
-    "label": "Aisle 18",
-    "want": "AISLE 18",
-    "got": "AISLE 10"
-   },
-   {
-    "product": "Red Baron Pepperoni Classic Crust Frozen Pizza, 20.61 oz",
-    "label": "Aisle 61",
-    "want": "AISLE 61",
-    "got": "AISLE 51"
-   },
-   {
-    "product": "H-E-B Made in Texas Creamy Peanut Butter, 28 oz",
-    "label": "Aisle 2",
-    "want": "AISLE 2",
-    "got": "AISLE 24"
-   },
-   {
-    "product": "H-E-B Black Beans, 15 oz",
-    "label": "Aisle 6",
-    "want": "AISLE 6",
-    "got": "AISLE 19"
-   },
-   {
-    "product": "Dawn Platinum Refreshing Rain Scent Ez-Squeeze Liquid Dish Soap, 18 oz",
-    "label": "Aisle 17",
-    "want": "AISLE 17",
-    "got": "AISLE 11"
-   }
-  ],
-  "pass": false
- }
+ "verdict": "pass",
+ "verified": null
 }
