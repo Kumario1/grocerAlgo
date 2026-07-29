@@ -1,0 +1,42 @@
+{
+ "must": [
+  [835, 400, "front action alley between the centre-aisle gondola ends (x=799) and the checkstand bank (x=855)"],
+  [945, 420, "front corridor east of the checkstand bank (x=920) and west of the east service block (x=954)"],
+  [985, 570, "approach inside the south Entrance"],
+  [985, 210, "front floor inside the north Entrance, NE corner of the sales floor"],
+  [700, 110, "Bakery counter customer frontage, south face of the counter (counter front edge y=100.4)"],
+  [860, 170, "Deli customer frontage, floor south of the wall-hugging deli cases (cases end y=154.4)"],
+  [845, 264, "alley in front of the Floral case at the head of the checkstand bank (case west edge x=870.8)"],
+  [880, 680, "Pharmacy customer corridor, floor west of the pharmacy room wall (wall x=893)"],
+  [952, 332, "Tobacco kiosk frontage, corridor west of the kiosk face (kiosk x=958-968)"],
+  [420, 90, "open Produce floor north of the produce tables (tables start y=121)"],
+  [240, 450, "Market west perimeter aisle between the wall-side cases (x<=227) and the Market island (x=260)"],
+  [505, 450, "mid-store north-south corridor between the west aisle block (ends x=495) and the centre block (starts x=529)"],
+  [576, 186, "aisle 13 corridor at the Tortillas/Bread shelf labels"],
+  [657, 395, "aisle 9 corridor at the Appliances/Kitchen Gadgets shelf labels"],
+  [552, 524, "aisle 6 corridor at the Diapers/Baby Wipes shelf labels"],
+  [550, 657, "aisle 3 corridor at the Hosiery/Deodorant shelf labels"],
+  [700, 735, "aisle 1 corridor at the Water/Napkins/Paper Towels shelf labels"],
+  [382, 448, "aisle 19 corridor at the Popcorn/Rice Cakes shelf labels"],
+  [303, 676, "aisle 24 badge corridor, west aisle block"]
+ ],
+ "must_not": [
+  [20, 20, "page corner NW, off the drawing entirely"],
+  [150, 150, "parking lot NW, outside the sales-floor boundary"],
+  [1150, 700, "parking lot SE, outside the sales-floor boundary"],
+  [600, 800, "outside the south exterior wall (boundary y=760.7)"],
+  [700, 72, "behind the Bakery counter — staff band between the north wall (y=59.8) and the counter back (y=87.1)"],
+  [930, 690, "Pharmacy room interior — walled room with a single door at its NW corner, no product labels inside"],
+  [1000, 330, "enclosed back room behind the Tobacco kiosk, east service block"],
+  [996, 404, "enclosed service room between the Tobacco back room and the east Restrooms block, no customer access"],
+  [1000, 258, "enclosed room at the NE corner of the east service block (walled, door off the front corridor)"],
+  [1015, 470, "east restroom interior, behind its door swing"],
+  [977, 456, "east restroom's west room interior, behind the drawn partition and door swing"],
+  [1007, 491, "east restroom's lower-right room interior, behind the drawn partition"],
+  [987, 516, "east restroom's lower room interior, behind the drawn partition"],
+  [866, 414, "checkout lane interior between two checkstands (fixture rows end y=408.2 and start y=423.0)"],
+  [881, 384, "upper checkout lane interior between the checkstand fixtures"],
+  [869, 353, "top checkout lane interior between the checkstand fixtures"],
+  [270, 150, "dead sliver behind the NW diagonal-wall shelving, no shopper access"]
+ ]
+}

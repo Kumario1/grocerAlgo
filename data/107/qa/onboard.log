@@ -1,0 +1,33 @@
+Store 107 is converged. Stopping here for the separate audit role, as the runbook requires.
+
+## Result
+
+`./rebuild.sh 107` → exit 0, 752 tests pass (includes 659's pixel-frozen golden gate).
+
+```
+verify      []
+coverage    {sealed_floor_patches: [], unreachable_shelf_labels: []}
+components  1  (77891 cells)
+walkable    29.5%  (29.5% entrance-reachable)
+```
+
+## What the first pass flagged and how I resolved it
+
+Three VERIFY flags, each judged off the PDF drawing (page 2 of `guide-ennis-107.pdf`):
+
+**`exclusions.json` — 1 entry (Bakery back band).** The `Bakery` label at (704, 74) sits in a dead-end strip between the north exterior wall (y=59.8) and the back edge of the bakery counter, whose outline I traced from the PDF strokes: (624.2,59.8)→(657.6,87.1)→(756.6,87.1). ~1.8 m deep, ~10 m long, reachable only through a 1.2 m slot at the NE corner, and `get_text` inside that band returns exactly one word — "Bakery". No product label loses frontage; the counter's customer side (y>100.4) stays fully green. Same pattern as 659's "top wall service band".
+
+**`inclusions.json` — 2 entries.**
+- Deli: the label at (827, 165) is a department name printed on open sales floor southwest of the two wall-hugging deli cases (y 139–154). Nothing is enclosed there.
+- `APPLIANCES KITCHEN GADGETS` at (657, 395): this is a *shelf* label row, not a Kitchen service counter — it fired only because `KITCHEN` is a SERVICE_DEPTS substring. Rect covers the aisle-9 corridor between the frozen case (bottom y=390.1) and the cereal gondola (top y=414.8).
+
+`zones.json` / `seal_zones.json`: not authored. Derivation was correct — ENTRANCE/CHECKSTANDS labels both present; the checkstand rect seals all nine lanes without eating the front alley, and the pharmacy/floral/deli/bakery disks behave.
+
+**`walk_truth.json`** — 19 `must` / 11 `must_not`, above the ~12–18 guideline deliberately so every wing has frontage coverage. Each coordinate was probed against `profile.npz` and each name cites the drawn feature it lies inside (e.g. checkout-lane point (866,414) falls in the gap between fixture rows ending y=408.2 and starting y=423.0). `must_not` covers the bakery staff band, the pharmacy room, three enclosed east-block rooms, the east restroom, a lane interior, the NW wall sliver, two parking points and a page corner.
+
+## Notes for the auditor
+
+- **`far_snaps` is non-empty**: BAKERY snaps 1.99 m (threshold 1.66 m). Expected — the label is now inside the excluded staff band, so the anchor lands at (675, 103), the counter's customer frontage. That's where a shopper should be routed.
+- **Pharmacy is sealed (2689-cell pocket, purple).** I classified it as legitimate: it's a walled room with a single door at its NW corner, and word extraction inside it returns only "Pharmacy" — zero product labels, unlike the store-24 failure. Customer approach is the green corridor west of the wall (x<893).
+- **`narrow: ENTRANCE 0.41 m`** is an artifact of the arrow-in-circle glyph being rasterized as an obstacle next to the east wall; the entrance approach itself is wide and green.
+- All 20 product labels I spot-probed across every wing sit directly on walkable floor (≤0.08 m).

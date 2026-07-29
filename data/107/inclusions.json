@@ -1,0 +1,6 @@
+[
+ {"name": "Deli frontage — the 'Deli' label is a department name printed on open sales floor SW of the two wall-hugging deli cases (rects y=139-154); nothing is enclosed here, shoppers walk the whole corner between Produce tables and Floral (customer)",
+  "rect": [795, 156, 950, 205]},
+ {"name": "Aisle 9 corridor between the lower Frozen Foods case (bottom y=390.1) and the Cereal gondola (top y=414.8) — 'Appliances'/'Kitchen Gadgets' are printed SHELF labels, not a Kitchen service counter (customer aisle)",
+  "rect": [535, 391, 800, 414]}
+]

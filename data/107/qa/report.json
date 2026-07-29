@@ -1,0 +1,153 @@
+{
+ "components": {
+  "n": 1,
+  "sizes": [
+   77891
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 2689,
+   "near": "PHARMACY",
+   "x": 928.9,
+   "y": 677.9
+  },
+  {
+   "cells": 964,
+   "near": "CHECKSTANDS",
+   "x": 874.5,
+   "y": 444.0
+  },
+  {
+   "cells": 838,
+   "near": "RESTROOMS",
+   "x": 995.5,
+   "y": 404.5
+  },
+  {
+   "cells": 514,
+   "near": "AISLE 14",
+   "x": 283.7,
+   "y": 144.7
+  },
+  {
+   "cells": 377,
+   "near": "BAKERY",
+   "x": 692.1,
+   "y": 91.4
+  },
+  {
+   "cells": 286,
+   "near": "CHECKSTANDS",
+   "x": 880.7,
+   "y": 384.5
+  },
+  {
+   "cells": 270,
+   "near": "ENTRANCE",
+   "x": 992.0,
+   "y": 611.0
+  },
+  {
+   "cells": 224,
+   "near": "FLORAL",
+   "x": 884.9,
+   "y": 326.2
+  },
+  {
+   "cells": 212,
+   "near": "FLORAL",
+   "x": 886.4,
+   "y": 296.5
+  },
+  {
+   "cells": 157,
+   "near": "RESTROOMS",
+   "x": 1007.4,
+   "y": 456.1
+  },
+  {
+   "cells": 154,
+   "near": "RESTROOMS",
+   "x": 987.0,
+   "y": 516.0
+  },
+  {
+   "cells": 152,
+   "near": "RESTROOMS",
+   "x": 976.7,
+   "y": 455.7
+  },
+  {
+   "cells": 145,
+   "near": "RESTROOMS",
+   "x": 1007.3,
+   "y": 491.4
+  },
+  {
+   "cells": 103,
+   "near": "CHECKSTANDS",
+   "x": 869.3,
+   "y": 353.3
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 14.4,
+   "meters": 1.99,
+   "name": "BAKERY"
+  }
+ ],
+ "m_per_cell": 0.1382,
+ "narrow": [
+  {
+   "half_width_m": 0.41,
+   "name": "ENTRANCE"
+  },
+  {
+   "half_width_m": 0.5,
+   "name": "RESTROOMS"
+  },
+  {
+   "half_width_m": 0.69,
+   "name": "BAKERY"
+  },
+  {
+   "half_width_m": 0.69,
+   "name": "PHARMACY"
+  },
+  {
+   "half_width_m": 0.83,
+   "name": "APPLIANCES KITCHEN GADGETS"
+  },
+  {
+   "half_width_m": 0.84,
+   "name": "FROZEN FOODS"
+  },
+  {
+   "half_width_m": 0.97,
+   "name": "MEAT"
+  },
+  {
+   "half_width_m": 1.19,
+   "name": "AISLE 12"
+  }
+ ],
+ "provenance": {
+  "decorations": "absent",
+  "drift": null,
+  "exclusions": "file",
+  "inclusions": "file",
+  "openings": "absent",
+  "seal_zones": "derived",
+  "zones": "derived"
+ },
+ "reachable_pct": 29.5,
+ "store": "107",
+ "verify": [],
+ "walkable_pct": 29.5
+}
