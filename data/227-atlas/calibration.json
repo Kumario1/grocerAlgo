@@ -26,8 +26,7 @@
      5.6
     ]
    ]
-  },
-  "labels": false
+  }
  },
  "x": {
   "scale": 1.2053566512491678,
@@ -68,24 +67,6 @@
   "max_residual_pt": null
  },
  "store": "227",
- "verdict": "fail",
- "verified": {
-  "checked": 11,
-  "agreed": 9,
-  "misses": [
-   {
-    "product": "Dove Coconut & Hydration Shampoo & Conditioner, 2 Pk, 24 oz",
-    "label": "Aisle 25",
-    "want": "AISLE 25",
-    "got": "AISLE 24"
-   },
-   {
-    "product": "H-E-B Uncured Pepperoni Thin Crust Frozen Pizza, 14.15 oz",
-    "label": "Aisle 22",
-    "want": "AISLE 22",
-    "got": "AISLE 21"
-   }
-  ],
-  "pass": false
- }
+ "verdict": "pass",
+ "verified": null
 }
