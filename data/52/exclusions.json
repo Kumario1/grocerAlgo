@@ -1,0 +1,11 @@
+[
+  {"name": "Pharmacy staff/dispensing room west of the stepped angled counter wall; customer frontage is east of the wall",
+   "poly": [[111, 380], [144, 380], [169, 402], [169, 422],
+            [143, 441], [143, 462], [111, 462]]},
+  {"name": "Seafood back-of-house room behind the drawn counter band",
+   "rect": [886, 164, 1072, 206]},
+  {"name": "Deli staff enclosure east of the drawn vertical and angled counter wall; shoppers stand on the west/customer side",
+   "poly": [[1072, 238], [1150, 238], [1150, 343], [1159, 348],
+            [1059, 349], [1032, 327], [1032, 320], [1058, 302],
+            [1064, 296], [1072, 295]]}
+]

@@ -1,0 +1,184 @@
+{
+ "components": {
+  "n": 3,
+  "sizes": [
+   38746,
+   559,
+   261
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 1495,
+   "near": "EXIT",
+   "x": 720.4,
+   "y": 427.9
+  },
+  {
+   "cells": 759,
+   "near": "AISLE 14",
+   "x": 422.0,
+   "y": 188.0
+  },
+  {
+   "cells": 562,
+   "near": "CHECKSTANDS",
+   "x": 543.6,
+   "y": 426.9
+  },
+  {
+   "cells": 508,
+   "near": "PRODUCE",
+   "x": 1109.8,
+   "y": 436.0
+  },
+  {
+   "cells": 434,
+   "near": "AISLE 1",
+   "x": 840.5,
+   "y": 186.1
+  },
+  {
+   "cells": 410,
+   "near": "AISLE 20",
+   "x": 143.4,
+   "y": 185.4
+  },
+  {
+   "cells": 275,
+   "near": "DAIRY",
+   "x": 198.0,
+   "y": 188.0
+  },
+  {
+   "cells": 204,
+   "near": "EXIT",
+   "x": 652.0,
+   "y": 473.0
+  },
+  {
+   "cells": 181,
+   "near": "AISLE 20",
+   "x": 146.8,
+   "y": 212.5
+  },
+  {
+   "cells": 120,
+   "near": "RESTROOMS",
+   "x": 825.4,
+   "y": 475.1
+  },
+  {
+   "cells": 117,
+   "near": "DELI",
+   "x": 1075.2,
+   "y": 213.3
+  },
+  {
+   "cells": 115,
+   "near": "RESTROOMS",
+   "x": 769.6,
+   "y": 473.8
+  },
+  {
+   "cells": 105,
+   "near": "AISLE 21",
+   "x": 114.0,
+   "y": 296.0
+  },
+  {
+   "cells": 101,
+   "near": "SEAFOOD",
+   "x": 923.7,
+   "y": 234.9
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 25.3,
+   "meters": 6.06,
+   "name": "DELI"
+  }
+ ],
+ "m_per_cell": 0.2394,
+ "narrow": [
+  {
+   "half_width_m": 0.54,
+   "name": "EXIT"
+  },
+  {
+   "half_width_m": 0.72,
+   "name": "FLORAL"
+  },
+  {
+   "half_width_m": 0.76,
+   "name": "BAKERY"
+  },
+  {
+   "half_width_m": 0.96,
+   "name": "FROZEN FOOD"
+  },
+  {
+   "half_width_m": 0.96,
+   "name": "KITCHEN"
+  },
+  {
+   "half_width_m": 0.96,
+   "name": "MEAT"
+  },
+  {
+   "half_width_m": 0.96,
+   "name": "RESTROOMS"
+  },
+  {
+   "half_width_m": 1.02,
+   "name": "AISLE 13"
+  }
+ ],
+ "provenance": {
+  "decorations": "absent",
+  "drift": {
+   "seal_zones": {
+    "derived_n": 7,
+    "derived_names": [
+     "auto:BAKERY",
+     "auto:DELI",
+     "auto:FLORAL",
+     "auto:KITCHEN",
+     "auto:PHARMACY",
+     "auto:SEAFOOD",
+     "auto:CHECKSTANDS"
+    ],
+    "file_n": 1,
+    "file_names": [
+     "Checkstand lane bank \u2014 tight to the printed register bodies; bridge the lane gaps while keeping the north and south action alleys open"
+    ]
+   },
+   "zones": {
+    "ENTRANCE": {
+     "derived": [
+      288.57151794433594,
+      493.5736846923828
+     ],
+     "file": [
+      288.0,
+      455.0
+     ]
+    }
+   }
+  },
+  "exclusions": "file",
+  "inclusions": "file",
+  "openings": "absent",
+  "seal_zones": "file",
+  "zones": "file"
+ },
+ "reachable_pct": 16.0,
+ "store": "52",
+ "verify": [],
+ "walkable_pct": 16.3
+}
