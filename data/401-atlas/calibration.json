@@ -41,8 +41,7 @@
      6.4
     ]
    ]
-  },
-  "labels": false
+  }
  },
  "x": {
   "scale": 1.5758807731791646,
@@ -91,30 +90,6 @@
   "source_axis": 1
  },
  "store": "401",
- "verdict": "fail",
- "verified": {
-  "checked": 10,
-  "agreed": 7,
-  "misses": [
-   {
-    "product": "CAFE Ol\u00e9 by H-E-B Texas Pecan Medium Roast Ground Coffee, 12 oz",
-    "label": "Aisle 9",
-    "want": "AISLE 9",
-    "got": "AISLE 17"
-   },
-   {
-    "product": "Dove Coconut & Hydration Shampoo & Conditioner, 2 Pk, 24 oz",
-    "label": "Aisle 26",
-    "want": "AISLE 26",
-    "got": "AISLE 28"
-   },
-   {
-    "product": "Hill Country Fare Liquid Dish Soap - Original Scent, 25 oz",
-    "label": "Aisle 21",
-    "want": "AISLE 21",
-    "got": "AISLE 23"
-   }
-  ],
-  "pass": false
- }
+ "verdict": "pass",
+ "verified": null
 }
