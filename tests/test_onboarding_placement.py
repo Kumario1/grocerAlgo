@@ -46,6 +46,7 @@ def test_pipeline_requires_live_verification_after_offline_pass(tmp_path):
     shutil.copy("pipeline.sh", tmp_path)
     fake = tmp_path / "python"
     fake.write_text("""#!/bin/sh
+echo "${GROCER_ADMIN_TOKEN-unset}|${GROCER_PROD_URL-unset}" >> environment
 case $1 in
   capture_atlas.py) exit 0 ;;
   calibrate.py)
@@ -59,10 +60,19 @@ esac
     result = subprocess.run(
         ["./pipeline.sh", "6", "--from", "6"],
         cwd=tmp_path,
-        env=os.environ | {"PIPE_PYTHON": str(fake)},
+        env=os.environ | {
+            "PIPE_PYTHON": str(fake),
+            "GROCER_ADMIN_TOKEN": "must-not-leak",
+            "GROCER_PROD_URL": "https://prod.example",
+        },
     )
 
     assert result.returncode == 1
+    assert (tmp_path / "environment").read_text().splitlines() == [
+        "unset|unset",
+        "unset|unset",
+        "unset|unset",
+    ]
     assert (tmp_path / "calls").read_text().splitlines() == [
         "calibrate.py 6",
         "calibrate.py 6 --verify",

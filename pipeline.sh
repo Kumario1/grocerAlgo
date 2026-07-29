@@ -40,6 +40,9 @@
 # runbooks only edit this checkout. Each stage stays single-agent and resumes
 # the same session after transient capacity errors.
 set -e
+# Deployment credentials belong to the parent fleet driver, never map agents
+# or their test suite.
+unset GROCER_ADMIN_TOKEN GROCER_PROD_URL
 S=$1
 [ -n "$S" ] || { echo "usage: ./pipeline.sh <store> [city|--no-agents] [--from n]"; exit 2; }
 shift
