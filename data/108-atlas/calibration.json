@@ -1,0 +1,92 @@
+{
+ "notes": [
+  "atlas aisles 53, guide aisles 56",
+  "aisle offsets x+10 y+12: 100% of sampled shelves land on a walkable cell and 33 anchors agree, against 100%/33 for x+10 y+13"
+ ],
+ "gates": {
+  "residual": true,
+  "margin": false,
+  "scale_skew": true,
+  "floor": {
+   "psas": 3316,
+   "on_floor_pct": 99.85,
+   "pass": true,
+   "off_floor": [
+    [
+     "15|17|A|8",
+     5.4
+    ],
+    [
+     "37|94|A|9",
+     5.4
+    ],
+    [
+     "15|13|A|8",
+     5.4
+    ],
+    [
+     "15|86|A|6",
+     5.2
+    ],
+    [
+     "37|94|A|10",
+     5.1
+    ]
+   ]
+  }
+ },
+ "x": {
+  "scale": 0.5354348467719773,
+  "offset": 437.9589227539654,
+  "inliers": [
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   43,
+   44,
+   45,
+   46
+  ],
+  "max_residual_pt": 2.086,
+  "aisle_offset": 10,
+  "source_axis": 0
+ },
+ "y": {
+  "scale": 0.5336476469233626,
+  "offset": 194.73239488448735,
+  "inliers": [
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19,
+   20,
+   21,
+   22,
+   23,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   37
+  ],
+  "max_residual_pt": 2.303,
+  "aisle_offset": 12,
+  "source_axis": 1
+ },
+ "store": "108",
+ "verdict": "fail",
+ "verified": null
+}
