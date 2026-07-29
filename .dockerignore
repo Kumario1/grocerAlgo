@@ -49,6 +49,10 @@ data/*
 !data/39/**
 !data/39-atlas/
 !data/39-atlas/**
+!data/52/
+!data/52/**
+!data/52-atlas/
+!data/52-atlas/**
 !data/57/
 !data/57/**
 !data/57-atlas/
