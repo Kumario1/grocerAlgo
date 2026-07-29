@@ -1,0 +1,95 @@
+{
+ "notes": [
+  "atlas aisles 47, guide aisles 30",
+  "y: aisle labels did not constrain this axis, so its scale came from the other axis and its offset from the walkable floor",
+  "aisle offsets x+1 y=floor: 87% of sampled shelves land on a walkable cell and 15 anchors agree, against 83%/16 for x-4 y=floor"
+ ],
+ "gates": {
+  "residual": true,
+  "margin": true,
+  "scale_skew": true,
+  "floor": {
+   "psas": 2851,
+   "on_floor_pct": 86.92,
+   "pass": false,
+   "off_floor": [
+    [
+     "16|94|A|2",
+     null
+    ],
+    [
+     "16|94|A|4",
+     null
+    ],
+    [
+     "16|94|A|6",
+     null
+    ],
+    [
+     "16|94|A|5",
+     null
+    ],
+    [
+     "16|94|A|3",
+     null
+    ],
+    [
+     "3000|3000|A|3000",
+     null
+    ],
+    [
+     "16|94|A|1",
+     null
+    ],
+    [
+     "27|94|A|1",
+     null
+    ],
+    [
+     "27|94|A|2",
+     null
+    ],
+    [
+     "27|94|A|3",
+     null
+    ]
+   ]
+  }
+ },
+ "x": {
+  "scale": 1.250000228147746,
+  "offset": -191.65950331689288,
+  "inliers": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   15,
+   25
+  ],
+  "max_residual_pt": 1.663,
+  "aisle_offset": 1,
+  "source_axis": 0
+ },
+ "y": {
+  "scale": 1.250000228147746,
+  "offset": -15.0,
+  "inliers": [],
+  "aisle_offset": null,
+  "source_axis": 1,
+  "derived": true,
+  "max_residual_pt": null
+ },
+ "store": "94",
+ "verdict": "fail",
+ "verified": null
+}
