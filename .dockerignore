@@ -113,6 +113,14 @@ data/*
 !data/373/**
 !data/373-atlas/
 !data/373-atlas/**
+!data/382/
+!data/382/**
+!data/382-atlas/
+!data/382-atlas/**
+!data/401/
+!data/401/**
+!data/401-atlas/
+!data/401-atlas/**
 !data/659/
 !data/659/**
 !data/659-atlas/
