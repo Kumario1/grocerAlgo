@@ -46,8 +46,7 @@
      5.2
     ]
    ]
-  },
-  "labels": false
+  }
  },
  "x": {
   "scale": 0.9760666308791058,
@@ -88,36 +87,6 @@
   "max_residual_pt": null
  },
  "store": "57",
- "verdict": "fail",
- "verified": {
-  "checked": 12,
-  "agreed": 8,
-  "misses": [
-   {
-    "product": "H-E-B Reduced Fat 2% Milk, 1 gal",
-    "label": "Aisle 37",
-    "want": "AISLE 37",
-    "got": "AISLE 24"
-   },
-   {
-    "product": "H-E-B Mi Tienda Ready to Cook Flour Tortillas, 36 ct",
-    "label": "Aisle 38",
-    "want": "AISLE 38",
-    "got": "AISLE 24"
-   },
-   {
-    "product": "Dove Coconut & Hydration Shampoo & Conditioner, 2 Pk, 24 oz",
-    "label": "Aisle 28",
-    "want": "AISLE 28",
-    "got": "AISLE 27"
-   },
-   {
-    "product": "Dawn Platinum Refreshing Rain Scent Ez-Squeeze Liquid Dish Soap, 18 oz",
-    "label": "Aisle 19",
-    "want": "AISLE 19",
-    "got": "AISLE 18"
-   }
-  ],
-  "pass": false
- }
+ "verdict": "pass",
+ "verified": null
 }
