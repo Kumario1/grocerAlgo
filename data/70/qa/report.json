@@ -1,0 +1,133 @@
+{
+ "components": {
+  "n": 1,
+  "sizes": [
+   56558
+  ]
+ },
+ "coverage": {
+  "sealed_floor_patches": [],
+  "unreachable_shelf_labels": []
+ },
+ "culled_pockets": [
+  {
+   "cells": 1580,
+   "near": "DELI",
+   "x": 888.3,
+   "y": 605.9
+  },
+  {
+   "cells": 1034,
+   "near": "DELI",
+   "x": 783.9,
+   "y": 615.8
+  },
+  {
+   "cells": 287,
+   "near": "CHECKSTANDS",
+   "x": 566.3,
+   "y": 594.5
+  },
+  {
+   "cells": 274,
+   "near": "AISLE 10",
+   "x": 548.0,
+   "y": 205.1
+  },
+  {
+   "cells": 270,
+   "near": "AISLE 9",
+   "x": 616.0,
+   "y": 175.0
+  },
+  {
+   "cells": 160,
+   "near": "AISLE 1",
+   "x": 934.0,
+   "y": 218.1
+  },
+  {
+   "cells": 136,
+   "near": "CHECKSTANDS",
+   "x": 648.6,
+   "y": 514.3
+  }
+ ],
+ "far_snaps": [
+  {
+   "cells": 19.9,
+   "meters": 4.52,
+   "name": "BAKERY"
+  },
+  {
+   "cells": 12.5,
+   "meters": 2.84,
+   "name": "PHARMACY"
+  }
+ ],
+ "m_per_cell": 0.2271,
+ "narrow": [
+  {
+   "half_width_m": 0.68,
+   "name": "KITCHEN"
+  },
+  {
+   "half_width_m": 0.68,
+   "name": "PHARMACY"
+  },
+  {
+   "half_width_m": 0.91,
+   "name": "AISLE 21"
+  },
+  {
+   "half_width_m": 0.91,
+   "name": "AISLE 26"
+  },
+  {
+   "half_width_m": 0.91,
+   "name": "MEAT"
+  },
+  {
+   "half_width_m": 0.94,
+   "name": "DAIRY"
+  },
+  {
+   "half_width_m": 0.96,
+   "name": "AISLE 23"
+  },
+  {
+   "half_width_m": 0.96,
+   "name": "AISLE 25"
+  }
+ ],
+ "provenance": {
+  "decorations": "absent",
+  "drift": {
+   "seal_zones": {
+    "derived_n": 7,
+    "derived_names": [
+     "auto:BAKERY",
+     "auto:DELI",
+     "auto:FLORAL",
+     "auto:KITCHEN",
+     "auto:PHARMACY",
+     "auto:SEAFOOD",
+     "auto:CHECKSTANDS"
+    ],
+    "file_n": 1,
+    "file_names": [
+     "Checkstand lane bank \u2014 the printed register bbox only. The registers run x 426.0-719.7, y 500.2-537.9 (16 lanes, ~6 pt of open floor between adjacent checkstands), so the rect is clamped to x 426-719: the earlier 416-740 rect overshot the bank at BOTH ends and its bridge closed the two walkways that flank it \u2014 the 16.6 pt (1.9 m) east-end walkway at x 719.7-736.3 that lines the south-central Entrance/Exit doors up with the front action alley, and 10 pt of the 21 pt west-end walkway at x 404.6-426. The derived rect reached x=342/y=446 and swallowed both the curbside staging bay and the whole front action alley north of the lanes; bridge 20 because checkout lanes are wider than service-counter gaps"
+    ]
+   }
+  },
+  "exclusions": "file",
+  "inclusions": "file",
+  "openings": "absent",
+  "seal_zones": "file",
+  "zones": "derived"
+ },
+ "reachable_pct": 21.4,
+ "store": "70",
+ "verify": [],
+ "walkable_pct": 21.4
+}

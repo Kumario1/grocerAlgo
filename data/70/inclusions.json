@@ -1,0 +1,10 @@
+[
+  {"name": "Aisle 4 corridor at the 'Kitchen Gadgets' shelf text (customer): the KITCHEN anchor is that product label, not a service kitchen — the corridor runs clear from the north alley to the checkstand alley",
+   "rect": [742, 258, 758, 470]},
+
+  {"name": "Seafood customer frontage (customer): the seafood service case is the serrated run on the Bakery's east wall (x~920-928); the 'Seafood' label is printed on the open Market floor shoppers stand on",
+   "rect": [944, 336, 1006, 396]},
+
+  {"name": "Deli approach corridor between the back-room wall and the Meal Simple floor (customer): the 'Deli' label here is wayfinding printed on the shopping floor beside the deli door, not inside a counter enclosure",
+   "rect": [758, 513, 808, 572]}
+]

@@ -1,0 +1,36 @@
+Store 70 (H-E-B Abilene) is converged. Stopping here for the separate audit role.
+
+## Result
+
+`./rebuild.sh 70` exits 0 — **745 passed**. `data/70/qa/report.json`:
+
+```
+verify: []                      components: {n: 1, sizes: [56376]}
+coverage: {sealed_floor_patches: [], unreachable_shelf_labels: []}
+walkable_pct: 21.4  (reachable 21.4)     m_per_cell 0.2271
+```
+
+Walkable went 14.2% → 21.4%; PRODUCE/FLORAL far-snaps (20.4 m / 11.3 m) are gone.
+
+## Root cause of the first pass
+
+The auto-derived seal zones were wrong in shape, not just in detail:
+
+- **`auto:KITCHEN`** was a false service anchor — extract read the *"Kitchen Gadgets"* shelf text at (754,351) as a KITCHEN department, dropping a 130 pt disk across aisles 1–8.
+- **`auto:SEAFOOD` / `auto:BAKERY` / `auto:FLORAL` / `auto:DELI`** disks (r=130) overlapped into one blanket over the whole diagonal east wing.
+- **`auto:CHECKSTANDS`** rect reached x=342/y=446 (CHECK_WIN grabbed aisle-end and curbside fixtures), eating the front action alley north of the lanes.
+
+Bridging inside that blanket disconnected the east wing *and* the action alley into a single 19147-cell pocket which, because it contained SEAFOOD/BAKERY labels, was culled as a staff area with no size cap — half the store sealed while every other signal read green (coverage nets stayed silent: this map has no painted floor and the Market/Produce side carries no small shelf labels).
+
+## Files authored (only `data/70/`; `zones` still derived)
+
+- **`seal_zones.json`** — full override, one zone: the checkstand bank re-cut to the printed 16-register bbox `[416,486,740,550]`, bridge 20.
+- **`exclusions.json`** — 4 staff enclosures traced off the PDF strokes: Bakery production room (poly, walled by the Healthy Living shelf back, the diagonal bread rack and the east/south cases, both openings drawn as door swings), Pharmacy room (poly, stepped counter wall), Lease tenant unit, NW back room behind the Dairy case.
+- **`inclusions.json`** — 3 customer areas, each clearing a VERIFY: aisle 4 corridor at the "Kitchen Gadgets" text, Seafood frontage on the open Market floor (the actual case is the serrated run on the bakery's east wall), Deli approach corridor beside the deli door.
+- **`walk_truth.json`** — 13 `must` (action alley, entrance approach, 3 aisle corridors, pharmacy pickup frontage, Dairy/Bakery/Seafood/Deli/Market/Produce/Floral frontages) + 10 `must_not` (2 outside points, 5 sealed staff interiors, business-center office, restroom interior, checkout-lane interior).
+
+## Remaining diagnostics, all classified
+
+- 9 culled pockets: deli prep room (1580) and the back room behind its wall (1034); the west entrance vestibule with the ice machines, drawn walled off from the sales floor (689); an enclosed business-center office (287); the north walk-in cooler band (274) and north restroom block (270); a dead wedge behind a Market gondola (160); two checkout-lane interiors (136, 136).
+- `far_snaps` BAKERY 4.5 m and PHARMACY 2.8 m are expected: both labels sit inside excluded staff rooms, so they snap out to the nearest customer frontage (aisle 1 and the pharmacy waiting corridor respectively).
+- `narrow` bottoms out at 0.68 m half-width (the pharmacy waiting neck and the aisle-4 corridor) — both are the drawn geometry, well above the ~0.5 m artifact threshold, and `corridor_width.png` shows no red.

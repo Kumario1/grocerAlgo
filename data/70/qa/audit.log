@@ -1,0 +1,32 @@
+## Audit report — H‑E‑B store 70 (Abilene), guide `guide-abilene-70.pdf` p.2
+
+### Pass 1 — Mechanical
+`./rebuild.sh 70` reran clean through extract → profile → QA. `report.json`: `verify: []`, `coverage.sealed_floor_patches: []`, `coverage.unreachable_shelf_labels: []`, `components: {n:1, sizes:[56558]}`, walkable = reachable = **21.4 %** (in band). Boundary extracted as a closed 39‑segment 1.931‑wide perimeter — no `boundary.json` needed.
+
+`rebuild.sh` exits 1 only on 26 pytest failures, none of which touch the map layer: they are caused by this shell's environment (`GROCER_ADMIN_TOKEN`, `PIPE_NO_BROWSER`, `HEB_RUNTIME_DIR` set) and by `data/6` existing in this worktree. With those unset: **2469 passed, 1 failed** (the `data/6` one). The eight map suites — walkability, coverage, legality, corridor, golden, derive, engine, extract — are **2259 passed, 0 failed**. Not a store‑70 defect, so not filed as a finding.
+
+### Findings (worst first) — all four fixed
+
+**1. `data/70/exclusions.json:16` — the west Exit/Entrance vestibule was an unexplained 689‑cell culled pocket** *(pt 214–282 × 516–566, stats centroid (244, 540), mislabelled "near AISLE 21")*
+Crop `/tmp/s70_20.png` and the 16× source render show a room holding the store's west **Exit/Entrance** door pair and two **ICE** merchandisers, entirely untinted. Vector check: the inner partition is unbroken — `(332.0,514.9)→(211.8,514.9)` is a **single line item**, plus `x=211.8 y=514.9‑567.5`, `x=271.5 y=515.1‑539.6` stepping to `x=283.2 y=539.6‑567.6`, all width 0.966. The guide erases walls for doorways with white rects (`[225.9,566.2,256.6,567.9]` at this door, `[347.0,566.5,377.7,568.1]` at the second SW door) — **there is no white rect and no door arc anywhere on the inner partition**. Truth: the drawing seals it, so it is not shopping floor here (zero product labels, aisle badges or department names over ~35 m²); but a 689‑cell pocket must be *stated*. Fix type: **exclusion** traced to the stroke faces (`[[213,516],[270,516],[270,540.5],[282,540.5],[282,566],[213,566]]`) + `walk_truth` must_not `(247,552)` + must `(240,508)` proving the sales floor north of the partition stays open. Free‑cell count is **56558 before and after** — zero shopping floor removed.
+⚠️ *Human note recorded in the exclusion:* the real store's inner doors are simply absent from this 2018 schematic. Routing shoppers through the west door would need a door‑punch in `router/`, not a data edit — I did not attempt it. The store still enters via the second SW door (`ENTRANCE 362.6,580.3`).
+
+**2. `data/70/walk_truth.json:38` — unexplained 160‑cell pocket at (934, 218)**
+It is the interior of an 8‑pt **white‑filled band** drawn along the NE exterior wall, `(898.8,249.8)-(904.5,255.5)-(971.3,189.1)-(965.4,183.2)` — wall‑thickness artwork behind the Market wall run, not floor (`/tmp/ne_src.png`). Correctly sealed, but undocumented. Fix type: **walk_truth must_not** `(934,218)`.
+
+**3. `data/70/walk_truth.json:20` — no must point at the real Seafood service‑case frontage**
+The only Seafood point, `(974,364)`, is the printed title out on the open Market floor (what `inclusions.json` rescues) — **4.7 m east** of the case. The case is the scalloped run `[913.4,341.7,920.5,429.4]` on the Bakery's east wall; its customer face at x≈921‑928 had no coverage. Fix type: **walk_truth must** `(930,400)`.
+
+**4. `data/70/walk_truth.json:21` — no must point on the south front walkway**
+The Business Center / Tobacco counter frontage (y≈555‑566, x 480‑740) sat between `(362,563)` and `(728,518)` with nothing in it. Fix type: **walk_truth must** `(600,560)`.
+
+### Passes 2–5, evidence
+- **Visual sweep:** 3×3 crops of `walkable_overlay.png`, then a finer **4×3 sweep of the store extent** (x 142‑1206, y 139‑670 at 5×, `/tmp/s70_rc.png`) plus 7×–16× renders of Bakery, Pharmacy, Deli, SE entrance, NE corner, and the west vestibule. Every aisle corridor (1‑31) is green end to end; north cross‑alley, front action alley, both checkout end‑walkways and the south walkway are green; every department frontage (Dairy, Pharmacy pickup, Bakery west, Seafood, Deli counter + cafe seating, Meal Simple, Market, Produce, Floral, Retail) is green; checkout lane interiors are sealed; the Bakery and Pharmacy rooms are verified drawn enclosures (staff door swings on the Bakery east and SW faces; traced stepped counter wall at the Pharmacy). Unanchored departments (Market ×2, Retail, Tobacco, Business Center, Meal Simple, Curbside, the second Deli label) were each inspected against `geometry.json` — all correct.
+- **All 7 remaining pockets classified:** 1580 Deli production room, 1034 Deli back room, 287 Business Center, 274 north‑wall Market cooler, 270 north bump‑out BOH, 160 NE wall band (new must_not), 136 checkout lane. Each now has a `must_not`.
+- **Label probes:** 16 product labels across every wing (Hair Color, Cotton Balls, Hosiery, Vitamins, Insecticides, Toys, Diapers, Dog Food, Trash Bags, Wine, Water, Charcoal, Spices, Salsa, Tortillas, Jam/Jelly) + 12 department/anchor points — **all reachable within 0.2 m**, zero misses.
+- **walk_truth:** 21 must / 16 must_not, all validated against the shipped `profile.npz`, 0 violations; each coordinate re‑checked to sit inside the feature it names.
+- **Config sanity:** 4 pre‑existing exclusions and 3 inclusions each verified against the printed art (the "Kitchen Gadgets" and "Seafood title" inclusions are genuine false‑positive rescues, not staff blankets). The checkstand seal rect `[426,486,719,550]` matches the measured registers exactly (67 fixtures, x 426.0‑719.7, y 500.2‑538.1) and both flanking walkways stay open.
+
+Files touched: `data/70/exclusions.json`, `data/70/walk_truth.json` only. No code, goldens, or other stores.
+
+`AUDIT CLEAN — store 70 (4 findings fixed)`

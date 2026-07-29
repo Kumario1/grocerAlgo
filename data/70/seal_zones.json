@@ -1,0 +1,4 @@
+[
+  {"name": "Checkstand lane bank — the printed register bbox only. The registers run x 426.0-719.7, y 500.2-537.9 (16 lanes, ~6 pt of open floor between adjacent checkstands), so the rect is clamped to x 426-719: the earlier 416-740 rect overshot the bank at BOTH ends and its bridge closed the two walkways that flank it — the 16.6 pt (1.9 m) east-end walkway at x 719.7-736.3 that lines the south-central Entrance/Exit doors up with the front action alley, and 10 pt of the 21 pt west-end walkway at x 404.6-426. The derived rect reached x=342/y=446 and swallowed both the curbside staging bay and the whole front action alley north of the lanes; bridge 20 because checkout lanes are wider than service-counter gaps",
+   "rect": [426, 486, 719, 550], "bridge": 20}
+]

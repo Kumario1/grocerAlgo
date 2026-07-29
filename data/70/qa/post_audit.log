@@ -1,0 +1,567 @@
+45 anchors, 201 rect fixtures + 155 poly fixtures, 2028 wall segments, boundary 40 vertices -> data/70/geometry.json
+overlay -> data/70/extract_overlay.png
+service pockets culled: 7 (largest 1580 cells)
+46 anchors, grid 633x417, m/cell=0.227 -> data/70/profile.npz
+walkable: 21.4% of page (21.4% entrance-reachable)
+components: 1  sizes: [np.int64(56558)]
+anchors: 46  |  exclusions: 5
+service pockets sealed (service + dead crevices): 7
+   1580 cells at (888,606) near DELI
+   1034 cells at (784,616) near DELI
+    287 cells at (566,594) near CHECKSTANDS
+    274 cells at (548,205) near AISLE 10
+    270 cells at (616,175) near AISLE 9
+    160 cells at (934,218) near AISLE 1
+    136 cells at (649,514) near CHECKSTANDS
+snaps moved >12 cells (check reachable.png):
+  BAKERY: 20 cells (~4.5 m)
+  PHARMACY: 12 cells (~2.8 m)
+tightest corridors at anchors (half-width capacity):
+  KITCHEN: 0.68 m
+  PHARMACY: 0.68 m
+  AISLE 21: 0.91 m
+  AISLE 26: 0.91 m
+  MEAT: 0.91 m
+  DAIRY: 0.94 m
+  AISLE 23: 0.96 m
+  AISLE 25: 0.96 m
+........................................................................ [  2%]
+........................................................................ [  5%]
+........................................................................ [  8%]
+...................F.......................s............................ [ 11%]
+........................................FFFFFFFFFFFFF..FFFFF..FFF.F.F... [ 14%]
+........................................................................ [ 17%]
+........................................................................ [ 20%]
+........................................................................ [ 23%]
+........................................................................ [ 26%]
+........................................................................ [ 29%]
+........................................................................ [ 31%]
+........................................................................ [ 34%]
+........................................................................ [ 37%]
+........................................................................ [ 40%]
+........................................................................ [ 43%]
+........................................................................ [ 46%]
+........................................................................ [ 49%]
+........................................................................ [ 52%]
+........................................................................ [ 55%]
+........................................................................ [ 58%]
+........................................................................ [ 61%]
+........................................................................ [ 63%]
+........................................................................ [ 66%]
+........................................................................ [ 69%]
+........................................................................ [ 72%]
+........................................................................ [ 75%]
+........................................................................ [ 78%]
+........................................................................ [ 81%]
+........................................................................ [ 84%]
+........................................................................ [ 87%]
+........................................................................ [ 90%]
+........................................................................ [ 93%]
+........................................................................ [ 95%]
+........................................................................ [ 98%]
+............................                                             [100%]
+=================================== FAILURES ===================================
+__ test_onboarding_selects_an_unsupported_store_without_publicly_enabling_it ___
+
+tmp_path = PosixPath('/private/var/folders/fb/7vf__5kj0g53l5_cg24mjytm0000gn/T/pytest-of-princekumar/pytest-443/test_onboarding_selects_an_uns0')
+
+    def test_onboarding_selects_an_unsupported_store_without_publicly_enabling_it(
+            tmp_path):
+        public = HEBClient(database_path=tmp_path / "public.sqlite")
+        onboarding = HEBClient(
+            6,
+            database_path=tmp_path / "onboarding.sqlite",
+            allow_unsupported=True,
+        )
+        context = Context()
+        onboarding._contexts[6] = context
+    
+        try:
+            public._store(6)
+        except HEBConnectionError:
+            pass
+        else:
+>           raise AssertionError("public client accepted an unsupported store")
+E           AssertionError: public client accepted an unsupported store
+
+tests/test_onboarding_placement.py:33: AssertionError
+____ test_onboarding_refuses_anything_that_is_not_a_store_number[payload0] _____
+
+payload = {'store': '12; rm -rf /'}
+
+    @pytest.mark.parametrize("payload", [
+        {"store": "12; rm -rf /"},
+        {"store": "../659"},
+        {"store": ""},
+        {"store": "99999"},
+        {"store": "1234", "city": "austin; ls"},
+        {"store": "1234", "city": "../../etc"},
+        {"store": "1234", "from": "0"},
+        {"store": "1234", "from": "7"},
+        {"store": "1234", "from": "3; rm -rf /"},
+    ])
+    def test_onboarding_refuses_anything_that_is_not_a_store_number(payload):
+>       assert client.post("/api/stores/onboard", json=payload).status_code == 400
+E       AssertionError: assert 401 == 400
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+E        +    where <Response [401 Unauthorized]> = post('/api/stores/onboard', json={'store': '12; rm -rf /'})
+E        +      where post = <starlette.testclient.TestClient object at 0x1391b43b0>.post
+
+tests/test_stores.py:170: AssertionError
+____ test_onboarding_refuses_anything_that_is_not_a_store_number[payload1] _____
+
+payload = {'store': '../659'}
+
+    @pytest.mark.parametrize("payload", [
+        {"store": "12; rm -rf /"},
+        {"store": "../659"},
+        {"store": ""},
+        {"store": "99999"},
+        {"store": "1234", "city": "austin; ls"},
+        {"store": "1234", "city": "../../etc"},
+        {"store": "1234", "from": "0"},
+        {"store": "1234", "from": "7"},
+        {"store": "1234", "from": "3; rm -rf /"},
+    ])
+    def test_onboarding_refuses_anything_that_is_not_a_store_number(payload):
+>       assert client.post("/api/stores/onboard", json=payload).status_code == 400
+E       AssertionError: assert 401 == 400
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+E        +    where <Response [401 Unauthorized]> = post('/api/stores/onboard', json={'store': '../659'})
+E        +      where post = <starlette.testclient.TestClient object at 0x1391b43b0>.post
+
+tests/test_stores.py:170: AssertionError
+____ test_onboarding_refuses_anything_that_is_not_a_store_number[payload2] _____
+
+payload = {'store': ''}
+
+    @pytest.mark.parametrize("payload", [
+        {"store": "12; rm -rf /"},
+        {"store": "../659"},
+        {"store": ""},
+        {"store": "99999"},
+        {"store": "1234", "city": "austin; ls"},
+        {"store": "1234", "city": "../../etc"},
+        {"store": "1234", "from": "0"},
+        {"store": "1234", "from": "7"},
+        {"store": "1234", "from": "3; rm -rf /"},
+    ])
+    def test_onboarding_refuses_anything_that_is_not_a_store_number(payload):
+>       assert client.post("/api/stores/onboard", json=payload).status_code == 400
+E       AssertionError: assert 401 == 400
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+E        +    where <Response [401 Unauthorized]> = post('/api/stores/onboard', json={'store': ''})
+E        +      where post = <starlette.testclient.TestClient object at 0x1391b43b0>.post
+
+tests/test_stores.py:170: AssertionError
+____ test_onboarding_refuses_anything_that_is_not_a_store_number[payload3] _____
+
+payload = {'store': '99999'}
+
+    @pytest.mark.parametrize("payload", [
+        {"store": "12; rm -rf /"},
+        {"store": "../659"},
+        {"store": ""},
+        {"store": "99999"},
+        {"store": "1234", "city": "austin; ls"},
+        {"store": "1234", "city": "../../etc"},
+        {"store": "1234", "from": "0"},
+        {"store": "1234", "from": "7"},
+        {"store": "1234", "from": "3; rm -rf /"},
+    ])
+    def test_onboarding_refuses_anything_that_is_not_a_store_number(payload):
+>       assert client.post("/api/stores/onboard", json=payload).status_code == 400
+E       AssertionError: assert 401 == 400
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+E        +    where <Response [401 Unauthorized]> = post('/api/stores/onboard', json={'store': '99999'})
+E        +      where post = <starlette.testclient.TestClient object at 0x1391b43b0>.post
+
+tests/test_stores.py:170: AssertionError
+____ test_onboarding_refuses_anything_that_is_not_a_store_number[payload4] _____
+
+payload = {'store': '1234', 'city': 'austin; ls'}
+
+    @pytest.mark.parametrize("payload", [
+        {"store": "12; rm -rf /"},
+        {"store": "../659"},
+        {"store": ""},
+        {"store": "99999"},
+        {"store": "1234", "city": "austin; ls"},
+        {"store": "1234", "city": "../../etc"},
+        {"store": "1234", "from": "0"},
+        {"store": "1234", "from": "7"},
+        {"store": "1234", "from": "3; rm -rf /"},
+    ])
+    def test_onboarding_refuses_anything_that_is_not_a_store_number(payload):
+>       assert client.post("/api/stores/onboard", json=payload).status_code == 400
+E       AssertionError: assert 401 == 400
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+E        +    where <Response [401 Unauthorized]> = post('/api/stores/onboard', json={'store': '1234', 'city': 'austin; ls'})
+E        +      where post = <starlette.testclient.TestClient object at 0x1391b43b0>.post
+
+tests/test_stores.py:170: AssertionError
+____ test_onboarding_refuses_anything_that_is_not_a_store_number[payload5] _____
+
+payload = {'store': '1234', 'city': '../../etc'}
+
+    @pytest.mark.parametrize("payload", [
+        {"store": "12; rm -rf /"},
+        {"store": "../659"},
+        {"store": ""},
+        {"store": "99999"},
+        {"store": "1234", "city": "austin; ls"},
+        {"store": "1234", "city": "../../etc"},
+        {"store": "1234", "from": "0"},
+        {"store": "1234", "from": "7"},
+        {"store": "1234", "from": "3; rm -rf /"},
+    ])
+    def test_onboarding_refuses_anything_that_is_not_a_store_number(payload):
+>       assert client.post("/api/stores/onboard", json=payload).status_code == 400
+E       AssertionError: assert 401 == 400
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+E        +    where <Response [401 Unauthorized]> = post('/api/stores/onboard', json={'store': '1234', 'city': '../../etc'})
+E        +      where post = <starlette.testclient.TestClient object at 0x1391b43b0>.post
+
+tests/test_stores.py:170: AssertionError
+____ test_onboarding_refuses_anything_that_is_not_a_store_number[payload6] _____
+
+payload = {'store': '1234', 'from': '0'}
+
+    @pytest.mark.parametrize("payload", [
+        {"store": "12; rm -rf /"},
+        {"store": "../659"},
+        {"store": ""},
+        {"store": "99999"},
+        {"store": "1234", "city": "austin; ls"},
+        {"store": "1234", "city": "../../etc"},
+        {"store": "1234", "from": "0"},
+        {"store": "1234", "from": "7"},
+        {"store": "1234", "from": "3; rm -rf /"},
+    ])
+    def test_onboarding_refuses_anything_that_is_not_a_store_number(payload):
+>       assert client.post("/api/stores/onboard", json=payload).status_code == 400
+E       AssertionError: assert 401 == 400
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+E        +    where <Response [401 Unauthorized]> = post('/api/stores/onboard', json={'store': '1234', 'from': '0'})
+E        +      where post = <starlette.testclient.TestClient object at 0x1391b43b0>.post
+
+tests/test_stores.py:170: AssertionError
+____ test_onboarding_refuses_anything_that_is_not_a_store_number[payload7] _____
+
+payload = {'store': '1234', 'from': '7'}
+
+    @pytest.mark.parametrize("payload", [
+        {"store": "12; rm -rf /"},
+        {"store": "../659"},
+        {"store": ""},
+        {"store": "99999"},
+        {"store": "1234", "city": "austin; ls"},
+        {"store": "1234", "city": "../../etc"},
+        {"store": "1234", "from": "0"},
+        {"store": "1234", "from": "7"},
+        {"store": "1234", "from": "3; rm -rf /"},
+    ])
+    def test_onboarding_refuses_anything_that_is_not_a_store_number(payload):
+>       assert client.post("/api/stores/onboard", json=payload).status_code == 400
+E       AssertionError: assert 401 == 400
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+E        +    where <Response [401 Unauthorized]> = post('/api/stores/onboard', json={'store': '1234', 'from': '7'})
+E        +      where post = <starlette.testclient.TestClient object at 0x1391b43b0>.post
+
+tests/test_stores.py:170: AssertionError
+____ test_onboarding_refuses_anything_that_is_not_a_store_number[payload8] _____
+
+payload = {'store': '1234', 'from': '3; rm -rf /'}
+
+    @pytest.mark.parametrize("payload", [
+        {"store": "12; rm -rf /"},
+        {"store": "../659"},
+        {"store": ""},
+        {"store": "99999"},
+        {"store": "1234", "city": "austin; ls"},
+        {"store": "1234", "city": "../../etc"},
+        {"store": "1234", "from": "0"},
+        {"store": "1234", "from": "7"},
+        {"store": "1234", "from": "3; rm -rf /"},
+    ])
+    def test_onboarding_refuses_anything_that_is_not_a_store_number(payload):
+>       assert client.post("/api/stores/onboard", json=payload).status_code == 400
+E       AssertionError: assert 401 == 400
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+E        +    where <Response [401 Unauthorized]> = post('/api/stores/onboard', json={'store': '1234', 'from': '3; rm -rf /'})
+E        +      where post = <starlette.testclient.TestClient object at 0x1391b43b0>.post
+
+tests/test_stores.py:170: AssertionError
+_____________ test_onboarding_refuses_a_store_that_already_exists ______________
+
+    def test_onboarding_refuses_a_store_that_already_exists():
+        response = client.post("/api/stores/onboard", json={"store": "659"})
+    
+>       assert response.status_code == 409
+E       assert 401 == 409
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+
+tests/test_stores.py:176: AssertionError
+_________ test_only_one_run_at_a_time_but_a_second_store_gets_in_line __________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x13b727590>
+
+    def test_only_one_run_at_a_time_but_a_second_store_gets_in_line(monkeypatch):
+        """The machine runs one at a time; the person no longer has to come back
+        in an hour and ask again."""
+        running_run(monkeypatch)
+    
+        assert client.get("/api/stores/onboard").json()["running"] is True
+        second = client.post("/api/stores/onboard",
+                             json={"store": "1234", "city": "austin"})
+    
+>       assert second.status_code == 200
+E       assert 401 == 200
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+
+tests/test_stores.py:202: AssertionError
+__ test_a_store_already_spoken_for_does_not_get_a_second_place_in_line[1234] ___
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x13b7251c0>
+store = '1234'
+
+    @pytest.mark.parametrize("store", ["1234", "452"])
+    def test_a_store_already_spoken_for_does_not_get_a_second_place_in_line(
+            monkeypatch, store):
+        running_run(monkeypatch)
+        client.post("/api/stores/onboard", json={"store": "1234"})
+    
+        again = client.post("/api/stores/onboard", json={"store": store})
+    
+>       assert again.status_code == 409
+E       assert 401 == 409
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+
+tests/test_stores.py:215: AssertionError
+___ test_a_store_already_spoken_for_does_not_get_a_second_place_in_line[452] ___
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x13b724bf0>
+store = '452'
+
+    @pytest.mark.parametrize("store", ["1234", "452"])
+    def test_a_store_already_spoken_for_does_not_get_a_second_place_in_line(
+            monkeypatch, store):
+        running_run(monkeypatch)
+        client.post("/api/stores/onboard", json={"store": "1234"})
+    
+        again = client.post("/api/stores/onboard", json={"store": store})
+    
+>       assert again.status_code == 409
+E       assert 401 == 409
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+
+tests/test_stores.py:215: AssertionError
+_____ test_a_queued_store_can_leave_the_line_without_killing_the_live_run ______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x13b74f4d0>
+tmp_path = PosixPath('/private/var/folders/fb/7vf__5kj0g53l5_cg24mjytm0000gn/T/pytest-of-princekumar/pytest-443/test_a_queued_store_can_leave_0')
+
+    def test_a_queued_store_can_leave_the_line_without_killing_the_live_run(
+            monkeypatch, tmp_path):
+        state = tmp_path / "onboarding.json"
+        state.write_text(json.dumps(
+            {"current": {"store": "811", "pid": os.getpid(),
+                         "log": str(tmp_path / "gone.log"), "returncode": None},
+             "queue": [{"store": "1234"}, {"store": "24"}]}))
+        monkeypatch.setattr(app_module, "ONBOARDING_STATE", str(state))
+    
+        body = client.delete("/api/stores/onboard?store=1234").json()
+    
+>       assert body["queue"] == ["24"]
+               ^^^^^^^^^^^^^
+E       KeyError: 'queue'
+
+tests/test_stores.py:273: KeyError
+____________ test_a_run_started_before_this_server_is_still_visible ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x15135bc20>
+tmp_path = PosixPath('/private/var/folders/fb/7vf__5kj0g53l5_cg24mjytm0000gn/T/pytest-of-princekumar/pytest-443/test_a_run_started_before_this0')
+
+    def test_a_run_started_before_this_server_is_still_visible(monkeypatch, tmp_path):
+        """An hour-long agent must not go invisible because uvicorn restarted."""
+        log = tmp_path / "onboard-811.log"
+        log.write_text("==> [3/5] onboarding agent\n")
+        state = tmp_path / "onboarding.json"
+        # A flat record, the shape written before there was a queue to write, and
+        # os.getpid() stands in for the pipeline: a pid that is genuinely alive.
+        state.write_text(json.dumps(
+            {"store": "811", "pid": os.getpid(), "log": str(log)}))
+        monkeypatch.setattr(app_module, "ONBOARDING_STATE", str(state))
+    
+        body = client.get("/api/stores/onboard").json()
+    
+        assert body["running"] is True
+        assert body["store"] == "811"
+        assert body["queue"] == []
+        assert "onboarding agent" in body["log"]
+        # ...and a second run does not start on top of it, it waits behind it.
+        second = client.post("/api/stores/onboard", json={"store": "1234"})
+    
+>       assert second.status_code == 200
+E       assert 401 == 200
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+
+tests/test_stores.py:301: AssertionError
+_________ test_a_finished_run_from_a_previous_server_reads_as_finished _________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x13b727020>
+tmp_path = PosixPath('/private/var/folders/fb/7vf__5kj0g53l5_cg24mjytm0000gn/T/pytest-of-princekumar/pytest-443/test_a_finished_run_from_a_pre0')
+
+    def test_a_finished_run_from_a_previous_server_reads_as_finished(
+            monkeypatch, tmp_path):
+        state = tmp_path / "onboarding.json"
+        state.write_text(json.dumps(
+            {"store": "811", "pid": 2 ** 30, "log": str(tmp_path / "gone.log")}))
+        monkeypatch.setattr(app_module, "ONBOARDING_STATE", str(state))
+    
+        assert client.get("/api/stores/onboard").json()["running"] is False
+>       assert client.delete("/api/stores/onboard").status_code == 409
+E       AssertionError: assert 401 == 409
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+E        +    where <Response [401 Unauthorized]> = delete('/api/stores/onboard')
+E        +      where delete = <starlette.testclient.TestClient object at 0x1391b43b0>.delete
+
+tests/test_stores.py:313: AssertionError
+__________ test_a_blocked_store_can_be_put_through_the_pipeline_again __________
+
+no_spawning = []
+
+    def test_a_blocked_store_can_be_put_through_the_pipeline_again(no_spawning):
+        """388 and 811 are onboarded but unroutable — rerunning is the fix."""
+>       assert client.post("/api/stores/onboard",
+                           json={"store": "388", "city": "austin"}).status_code == 200
+E       AssertionError: assert 401 == 200
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+E        +    where <Response [401 Unauthorized]> = post('/api/stores/onboard', json={'store': '388', 'city': 'austin'})
+E        +      where post = <starlette.testclient.TestClient object at 0x1391b43b0>.post
+
+tests/test_stores.py:318: AssertionError
+________ test_a_run_can_resume_at_a_stage_instead_of_repeating_an_hour _________
+
+no_spawning = []
+
+    def test_a_run_can_resume_at_a_stage_instead_of_repeating_an_hour(no_spawning):
+        """Stages 3 and 4 are ~50 min of agent time; a stage-5 failure must not
+        charge for them twice."""
+        response = client.post("/api/stores/onboard",
+                               json={"store": "388", "city": "austin", "from": "6"})
+    
+>       assert response.status_code == 200
+E       assert 401 == 200
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+
+tests/test_stores.py:329: AssertionError
+_________ test_live_label_verification_is_reachable_without_a_terminal _________
+
+no_spawning = []
+
+    def test_live_label_verification_is_reachable_without_a_terminal(no_spawning):
+        """The one step that can clear the margin gate, driven from the webapp."""
+        response = client.post("/api/stores/811/verify")
+    
+>       assert response.status_code == 200
+E       assert 401 == 200
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+
+tests/test_stores.py:372: AssertionError
+____ test_verification_refuses_anything_that_is_not_an_onboarded_store[999] ____
+
+store = '999', no_spawning = []
+
+    @pytest.mark.parametrize("store", ["999", "9999", "../659", "12; ls", ""])
+    def test_verification_refuses_anything_that_is_not_an_onboarded_store(
+            store, no_spawning):
+>       assert client.post(f"/api/stores/{store}/verify").status_code in (404, 405)
+E       AssertionError: assert 401 in (404, 405)
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+E        +    where <Response [401 Unauthorized]> = post('/api/stores/999/verify')
+E        +      where post = <starlette.testclient.TestClient object at 0x1391b43b0>.post
+
+tests/test_stores.py:382: AssertionError
+___ test_verification_refuses_anything_that_is_not_an_onboarded_store[9999] ____
+
+store = '9999', no_spawning = []
+
+    @pytest.mark.parametrize("store", ["999", "9999", "../659", "12; ls", ""])
+    def test_verification_refuses_anything_that_is_not_an_onboarded_store(
+            store, no_spawning):
+>       assert client.post(f"/api/stores/{store}/verify").status_code in (404, 405)
+E       AssertionError: assert 401 in (404, 405)
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+E        +    where <Response [401 Unauthorized]> = post('/api/stores/9999/verify')
+E        +      where post = <starlette.testclient.TestClient object at 0x1391b43b0>.post
+
+tests/test_stores.py:382: AssertionError
+__ test_verification_refuses_anything_that_is_not_an_onboarded_store[12; ls] ___
+
+store = '12; ls', no_spawning = []
+
+    @pytest.mark.parametrize("store", ["999", "9999", "../659", "12; ls", ""])
+    def test_verification_refuses_anything_that_is_not_an_onboarded_store(
+            store, no_spawning):
+>       assert client.post(f"/api/stores/{store}/verify").status_code in (404, 405)
+E       AssertionError: assert 401 in (404, 405)
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+E        +    where <Response [401 Unauthorized]> = post('/api/stores/12; ls/verify')
+E        +      where post = <starlette.testclient.TestClient object at 0x1391b43b0>.post
+
+tests/test_stores.py:382: AssertionError
+______ test_stopping_nothing_is_not_an_error_worth_killing_a_process_over ______
+
+    def test_stopping_nothing_is_not_an_error_worth_killing_a_process_over():
+>       assert client.delete("/api/stores/onboard").status_code == 409
+E       AssertionError: assert 401 == 409
+E        +  where 401 = <Response [401 Unauthorized]>.status_code
+E        +    where <Response [401 Unauthorized]> = delete('/api/stores/onboard')
+E        +      where delete = <starlette.testclient.TestClient object at 0x1391b43b0>.delete
+
+tests/test_stores.py:387: AssertionError
+=============================== warnings summary ===============================
+../../.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /Users/princekumar/Documents/grocerAlgo/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+<frozen importlib._bootstrap>:488
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type swigvarlink has no __module__ attribute
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_onboarding_placement.py::test_onboarding_selects_an_unsupported_store_without_publicly_enabling_it
+FAILED tests/test_stores.py::test_onboarding_refuses_anything_that_is_not_a_store_number[payload0]
+FAILED tests/test_stores.py::test_onboarding_refuses_anything_that_is_not_a_store_number[payload1]
+FAILED tests/test_stores.py::test_onboarding_refuses_anything_that_is_not_a_store_number[payload2]
+FAILED tests/test_stores.py::test_onboarding_refuses_anything_that_is_not_a_store_number[payload3]
+FAILED tests/test_stores.py::test_onboarding_refuses_anything_that_is_not_a_store_number[payload4]
+FAILED tests/test_stores.py::test_onboarding_refuses_anything_that_is_not_a_store_number[payload5]
+FAILED tests/test_stores.py::test_onboarding_refuses_anything_that_is_not_a_store_number[payload6]
+FAILED tests/test_stores.py::test_onboarding_refuses_anything_that_is_not_a_store_number[payload7]
+FAILED tests/test_stores.py::test_onboarding_refuses_anything_that_is_not_a_store_number[payload8]
+FAILED tests/test_stores.py::test_onboarding_refuses_a_store_that_already_exists
+FAILED tests/test_stores.py::test_only_one_run_at_a_time_but_a_second_store_gets_in_line
+FAILED tests/test_stores.py::test_a_store_already_spoken_for_does_not_get_a_second_place_in_line[1234]
+FAILED tests/test_stores.py::test_a_store_already_spoken_for_does_not_get_a_second_place_in_line[452]
+FAILED tests/test_stores.py::test_a_queued_store_can_leave_the_line_without_killing_the_live_run
+FAILED tests/test_stores.py::test_a_run_started_before_this_server_is_still_visible
+FAILED tests/test_stores.py::test_a_finished_run_from_a_previous_server_reads_as_finished
+FAILED tests/test_stores.py::test_a_blocked_store_can_be_put_through_the_pipeline_again
+FAILED tests/test_stores.py::test_a_run_can_resume_at_a_stage_instead_of_repeating_an_hour
+FAILED tests/test_stores.py::test_live_label_verification_is_reachable_without_a_terminal
+FAILED tests/test_stores.py::test_verification_refuses_anything_that_is_not_an_onboarded_store[999]
+FAILED tests/test_stores.py::test_verification_refuses_anything_that_is_not_an_onboarded_store[9999]
+FAILED tests/test_stores.py::test_verification_refuses_anything_that_is_not_an_onboarded_store[12; ls]
+FAILED tests/test_stores.py::test_stopping_nothing_is_not_an_error_worth_killing_a_process_over
+24 failed, 2451 passed, 1 skipped, 6 warnings in 41.80s
+sys:1: DeprecationWarning: builtin type swigvarlink has no __module__ attribute

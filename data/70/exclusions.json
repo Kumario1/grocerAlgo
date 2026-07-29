@@ -1,0 +1,17 @@
+[
+  {"name": "Bakery production room (staff): the 'Bakery' label sits in an empty enclosure walled by the Healthy Living shelf back (x~846), the diagonal bread rack, the east display case (x~908-926) and the south cases (y~465-476); the only two openings are drawn as staff door swings",
+   "poly": [[846, 256], [862, 256], [924, 320], [924, 477], [846, 477]]},
+
+  {"name": "Pharmacy room behind the stepped counter wall (staff; wall traced from the PDF strokes: y=355 top, step x=191 y=368-424, diagonal to (211,443), x=211 down to the y=474 back wall)",
+   "poly": [[143, 355], [178, 355], [191, 368], [191, 424], [196, 424],
+            [211, 443], [211, 474], [143, 474]]},
+
+  {"name": "Lease tenant unit + its dead west strip (enclosed leased space off the west entrance, not H-E-B sales floor; walls x=161/y=537 inside, bold x=212 wall to the entrance vestibule)",
+   "rect": [143, 472, 213, 566]},
+
+  {"name": "NW back room behind the Dairy case wall (cooler/receiving; bold walls x=142-291, y=139-198, no customer opening drawn)",
+   "rect": [143, 140, 291, 197]},
+
+  {"name": "West Exit/Entrance vestibule (the ICE house), drawn sealed from the sales floor. The guide walls it on every inside face with unbroken 0.966-wide partition strokes — north y=514.9 from x=211.8 to x=332.0 (ONE line item, no break), west x=211.8 y=514.9-567.5, east x=271.5 y=515.1-539.6 stepping out to x=283.2 y=539.6-567.6 — and its only opening is the door pair in its OWN south face, the 1.931 exterior wall, where the white doorway rect [225.9,566.2,256.6,567.9] erases the stroke exactly as at the second SW entrance [347.0,566.5,377.7,568.1]. There is no white erase rect and no door arc anywhere on the inner partition, so the drawing gives no path from this room to the floor, which is walkable right up to y=513 above it. Contents: two ICE merchandisers (x 214.8-222.1 and 274.8-282.5) and nothing else — zero product labels, zero aisle badges, zero department names over ~35 m2. Left un-named it was the 689-cell pocket the stats printed as 'near AISLE 21' at (244,540); excluding it states the enclosure instead of leaving it unexplained. Traced to the stroke faces (north 516, step 540.5) so no sales floor north of the partition and none of the curbside bay east of x=283 is touched. NOTE for humans: the real store's inner doors are simply absent from this 2018 schematic — routing shoppers through the west door needs a door-punch mechanism in router/, not a data edit, and the store still enters through the second SW door (ENTRANCE 362.6,580.3)",
+   "poly": [[213, 516], [270, 516], [270, 540.5], [282, 540.5], [282, 566], [213, 566]]}
+]
