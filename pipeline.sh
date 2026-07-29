@@ -35,13 +35,10 @@
 # the main checkout. Nothing is attempted in the worktree, so its exit status
 # remains the audit verdict alone.
 #
-# Agent runner: isolated Opus/xhigh Claude session (override the whole command
-# with PIPE_AGENT='codex exec' etc.). Runs with --dangerously-skip-permissions
-# — the guardrails live in the runbook prompts (data-files-only, no code, no
-# goldens) and the golden + test gates catch violations. Subagent spawning is
-# hard-disabled (--disallowedTools): one session per stage does all the work
-# itself — slower, but every token spent is visible in one log and the usage
-# rate stays flat. Run from a terminal, not from inside another agent session.
+# Agent runner: isolated Luna/max Codex session (override the whole command
+# with PIPE_AGENT='...' if needed). Workspace-write is sufficient because the
+# runbooks only edit this checkout. Each stage stays single-agent and resumes
+# the same session after transient capacity errors.
 set -e
 S=$1
 [ -n "$S" ] || { echo "usage: ./pipeline.sh <store> [city|--no-agents] [--from n]"; exit 2; }
@@ -70,11 +67,9 @@ case $FROM in
     *) echo "--from takes a stage number 1-6"; exit 2 ;;
 esac
 
-# effort high, not medium: the 790 parity test showed medium ships maps that
-# pass every automated gate yet seal real customer space (service-disk rims
-# pinching aisle mouths) — and a medium audit blesses them. High reproduced
-# the shipped xhigh map exactly (60/60 walk-truth points).
-AGENT=${PIPE_AGENT:-"claude --safe-mode --model claude-opus-5 --effort high --disallowedTools Task,Agent --dangerously-skip-permissions -p"}
+# Keep max explicit: map truth is quality-sensitive and fleet runs must not
+# inherit a developer's personal CLI default.
+AGENT=${PIPE_AGENT:-"./scripts/codex_agent.sh"}
 AGENT_TIMEOUT=${PIPE_AGENT_TIMEOUT:-2700}
 case $AGENT_TIMEOUT in
     ''|*[!0-9]*) echo "PIPE_AGENT_TIMEOUT must be seconds"; exit 2 ;;
@@ -82,7 +77,7 @@ esac
 run_agent() {
     # alarm survives exec; `exec` also prevents an orphan shell on timeout.
     perl -e 'alarm shift; exec @ARGV' "$AGENT_TIMEOUT" \
-        sh -c "exec $AGENT"
+        env -u PIPE_NO_BROWSER -u HEB_RUNTIME_DIR sh -c "exec $AGENT"
 }
 LOG="data/$S/qa"
 mkdir -p "$LOG"

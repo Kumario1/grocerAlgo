@@ -103,6 +103,9 @@ EOF
 share_guides() {
     wt=$1
     mkdir -p "$wt/guides"
+    exclude=$(git -C "$wt" rev-parse --git-path info/exclude)
+    grep -qxF 'guides/*.pdf' "$exclude" 2>/dev/null ||
+        echo 'guides/*.pdf' >> "$exclude"
     for pdf in "$ROOT"/guides/*.pdf; do
         [ -f "$pdf" ] || continue
         dst="$wt/guides/$(basename "$pdf")"
@@ -293,6 +296,11 @@ while read -r S CITY; do
         if hit=$(recent_qa "$S" "session limit"); then
             reset=$(echo "$hit" | grep -o "resets [^ ]*" | awk '{print $2}' | tail -1)
             park_until "${reset:-unknown}"   # then retry this store, same spot
+            continue
+        fi
+        if recent_qa "$S" "selected model is at capacity" >/dev/null; then
+            say "PARKED 5 min — Codex model at capacity"
+            sleep 300
             continue
         fi
         tries=$((tries + 1))
