@@ -40,6 +40,31 @@ def test_no_missed_sections(store):
         f"sealed painted-floor patches: {cov['sealed_floor_patches']}"
 
 
+def test_the_audit_worklist_catches_a_sealed_corridor():
+    """qa_checks.suspects is advisory, so nothing else fails when it goes
+    blind. Seal one of 659's aisle corridors and it must name the area."""
+    cfg = derive.load_store("data/659")
+    built = derive.build_free(cfg)
+    page = fitz.open(derive.pdf_path("659"))[1]
+    words = raster.coverage_words(page, cfg["geom"])
+    m = float(np.load("data/659/profile.npz", allow_pickle=True)["m_per_cell"])
+    before = qa_checks.suspects(words, cfg, built, m)
+
+    # the store-24 failure mode: a corridor that is reachable at its badge
+    # mouth and sealed deeper in. AISLE 20's badge, 30 pt of corridor cut.
+    bx, by = cfg["anchors"]["AISLE 20"]
+    reach = built["reach"].reshape(built["free"].shape).copy()
+    cell = qa_checks.engine.CELL
+    cx, cy = int(bx // cell), int(by // cell)
+    reach[cy:cy + round(30 / cell), cx - 2:cx + 3] = -1
+    sealed = qa_checks.suspects(words, cfg, {**built, "reach": reach.ravel()}, m)
+
+    grew = [c for c in sealed["sealed_clusters"] if c not in
+            before["sealed_clusters"] and abs(c["x"] - bx) < 40]
+    assert grew, "a sealed aisle corridor produced no worklist entry"
+    assert sealed["sealed_clusters_total"] > before["sealed_clusters_total"]
+
+
 @pytest.mark.parametrize("store", STORES)
 def test_report_converged(store):
     r = json.load(open(f"data/{store}/qa/report.json"))

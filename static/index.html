@@ -136,6 +136,30 @@
     }
     #floor-map { object-fit: contain; }
     #map { display: block; }
+    #map-legend {
+      position: absolute; bottom: .75rem; left: .75rem; z-index: 1;
+      max-width: calc(100% - 1.5rem); padding: .5rem .7rem;
+      border: 1px solid var(--line); border-radius: 8px;
+      background: var(--paper); font-size: .75rem;
+    }
+    #map-legend summary { cursor: pointer; font-weight: 700; }
+    #map-legend ul {
+      display: flex; flex-wrap: wrap; gap: .4rem 1rem;
+      max-width: 32rem; list-style: none; padding: 0; margin: .5rem 0 0;
+    }
+    #map-legend li { display: flex; align-items: center; gap: .4rem; }
+    .legend-symbol {
+      display: inline-grid; place-items: center; width: 1.25rem; height: 1.25rem;
+      color: var(--paper); background: var(--red); border-radius: 50%;
+      font-weight: 700;
+    }
+    .legend-symbol.area {
+      border: 2px dashed var(--red); color: var(--red); background: var(--paper);
+    }
+    .legend-symbol.terminal { background: var(--green); }
+    .legend-path { color: var(--blue); font-size: 1.4rem; line-height: 1; }
+    .legend-floor { color: var(--green); }
+    .legend-blocked { color: var(--red); }
     /* geometry in page points, same proportions as data/659/qa/route_directional.png */
     .route {
       fill: none; stroke: var(--blue); stroke-width: 2; stroke-linecap: round;
@@ -183,7 +207,7 @@
     @media (max-width: 760px) {
       main { grid-template-columns: 1fr; }
       #panel { border-right: 0; border-bottom: 1px solid var(--line); }
-      #map { height: 65vh; }
+      #map-shell { height: 65vh; }
       #map-title { position: static; margin: .7rem; display: inline-block; }
     }
   </style>
@@ -234,32 +258,41 @@
           </marker>
         </defs>
       </svg>
+      <details id="map-legend" open>
+        <summary>Map legend</summary>
+        <ul>
+          <li><span class="legend-path" aria-hidden="true">→</span>Walking route</li>
+          <li><span class="legend-symbol" aria-hidden="true">1</span>Shelf location · pick order</li>
+          <li><span class="legend-symbol area" aria-hidden="true">2</span>Approximate aisle or department</li>
+          <li><span class="legend-symbol terminal" aria-hidden="true">S</span>Start</li>
+          <li><span class="legend-symbol terminal" aria-hidden="true">$</span>Checkout</li>
+          <li><span class="legend-floor" aria-hidden="true">■</span>Green floor: walkable</li>
+          <li><span class="legend-blocked" aria-hidden="true">■</span>Pink or white: outside route area / fixtures</li>
+        </ul>
+      </details>
     </section>
   </main>
 
   <dialog id="onboard-dialog" aria-labelledby="onboard-title">
     <h2 id="onboard-title">Onboard another store</h2>
     <p>
-      Give an H‑E‑B store number. The pipeline finds its published guide,
-      builds a walkable map, runs the onboarding and audit agents, then
-      captures and calibrates the Atlas. It takes about an hour and drives a
-      headless agent with permissions skipped — run it from a machine you are
-      watching.
+      Enter an H‑E‑B store number. We prepare its map, check walking routes,
+      and verify product locations. A new store can take about an hour;
+      completed map work is reused on retries. Run this from your onboarding machine.
     </p>
     <p>
-      A store that already got through the agents resumes instead: stage 5 is
-      the verdict and full test suite, <strong>stage 6 is Atlas capture and
-      calibration</strong>, which opens a browser and needs that store selected
-      in it.
+      Leave the resume stage empty to continue automatically. Use stage 1 to
+      rebuild from the beginning, or stage 6 to retry product-location checks
+      after the map has been reviewed.
     </p>
     <p id="onboard-blocked" hidden>
       Stores with a map that cannot place products yet — click one to fill it
       in: <span id="onboard-blocked-list"></span>
     </p>
     <div class="onboard-fields">
-      <input id="onboard-store" inputmode="numeric" placeholder="Store number, e.g. 452">
-      <input id="onboard-city" placeholder="City (optional), e.g. cedar-park">
-      <input id="onboard-from" inputmode="numeric"
+      <input id="onboard-store" aria-label="Store number" inputmode="numeric" placeholder="Store number, e.g. 452">
+      <input id="onboard-city" aria-label="City (optional)" placeholder="City (optional), e.g. cedar-park">
+      <input id="onboard-from" aria-label="Resume stage (optional)" inputmode="numeric"
              placeholder="Resume at stage (optional), 1–6">
       <button id="onboard-start" class="button" type="button">Start</button>
       <button id="onboard-verify" class="button secondary" type="button">
@@ -654,7 +687,7 @@
         row.textContent = `${stop.quantity > 1 ? `${stop.quantity} × ` : ''}${stop.item}`;
         row.append(textNode('span',
           ` — ${stop.location_label || 'store placement'}` +
-          `${stop.approximation_state === 'exact' ? '' : ' · department'}`,
+          `${stop.approximation_state === 'exact' ? '' : ' · approximate area'}`,
           'location'));
         ordered.append(row);
       });

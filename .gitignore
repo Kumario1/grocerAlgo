@@ -8,3 +8,9 @@ heb-state-*.json
 runtime/
 logs/
 .wt/
+.claude/
+
+# Store truth + guide PDFs stay local. Promote with `git add -f`.
+data/
+guides/*.pdf
+storelist/

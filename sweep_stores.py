@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the fleet work list: every published store guide -> stores.txt.
+"""Build the fleet work list: every published store guide -> storelist/stores.txt.
 
 Usage: python3 sweep_stores.py [first] [last]      default 1 999
 
@@ -12,10 +12,10 @@ Sources, best first:
 
 Each store then goes through discover.py (download + validate + preflight;
 a local guide wins without a request). Already-onboarded stores are
-skipped. stores.txt orders fresh guides first, stale-risk (the 388 tells)
-last, so early fleet capacity goes to stores users can actually route in.
-stores.txt is never written while the control URL fails to probe — a blind
-sweep must not masquerade as an empty fleet.
+skipped. storelist/stores.txt orders fresh guides first, stale-risk (the
+388 tells) last, so early fleet capacity goes to stores users can actually
+route in. The file is never written while the control URL fails to probe —
+a blind sweep must not masquerade as an empty fleet.
 """
 import concurrent.futures
 import csv
@@ -92,8 +92,8 @@ def main(first, last):
     if probe(CONTROL) is not True:
         raise SystemExit(
             "the CDN is not answering this IP right now (the control guide "
-            "failed to probe) — refusing to write stores.txt off a blind "
-            "sweep. Wait out the block and rerun.")
+            "failed to probe) — refusing to write storelist/stores.txt off a "
+            "blind sweep. Wait out the block and rerun.")
 
     rows, failed = [], []
     for store, slug in hits:
@@ -120,10 +120,12 @@ def main(first, last):
         rows.append((src.get("stale_risk", False), store, slug))
 
     rows.sort()                             # fresh first, stale-risk last
-    with open("stores.txt", "w") as out:
+    os.makedirs("storelist", exist_ok=True)
+    out_path = "storelist/stores.txt"
+    with open(out_path, "w") as out:
         for _, store, slug in rows:
             out.write(f"{store} {slug}\n")
-    print(f"stores.txt: {len(rows)} stores to onboard, "
+    print(f"{out_path}: {len(rows)} stores to onboard, "
           f"{sum(1 for stale, *_ in rows if stale)} stale-risk at the end")
     for store, slug, err in failed:
         print(f"SKIPPED {store} ({slug}): {err.splitlines()[0]}")

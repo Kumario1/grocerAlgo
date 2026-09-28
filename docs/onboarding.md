@@ -56,6 +56,14 @@ repeat that build before inspecting its evidence. Then repeat until converged:
      and classify every culled pocket printed in the top-ten stats; do not
      dismiss smaller entries after explaining only the largest ones. A large
      pocket near an aisle badge or service island can be a swallowed corridor.
+   - `suspects.sealed_clusters`: every area inside the building that is
+     sealed and that no fixture, exclusion or staff label explains, largest
+     first. A converged store still has entries here — checkout lanes,
+     dispensing rooms, utility rooms — but you must be able to name each one.
+     An entry you cannot name is a swallowed section.
+   - `suspects.worst_labels`: every printed word's distance to floor a
+     shopper can stand on, worst first. Anything but a vestibule word beyond
+     ~2 m is a defect.
    - `far_snaps`: an anchor snapping meters away from its label usually
      sits inside a wrongly-sealed or wrongly-open region.
    - `narrow`: corridors under ~0.5 m half-width are usually artifacts —
@@ -72,6 +80,14 @@ repeat that build before inspecting its evidence. Then repeat until converged:
    any visible but unanchored department. Compare against
    `data/659/qa/walkable_overlay.png` — that is what "converged" looks
    like.
+   Once per loop, when you want the whole page read at detail rather than a
+   region you already suspect, cut `walkable_overlay.png` and the printed
+   page into a 3×3 grid and **dispatch nine `map-crop-inspector` subagents in
+   one message**, one per crop, each with its two image paths, its PDF-point
+   rectangle, the pixel-to-point scale, and the `suspects.sealed_clusters`
+   entries inside it. They are read-only: **you stay the only writer of the
+   five JSON truth files**, and you confirm a reported defect in the crop
+   yourself before editing anything.
 4. For each VERIFY flag, decide from the map drawing:
    - Staff-only area (label sits inside a counter/prep enclosure) →
      add an entry to `data/<N>/exclusions.json`.
@@ -175,6 +191,29 @@ counter, rect = checkstand bank; `bridge` = max gap width sealed, pt):
 ## After convergence: stop for the audit
 
 Stop and return your result. Do NOT run `docs/audit.md`, spawn an audit agent,
-or continue into an audit yourself. `pipeline.sh` starts the required fresh
-audit context after you exit; onboarding finishes only when that separate
-role reports CLEAN.
+or continue into an audit yourself — `map-crop-inspector` subagents are for
+looking at crops of your own work, not for grading it. `pipeline.sh` starts the
+required fresh audit context after you exit; onboarding finishes only when that
+separate role reports CLEAN.
+
+## What happens after you (not your job, but know it exists)
+
+A converged map is not yet a store the app will offer. After the audit and the
+human visual verdict, `pipeline.sh` runs two more mechanical steps:
+
+```
+python3 capture_atlas.py <N>     # the store's live Atlas -> data/<N>-atlas/
+python3 calibrate.py <N>         # fit the Atlas onto YOUR map, then gate it
+python3 calibrate.py <N> --verify   # check live shelf labels agree
+```
+
+Calibration is what lets a product pin to the shelf it is on rather than to the
+aisle label, and the store stays unpickable until it passes. It reads your
+`geometry.json` aisle anchors, so an aisle badge you mis-assigned shows up
+there as a residual or a failed label check — one more reason the anchors are
+worth getting right.
+
+If the search picks the wrong aisle correspondence, the fix is data: an
+`atlas_fit` pin in `data/<N>/store.json`, the same way #659 records that its
+guide numbers its left-hand column four lower than today's shelf labels. That
+file is outside your five, so report it rather than writing it.

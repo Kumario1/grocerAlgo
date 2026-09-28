@@ -144,10 +144,13 @@ Image.composite(Image.blend(base, heat, 0.6), base, mm) \
 # --- coverage nets (router/qa_checks.py): missed-section detectors that are
 # independent of any authored truth — the onboarding agent cannot pass its
 # own blind spots through these ---
-cov = qa_checks.coverage(raster.coverage_words(page, geom), base, cfg, built,
-                         m_per_cell)
+words = raster.coverage_words(page, geom)
+cov = qa_checks.coverage(words, base, cfg, built, m_per_cell)
 label_clusters = cov["unreachable_shelf_labels"]
 floor_patches = cov["sealed_floor_patches"]
+
+# the audit agent's worklist — advisory, not a gate (see qa_checks.suspects)
+sus = qa_checks.suspects(words, cfg, built, m_per_cell)
 
 # draw coverage findings on the overlay so the agent SEES them: red X per
 # label cluster, red box per sealed floor patch
@@ -199,6 +202,13 @@ for p in floor_patches:
     print(f"COVERAGE: {p['m2']:.0f} m^2 of painted floor sealed at "
           f"({p['x']:.0f},{p['y']:.0f}) — missed section? open it (inclusion) "
           f"or bless it (exclusion)")
+print(f"unexplained sealed clusters >= {qa_checks.SUSPECT_MIN_M2} m^2: "
+      f"{sus['sealed_clusters_total']} (the audit accounts for each)")
+for c in sus["sealed_clusters"][:10]:
+    print(f"  {c['m2']:6.1f} m^2 at ({c['x']:.0f},{c['y']:.0f}) near {c['near']}")
+print("printed labels furthest from reachable floor:")
+for c in sus["worst_labels"][:5]:
+    print(f"  {c['meters']:5.2f} m  {c['label']} at ({c['x']:.0f},{c['y']:.0f})")
 
 # --- machine-readable report (the headless-agent loop reads this; same
 # numbers as the prints above, deterministically ordered) ---
@@ -226,6 +236,7 @@ report = {
         {"name": name, "half_width_m": round(hw_cells * m_per_cell, 2)}
         for hw_cells, name in narrow[:8]],
     "coverage": cov,
+    "suspects": sus,
     "provenance": cfg["provenance"],
 }
 with open(f"{OUTDIR}/report.json", "w") as f:

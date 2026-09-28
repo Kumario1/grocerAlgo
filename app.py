@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """H-E-B product picker and optimal in-store route API, one store at a time."""
 import glob
+import hashlib
 import json
 import logging
 import logging.handlers
@@ -42,6 +43,7 @@ log = logging.getLogger("grocer.app")
 
 DEFAULT_STORE = "659"
 MAX_SNAP_M = 5.0        # nothing on a shelf is further than this from a corridor
+PLACEMENT_VERSION = 2  # persisted pins must pass the current placement rules
 BOOT_ID = secrets.token_hex(8)
 ADMIN_TOKEN = "GROCER_ADMIN_TOKEN"
 LOOPBACK = {"127.0.0.1", "::1", "localhost", "testclient"}
@@ -176,6 +178,8 @@ class Store:
 
         self.atlas = cal.load_atlas(store_id)
         self.calibration = cal.load_calibration(store_id)
+        self.calibration_id = hashlib.sha256(json.dumps(
+            self.calibration, sort_keys=True).encode()).hexdigest()
         self.blocked_reason = cal.blocked_reason(store_id)
         self.runs = cal.shelf_runs(self.atlas["psas"]) if self.atlas else {}
         self.carry = cal.transform(self.calibration) if self.calibration else None
@@ -199,6 +203,13 @@ def catalog_store(store_id):
     store = get_store(store_id)
     if not cal.is_catalog_enabled(store_id):
         raise HTTPException(409, f"store {store_id} is not catalog-enabled")
+    if store.calibration != cal.load_calibration(store_id):
+        # The onboarding subprocess can replace a fit while this server runs.
+        load_store.cache_clear()
+        shortest_tree.cache_clear()
+        leg_path.cache_clear()
+        anchor_order.cache_clear()
+        store = load_store(store_id)
     return store
 
 
@@ -472,47 +483,57 @@ def snap_distance_m(store, point):
                       ) / store.cell * store.m_per_cell
 
 
-def label_map_point(store, location_label, placement):
-    """Where the printed shelf label says the product is."""
+def label_map_anchor(store, location_label, placement):
+    """The guide anchor named by the printed shelf label."""
     anchors = store.geometry["anchors"]
     label = re.sub(r"\s+", " ", (location_label or "").upper())
     aisle = re.search(r"\bAISLE\s+(\d+)\b", label)
     if aisle:
-        return anchors.get(cal.guide_aisle_name(store.config, int(aisle[1])))
+        name = cal.guide_aisle_name(store.config, int(aisle[1]))
+        return name if name in anchors else None
 
     for name in sorted(anchors, key=len, reverse=True):
         if not name.startswith("AISLE ") and name in label:
-            return anchors[name]
+            return name
     group = placement["group"].removeprefix("ANCHOR:")
-    return anchors.get(DEPARTMENT_ALIASES.get(group, group))
+    name = DEPARTMENT_ALIASES.get(group, group)
+    return name if name in anchors else None
+
+
+def label_map_point(store, location_label, placement):
+    name = label_map_anchor(store, location_label, placement)
+    return store.geometry["anchors"].get(name)
 
 
 def place(store, location_label, placement):
     """Where the product is on this store's map, and how well we know it.
 
-    "exact" is earned: it means H-E-B gave shelf-face geometry for this
-    product, the store's calibration passed its gates, and the transformed
-    point lands on floor a shopper can stand on. Anything else is a
-    department-level fact — H-E-B knowing only that it is somewhere in
-    Produce — and must not be drawn as if it were a shelf position.
+    Exact requires non-approximate shelf geometry, reachable floor, and
+    agreement with any numbered aisle label. Otherwise use the named area;
+    a rejected coordinate is never a fallback for itself.
     """
-    mapped = None
-    if placement["group"].startswith("PSA:") and placement.get("point"):
+    if (placement["group"].startswith("PSA:") and placement.get("point")
+            and not placement.get("approx")):
         mapped = atlas_to_guide(store, on_corridor(
             store, placement["group"], placement["point"]))
-        if snap_distance_m(store, mapped) <= MAX_SNAP_M:
+        agrees = True
+        aisle = re.search(r"\baisle\s+(\d+)\b", location_label or "", re.I)
+        if aisle:
+            segment = cal.corridor_segment(
+                store.atlas["psas"], store.runs,
+                placement["group"], placement["point"])
+            _, agrees = cal.aisle_agreement(
+                store.geometry["anchors"],
+                cal.guide_aisle_name(store.config, int(aisle[1])),
+                [atlas_to_guide(store, end) for end in segment])
+        if agrees and snap_distance_m(store, mapped) <= MAX_SNAP_M:
             return mapped, "exact"
-        # H-E-B answers for some bulk packs with a pallet slot off the shopping
-        # floor while its own label names a real aisle — 16|88 sits in the
-        # bottom-left vestibule and is labelled "Aisle 13". Snapping such a
-        # point to the nearest legal cell silently parks the product at the
-        # entrance, so believe the label instead.
-        log.warning("placement %s maps %s off the floor; using the label %r",
+        log.warning("placement %s maps %s outside its floor/aisle; using label %r",
                     placement["group"], [round(v, 1) for v in mapped],
                     location_label)
 
     named = label_map_point(store, location_label, placement)
-    return (named if named is not None else mapped), "department"
+    return named, "department"
 
 
 def exact_map_point(store, location_label, placement):
@@ -537,6 +558,8 @@ async def locate_products(req: LocateReq, store: str = Query(DEFAULT_STORE)):
         except (HEBConnectionError, ValueError) as e:
             heb_http_error(e)
         result = product | {
+            "placement_version": PLACEMENT_VERSION,
+            "calibration_id": shop.calibration_id,
             "routable": False,
             "approx": None,
             "placement_state": None,
@@ -567,13 +590,18 @@ async def locate_products(req: LocateReq, store: str = Query(DEFAULT_STORE)):
                     placement["group"], placement.get("point"),
                     point[0], point[1], x, y,
                     math.hypot(x - point[0], y - point[1]), state)
+                group = placement["group"]
+                if state == "department":
+                    group = "ANCHOR:" + label_map_anchor(
+                        shop, placement.get("location_label") or model.location_label,
+                        placement)
                 result |= {
                     "routable": True,
                     "approx": state != "exact",
                     "placement_state": state,
                     "location_label": placement.get("location_label")
                                       or model.location_label,
-                    "placement_group": placement["group"],
+                    "placement_group": group,
                     "x": x,
                     "y": y,
                     "route_cell": route_cell,
@@ -581,7 +609,7 @@ async def locate_products(req: LocateReq, store: str = Query(DEFAULT_STORE)):
         app.state.catalog_cache.save_cache(
             "located", store, model.id, result, PLACEMENT_TTL)
         located.append({k: v for k, v in result.items()
-                        if k != "route_cell"})
+                        if k not in {"route_cell", "placement_version", "calibration_id"}})
     return {"products": located}
 
 
@@ -598,6 +626,9 @@ def selected_route(store, items):
     for product_id in requested:
         product = app.state.catalog_cache.get_cache(
             "located", store.id, product_id)
+        if product and (product.get("placement_version") != PLACEMENT_VERSION
+                        or product.get("calibration_id") != store.calibration_id):
+            product = None
         if not product or not product.get("routable"):
             unrouted.append({
                 "product_id": product_id,
@@ -679,7 +710,7 @@ def route(req: RouteReq, store: str = Query(DEFAULT_STORE)):
     if not all(isinstance(item, str) for item in req.items):
         if any(isinstance(item, str) for item in req.items):
             raise HTTPException(400, "cannot mix product IDs and free text")
-        return selected_route(shop, req.items)
+        return selected_route(catalog_store(store), req.items)
     if not shop.directory:
         raise HTTPException(
             422, f"store {store} has no free-text directory; select products")

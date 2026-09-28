@@ -1,6 +1,8 @@
+import pytest
 import fitz
 from PIL import Image
 
+import extract
 from extract import (
     load_boundary_override,
     raster_experiment_enabled,
@@ -12,6 +14,50 @@ from router.raster import is_raster_page
 def test_raster_fallback_only_claims_image_only_maps():
     assert is_raster_page(fitz.open("guides/guide-cedar-park-265.pdf")[1])
     assert not is_raster_page(fitz.open("guides/guide-austin-659.pdf")[1])
+
+
+@pytest.mark.parametrize("missing", ({15}, {13, 14}),
+                         ids=("store-54", "store-68"))
+def test_vector_extraction_allows_real_aisle_number_gaps(monkeypatch, missing):
+    class ReachedDrawingExtraction(Exception):
+        pass
+
+    class Page:
+        rect = fitz.Rect(0, 0, 100, 100)
+
+        def get_text(self, kind):
+            assert kind == "words"
+            return [(n, n, n + 1, n + 1, str(n), 0, 0, 0)
+                    for n in range(1, 38) if n not in missing]
+
+        def get_drawings(self):
+            raise ReachedDrawingExtraction
+
+    monkeypatch.setattr(extract, "PDF", "unused")
+    monkeypatch.setattr(extract.fitz, "open",
+                        lambda _path: [None, Page()])
+    monkeypatch.setattr(extract.raster, "is_raster_page",
+                        lambda _page: False)
+
+    with pytest.raises(ReachedDrawingExtraction):
+        extract.extract()
+
+
+def test_aisle_badges_exclude_curbside_slot_numbers_outside_floor():
+    badges = {
+        (n, 20): (n, n, 20, n + 1, 21) for n in range(1, 40)
+    }
+    badges.update({
+        (110 + n, 20): (n, 110 + n, 20, 111 + n, 21)
+        for n in range(1, 11)
+    })
+
+    anchors, aisles = extract.aisle_anchors_inside_boundary(
+        badges, [[0, 0], [100, 0], [100, 100], [0, 100], [0, 0]],
+        140, 100)
+
+    assert aisles == list(range(1, 40))
+    assert set(anchors) == {f"AISLE {n}" for n in range(1, 40)}
 
 
 def test_raster_fallback_rejects_small_page_decoration(tmp_path):

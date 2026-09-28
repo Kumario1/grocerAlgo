@@ -29,6 +29,11 @@ Blessed-truth exemptions (both nets): staff_mask pockets (label-condemned)
 and exclusion shapes (human-marked staff) are intentional seals, never
 flags.
 
+`suspects()` at the bottom is a different animal: not a gate but the audit
+agent's worklist — every sealed area and every printed label the authored truth
+does not explain, ranked. A perfect store still has entries there; they are the
+things the audit must account for, not defects.
+
 Constants are universal, calibrated so blessed store 659 reports ZERO flags
 (it is the pixel-frozen baseline; its map is correct by definition). Never
 tune them per store — a store that trips a net either has a real coverage
@@ -40,6 +45,10 @@ from PIL import Image
 from scipy import ndimage
 
 from router import engine
+
+SUSPECT_MIN_M2 = 2.4  # smaller sealed non-fixture areas are wall/door-swing trace
+SUSPECT_TOP = 40      # clusters reported to the audit agent, largest first
+WORST_LABELS = 15     # printed words reported by distance to reachable floor
 
 FRONTAGE_R = 16      # pt (~1.9 m) — max label-to-reachable-floor distance
 NEAR_FIX = 4         # cells (~0.9 m) — label-to-shelf proximity for eligibility
@@ -148,3 +157,72 @@ def coverage(words, base_img, cfg, built, m_per_cell, cell=engine.CELL):
 
     return {"unreachable_shelf_labels": clusters,
             "sealed_floor_patches": patches}
+
+
+def suspects(words, cfg, built, m_per_cell, cell=engine.CELL):
+    """The audit agent's worklist. Advisory, never a gate.
+
+    The nets above are gates: they flag only what is corroborated enough to be
+    called wrong. This is the opposite — everything the drawing seals that no
+    fixture and no authored truth explains, ranked, for a human-grade reader to
+    account for one by one. Store 811's auditor derived exactly this inside its
+    own billed hour and it died with the context; store 24's sealed pharmacy
+    wing is what it catches.
+
+    Returns {"sealed_clusters": [...], "worst_labels": [...]}, both possibly
+    non-empty on a perfect store — checkout lanes and the pharmacy dispensing
+    room are supposed to be sealed. Explaining them is the audit's job.
+    """
+    geom = cfg["geom"]
+    shape = built["free"].shape
+    h, w = shape
+    bound = engine.build_grid({"page": geom["page"],
+                               "boundary": geom["boundary"],
+                               "fixtures": [], "obstacle_paths": []}, cell)
+    fixtures = engine.shape_mask(
+        [{"rect": list(f)} for f in geom["fixtures"]]
+        + [{"poly": p} for p in geom.get("fixture_polys") or []], shape, cell)
+    excl_mask = engine.shape_mask(cfg["exclusions"], shape, cell)
+    reachable = (built["reach"] >= 0).reshape(shape)
+    unexplained = (bound & ~reachable & ~fixtures & ~excl_mask
+                   & ~built["staff_mask"])
+
+    anchors = cfg["anchors"]
+    labels_, n = ndimage.label(unexplained)
+    clusters = []
+    for i in range(1, n + 1):
+        m = labels_ == i
+        m2 = float(m.sum()) * m_per_cell ** 2
+        if m2 < SUSPECT_MIN_M2:
+            continue
+        ys, xs = np.where(m)
+        px, py = float(xs.mean()) * cell, float(ys.mean()) * cell
+        near = min(anchors, key=lambda a: (anchors[a][0] - px) ** 2
+                   + (anchors[a][1] - py) ** 2) if anchors else ""
+        clusters.append({"m2": round(m2, 1), "x": round(px, 1),
+                         "y": round(py, 1), "near": near})
+    clusters.sort(key=lambda c: (-c["m2"], c["x"], c["y"]))
+
+    # Every printed word's distance to floor a shopper can stand on. The
+    # runbook asks for >=10 spot-probes; there is no reason to sample when
+    # measuring all of them is a distance transform and a lookup.
+    dist_pt = ndimage.distance_transform_edt(~reachable) * cell
+    far = []
+    for x0, y0, x1, y1, t, *_ in words:
+        if t.isdigit() or len(t) < 2:
+            continue
+        mx, my = (x0 + x1) / 2, (y0 + y1) / 2
+        cx, cy = int(mx // cell), int(my // cell)
+        if not (0 <= cy < h and 0 <= cx < w) or not bound[cy, cx]:
+            continue
+        far.append((float(dist_pt[cy, cx]), t, round(mx, 1), round(my, 1)))
+    far.sort(key=lambda r: (-r[0], r[1]))
+
+    return {
+        "sealed_clusters": clusters[:SUSPECT_TOP],
+        "sealed_clusters_total": len(clusters),
+        "worst_labels": [
+            {"label": t, "x": x, "y": y,
+             "meters": round(d / cell * m_per_cell, 2)}
+            for d, t, x, y in far[:WORST_LABELS]],
+    }

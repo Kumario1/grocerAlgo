@@ -64,7 +64,8 @@ def derive_aisle_pitch(anchors):
                 for a, b in zip(sorted(xs), sorted(xs)[1:])]
     for gaps in (adjacent_gaps(1, 0), adjacent_gaps(0, 1)):
         pitches = ([d for d in gaps if 10 < d < 35]
-                   or [d for d in gaps if 35 <= d < 50])
+                   or [d for d in gaps if 35 <= d < 50]
+                   or [d for d in gaps if 50 <= d < 70])
         if pitches:
             return float(median(pitches))
     raise AssertionError("cannot derive aisle pitch from aisle-label rows")

@@ -386,14 +386,15 @@ def test_failed_fresh_confirmation_restores_previous_verified_state(tmp_path):
 def test_heb_client_launches_normal_chrome_instead_of_automation_mode(
         monkeypatch):
     monkeypatch.setenv("CHROME_PATH", "/usr/bin/google-chrome")
-    command = HEBClient()._chrome_command(9223)
+    client = HEBClient()
+    command = client._chrome_command(9223)
 
     assert command[0] == "/usr/bin/google-chrome"
     assert "--remote-debugging-port=9223" in command
     assert "--remote-debugging-address=127.0.0.1" in command
     assert "--no-sandbox" in command
     assert "--disable-gpu" in command
-    assert any("runtime/chrome" in arg for arg in command)
+    assert f"--user-data-dir={client.profile_dir.resolve()}" in command
     assert not any(".heb-" in arg for arg in command)
     assert not any("enable-automation" in arg for arg in command)
 

@@ -496,6 +496,66 @@ def to_corridor(runs, group, point):
     return point
 
 
+def corridor_segment(psas, runs, group, point):
+    """The full corridor centre-line of the product's own shelf run."""
+    line = runs.get(tuple(group.split(":")[1:]))
+    if not line:
+        return [point, point]
+    axis, value = line
+    prefix = tuple(group.split(":")[1:])
+    span = [p[1 - axis] for key, p in psas.items()
+            if tuple(key.split("|")[:2]) == prefix]
+    start, end = list(point), list(point)
+    start[axis] = end[axis] = value
+    start[1 - axis], end[1 - axis] = min(span), max(span)
+    return [start, end]
+
+
+def nearest_aisle(guide_anchors, segment):
+    """The printed aisle number nearest the product's corridor segment.
+
+    Nearest-to-a-point is wrong in a two-bank store: #811 prints aisle 4 at
+    the front of a column and aisle 15 at the back of the same column, so a
+    product deep in aisle 4 sits nearer the printed "15" than the printed "4".
+    Measured against the whole corridor (213 of 896 dry-grocery PSAs
+    mis-associate by point, 5 by segment), the far end of an aisle stays in
+    its own aisle.
+    """
+    (ax, ay), (bx, by) = segment
+
+    def dist(label):
+        px, py = label
+        dx, dy = bx - ax, by - ay
+        t = 0 if dx == dy == 0 else max(0, min(1, (
+            (px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy)))
+        return math.hypot(px - (ax + t * dx), py - (ay + t * dy))
+
+    aisles = {name: xy for name, xy in guide_anchors.items()
+              if name.startswith("AISLE ")}
+    return min(aisles, key=lambda n: dist(aisles[n]), default=None)
+
+
+def label_fits_segment(label, segment, cross_tol=8.0, end_tol=30.0):
+    """A badge aligns across a corridor and sits near either aisle mouth."""
+    (ax, ay), (bx, by) = segment
+    dx, dy = bx - ax, by - ay
+    length = math.hypot(dx, dy)
+    if not length:
+        return math.hypot(label[0] - ax, label[1] - ay) <= cross_tol
+    along = ((label[0] - ax) * dx + (label[1] - ay) * dy) / length
+    cross = abs((label[0] - ax) * dy - (label[1] - ay) * dx) / length
+    return cross <= cross_tol and -end_tol <= along <= length + end_tol
+
+
+def aisle_agreement(guide_anchors, want, segment):
+    """Return (nearest badge, whether the expected badge fits this aisle)."""
+    got = nearest_aisle(guide_anchors, segment)
+    agreed = got == want or (
+        want in guide_anchors and
+        label_fits_segment(guide_anchors[want], segment))
+    return got, agreed
+
+
 def floor_check(profile, calibration, psas):
     """Every PSA measured against the floor, as the gate.
 

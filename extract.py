@@ -53,6 +53,25 @@ def raster_experiment_enabled():
     return os.environ.get("GROCER_RASTER_EXPERIMENTAL") == "1"
 
 
+def aisle_anchors_inside_boundary(badges, boundary, width, height):
+    """Return only numbered badges printed inside the sales floor."""
+    mask = raster.Image.new("1", (math.ceil(width), math.ceil(height)), 0)
+    raster.ImageDraw.Draw(mask).polygon(
+        [tuple(point) for point in boundary], fill=1)
+    anchors, seen = {}, []
+    for n, x0, y0, x1, y1 in badges.values():
+        point = [(x0 + x1) / 2, (y0 + y1) / 2]
+        pixel = tuple(map(int, point))
+        if (0 <= pixel[0] < mask.width and 0 <= pixel[1] < mask.height
+                and mask.getpixel(pixel)):
+            seen.append(n)
+            anchors[f"AISLE {n}"] = point
+    aisles = sorted(seen)
+    assert len(aisles) >= 15 and len(aisles) == len(set(aisles)), \
+        f"need at least 15 unique aisle badges inside floor: {aisles}"
+    return anchors, aisles
+
+
 def stitch_open_boundary(chains, width, height, join_tol=3.0, min_span=.4):
     """Close a fragmented perimeter whose chain endpoint meets another wall.
 
@@ -137,7 +156,7 @@ def extract():
         return geom
     words = page.get_text("words")  # (x0, y0, x1, y1, text, ...)
 
-    anchors, seen = {}, []
+    anchors = {}
     # Stacked digit spans share one bbox and only the last-painted shows:
     # store #658 leaves a stale "21" hidden under aisle 10's badge. Keep the
     # visible winner — within a block, word order is content (paint) order.
@@ -145,18 +164,8 @@ def extract():
     for x0, y0, x1, y1, t, *_ in words:
         if t.isdigit() and 1 <= int(t) <= 60:
             badges[round(x0, 1), round(y0, 1)] = (int(t), x0, y0, x1, y1)
-    for n, x0, y0, x1, y1 in badges.values():
-        seen.append(n)
-        anchors[f"AISLE {n}"] = [(x0 + x1) / 2, (y0 + y1) / 2]
-    # aisle badges must be a clean 1..N run, each number exactly once
-    # (store #659: 45, store #24: 43); duplicates or holes mean the map
-    # page carries stray digits and needs a smarter filter. Floor is 15,
-    # matching discover.py's validation gate: store #6 (Stephenville) is a
-    # real 15-aisle store, and a stray-digit page fails the clean-run
-    # check long before it fails the count.
-    aisles = sorted(seen)
-    assert len(aisles) >= 15 and aisles == list(range(1, len(aisles) + 1)), \
-        f"aisle badges not a clean 1..N run: {aisles}"
+    badge_pts = [[(x0 + x1) / 2, (y0 + y1) / 2]
+                 for _, x0, y0, x1, y1 in badges.values()]
 
     # Multi-word labels (Entrance, Check Stands, department names): join words
     # that share a line, then keep known label phrases.
@@ -251,7 +260,6 @@ def extract():
             fixture_polys.append([[round(x, 2), round(y, 2)] for x, y in ch[:-1]])
         return True
 
-    badge_pts = [v for k, v in anchors.items() if k.startswith("AISLE ")]
     for dr in page.get_drawings():
         if dr["type"] == "f" and dr.get("fill") in (None, WHITE):
             continue                            # body/background: stroke twin has it
@@ -289,17 +297,6 @@ def extract():
                 # degenerate fill: zero-width wall line (e.g. the seafood /
                 # kitchen counter walls drawn as 2-line white-ish fills)
                 walls(ch)
-
-    # self-check against the "kept only decorative confetti" failure mode
-    # (2026-07-21 bug). Floor scales with store size: a 45-aisle superstore
-    # has hundreds of store-sized fixtures, a real 15-aisle store (#6
-    # Stephenville) has 97 — confetti yields near zero either way.
-    big = sum((x1 - x0) * (y1 - y0) > 200 for x0, y0, x1, y1 in fixtures)
-    big += sum(1 for ch in fixture_polys
-               if (max(p[0] for p in ch) - min(p[0] for p in ch))
-               * (max(p[1] for p in ch) - min(p[1] for p in ch)) > 200)
-    assert big >= max(50, 2 * len(aisles)), \
-        f"only {big} store-sized fixtures — wrong fill/stroke filter?"
 
     # Sales-floor boundary: the map draws the interior outline as one CLOSED
     # thick-stroke polyline (store #659: 18 segments, stroke width ~1.85).
@@ -356,6 +353,20 @@ def extract():
         find_boundary(1.5) or find_boundary(0.9)
         or find_boundary(1.5, .40) or find_boundary(.9, .40))
     assert boundary, "no closed thick-stroke boundary polygon found"
+    aisle_anchors, aisles = aisle_anchors_inside_boundary(
+        badges, boundary, W, H)
+    anchors = {**aisle_anchors, **anchors}
+
+    # self-check against the "kept only decorative confetti" failure mode
+    # (2026-07-21 bug). Floor scales with store size: a 45-aisle superstore
+    # has hundreds of store-sized fixtures, a real 15-aisle store (#6
+    # Stephenville) has 97 — confetti yields near zero either way.
+    big = sum((x1 - x0) * (y1 - y0) > 200 for x0, y0, x1, y1 in fixtures)
+    big += sum(1 for ch in fixture_polys
+               if (max(p[0] for p in ch) - min(p[0] for p in ch))
+               * (max(p[1] for p in ch) - min(p[1] for p in ch)) > 200)
+    assert big >= max(50, 2 * len(aisles)), \
+        f"only {big} store-sized fixtures — wrong fill/stroke filter?"
 
     geom = {"page": {"w": page.rect.width, "h": page.rect.height},
             "anchors": anchors, "fixtures": fixtures,

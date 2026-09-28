@@ -57,7 +57,7 @@ if [ -z "${CHROME_PATH:-}" ] &&
     export CHROME_PATH
 fi
 
-FROM=1
+FROM=""
 CITY=""
 while [ $# -gt 0 ]; do
     case $1 in
@@ -66,7 +66,7 @@ while [ $# -gt 0 ]; do
     esac
 done
 case $FROM in
-    [1-6]) ;;
+    ''|[1-6]) ;;
     *) echo "--from takes a stage number 1-6"; exit 2 ;;
 esac
 
@@ -84,6 +84,16 @@ run_agent() {
 }
 LOG="data/$S/qa"
 mkdir -p "$LOG"
+if [ -z "$FROM" ]; then
+    FROM=1
+    # Reuse the same successful rebuild checkpoints as the fleet. A profile
+    # alone can be a failed first pass; it must not skip the map agent.
+    if [ "$CITY" != "--no-agents" ] && [ -f "data/$S/profile.npz" ] &&
+            [ -f "data/$S/walk_truth.json" ] && [ -f "$LOG/post_onboard.ok" ]; then
+        FROM=4
+        [ ! -f "$LOG/post_audit.ok" ] || FROM=5
+    fi
+fi
 [ "$FROM" = 1 ] || echo "==> resuming store $S at stage $FROM"
 
 if [ "$FROM" -le 1 ]; then
@@ -112,6 +122,7 @@ if [ "$CITY" = "--no-agents" ]; then
 fi
 
 if [ "$FROM" -le 3 ]; then
+    rm -f "$LOG/post_onboard.ok" "$LOG/post_audit.ok"
     echo "==> [3/6] onboarding agent (docs/onboarding.md, store $S)"
     { echo "You are in the grocerAlgo repo. Execute this runbook for store $S:"; \
       echo; sed "s/<N>/$S/g" docs/onboarding.md; \
@@ -128,6 +139,7 @@ if [ "$FROM" -le 3 ]; then
 fi
 
 if [ "$FROM" -le 4 ]; then
+    rm -f "$LOG/post_audit.ok"
     echo "==> [4/6] audit agent (docs/audit.md, store $S — fresh context)"
     { echo "You are the adversarial auditor in the grocerAlgo repo. Execute this runbook for store $S:"; \
       echo; sed "s/<N>/$S/g" docs/audit.md; \
@@ -139,6 +151,9 @@ if [ "$FROM" -le 4 ]; then
     env -u PIPE_NO_BROWSER -u HEB_RUNTIME_DIR \
         ./rebuild.sh "$S" > "$LOG/post_audit.log" 2>&1 \
         || { echo "rebuild after audit failed — read $LOG/post_audit.log"; exit 1; }
+    if tail -5 "$LOG/audit.log" | grep -q "AUDIT CLEAN"; then
+        touch "$LOG/post_audit.ok"
+    fi
 fi
 
 # CLEAN describes the artifacts, not the sweep: an audit that finds three real

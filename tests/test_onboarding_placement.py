@@ -3,6 +3,8 @@ import os
 import shutil
 import subprocess
 
+import pytest
+
 from router.heb import HEBClient, HEBConnectionError
 
 
@@ -118,3 +120,43 @@ exit 1
     assert "exec resume 00000000-0000-0000-0000-000000000231" in log.read_text()
     assert "-c sandbox_mode=workspace-write" in log.read_text()
     assert "AUDIT CLEAN" in result.stdout
+
+
+@pytest.mark.parametrize("checkpoint, expected", [(None, 1), ("onboard", 4), ("audit", 5)])
+def test_pipeline_automatically_resumes_completed_map_work(tmp_path, checkpoint, expected):
+    shutil.copy("pipeline.sh", tmp_path)
+    data = tmp_path / "data/1234"
+    (data / "qa").mkdir(parents=True)
+    # A profile alone is not evidence that the onboarding agent finished.
+    (data / "profile.npz").touch()
+    if checkpoint:
+        (data / "walk_truth.json").write_text('{}')
+        (data / "qa/post_onboard.ok").touch()
+        if checkpoint == "audit":
+            (data / "qa/post_audit.ok").touch()
+            (data / "qa/audit.log").write_text('AUDIT CLEAN — store 1234\n')
+    fake = tmp_path / "python"
+    fake.write_text('#!/bin/sh\nexit 1\n')
+    fake.chmod(0o755)
+    result = subprocess.run(
+        ["./pipeline.sh", "1234"], cwd=tmp_path, text=True, capture_output=True,
+        env=os.environ | {"PIPE_PYTHON": str(fake), "PIPE_AGENT": "exit 1"})
+
+    assert f"[{expected}/6]" in result.stdout
+    if checkpoint:
+        assert "[3/6]" not in result.stdout
+
+
+def test_explicit_pipeline_stage_overrides_automatic_resume(tmp_path):
+    shutil.copy("pipeline.sh", tmp_path)
+    data = tmp_path / "data/1234"
+    (data / "qa").mkdir(parents=True)
+    (data / "profile.npz").touch()
+    (data / "walk_truth.json").write_text('{}')
+    (data / "qa/post_onboard.ok").touch()
+    result = subprocess.run(
+        ["./pipeline.sh", "1234", "--from", "3"], cwd=tmp_path,
+        text=True, capture_output=True,
+        env=os.environ | {"PIPE_AGENT": "exit 1"})
+
+    assert "[3/6]" in result.stdout

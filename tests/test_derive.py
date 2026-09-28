@@ -25,6 +25,11 @@ def test_larger_scale_aisle_pitch_fallback():
     assert derive.derive_aisle_pitch(anchors) == 40
 
 
+def test_extra_large_scale_aisle_pitch_fallback():
+    anchors = {f"AISLE {i}": [100 + i * 60, 200] for i in range(1, 6)}
+    assert derive.derive_aisle_pitch(anchors) == 60
+
+
 # --- derive_zones ---
 
 def test_zones_from_labels():

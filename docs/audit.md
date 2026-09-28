@@ -29,34 +29,40 @@ otherwise faithful map. Confirm a single dominant component. Any actual
 mechanical failure = finding, stop and file it.
 
 **2. Systematic visual sweep — the heart of the audit.** Cut
-`walkable_overlay.png` into a 3×3 grid of crops (PIL: crop, save,
-view each — full-page viewing hides detail; the store-24 miss was
-invisible at page zoom). For EVERY crop verify:
-- every corridor between shelf rows is green end to end (a corridor green
-  at its badge mouth but white deeper in = the store-24 failure mode);
-- every aisle badge's corridor is green along its FULL length;
-- every department frontage (Produce/Dairy/Deli/Bakery/Seafood/Floral/
-  Pharmacy pickup) has green in front of it;
-- every internal corridor around service islands is green when customer
-  accessible. Visible logos may be vector artwork absent from extracted
-  anchors (for example Sushiya/Meal Simple), so compare the printed map to
-  `geometry.json` and explicitly inspect every unanchored department;
-- staff areas are purple/untinted, enclosed rooms (lease, restrooms) are
-  NOT green, outside-boundary is NOT green;
-- checkout: lanes sealed, front action alley green.
-Compare each crop against the printed map underneath: floor paint with no
-green tint over it is a suspect unless it is a blessed staff/enclosed area.
-Note: drawn-sealed shelf sections (walled off in the source PDF itself) are
-exempt from the mechanical nets by design — ONLY this sweep catches those.
-Also locate and classify every culled pocket printed in the top-ten mechanical
-stats. An unexplained pocket is a finding even when the coverage lists are
-empty.
+`walkable_overlay.png` into a 3×3 grid of crops, and the same nine regions
+out of the printed guide page (PIL: crop, save — full-page viewing hides
+detail; the store-24 miss was invisible at page zoom).
 
-**3. Label spot-probes.** Pick ≥10 product labels spread across all wings
-of the PDF (read them off the map: "Cotton Balls", "Dog Food", ...). For
-each, probe the shipped grid at the label's frontage
-(`python3 -c` + `numpy` on `data/<N>/profile.npz`, cell size from the npz)
-and confirm reachable floor within ~2 m. Any miss = finding.
+**Dispatch these in parallel: one `map-crop-inspector` subagent per crop, all
+nine in a single message.** Give each its two image paths, the PDF-point
+rectangle it covers, the crop-pixel-to-PDF-point scale, and the entries from
+`report.json`'s `suspects.sealed_clusters` that fall inside its rectangle. The
+inspectors are read-only by construction — **you remain the only writer of the
+five JSON truth files**, and you adjudicate their reports rather than applying
+them on trust. A finding you cannot see yourself in the crop is not a finding;
+go look before you act on it.
+
+Nine serial crops plus zooms is most of this audit's wall-clock, and it is nine
+independent jobs. Read the crops yourself only where an inspector reports
+something you must judge, or where its report is vague.
+
+Then, whatever the inspectors say, account for **every** entry in
+`report.json`'s `suspects.sealed_clusters` — the ranked list of areas inside
+the building that are sealed and that no fixture, exclusion or staff label
+explains. Checkout lanes, dispensing rooms and utility rooms belong there and
+are fine; each one you leave unexplained is a finding. Same for every culled
+pocket in the top-ten mechanical stats.
+
+Note: drawn-sealed shelf sections (walled off in the source PDF itself) are
+exempt from every mechanical net by design — ONLY this sweep catches those.
+
+**3. Label probes.** `report.json`'s `suspects.worst_labels` already carries
+every printed word's distance to reachable floor, worst first — the whole
+population, measured, not a sample. Read it instead of probing by hand. Any
+product or department label beyond ~2 m is a finding; `Entrance`/`Exit`/`Carts`
+in a vestibule outside the drawn sales floor are the normal exception. Probe
+the grid yourself only to confirm a specific suspect
+(`python3 -c` + `numpy` on `data/<N>/profile.npz`, cell size from the npz).
 
 **4. walk_truth adequacy.** Open `data/<N>/walk_truth.json`. Does every
 wing/section of the store have at least one `must` point? Does every
@@ -81,15 +87,22 @@ only, never code, never goldens, never other stores) and rerun
 walk_truth point that would have caught it.
 
 Verdict line, exactly one of:
-- `AUDIT CLEAN — store <N>` (zero findings on a full sweep after the
-  latest rebuild)
-- `AUDIT CLEAN — store <N> (<k> findings fixed)` (you found real defects,
-  repaired every one in this store's data files, reran the rebuild, and
-  everything is green — that is a GOOD audit and it ships; CLEAN describes
-  the artifacts, not the sweep)
-- `AUDIT BLOCKED — store <N>: <reason>` (something is still wrong that a
-  data edit cannot fix — include the findings; a finding that needs a code
-  change is reported this way with evidence, never fixed by you)
+
+- `AUDIT CLEAN — store <N> (<n> findings fixed)` — the artifacts as they now
+  stand pass every pass above, and each of the `<n>` findings you made is fixed
+  in data, re-verified against a fresh `./rebuild.sh <N>`, and locked by a new
+  `walk_truth` point that would have caught it. `<n>` may be 0.
+- `AUDIT BLOCKED — store <N>: <n> unresolved` — something is still wrong that
+  you could not or must not fix in data: it needs code, another store's data,
+  a new guide, or a human eye. List them.
+
+**The verdict describes the artifacts, not the sweep.** Finding three real
+defects and repairing them is a *good* audit and ships as CLEAN with
+`(3 findings fixed)` — the full findings list is still mandatory and still
+worst-first either way. Store 811 sat unroutable for a day because the old
+contract had no word for that outcome and its auditor picked FAILED. Only
+report BLOCKED when the store is genuinely not shippable; only report CLEAN
+when you have re-run the rebuild since your last edit.
 
 Never edit `router/`, `extract.py`, `tests/`, goldens, or another store's
 data. If a finding seems to require a code change, report it as a blocker

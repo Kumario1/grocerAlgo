@@ -40,16 +40,16 @@ dozens of stores, and an in-app button to onboard the next one.
 
 **A store is only offered once it can place products exactly.** Being mapped is
 not enough: the store's live Atlas has to be captured and calibrated onto its
-guide, and that calibration has to pass its gates. **22 stores pass and are
-catalog-enabled** — 6, 14, 16, 24, 25, 26, 28, 31, 38, 39, 178, 183, 189, 224,
-265, 269, 333, 370, 373, 659, 790 and 811. Mapped stores that fail calibration
-(for example #388, whose guide is a 2011 drawing of a remodelled store) stay
-listed with that reason instead of being served pins that only look precise.
+guide, and that calibration has to pass its gates. **Catalog-enabled means
+`data/<N>/profile.npz` plus a passing `data/<N>-atlas/calibration.json`** — no
+hand-maintained allowlist. Mapped stores that fail calibration (for example
+#388, whose guide is a 2011 drawing of a remodelled store) stay listed with
+that reason instead of being served pins that only look precise.
 `discover.py` now reads those tells off the PDF itself (creation year, foreign
 store number in the title, QuarkXPress tooling, sparse drawings) and warns
 before an onboarding run is spent.
 
-Against the goals in [`plan.md`](plan.md):
+Against the goals in [`docs/plan.md`](docs/plan.md):
 
 | Goal | Target | Now |
 |---|---|---|
@@ -225,19 +225,26 @@ python3 -m uvicorn app:app --port 8000
 # open http://localhost:8000
 ```
 
-The public UI has no browser controls. An operator bootstraps each store once
-from a fresh anonymous context:
+The public UI has no browser controls. An operator bootstraps anonymous H-E-B
+state once per catalog store (cookies only — `select_store` sets the store
+without clicks):
+
+```bash
+python3 -m scripts.bootstrap_heb_states 659   # or omit ids for every catalog store
+```
+
+Or via the admin HTTP API:
 
 ```bash
 curl -X POST 'http://localhost:8000/api/heb/connect?store=659'
-# Select store #659 in the Chrome window that opens.
 curl -X POST 'http://localhost:8000/api/heb/connect/confirm?store=659'
-curl 'http://localhost:8000/api/heb/state?store=659' > heb-state-659.json
+curl -H "Authorization: Bearer $GROCER_ADMIN_TOKEN" \
+  'http://localhost:8000/api/heb/state?store=659' > runtime/heb-state-659.json
 ```
 
-Repeat for `24`, `265`, `269`, `659`, `790`, and `811`. The old `.heb-*`
-profiles are never read or deployed. SQLite stores only H-E-B cookies,
-localStorage, and IndexedDB from these anonymous contexts.
+The old `.heb-*` profiles are never read or deployed. SQLite under
+`HEB_RUNTIME_DIR` stores only H-E-B cookies, localStorage, and IndexedDB from
+these anonymous contexts.
 
 Logs land in `logs/app.log` (rotating, gitignored): every catalog fetch with
 timing, every disconnect with its exception, and every placement as
@@ -263,13 +270,38 @@ Railway builds the included `Dockerfile`, starts one normal Google Chrome under
 Xvfb, and runs exactly one Uvicorn worker. Attach a persistent volume at
 `/app/runtime` and set a strong `GROCER_ADMIN_TOKEN`.
 
-Import every locally verified anonymous state into the deployed service:
+Only catalog-enabled stores are baked into the image. Regenerate the whitelist
+from passing calibrations (committed so Railway builds stay reviewable):
+
+```bash
+./scripts/sync_prod_data.sh          # rewrites .dockerignore from calibration pass
+```
+
+**One-command promote** after a store passes calibration — commit data, sync
+dockerignore, `git push` (Railway rebuild), bootstrap missing local states, PUT
+any stale/missing states to PROD:
+
+```bash
+export GROCER_PROD_URL='https://YOUR-SERVICE'
+export GROCER_ADMIN_TOKEN='...'
+./scripts/promote_stores.sh 123      # or omit ids to drain logs/promote_queue
+PROMOTE_SMOKE=1 ./scripts/promote_stores.sh 123   # + one search/locate on PROD
+```
+
+Or push states alone (skips stores PROD already reports connected + map_ready):
+
+```bash
+./scripts/push_heb_states.sh         # all catalog stores
+./scripts/push_heb_states.sh 659     # one store
+```
+
+Manual curl still works:
 
 ```bash
 curl -X PUT 'https://YOUR-SERVICE/api/heb/state?store=659' \
   -H 'Authorization: Bearer YOUR_ADMIN_TOKEN' \
   -H 'Content-Type: application/json' \
-  --data-binary @heb-state-659.json
+  --data-binary @runtime/heb-state-659.json
 ```
 
 The import is accepted only after the deployed browser confirms the selected
@@ -338,14 +370,14 @@ vanishing, which is how store 811 spent a day looking like a crash.
 ### Onboarding all of them
 
 ```bash
-python3 sweep_stores.py               # probe the CDN for every published guide → stores.txt
-nohup ./fleet_drive.sh &              # drive everything in stores.txt, one store at a time
+python3 sweep_stores.py               # probe the CDN → storelist/stores.txt
+nohup ./scripts/fleet_drive.sh &       # drive everything in storelist/stores.txt
 ./fleet_drive.sh 658 660              # or just these stores
 ```
 
 H-E-B publishes a guide for every store at a predictable URL, so the sweep
 finds the whole fleet with HEAD requests, downloads and preflights each guide,
-and orders `stores.txt` fresh-guides-first, stale-risk last. Each store runs
+and orders `storelist/stores.txt` fresh-guides-first, stale-risk last. Each store runs
 in its own git worktree pinned to a commit, so runs never tread on
 development in the main checkout.
 
@@ -362,6 +394,11 @@ After a clean map is promoted, the driver immediately captures and calibrates
 Atlas from the main checkout. Placement passes only after live shelf labels
 agree; incompatible guide/Atlas sources are committed as diagnostics and stay
 blocked until the source is repaired, without being retried forever.
+
+On `READY`, the store id is appended to `logs/promote_queue`. Run
+`./scripts/promote_stores.sh` to ship it to PROD, or set `PROMOTE_AUTO=1` with
+`GROCER_PROD_URL` and `GROCER_ADMIN_TOKEN` so the driver drains the queue
+itself after each READY.
 
 Vector guides use the standard extraction path. The image-only fallback is
 still experimental — it passes the structural precision/recall, exact-aisle,
@@ -394,7 +431,7 @@ rate, not a speculative browser pool.
 
 Explicitly **not** in v1: blue-dot indoor positioning, price comparison,
 online ordering, multi-store trip splitting. Full reasoning in
-[`plan.md`](plan.md) §3.
+[`docs/plan.md`](docs/plan.md) §3.
 
 ---
 
@@ -404,11 +441,15 @@ online ordering, multi-store trip splitting. Full reasoning in
 |---|---|
 | `app.py` | FastAPI app — catalog, placement, routing endpoints |
 | `router/` | engine (TSP, BFS), map derivation, H-E-B client, QA checks |
-| `static/index.html` | the whole front end |
-| `data/<store>/` | per-store truth: geometry, profile, zones, QA artifacts |
-| `guides/` | source store guides (`guide-<city>-<store>.pdf`); `discover.py` downloads here |
-| `plan.md` | living master plan — PRD, architecture, provider findings |
-| `CONTEXT.md` | canonical domain vocabulary used in code, tests and UI |
-| `docs/` | onboarding and audit runbooks for the agent loop |
-| `docs/evidence/` | proof artifacts behind dated findings in `plan.md` §14 |
-| `docs/archive/` | the Phase-0 prototype, superseded by the vector pipeline |
+| `static/` | front end |
+| `discover.py` … `calibrate.py` | map-pipeline CLIs (discover → extract → profile → QA → Atlas) |
+| `pipeline.sh` / `rebuild.sh` | onboarding driver and one-store rebuild |
+| `scripts/` | fleet, promote, HEB-state, and deploy helpers |
+| `tests/` | pytest suite |
+| `docs/` | plan, domain vocabulary, onboarding/audit runbooks |
+| `docs/plan.md` | living master plan — PRD, architecture, provider findings |
+| `docs/CONTEXT.md` | canonical domain vocabulary used in code, tests and UI |
+| `data/<store>/` | per-store truth (local; promote with `git add -f`) |
+| `guides/` | store guide PDFs (local; `discover.py` downloads here) |
+| `storelist/` | Texas store directory + fleet work list |
+| `runtime/` | ephemeral browser profiles and exported HEB states |

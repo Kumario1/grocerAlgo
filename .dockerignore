@@ -65,6 +65,10 @@ data/*
 !data/92/**
 !data/92-atlas/
 !data/92-atlas/**
+!data/94/
+!data/94/**
+!data/94-atlas/
+!data/94-atlas/**
 !data/95/
 !data/95/**
 !data/95-atlas/
@@ -77,6 +81,10 @@ data/*
 !data/99/**
 !data/99-atlas/
 !data/99-atlas/**
+!data/102/
+!data/102/**
+!data/102-atlas/
+!data/102-atlas/**
 !data/107/
 !data/107/**
 !data/107-atlas/
@@ -93,10 +101,6 @@ data/*
 !data/178/**
 !data/178-atlas/
 !data/178-atlas/**
-!data/182/
-!data/182/**
-!data/182-atlas/
-!data/182-atlas/**
 !data/183/
 !data/183/**
 !data/183-atlas/

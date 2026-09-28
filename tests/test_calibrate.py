@@ -205,6 +205,29 @@ def test_aisle_label_shifts_can_describe_multiple_guide_vintages():
     assert cal.guide_aisle_name(config, 35) == "AISLE 40"
 
 
+def test_94_vintage_shifts_cover_each_geometry_derived_section():
+    config = cal.store_config("94")
+    expected = {
+        1: 2, 6: 7, 7: 7, 12: 11, 16: 15, 17: 17,
+        18: 7, 19: 8, 20: 8, 21: 9, 22: 22, 23: 12,
+        24: 27, 25: 27, 26: 27, 27: 16, 32: 21, 33: 21,
+        34: 22, 35: 22, 36: 22, 37: 23, 38: 23, 39: 24,
+        40: 24, 46: 30,
+    }
+
+    assert {
+        live: int(cal.guide_aisle_name(config, live).split()[1])
+        for live in expected
+    } == expected
+
+
+@pytest.mark.parametrize("store", ("94", "102"))
+def test_repaired_stores_ship_live_verified_calibrations(store):
+    record = cal.load_calibration(store)
+    assert record["verified"]["pass"]
+    assert record["verified"]["agreed"] == record["verified"]["checked"] == 11
+
+
 def test_659_ships_a_passing_calibration():
     assert cal.load_calibration("659")["verdict"] == "pass"
     assert cal.blocked_reason("659") is None
@@ -339,3 +362,72 @@ def test_a_department_blob_still_verifies_by_its_point():
 
     assert segment == [[12.0, 11.0], [12.0, 11.0]]
     assert calibrate_cli.nearest_aisle(anchors, segment) == "AISLE 2"
+
+
+@pytest.mark.parametrize("live", [False, True])
+def test_cli_cannot_publish_an_offline_fit_without_live_evidence(monkeypatch, live):
+    writes = []
+    record = {"verdict": "pass", "gates": {"floor": {
+        "pass": True, "on_floor_pct": 100, "psas": 10, "off_floor": []}},
+        "notes": [], "verified": None,
+        "x": {"derived": True, "scale": 1, "offset": 0}}
+    monkeypatch.setattr(cal, "calibrate", lambda store: copy.deepcopy(record))
+    monkeypatch.setattr(cal, "write", lambda store, value:
+                        writes.append(copy.deepcopy(value)) or "calibration.json")
+    monkeypatch.setattr(calibrate_cli.sys, "argv", ["calibrate.py", "811"] +
+                        (["--verify"] if live else []))
+
+    async def unavailable(*args):
+        # Even while the browser is running, the offline fit cannot be served.
+        assert writes[-1]["verdict"] != "pass"
+        raise calibrate_cli.HEBConnectionError("browser unavailable")
+
+    monkeypatch.setattr(calibrate_cli, "verify", unavailable)
+    if live:
+        with pytest.raises(SystemExit, match="verification unavailable"):
+            calibrate_cli.main()
+    else:
+        assert calibrate_cli.main() == 0  # offline gates succeeded
+    assert writes and writes[-1]["verdict"] != "pass"
+
+
+def test_verification_always_closes_the_browser(monkeypatch):
+    import asyncio
+
+    closed = []
+
+    class FailedBrowser:
+        async def connect(self):
+            raise calibrate_cli.HEBConnectionError("connection failed")
+
+        async def close(self):
+            closed.append(True)
+
+    monkeypatch.setattr(calibrate_cli, "HEBClient", lambda *a, **kw: FailedBrowser())
+    with pytest.raises(calibrate_cli.HEBConnectionError):
+        asyncio.run(calibrate_cli.verify("659", cal.load_calibration("659")))
+    assert closed == [True]
+
+
+@pytest.mark.parametrize("approximate, checked", [(False, 1), (True, 0)])
+def test_live_verification_requires_distinct_nonapproximate_products(
+        monkeypatch, approximate, checked):
+    import asyncio
+
+    class Browser:
+        async def connect(self): pass
+        async def select_store(self, store): pass
+        async def confirm(self): pass
+        async def close(self): pass
+
+        async def search(self, probe):
+            return [{"id": "same", "name": "Same item", "location_label": "Aisle 17"}]
+
+        async def locate(self, product, label, atlas):
+            return {"point": atlas["psas"]["04|17|A|12"],
+                    "group": "PSA:04:17", "approx": approximate}
+
+    monkeypatch.setattr(calibrate_cli, "HEBClient", lambda *a, **kw: Browser())
+    result = asyncio.run(calibrate_cli.verify("659", cal.load_calibration("659")))
+    assert result["checked"] == checked
+    assert result["pass"] is False

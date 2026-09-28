@@ -1,8 +1,7 @@
 {
  "notes": [
   "atlas aisles 40, guide aisles 43",
-  "y: aisle labels did not constrain this axis, so its scale came from the other axis and its offset from the walkable floor",
-  "aisle offsets x+0 y=floor: 100% of sampled shelves land on a walkable cell and 18 anchors agree, against 98%/15 for x+1 y=floor"
+  "pinned by data/<store>/store.json"
  ],
  "gates": {
   "residual": true,
@@ -10,89 +9,83 @@
   "scale_skew": true,
   "floor": {
    "psas": 2600,
-   "on_floor_pct": 98.5,
-   "pass": false,
+   "on_floor_pct": 99.04,
+   "pass": true,
    "off_floor": [
     [
      "22|88|A|1",
-     13.7
+     11.3
     ],
     [
      "22|88|A|3",
-     13.7
+     11.3
     ],
     [
      "22|88|B|4",
-     13.7
+     11.3
     ],
     [
      "22|88|A|4",
-     13.7
+     11.3
     ],
     [
      "22|88|B|1",
-     13.7
+     11.3
     ],
     [
      "22|88|B|3",
-     13.7
+     11.3
     ],
     [
      "22|88|A|2",
-     13.7
+     11.3
     ],
     [
      "22|88|B|2",
-     13.7
+     11.3
+    ],
+    [
+     "22|86|A|1",
+     9.7
     ],
     [
      "22|88|A|5",
-     13.2
-    ],
-    [
-     "22|88|B|5",
-     13.2
+     9.6
     ]
    ]
-  }
+  },
+  "labels": true
  },
  "x": {
-  "scale": 1.0181068748886686,
-  "offset": 135.87735623700354,
+  "scale": 0.9122268886489368,
+  "offset": 182.71173165274428,
   "inliers": [
-   3,
-   4,
    5,
-   7,
-   8,
-   9,
-   10,
-   11,
-   12,
-   13,
-   14,
-   15,
-   16,
-   34,
-   35,
-   36,
-   37,
-   38
+   6
   ],
-  "max_residual_pt": 2.833,
   "aisle_offset": 0,
-  "source_axis": 0
+  "source_axis": 0,
+  "pinned": true,
+  "max_residual_pt": 0.0
  },
  "y": {
-  "scale": 1.0181068748886686,
-  "offset": 27.0,
-  "inliers": [],
-  "aisle_offset": null,
+  "scale": 0.9018954111224097,
+  "offset": 86.06866306517375,
+  "inliers": [
+   28,
+   29
+  ],
+  "aisle_offset": -1,
   "source_axis": 1,
-  "derived": true,
-  "max_residual_pt": null
+  "pinned": true,
+  "max_residual_pt": 0.0
  },
  "store": "102",
- "verdict": "fail",
- "verified": null
+ "verdict": "pass",
+ "verified": {
+  "checked": 11,
+  "agreed": 11,
+  "misses": [],
+  "pass": true
+ }
 }

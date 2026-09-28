@@ -14,11 +14,12 @@ store routable — see router/calibrate.blocked_reason.
 """
 import asyncio
 import json
-import math
 import re
 import sys
 
 from router import calibrate as cal
+from router.calibrate import (aisle_agreement, corridor_segment,
+                              label_fits_segment, nearest_aisle)
 from router.heb import HEBClient, HEBConnectionError
 
 # Spread across the store so a systematic aisle-offset error cannot hide in
@@ -32,66 +33,6 @@ def labels_pass(checked, agreed):
     return checked >= 6 and agreed / checked >= .9
 
 
-def corridor_segment(psas, runs, group, point):
-    """The full corridor centre-line of the product's own shelf run."""
-    line = runs.get(tuple(group.split(":")[1:]))
-    if not line:
-        return [point, point]
-    axis, value = line
-    prefix = tuple(group.split(":")[1:])
-    span = [p[1 - axis] for key, p in psas.items()
-            if tuple(key.split("|")[:2]) == prefix]
-    start, end = list(point), list(point)
-    start[axis] = end[axis] = value
-    start[1 - axis], end[1 - axis] = min(span), max(span)
-    return [start, end]
-
-
-def nearest_aisle(guide_anchors, segment):
-    """The printed aisle number nearest the product's corridor segment.
-
-    Nearest-to-a-point is wrong in a two-bank store: #811 prints aisle 4 at
-    the front of a column and aisle 15 at the back of the same column, so a
-    product deep in aisle 4 sits nearer the printed "15" than the printed "4".
-    Measured against the whole corridor (213 of 896 dry-grocery PSAs
-    mis-associate by point, 5 by segment), the far end of an aisle stays in
-    its own aisle.
-    """
-    (ax, ay), (bx, by) = segment
-
-    def dist(label):
-        px, py = label
-        dx, dy = bx - ax, by - ay
-        t = 0 if dx == dy == 0 else max(0, min(1, (
-            (px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy)))
-        return math.hypot(px - (ax + t * dx), py - (ay + t * dy))
-
-    aisles = {name: xy for name, xy in guide_anchors.items()
-              if name.startswith("AISLE ")}
-    return min(aisles, key=lambda n: dist(aisles[n]))
-
-
-def label_fits_segment(label, segment, cross_tol=8.0, end_tol=30.0):
-    """A badge aligns across a corridor and sits near either aisle mouth."""
-    (ax, ay), (bx, by) = segment
-    dx, dy = bx - ax, by - ay
-    length = math.hypot(dx, dy)
-    if not length:
-        return math.hypot(label[0] - ax, label[1] - ay) <= cross_tol
-    along = ((label[0] - ax) * dx + (label[1] - ay) * dy) / length
-    cross = abs((label[0] - ax) * dy - (label[1] - ay) * dx) / length
-    return cross <= cross_tol and -end_tol <= along <= length + end_tol
-
-
-def aisle_agreement(guide_anchors, want, segment):
-    """Return (nearest badge, whether the expected badge fits this aisle)."""
-    got = nearest_aisle(guide_anchors, segment)
-    agreed = got == want or (
-        want in guide_anchors and
-        label_fits_segment(guide_anchors[want], segment))
-    return got, agreed
-
-
 async def verify(store, record):
     """Do labelled products land in the aisle their own label names?"""
     atlas = cal.load_atlas(store)
@@ -101,35 +42,40 @@ async def verify(store, record):
     carry, runs = cal.transform(record), cal.shelf_runs(atlas["psas"])
 
     client = HEBClient(int(store), allow_unsupported=True)
-    await client.connect()
-    await client.select_store(store)
-    await client.confirm()
-    checked, agreed, misses = 0, 0, []
-    for probe in PROBES:
-        for product in await client.search(probe):
-            label = re.search(r"\baisle\s+(\d+)\b",
-                              product.get("location_label") or "", re.I)
-            if not label:
-                continue
-            placement = await client.locate(
-                product["id"], product["location_label"], atlas)
-            if not placement or not placement["group"].startswith("PSA:"):
-                continue
-            segment = corridor_segment(atlas["psas"], runs,
-                                       placement["group"], placement["point"])
-            want = cal.guide_aisle_name(config, int(label[1]))
-            carried = [carry(end) for end in segment]
-            got, agreed_here = aisle_agreement(
-                guide["anchors"], want, carried)
-            checked += 1
-            if agreed_here:
-                agreed += 1
-            else:
-                misses.append({"product": product["name"], "label":
-                               product["location_label"], "want": want,
-                               "got": got})
-            break                       # one product per probe is enough
-    await client.close()
+    try:
+        await client.connect()
+        await client.select_store(store)
+        await client.confirm()
+        checked, agreed, misses = 0, 0, []
+        seen = set()
+        for probe in PROBES:
+            for product in await client.search(probe):
+                label = re.search(r"\baisle\s+(\d+)\b",
+                                  product.get("location_label") or "", re.I)
+                if not label or product["id"] in seen:
+                    continue
+                seen.add(product["id"])
+                placement = await client.locate(
+                    product["id"], product["location_label"], atlas)
+                if (not placement or placement.get("approx")
+                        or not placement["group"].startswith("PSA:")):
+                    continue
+                segment = corridor_segment(atlas["psas"], runs,
+                                           placement["group"], placement["point"])
+                want = cal.guide_aisle_name(config, int(label[1]))
+                carried = [carry(end) for end in segment]
+                got, agreed_here = aisle_agreement(
+                    guide["anchors"], want, carried)
+                checked += 1
+                if agreed_here:
+                    agreed += 1
+                else:
+                    misses.append({"product": product["name"], "label":
+                                   product["location_label"], "want": want,
+                                   "got": got})
+                break                       # one product per probe is enough
+    finally:
+        await client.close()
     return {"checked": checked, "agreed": agreed, "misses": misses,
             "pass": labels_pass(checked, agreed)}
 
@@ -170,6 +116,12 @@ def main():
         raise SystemExit(__doc__)
     store = sys.argv[1]
     record = cal.calibrate(store)
+    offline_ok = record["verdict"] == "pass"
+    # Offline success is only a candidate. Persist this before browser work:
+    # failure or interruption must never leave a fresh fit publicly enabled.
+    if offline_ok:
+        record["verdict"] = "pending"
+    cal.write(store, record)
 
     for note in record["notes"]:
         print(f"    {note}")
@@ -218,6 +170,10 @@ def main():
         for name, g in record["gates"].items())
     print(f"    gates: {gates}")
     print(f"    {record['verdict'].upper()} -> {path}")
+    if "--verify" not in sys.argv and offline_ok:
+        print(f"    offline gates passed; run calibrate.py {store} --verify "
+              "before enabling this store")
+        return 0
     if record["verdict"] != "pass":
         print("    store stays unroutable until this passes; pin the aisle "
               f"correspondence in data/{store}/store.json if the search "
